@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./oabtw-lib.sh
+source "$SCRIPT_DIR/oabtw-lib.sh"
+
+scope="${*:-legacy Java/Kotlin codebase for libGDX rewrite extraction}"
+
+ensure_layout
+require_oabtw
+
+run_dir="$(make_run_dir "explore" "$scope")"
+brief_file="$run_dir/brief.md"
+write_run_brief "$brief_file" "explore" "$scope"
+
+lane1="$run_dir/results/lane1-gameplay-rules.md"
+lane2="$run_dir/results/lane2-runtime-shell.md"
+lane3="$run_dir/results/lane3-services-data.md"
+summary="$run_dir/results/summary.md"
+
+prompt_lane1="$(cat <<EOF
+Read $brief_file first.
+
+Explore scope: $scope
+
+Ownership:
+- src/com/rian
+- tests/test/kotlin/com/rian
+
+Produce:
+- Current Shape
+- Rewrite-Relevant Behavior
+- Architecture To Discard
+- Hotspots
+- Missing Tests
+- Next Traces
+
+Focus on gameplay rules, beatmap parsing, difficulty, replay semantics, math, and deterministic logic.
+EOF
+)"
+
+prompt_lane2="$(cat <<EOF
+Read $brief_file first.
+
+Explore scope: $scope
+
+Ownership:
+- src/ru/nsu/ccfit/zuev
+- src/com/reco1l
+- src/com/edlplan
+
+Produce:
+- Current Shape
+- Rewrite-Relevant Behavior
+- Architecture To Discard
+- Hotspots
+- Missing Tests
+- Next Traces
+
+Focus on legacy runtime flow, scene ownership, UI shell, AndEngine glue, audio/service integration, and launcher boundaries.
+EOF
+)"
+
+prompt_lane3="$(cat <<EOF
+Read $brief_file first.
+
+Explore scope: $scope
+
+Ownership:
+- src/com/osudroid
+- src/com/acivev
+- tests/test/kotlin/com/osudroid
+- tests/test/kotlin/com/reco1l
+
+Produce:
+- Current Shape
+- Rewrite-Relevant Behavior
+- Architecture To Discard
+- Hotspots
+- Missing Tests
+- Next Traces
+
+Focus on data, beatmap services, multiplayer, app-side Kotlin services, and Android-facing integrations that affect rewrite boundaries.
+EOF
+)"
+
+run_codox_job "explore" "$lane1" "$prompt_lane1" &
+pid1=$!
+run_codox_job "explore" "$lane2" "$prompt_lane2" &
+pid2=$!
+run_codox_job "explore" "$lane3" "$prompt_lane3" &
+pid3=$!
+
+wait "$pid1" "$pid2" "$pid3"
+
+summary_prompt="$(cat <<EOF
+Read:
+- $brief_file
+- $lane1
+- $lane2
+- $lane3
+
+Produce a concise synthesis for the libGDX rewrite.
+
+Required sections:
+- System Shape
+- Preserve For Rewrite
+- Discard With AndEngine
+- Cross-Boundary Risks
+- Recommended Migration Order
+- Files Or Symbols Worth Immediate Tracing
+EOF
+)"
+
+run_codox_job "orchestrate" "$summary" "$summary_prompt"
+
+copy_if_exists "$lane1" "$ORIGINAL_DOCS_DIR/gameplay-rules.md"
+copy_if_exists "$lane2" "$ORIGINAL_DOCS_DIR/runtime-shell.md"
+copy_if_exists "$lane3" "$ORIGINAL_DOCS_DIR/services-data.md"
+copy_if_exists "$summary" "$ORIGINAL_DOCS_DIR/overview.md"
+
+printf 'Explore peer run complete.\n'
+printf 'Run dir: %s\n' "$run_dir"
+printf 'Docs   : %s\n' "$ORIGINAL_DOCS_DIR"

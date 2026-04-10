@@ -1,0 +1,52 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "oabtw: preflight",
+			"type": "shell",
+			"command": "bash",
+			"args": ["${workspaceFolder}/scripts/oabtw-preflight"],
+			"problemMatcher": []
+		},
+		{
+			"label": "oabtw: explore peer",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"${workspaceFolder}/scripts/oabtw-explore-peer",
+				"legacy Java/Kotlin codebase for libGDX rewrite extraction"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "oabtw: review peer",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"${workspaceFolder}/scripts/oabtw-review-peer",
+				"legacy Java/Kotlin codebase for libGDX rewrite-risk review"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "oabtw: architecture peer",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"${workspaceFolder}/scripts/oabtw-architecture-peer",
+				"libGDX rewrite architecture synthesis"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "oabtw: implement peer",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"${workspaceFolder}/scripts/oabtw-implement-peer",
+				"Implement the highest-priority hotspot from docs/original-codebase and docs/architecture."
+			],
+			"problemMatcher": []
+		}
+	]
+}

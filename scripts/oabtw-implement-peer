@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./oabtw-lib.sh
+source "$SCRIPT_DIR/oabtw-lib.sh"
+
+task="${*:-Implement the highest-priority hotspot from docs/original-codebase and docs/architecture.}"
+
+ensure_layout
+require_oabtw
+require_command "$OABTW_PEER" "oabtw-codex-peer"
+
+augmented_task="$(cat <<EOF
+$task
+
+Required context:
+- Read docs/libgdx_rewrite_brief.md if present.
+- Read docs/original-codebase/overview.md and cross-boundary-review.md if present.
+- Read docs/architecture/runtime-model.md, conventions.md, assets.md, and migration-map.md if present.
+- Keep changes cohesive and aligned with the repo-local architecture docs.
+EOF
+)"
+
+exec "$OABTW_PEER" batch "$augmented_task"

@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./oabtw-lib.sh
+source "$SCRIPT_DIR/oabtw-lib.sh"
+
+scope="${*:-legacy Java/Kotlin codebase for rewrite-risk review}"
+
+ensure_layout
+require_oabtw
+
+run_dir="$(make_run_dir "review" "$scope")"
+brief_file="$run_dir/brief.md"
+write_run_brief "$brief_file" "review" "$scope"
+
+lane1="$run_dir/results/lane1-gameplay-review.md"
+lane2="$run_dir/results/lane2-runtime-review.md"
+lane3="$run_dir/results/lane3-services-review.md"
+summary="$run_dir/results/cross-boundary-review.md"
+
+prompt_common='Lead with findings and evidence. Focus on correctness, regressions, god objects, SRP violations, hidden coupling, and missing tests.'
+
+run_codox_job "review" "$lane1" "$(cat <<EOF
+Read $brief_file first.
+
+Review scope: $scope
+Ownership:
+- src/com/rian
+- tests/test/kotlin/com/rian
+
+$prompt_common
+EOF
+)" &
+pid1=$!
+
+run_codox_job "review" "$lane2" "$(cat <<EOF
+Read $brief_file first.
+
+Review scope: $scope
+Ownership:
+- src/ru/nsu/ccfit/zuev
+- src/com/reco1l
+- src/com/edlplan
+
+$prompt_common
+EOF
+)" &
+pid2=$!
+
+run_codox_job "review" "$lane3" "$(cat <<EOF
+Read $brief_file first.
+
+Review scope: $scope
+Ownership:
+- src/com/osudroid
+- src/com/acivev
+- tests/test/kotlin/com/osudroid
+- tests/test/kotlin/com/reco1l
+
+$prompt_common
+EOF
+)" &
+pid3=$!
+
+wait "$pid1" "$pid2" "$pid3"
+
+run_codox_job "review" "$summary" "$(cat <<EOF
+Read:
+- $brief_file
+- $lane1
+- $lane2
+- $lane3
+
+Produce one cross-boundary review focused on:
+- hidden shared state
+- rewrite blockers
+- Android-specific coupling that must not leak into libGDX core
+- missing parity tests
+- risky ownership seams between gameplay, UI/runtime, and services/data
+EOF
+)"
+
+copy_if_exists "$lane1" "$ORIGINAL_DOCS_DIR/gameplay-rules-review.md"
+copy_if_exists "$lane2" "$ORIGINAL_DOCS_DIR/runtime-shell-review.md"
+copy_if_exists "$lane3" "$ORIGINAL_DOCS_DIR/services-data-review.md"
+copy_if_exists "$summary" "$ORIGINAL_DOCS_DIR/cross-boundary-review.md"
+
+printf 'Review peer run complete.\n'
+printf 'Run dir: %s\n' "$run_dir"
+printf 'Docs   : %s\n' "$ORIGINAL_DOCS_DIR"
