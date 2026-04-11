@@ -14,7 +14,7 @@
 			"command": "bash",
 			"args": [
 				"${workspaceFolder}/scripts/oabtw-explore-peer",
-				"legacy Java/Kotlin codebase for libGDX rewrite extraction"
+				"active libGDX rewrite root and preserved legacy dossiers"
 			],
 			"problemMatcher": []
 		},
@@ -24,7 +24,7 @@
 			"command": "bash",
 			"args": [
 				"${workspaceFolder}/scripts/oabtw-review-peer",
-				"legacy Java/Kotlin codebase for libGDX rewrite-risk review"
+				"active libGDX rewrite root for rewrite-risk review"
 			],
 			"problemMatcher": []
 		},
@@ -46,6 +46,13 @@
 				"${workspaceFolder}/scripts/oabtw-implement-peer",
 				"Implement the highest-priority hotspot from docs/original-codebase and docs/architecture."
 			],
+			"problemMatcher": []
+		},
+		{
+			"label": "ios: build install iphone",
+			"type": "shell",
+			"command": "zsh",
+			"args": ["${workspaceFolder}/scripts/build-install-iphone.sh"],
 			"problemMatcher": []
 		}
 	]

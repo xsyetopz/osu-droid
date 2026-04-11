@@ -3,6 +3,7 @@ package moe.osudroid.android;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 
 import moe.osudroid.platform.AudioBackend;
@@ -12,6 +13,7 @@ import moe.osudroid.platform.PlatformServices;
 import moe.osudroid.platform.StorageBackend;
 
 public final class AndroidPlatformServices {
+
     private AndroidPlatformServices() {
     }
 
@@ -33,9 +35,9 @@ public final class AndroidPlatformServices {
         HapticsBackend hapticsBackend = new HapticsBackend() {
             @Override
             public void lightImpact() {
-                Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+                Vibrator vibrator = (Vibrator) context.getSystemService(Vibrator.class);
                 if (vibrator != null && vibrator.hasVibrator()) {
-                    vibrator.vibrate(10L);
+                    vibrator.vibrate(VibrationEffect.createOneShot(10L, VibrationEffect.DEFAULT_AMPLITUDE));
                 }
             }
         };

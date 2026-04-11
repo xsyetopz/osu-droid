@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <executableName>osu-droid</executableName>
+  <mainClass>moe.osudroid.ios.IOSLauncher</mainClass>
+  <iosInfoPList>Info.plist.xml</iosInfoPList>
+  <forceLinkClasses>
+    <pattern>moe.osudroid.**</pattern>
+  </forceLinkClasses>
+</config>

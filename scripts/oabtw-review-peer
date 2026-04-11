@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./oabtw-lib.sh
 source "$SCRIPT_DIR/oabtw-lib.sh"
 
-scope="${*:-legacy Java/Kotlin codebase for rewrite-risk review}"
+scope="${*:-active libGDX rewrite root for rewrite-risk review}"
 
 ensure_layout
 require_oabtw
@@ -26,8 +26,8 @@ Read $brief_file first.
 
 Review scope: $scope
 Ownership:
-- src/com/rian
-- tests/test/kotlin/com/rian
+- core
+- docs/original-codebase/gameplay-rules.md
 
 $prompt_common
 EOF
@@ -39,9 +39,10 @@ Read $brief_file first.
 
 Review scope: $scope
 Ownership:
-- src/ru/nsu/ccfit/zuev
-- src/com/reco1l
-- src/com/edlplan
+- android
+- ios
+- lwjgl3
+- docs/original-codebase/runtime-shell.md
 
 $prompt_common
 EOF
@@ -53,10 +54,10 @@ Read $brief_file first.
 
 Review scope: $scope
 Ownership:
-- src/com/osudroid
-- src/com/acivev
-- tests/test/kotlin/com/osudroid
-- tests/test/kotlin/com/reco1l
+- tools
+- assets
+- docs/architecture
+- docs/original-codebase/services-data.md
 
 $prompt_common
 EOF

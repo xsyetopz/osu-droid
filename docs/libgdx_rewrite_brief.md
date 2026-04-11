@@ -242,4 +242,4 @@ When uncertain, prefer:
 ## One-sentence project summary
 Build a new **Java/libGDX rhythm game** with a **single shared `core` codebase** for **Android+iOS**, using **open/documented asset and data formats**, while treating the old Android/AndEngine codebase as a **behavior reference**, not as architecture to preserve.
 
-The new src/ organisation will be `src/moe/osudroid/*` as the game's actual website is called `https://osudroid.moe/`
+The new package organisation will use `moe.osudroid.*`, housed inside standard libGDX module roots such as `core/src/main/java/moe/osudroid/*`.

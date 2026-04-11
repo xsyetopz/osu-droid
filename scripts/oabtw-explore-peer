@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./oabtw-lib.sh
 source "$SCRIPT_DIR/oabtw-lib.sh"
 
-scope="${*:-legacy Java/Kotlin codebase for libGDX rewrite extraction}"
+scope="${*:-active libGDX rewrite root and preserved legacy dossiers}"
 
 ensure_layout
 require_oabtw
@@ -25,8 +25,9 @@ Read $brief_file first.
 Explore scope: $scope
 
 Ownership:
-- src/com/rian
-- tests/test/kotlin/com/rian
+- core
+- docs/original-codebase/gameplay-rules.md
+- docs/original-codebase/gameplay-rules-review.md
 
 Produce:
 - Current Shape
@@ -36,7 +37,7 @@ Produce:
 - Missing Tests
 - Next Traces
 
-Focus on gameplay rules, beatmap parsing, difficulty, replay semantics, math, and deterministic logic.
+Focus on gameplay systems, deterministic logic boundaries, and how the active `core` implementation lines up with preserved gameplay findings.
 EOF
 )"
 
@@ -46,9 +47,11 @@ Read $brief_file first.
 Explore scope: $scope
 
 Ownership:
-- src/ru/nsu/ccfit/zuev
-- src/com/reco1l
-- src/com/edlplan
+- android
+- ios
+- lwjgl3
+- docs/original-codebase/runtime-shell.md
+- docs/original-codebase/runtime-shell-review.md
 
 Produce:
 - Current Shape
@@ -58,7 +61,7 @@ Produce:
 - Missing Tests
 - Next Traces
 
-Focus on legacy runtime flow, scene ownership, UI shell, AndEngine glue, audio/service integration, and launcher boundaries.
+Focus on launcher boundaries, platform service wiring, and where the new runtime still needs to absorb lessons from the old shell.
 EOF
 )"
 
@@ -68,10 +71,11 @@ Read $brief_file first.
 Explore scope: $scope
 
 Ownership:
-- src/com/osudroid
-- src/com/acivev
-- tests/test/kotlin/com/osudroid
-- tests/test/kotlin/com/reco1l
+- tools
+- assets
+- docs/architecture
+- docs/original-codebase/services-data.md
+- docs/original-codebase/services-data-review.md
 
 Produce:
 - Current Shape
@@ -81,7 +85,7 @@ Produce:
 - Missing Tests
 - Next Traces
 
-Focus on data, beatmap services, multiplayer, app-side Kotlin services, and Android-facing integrations that affect rewrite boundaries.
+Focus on asset policy, tooling, docs, and pending service/data boundaries that still need concrete rewrite implementations.
 EOF
 )"
 

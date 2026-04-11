@@ -1,48 +1,51 @@
-![osudroid](https://github.com/osudroid/osu-droid/assets/52914632/8747ab50-c77d-4808-91aa-5058891e4bcd)
-
 # osu-droid
-[![Official International Discord](https://discordapp.com/api/guilds/316545691545501706/widget.png?style=shield)](https://discord.gg/nyD92cE)
-[![Android](https://github.com/osudroid/osu-droid/workflows/Android/badge.svg?branch=master)](https://github.com/osudroid/osu-droid/actions?query=workflow%3A"Android")
-[![CodeFactor](https://www.codefactor.io/repository/github/osudroid/osu-droid/badge)](https://www.codefactor.io/repository/github/osudroid/osu-droid)
 
-osu!droid is a free-to-play circle clicking rhythm game for Android devices. It was a game hatched many years ago by the
-[osu!](https://osu.ppy.sh/home) community. This project is now being developed by a small group of fans and also with the help of foreign friends.
+This repository is now the in-place libGDX rewrite root for osu!droid.
 
-## Status
+## Layout
+- `core`: shared gameplay/runtime code under `moe.osudroid`
+- `android`: Android launcher and Android-only adapters
+- `ios`: iOS launcher and iOS-only adapters
+- `lwjgl3`: desktop development launcher
+- `tools`: asset and migration utilities
+- `assets`: runtime assets used by libGDX
+- `assets-raw`: editable source assets that will later feed build-time packing
 
-osu!droid is under constant development. Features are constantly being added and bugs are constantly being fixed, but
-it's playable and fun!
+## Current State
+- The root has been reset to a clean libGDX-style project layout.
+- Legacy Android/AndEngine/Kotlin code has been removed from the working tree.
+- The first runnable baseline is a bootstrap app that uses `AssetManager` and the `moe.osudroid` namespace.
 
-### Downloading the source code
+## Build
 
-Clone the repository:
+Use the generated Gradle wrapper:
 
 ```sh
-git clone https://github.com/osudroid/osu-droid.git
-```
-Open the folder in Android Studio.
-
-To update the source code to the latest commit, run the following command inside the `osu-droid` directory:
-
-```she
-git pull
+./gradlew build
+./gradlew lwjgl3:run
+./gradlew android:assembleDebug
 ```
 
-### Building
+The rewrite uses Java 8 source/target compatibility for the generated libGDX Android+iOS layout, while JDK 17 remains the expected installed JDK.
 
-osu!droid requires Java 17 to build.
+## VS Code
 
-In Android Studio, you can `Build` a debug release to test your changes. The output directory of your `.apk` is inside
-`build/output` of `osu-droid`'s directory.
+This workspace is set up for the Red Hat Java tooling stack in VS Code:
 
-If you prefer the command line, and you are on Linux, run `chmod +x gradlew` and `./gradlew assembleDebug` inside the
-directory to build the debug `.apk` files.
+- `redhat.java`
+- `vscjava.vscode-gradle`
+- `vscjava.vscode-java-debug`
 
-## Contributing
+The Android module relies on the Java extension's experimental Android Gradle import support. If VS Code still shows unresolved Android or `:core` imports:
 
-We welcome any sort of contributions, as long as they're helpful. Those who aren't able to contribute code may instead
-suggest small changes like grammar fixes or report client issues via [Feature request](https://github.com/osudroid/osu-droid/issues/11) or [GitHub issues](https://github.com/osudroid/osu-droid/issues).
+1. Disable `oracle.oracle-java` for this workspace.
+2. Install the recommended workspace extensions.
+3. Run `Java: Clean the Java Language Server Workspace`.
+4. Run `Java: Import Java Projects into Workspace` or `Java: Reload Projects`.
+5. Reload the VS Code window once.
 
-## License
+Do not commit machine-specific Java or Android SDK paths into workspace settings. Keep SDK discovery in `local.properties` and your local shell environment.
 
-osu!droid is licensed under the [Apache-2.0](https://opensource.org/licenses/Apache-2.0) License. Please see the LICENSE file for more information.
+## Notes
+- The rewrite follows the official libGDX module layout rather than a custom root-level shared `src/`.
+- Durable rewrite architecture and migration notes live under `docs/`.

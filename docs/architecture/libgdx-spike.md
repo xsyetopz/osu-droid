@@ -15,6 +15,7 @@ Create a clean reference rewrite project that follows libGDX's documented Androi
 - `android`
 - `ios`
 - `lwjgl3`
+- `tools`
 - `assets`
 - `gradle` wrapper and normal libGDX build files
 
@@ -23,6 +24,7 @@ Create a clean reference rewrite project that follows libGDX's documented Androi
 2. Use Android Studio once to import the generated project and confirm the Android SDK/NDK setup that libGDX expects.
 3. Confirm the iOS launcher, signing, and provisioning flow from Xcode CLI.
 4. Keep day-to-day editing in VS Code plus Gradle/Xcode CLI after the initial sanity check.
+5. Keep Java source/target compatibility at `1.8` for the first Android+iOS spike.
 
 ## Launcher expectations
 - Android: one thin launcher activity

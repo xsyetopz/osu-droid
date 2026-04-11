@@ -8,6 +8,7 @@ import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import moe.osudroid.app.OsuDroidGame;
 
 public final class AndroidLauncher extends AndroidApplication {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
