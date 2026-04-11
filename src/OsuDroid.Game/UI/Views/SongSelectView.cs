@@ -1,45 +1,46 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using OsuDroid.Game.Localisation;
-using osu.Framework.Bindables;
+using OsuDroid.Game.Resources;
+using OsuDroid.Game.UI.Controls;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Graphics.Textures;
 using osuTK;
 using osuTK.Graphics;
-using OsuDroid.Game.UI.Controls;
 
 namespace OsuDroid.Game.UI.Views;
 
 public partial class SongSelectView : CompositeDrawable
 {
-    private readonly IBeatmapLibraryService beatmapLibraryService;
-    private readonly IExternalUriLauncher externalUriLauncher;
-    private readonly IAudioService audioService;
-    private readonly Action onBack;
+    private readonly ILocalBeatmapLibraryService _beatmapLibraryService;
+    private readonly IExternalUriLauncher _externalUriLauncher;
+    private readonly IAudioService _audioService;
+    private readonly IGameResources _resources;
+    private readonly Action _onBack;
 
-    private readonly List<BeatmapCard> beatmaps = [];
-    private BeatmapCard? selectedBeatmap;
+    private readonly List<BeatmapCard> _beatmaps = [];
+    private BeatmapCard? _selectedBeatmap;
 
-    private FillFlowContainer beatmapList = null!;
-    private FillFlowContainer detailsFlow = null!;
-    private Container listContent = null!;
-    private PanelTextBox searchBox = null!;
+    private FillFlowContainer _beatmapList = null!;
+    private FillFlowContainer _detailsFlow = null!;
+    private PanelTextBox _searchBox = null!;
 
     public SongSelectView(
-        IBeatmapLibraryService beatmapLibraryService,
+        ILocalBeatmapLibraryService beatmapLibraryService,
         IExternalUriLauncher externalUriLauncher,
         IAudioService audioService,
+        IGameResources resources,
         Action onBack)
     {
-        this.beatmapLibraryService = beatmapLibraryService;
-        this.externalUriLauncher = externalUriLauncher;
-        this.audioService = audioService;
-        this.onBack = onBack;
+        _beatmapLibraryService = beatmapLibraryService;
+        _externalUriLauncher = externalUriLauncher;
+        _audioService = audioService;
+        _resources = resources;
+        _onBack = onBack;
 
         RelativeSizeAxes = Axes.Both;
 
@@ -48,10 +49,17 @@ public partial class SongSelectView : CompositeDrawable
             RelativeSizeAxes = Axes.Both,
             Children = new Drawable[]
             {
+                new Sprite
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Texture = getTexture("Menu/menu-background-2"),
+                    FillMode = FillMode.Fill,
+                    Alpha = 0.78f
+                },
                 new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = new Color4(10, 13, 24, 255)
+                    Colour = new Color4(10, 13, 24, 150)
                 },
                 new FillFlowContainer
                 {
@@ -90,12 +98,12 @@ public partial class SongSelectView : CompositeDrawable
         base.LoadComplete();
         _ = Task.Run(async () =>
         {
-            var items = await beatmapLibraryService.RefreshLocalAsync().ConfigureAwait(false);
+            IReadOnlyList<BeatmapCard> items = await _beatmapLibraryService.RefreshAsync().ConfigureAwait(false);
             Schedule(() =>
             {
-                beatmaps.Clear();
-                beatmaps.AddRange(items);
-                selectedBeatmap = beatmaps.FirstOrDefault();
+                _beatmaps.Clear();
+                _beatmaps.AddRange(items);
+                _selectedBeatmap = _beatmaps.FirstOrDefault();
                 refreshView();
             });
         });
@@ -103,7 +111,7 @@ public partial class SongSelectView : CompositeDrawable
 
     private GridContainer createTopBar()
     {
-        var topBar = new GridContainer
+        GridContainer topBar = new()
         {
             RelativeSizeAxes = Axes.X,
             Height = 62,
@@ -116,7 +124,7 @@ public partial class SongSelectView : CompositeDrawable
             {
                 new Drawable[]
                 {
-                    new PillButton(audioService, ButtonSystemStrings.Back.ToString(), new Color4(50, 61, 96, 255), onBack),
+                    new PillButton(_audioService, OsuDroid.Game.Localisation.ButtonSystemStrings.Back, new Color4(50, 61, 96, 255), _onBack),
                     new FillFlowContainer
                     {
                         RelativeSizeAxes = Axes.X,
@@ -125,23 +133,23 @@ public partial class SongSelectView : CompositeDrawable
                         Spacing = new Vector2(12, 0),
                         Children = new Drawable[]
                         {
-                            searchBox = new PanelTextBox("search"),
-                            new PillButton(audioService, SongSelectStrings.Group.ToString(), new Color4(32, 40, 66, 255), refreshView),
-                            new PillButton(audioService, SongSelectStrings.Sort.ToString(), new Color4(32, 40, 66, 255), refreshView)
+                            _searchBox = new PanelTextBox(osu.Game.Resources.Localisation.Web.HomeStrings.SearchPlaceholder),
+                            new PillButton(_audioService, OsuDroid.Game.Localisation.SongSelectStrings.Group, new Color4(32, 40, 66, 255), refreshView),
+                            new PillButton(_audioService, OsuDroid.Game.Localisation.SongSelectStrings.Sort, new Color4(32, 40, 66, 255), refreshView)
                         }
                     }
                 }
             }
         };
 
-        searchBox.Width = 420;
-        searchBox.TextBox.Current.BindValueChanged(_ => refreshView());
+        _searchBox.Width = 420;
+        _searchBox.TextBox.Current.BindValueChanged(_ => refreshView());
         return topBar;
     }
 
     private Container createDetailsPanel()
     {
-        detailsFlow = new FillFlowContainer
+        _detailsFlow = new FillFlowContainer
         {
             RelativeSizeAxes = Axes.X,
             AutoSizeAxes = Axes.Y,
@@ -150,26 +158,12 @@ public partial class SongSelectView : CompositeDrawable
             Spacing = new Vector2(0, 14)
         };
 
-        return new Container
-        {
-            RelativeSizeAxes = Axes.Both,
-            Masking = true,
-            CornerRadius = 28,
-            Children = new Drawable[]
-            {
-                new Box
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = new Color4(18, 24, 40, 246)
-                },
-                detailsFlow
-            }
-        };
+        return panelContainer(_detailsFlow, new Color4(18, 24, 40, 246));
     }
 
     private Container createListPanel()
     {
-        beatmapList = new FillFlowContainer
+        _beatmapList = new FillFlowContainer
         {
             RelativeSizeAxes = Axes.X,
             AutoSizeAxes = Axes.Y,
@@ -177,42 +171,30 @@ public partial class SongSelectView : CompositeDrawable
             Spacing = new Vector2(0, 12)
         };
 
-        listContent = new Container
-        {
-            RelativeSizeAxes = Axes.Both,
-            Padding = new MarginPadding(22),
-            Child = new BasicScrollContainer
+        return panelContainer(
+            new Container
             {
                 RelativeSizeAxes = Axes.Both,
-                Child = beatmapList
-            }
-        };
-
-        return new Container
-        {
-            RelativeSizeAxes = Axes.Both,
-            Masking = true,
-            CornerRadius = 28,
-            Children = new Drawable[]
-            {
-                new Box
+                Padding = new MarginPadding(22),
+                Child = new BasicScrollContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = new Color4(16, 22, 36, 242)
-                },
-                listContent
-            }
-        };
+                    Child = _beatmapList
+                }
+            },
+            new Color4(16, 22, 36, 242));
     }
 
     private void refreshView()
     {
-        var filtered = beatmaps
+        BeatmapCard[] filtered = _beatmaps
             .Where(matchesSearch)
             .ToArray();
 
-        if (selectedBeatmap is null || !filtered.Contains(selectedBeatmap))
-            selectedBeatmap = filtered.FirstOrDefault();
+        if (_selectedBeatmap is null || !filtered.Contains(_selectedBeatmap))
+        {
+            _selectedBeatmap = filtered.FirstOrDefault();
+        }
 
         rebuildDetails(filtered);
         rebuildList(filtered);
@@ -220,10 +202,12 @@ public partial class SongSelectView : CompositeDrawable
 
     private bool matchesSearch(BeatmapCard beatmap)
     {
-        if (string.IsNullOrWhiteSpace(searchBox.Text))
+        if (string.IsNullOrWhiteSpace(_searchBox.Text))
+        {
             return true;
+        }
 
-        var query = searchBox.Text.Trim();
+        string query = _searchBox.Text.Trim();
         return beatmap.Artist.Contains(query, StringComparison.OrdinalIgnoreCase)
                || beatmap.Title.Contains(query, StringComparison.OrdinalIgnoreCase)
                || beatmap.Mapper.Contains(query, StringComparison.OrdinalIgnoreCase)
@@ -232,51 +216,52 @@ public partial class SongSelectView : CompositeDrawable
 
     private void rebuildDetails(IReadOnlyList<BeatmapCard> filtered)
     {
-        detailsFlow.Clear();
+        _detailsFlow.Clear();
 
-        if (selectedBeatmap is null)
+        if (_selectedBeatmap is null)
         {
-            detailsFlow.AddRange(new Drawable[]
+            _detailsFlow.AddRange(new Drawable[]
             {
                 new SpriteText
                 {
-                    Text = SongSelectStrings.NoMatchingBeatmaps,
+                    Text = OsuDroid.Game.Localisation.SongSelectStrings.NoMatchingBeatmaps,
                     Font = FontUsage.Default.With(size: 30, weight: "Bold")
                 },
                 new SpriteText
                 {
-                    Text = SongSelectStrings.NoMatchingBeatmapsDescription,
+                    Text = OsuDroid.Game.Localisation.SongSelectStrings.NoMatchingBeatmapsDescription,
                     Font = FontUsage.Default.With(size: 19),
                     Colour = new Color4(188, 196, 220, 255)
                 },
-                new PillButton(audioService, ButtonSystemStrings.Browse.ToString(), new Color4(86, 126, 219, 255), () =>
-                    externalUriLauncher.Open(new Uri("https://osu.direct")))
+                new PillButton(_audioService, OsuDroid.Game.Localisation.ButtonSystemStrings.Browse, new Color4(86, 126, 219, 255), () =>
+                    _externalUriLauncher.Open(new Uri("https://osu.direct")))
             });
             return;
         }
 
-        detailsFlow.AddRange(new Drawable[]
+        _detailsFlow.AddRange(new Drawable[]
         {
             new SpriteText
             {
-                Text = SongSelectStrings.Details,
+                Text = OsuDroid.Game.Localisation.SongSelectStrings.Details,
                 Font = FontUsage.Default.With(size: 18, weight: "Bold"),
                 Colour = new Color4(140, 154, 214, 255)
             },
             new SpriteText
             {
-                Text = selectedBeatmap.Title,
+                Text = _selectedBeatmap.Title,
                 Font = FontUsage.Default.With(size: 34, weight: "Bold")
             },
             new SpriteText
             {
-                Text = selectedBeatmap.Artist,
+                Text = _selectedBeatmap.Artist,
                 Font = FontUsage.Default.With(size: 20),
                 Colour = new Color4(214, 219, 236, 255)
             },
-            createMetadataRow(SongSelectStrings.Author.ToString(), selectedBeatmap.Mapper),
-            createMetadataRow(SongSelectStrings.Difficulty.ToString(), selectedBeatmap.DifficultyName),
-            createMetadataRow(SongSelectStrings.Ranked.ToString(), filtered.Count.ToString(CultureInfo.InvariantCulture)),
+            createMetadataRow(OsuDroid.Game.Localisation.SongSelectStrings.Author.ToString(), _selectedBeatmap.Mapper),
+            createMetadataRow(OsuDroid.Game.Localisation.SongSelectStrings.Difficulty.ToString(), _selectedBeatmap.DifficultyName),
+            createMetadataRow(OsuDroid.Game.Localisation.SongSelectStrings.RankedStatus.ToString(), _selectedBeatmap.Status ?? OsuDroid.Game.Localisation.SongSelectStrings.StatusUnknown.ToString()),
+            createMetadataRow(OsuDroid.Game.Localisation.SongSelectStrings.Source.ToString(), _selectedBeatmap.SourceLabel ?? "-"),
             new Box
             {
                 RelativeSizeAxes = Axes.X,
@@ -292,8 +277,8 @@ public partial class SongSelectView : CompositeDrawable
         });
     }
 
-    private static FillFlowContainer createMetadataRow(string label, string value) =>
-        new FillFlowContainer
+    private static FillFlowContainer createMetadataRow(string label, string value)
+        => new()
         {
             RelativeSizeAxes = Axes.X,
             AutoSizeAxes = Axes.Y,
@@ -317,11 +302,11 @@ public partial class SongSelectView : CompositeDrawable
 
     private void rebuildList(IReadOnlyList<BeatmapCard> filtered)
     {
-        beatmapList.Clear();
+        _beatmapList.Clear();
 
         if (filtered.Count == 0)
         {
-            beatmapList.Add(new FillFlowContainer
+            _beatmapList.Add(new FillFlowContainer
             {
                 RelativeSizeAxes = Axes.X,
                 AutoSizeAxes = Axes.Y,
@@ -336,14 +321,14 @@ public partial class SongSelectView : CompositeDrawable
                     {
                         Anchor = Anchor.TopCentre,
                         Origin = Anchor.TopCentre,
-                        Text = SongSelectStrings.NoMatchingBeatmaps,
+                        Text = OsuDroid.Game.Localisation.SongSelectStrings.NoMatchingBeatmaps,
                         Font = FontUsage.Default.With(size: 26, weight: "Bold")
                     },
                     new SpriteText
                     {
                         Anchor = Anchor.TopCentre,
                         Origin = Anchor.TopCentre,
-                        Text = SongSelectStrings.NoMatchingBeatmapsDescription,
+                        Text = OsuDroid.Game.Localisation.SongSelectStrings.NoMatchingBeatmapsDescription,
                         Font = FontUsage.Default.With(size: 18),
                         Colour = new Color4(184, 192, 216, 255)
                     }
@@ -352,15 +337,34 @@ public partial class SongSelectView : CompositeDrawable
             return;
         }
 
-        foreach (var beatmap in filtered)
+        foreach (BeatmapCard beatmap in filtered)
         {
-            var selected = beatmap == selectedBeatmap;
-            beatmapList.Add(new BeatmapListCard(beatmap, selected, () =>
+            bool selected = beatmap == _selectedBeatmap;
+            _beatmapList.Add(new BeatmapListCard(beatmap, selected, () =>
             {
-                selectedBeatmap = beatmap;
-                audioService.PlayMenuSample(MenuSample.SelectDifficulty);
+                _selectedBeatmap = beatmap;
+                _audioService.PlayMenuSample(MenuSample.SelectDifficulty);
                 refreshView();
             }));
         }
     }
+
+    private static Container panelContainer(Drawable child, Color4 colour)
+        => new()
+        {
+            RelativeSizeAxes = Axes.Both,
+            Masking = true,
+            CornerRadius = 28,
+            Children = new Drawable[]
+            {
+                new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = colour
+                },
+                child
+            }
+        };
+
+    private Texture getTexture(string name) => _resources.GetTexture(name);
 }

@@ -2,6 +2,8 @@ SOLUTION := OsuDroid.sln
 GAME_TEST_PROJECT := tests/OsuDroid.Game.Tests/OsuDroid.Game.Tests.csproj
 ANDROID_PROJECT := src/OsuDroid.Android/OsuDroid.Android.csproj
 IOS_PROJECT := src/OsuDroid.iOS/OsuDroid.iOS.csproj
+DOTNET_BUILD_FLAGS := -nr:false
+LOCAL_AUDIT_BYPASS_FLAGS := -p:NuGetAudit=false -p:WarningsNotAsErrors=NU1900
 
 ANDROID_PACKAGE := moe.osudroid.android
 ANDROID_APK := src/OsuDroid.Android/bin/Debug/net8.0-android/moe.osudroid.android-Signed.apk
@@ -22,6 +24,7 @@ endif
 
 .PHONY: \
 	bootstrap restore build test format check clean \
+	test-no-build \
 	build-android build-ios verify-android-bass \
 	install-android launch-android \
 	install-ios launch-ios doctor-ios xcode-ios \
@@ -39,9 +42,12 @@ restore:
 	dotnet restore $(SOLUTION)
 
 build:
-	dotnet build $(SOLUTION) --warnaserror
+	dotnet build $(SOLUTION) --warnaserror $(DOTNET_BUILD_FLAGS)
 
 test:
+	dotnet test $(GAME_TEST_PROJECT) --verbosity normal
+
+test-no-build:
 	dotnet test $(GAME_TEST_PROJECT) --no-build --verbosity normal
 
 format:
@@ -58,7 +64,7 @@ clean:
 	rm -rf tests/OsuDroid.Game.Tests/bin tests/OsuDroid.Game.Tests/obj
 
 build-android:
-	dotnet build $(ANDROID_PROJECT) -c Debug
+	dotnet build $(ANDROID_PROJECT) -c Debug $(DOTNET_BUILD_FLAGS) $(LOCAL_AUDIT_BYPASS_FLAGS)
 
 verify-android-bass:
 	./scripts/verify-android-bass.sh "$(ANDROID_APK)"

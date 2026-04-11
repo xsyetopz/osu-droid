@@ -1,11 +1,9 @@
 using Android.App;
 using Android.Content.PM;
 using Android.OS;
-using OsuDroid.Game;
-using OsuDroid.Game.Services.Stubs;
-using OsuDroid.Android.Platform.Audio;
 using OsuDroid.Android.Platform.External;
 using OsuDroid.Android.Platform.Storage;
+using OsuDroid.Game;
 using osu.Framework.Android;
 using Android.Util;
 using System;
@@ -74,15 +72,5 @@ public class MainActivity : AndroidGameActivity
     }
 
     private OsuDroidGame createGame()
-    {
-        var authState = new StubAuthState();
-
-        return new OsuDroidGame(
-            new AndroidAudioService(),
-            new StubAccountService(authState),
-            new StubSessionService(authState),
-            new StubBeatmapLibraryService(),
-            new AndroidExternalUriLauncher(this),
-            new AndroidPlatformStorage());
-    }
+        => new(new AndroidExternalUriLauncher(this), new AndroidPlatformStorage(this));
 }

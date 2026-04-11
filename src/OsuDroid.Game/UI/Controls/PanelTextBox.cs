@@ -3,6 +3,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
+using osu.Framework.Localisation;
 using osuTK;
 using osuTK.Graphics;
 
@@ -24,7 +25,7 @@ public partial class PanelTextBox : CompositeDrawable
         set => TextBox.PlaceholderText = value;
     }
 
-    public PanelTextBox(string placeholderText, bool secret = false)
+    public PanelTextBox(LocalisableString placeholderText, bool secret = false)
     {
         RelativeSizeAxes = Axes.X;
         Height = 58;
@@ -47,5 +48,10 @@ public partial class PanelTextBox : CompositeDrawable
         };
 
         _ = secret;
+    }
+
+    public PanelTextBox(string placeholderText, bool secret = false)
+        : this((LocalisableString)placeholderText, secret)
+    {
     }
 }

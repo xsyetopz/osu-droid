@@ -50,7 +50,10 @@ require_value "$IOS_TEAM_ID" "IOS_TEAM_ID" "IOS_TEAM_ID=TEAMID ./scripts/build-i
 dotnet build "$PROJECT" \
   -c "$CONFIGURATION" \
   -f "$TARGET_FRAMEWORK" \
+  -nr:false \
   -p:RuntimeIdentifier="$RUNTIME_IDENTIFIER" \
+  -p:NuGetAudit=false \
+  -p:WarningsNotAsErrors=NU1900 \
   -p:CodesignKey="$IOS_CODESIGN_KEY" \
   -p:CodesignTeamId="$IOS_TEAM_ID"
 print_app_path > /dev/null

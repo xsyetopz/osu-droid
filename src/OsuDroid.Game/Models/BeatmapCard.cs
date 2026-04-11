@@ -5,4 +5,6 @@ public sealed record BeatmapCard(
     string Artist,
     string Title,
     string DifficultyName,
-    string Mapper);
+    string Mapper,
+    string? SourceLabel = null,
+    string? Status = null);

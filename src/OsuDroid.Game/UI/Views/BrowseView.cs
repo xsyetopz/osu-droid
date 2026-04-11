@@ -2,38 +2,42 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using OsuDroid.Game.Localisation;
+using OsuDroid.Game.Resources;
+using OsuDroid.Game.UI.Controls;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Graphics.Textures;
 using osuTK;
 using osuTK.Graphics;
-using OsuDroid.Game.UI.Controls;
 
 namespace OsuDroid.Game.UI.Views;
 
 public partial class BrowseView : CompositeDrawable
 {
-    private readonly IBeatmapLibraryService beatmapLibraryService;
-    private readonly IExternalUriLauncher externalUriLauncher;
-    private readonly IAudioService audioService;
-    private readonly Action onBack;
+    private readonly IOnlineBeatmapBrowseService _beatmapLibraryService;
+    private readonly IExternalUriLauncher _externalUriLauncher;
+    private readonly IAudioService _audioService;
+    private readonly IGameResources _resources;
+    private readonly Action _onBack;
 
-    private FillFlowContainer resultsFlow = null!;
-    private PanelTextBox searchBox = null!;
-    private SpriteText stateText = null!;
+    private FillFlowContainer _resultsFlow = null!;
+    private PanelTextBox _searchBox = null!;
+    private SpriteText _stateText = null!;
 
     public BrowseView(
-        IBeatmapLibraryService beatmapLibraryService,
+        IOnlineBeatmapBrowseService beatmapLibraryService,
         IExternalUriLauncher externalUriLauncher,
         IAudioService audioService,
+        IGameResources resources,
         Action onBack)
     {
-        this.beatmapLibraryService = beatmapLibraryService;
-        this.externalUriLauncher = externalUriLauncher;
-        this.audioService = audioService;
-        this.onBack = onBack;
+        _beatmapLibraryService = beatmapLibraryService;
+        _externalUriLauncher = externalUriLauncher;
+        _audioService = audioService;
+        _resources = resources;
+        _onBack = onBack;
 
         RelativeSizeAxes = Axes.Both;
 
@@ -42,10 +46,17 @@ public partial class BrowseView : CompositeDrawable
             RelativeSizeAxes = Axes.Both,
             Children = new Drawable[]
             {
+                new Sprite
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Texture = getTexture("Menu/menu-background-3"),
+                    FillMode = FillMode.Fill,
+                    Alpha = 0.76f
+                },
                 new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = new Color4(11, 16, 28, 255)
+                    Colour = new Color4(11, 16, 28, 150)
                 },
                 new FillFlowContainer
                 {
@@ -76,15 +87,15 @@ public partial class BrowseView : CompositeDrawable
                                     Spacing = new Vector2(0, 16),
                                     Children = new Drawable[]
                                     {
-                                        stateText = new SpriteText
+                                        _stateText = new SpriteText
                                         {
-                                            Text = ButtonSystemStrings.Browse,
+                                            Text = OsuDroid.Game.Localisation.ButtonSystemStrings.Browse,
                                             Font = FontUsage.Default.With(size: 28, weight: "Bold")
                                         },
                                         new BasicScrollContainer
                                         {
                                             RelativeSizeAxes = Axes.Both,
-                                            Child = resultsFlow = new FillFlowContainer
+                                            Child = _resultsFlow = new FillFlowContainer
                                             {
                                                 RelativeSizeAxes = Axes.X,
                                                 AutoSizeAxes = Axes.Y,
@@ -110,8 +121,8 @@ public partial class BrowseView : CompositeDrawable
 
     private GridContainer createTopBar()
     {
-        searchBox = new PanelTextBox("search");
-        searchBox.Width = 440;
+        _searchBox = new PanelTextBox(osu.Game.Resources.Localisation.Web.HomeStrings.SearchPlaceholder);
+        _searchBox.Width = 440;
 
         return new GridContainer
         {
@@ -126,7 +137,7 @@ public partial class BrowseView : CompositeDrawable
             {
                 new Drawable[]
                 {
-                    new PillButton(audioService, ButtonSystemStrings.Back.ToString(), new Color4(50, 61, 96, 255), onBack),
+                    new PillButton(_audioService, OsuDroid.Game.Localisation.ButtonSystemStrings.Back, new Color4(50, 61, 96, 255), _onBack),
                     new FillFlowContainer
                     {
                         RelativeSizeAxes = Axes.X,
@@ -135,8 +146,8 @@ public partial class BrowseView : CompositeDrawable
                         Spacing = new Vector2(12, 0),
                         Children = new Drawable[]
                         {
-                            searchBox,
-                            new PillButton(audioService, ButtonSystemStrings.Browse.ToString(), new Color4(86, 126, 219, 255), () => _ = performSearch(searchBox.Text))
+                            _searchBox,
+                            new PillButton(_audioService, osu.Game.Resources.Localisation.Web.HomeStrings.SearchTitle, new Color4(86, 126, 219, 255), () => _ = performSearch(_searchBox.Text))
                         }
                     }
                 }
@@ -148,26 +159,35 @@ public partial class BrowseView : CompositeDrawable
     {
         Schedule(() =>
         {
-            stateText.Text = ButtonSystemStrings.Browse;
-            resultsFlow.Clear();
-            resultsFlow.Add(new SpriteText
+            _stateText.Text = OsuDroid.Game.Localisation.ButtonSystemStrings.Browse;
+            _resultsFlow.Clear();
+            _resultsFlow.Add(new Box
             {
-                Text = "loading…",
-                Font = FontUsage.Default.With(size: 20),
-                Colour = new Color4(181, 190, 215, 255)
+                RelativeSizeAxes = Axes.X,
+                Height = 6,
+                Colour = new Color4(226, 113, 165, 255)
             });
         });
 
-        var results = await beatmapLibraryService.SearchOnlineAsync(query).ConfigureAwait(false);
+        IReadOnlyList<BeatmapCard> results;
+
+        try
+        {
+            results = await _beatmapLibraryService.SearchAsync(query).ConfigureAwait(false);
+        }
+        catch
+        {
+            results = [];
+        }
 
         Schedule(() =>
         {
-            resultsFlow.Clear();
+            _resultsFlow.Clear();
 
             if (results.Count == 0)
             {
-                stateText.Text = SongSelectStrings.NoMatchingBeatmaps;
-                resultsFlow.Add(new FillFlowContainer
+                _stateText.Text = OsuDroid.Game.Localisation.SongSelectStrings.NoMatchingBeatmaps;
+                _resultsFlow.Add(new FillFlowContainer
                 {
                     RelativeSizeAxes = Axes.X,
                     AutoSizeAxes = Axes.Y,
@@ -180,14 +200,14 @@ public partial class BrowseView : CompositeDrawable
                         {
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre,
-                            Text = SongSelectStrings.NoMatchingBeatmaps,
+                            Text = OsuDroid.Game.Localisation.SongSelectStrings.NoMatchingBeatmaps,
                             Font = FontUsage.Default.With(size: 26, weight: "Bold")
                         },
                         new SpriteText
                         {
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre,
-                            Text = SongSelectStrings.NoMatchingBeatmapsDescription,
+                            Text = OsuDroid.Game.Localisation.SongSelectStrings.NoMatchingBeatmapsDescription,
                             Font = FontUsage.Default.With(size: 18),
                             Colour = new Color4(184, 192, 216, 255)
                         }
@@ -196,9 +216,9 @@ public partial class BrowseView : CompositeDrawable
                 return;
             }
 
-            foreach (var row in chunk(results, 2))
+            foreach (List<BeatmapCard> row in chunk(results, 2))
             {
-                resultsFlow.Add(new GridContainer
+                _resultsFlow.Add(new GridContainer
                 {
                     RelativeSizeAxes = Axes.X,
                     Height = 138,
@@ -220,8 +240,8 @@ public partial class BrowseView : CompositeDrawable
         });
     }
 
-    private Container createCard(BeatmapCard beatmap) =>
-        new Container
+    private Container createCard(BeatmapCard beatmap)
+        => new()
         {
             RelativeSizeAxes = Axes.Both,
             Padding = new MarginPadding { Right = 8 },
@@ -270,10 +290,10 @@ public partial class BrowseView : CompositeDrawable
                                 Spacing = new Vector2(8, 0),
                                 Children = new Drawable[]
                                 {
-                                    new PillButton(audioService, SongSelectStrings.Details.ToString(), new Color4(69, 82, 120, 255), () =>
-                                        externalUriLauncher.Open(new Uri("https://osu.direct"))),
-                                    new PillButton(audioService, ButtonSystemStrings.Browse.ToString(), new Color4(86, 126, 219, 255), () =>
-                                        externalUriLauncher.Open(new Uri("https://osu.direct")))
+                                    new PillButton(_audioService, OsuDroid.Game.Localisation.SongSelectStrings.Details, new Color4(69, 82, 120, 255), () =>
+                                        _externalUriLauncher.Open(new Uri("https://osu.direct"))),
+                                    new PillButton(_audioService, OsuDroid.Game.Localisation.ButtonSystemStrings.Browse, new Color4(86, 126, 219, 255), () =>
+                                        _externalUriLauncher.Open(new Uri("https://osu.direct")))
                                 }
                             }
                         }
@@ -284,11 +304,15 @@ public partial class BrowseView : CompositeDrawable
 
     private static List<List<BeatmapCard>> chunk(IReadOnlyList<BeatmapCard> results, int size)
     {
-        var rows = new List<List<BeatmapCard>>();
+        List<List<BeatmapCard>> rows = [];
 
-        for (var index = 0; index < results.Count; index += size)
+        for (int index = 0; index < results.Count; index += size)
+        {
             rows.Add(results.Skip(index).Take(size).ToList());
+        }
 
         return rows;
     }
+
+    private Texture getTexture(string name) => _resources.GetTexture(name);
 }

@@ -16,6 +16,9 @@ public static class SongSelectStrings
     public static LocalisableString Difficulty => new TranslatableString(Key("difficulty"), "Difficulty");
     public static LocalisableString Length => new TranslatableString(Key("length"), "Length");
     public static LocalisableString Ranked => new TranslatableString(Key("ranked"), "Ranked");
+    public static LocalisableString RankedStatus => new TranslatableString(Key("ranked_status"), "Ranked Status");
+    public static LocalisableString Source => new TranslatableString(Key("source"), "Source");
+    public static LocalisableString StatusUnknown => new TranslatableString(Key("status_unknown"), "Unknown");
     public static LocalisableString Details => new TranslatableString(Key("details"), "Details");
     public static LocalisableString NoMatchingBeatmaps => new TranslatableString(Key("no_matching_beatmaps"), "No matching beatmaps");
     public static LocalisableString NoMatchingBeatmapsDescription => new TranslatableString(Key("no_matching_beatmaps_description"), "No beatmaps match your filter criteria!");

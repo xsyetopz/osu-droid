@@ -4,6 +4,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
+using osu.Framework.Localisation;
 using osuTK;
 using osuTK.Graphics;
 
@@ -11,22 +12,22 @@ namespace OsuDroid.Game.UI.Controls;
 
 public partial class PillButton : ClickableContainer
 {
-    private readonly Box background;
-    private readonly SpriteText label;
-    private readonly IAudioService audioService;
+    private readonly Box _background;
+    private readonly SpriteText _label;
+    private readonly IAudioService _audioService;
 
     public string Text
     {
-        get => label.Text.ToString();
-        set => label.Text = value;
+        get => _label.Text.ToString();
+        set => _label.Text = value;
     }
 
-    public PillButton(IAudioService audioService, string text, Color4 colour, Action action)
+    public PillButton(IAudioService audioService, LocalisableString text, Color4 colour, Action action)
     {
-        this.audioService = audioService;
+        _audioService = audioService;
         Action = () =>
         {
-            audioService.PlayMenuSample(MenuSample.ButtonConfirm);
+            _audioService.PlayMenuSample(MenuSample.ButtonConfirm);
             action();
         };
 
@@ -40,13 +41,13 @@ public partial class PillButton : ClickableContainer
             Padding = new MarginPadding { Horizontal = 18, Vertical = 12 },
             Children = new Drawable[]
             {
-                background = new Box
+                _background = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
                     Colour = colour,
                     Alpha = 0.9f
                 },
-                label = new SpriteText
+                _label = new SpriteText
                 {
                     Position = new Vector2(0, 2),
                     Font = FontUsage.Default.With(size: 22, weight: "SemiBold"),
@@ -56,16 +57,21 @@ public partial class PillButton : ClickableContainer
         };
     }
 
+    public PillButton(IAudioService audioService, string text, Color4 colour, Action action)
+        : this(audioService, (LocalisableString)text, colour, action)
+    {
+    }
+
     protected override bool OnHover(HoverEvent e)
     {
-        audioService.PlayMenuSample(MenuSample.ButtonHover);
-        background.FadeTo(1f, 120);
+        _audioService.PlayMenuSample(MenuSample.ButtonHover);
+        _background.FadeTo(1f, 120);
         return base.OnHover(e);
     }
 
     protected override void OnHoverLost(HoverLostEvent e)
     {
-        background.FadeTo(0.9f, 120);
+        _background.FadeTo(0.9f, 120);
         base.OnHoverLost(e);
     }
 }
