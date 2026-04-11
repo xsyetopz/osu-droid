@@ -1,0 +1,5 @@
+-keep class moe.osudroid.net.** { *; }
+-keep class moe.osudroid.assets.** { *; }
+-keepattributes Signature
+-keepattributes *Annotation*
+-dontwarn sun.misc.**
