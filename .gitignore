@@ -1,25 +1,51 @@
-docs/
-.openagentsbtw
-assets-built/
+# Build results
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+artifacts/
 
-*.apk
-*.ap_
-output.json
-*.dex
-*.class
+# .NET
+project.lock.json
+project.fragment.lock.json
+*.nupkg
+*.snupkg
+*.binlog
 
-bin/
-gen/
-out/
-local.properties
-proguard/
-*.iml
-*.ipr
-*.iws
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.VisualState.xml
+TestResult.xml
+nunit-*.xml
+CodeCoverage/
+
+# IDE
 .idea/
-build/
-proguard_logs/
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# OS
 .DS_Store
-.gradle/
-.externalNativeBuild/
-release.jks
+Thumbs.db
+._*
+
+# Environment
+.env
+
+# Test fixtures (not published)
+dumping/
+
+# Temp files
+*~
+~$*
+*.stackdump
+nohup.out
+*.Backup.tmp
+
+third_party/osu-framework/
+third_party/ppy-osu/
+third_party/osu-droid-legacy/

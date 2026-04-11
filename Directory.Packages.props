@@ -1,0 +1,17 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="ppy.osu.Framework" Version="2026.406.0" />
+    <PackageVersion Include="ppy.osu.Framework.Android" Version="2026.406.0" />
+    <PackageVersion Include="ppy.osu.Framework.iOS" Version="2026.406.0" />
+    <PackageVersion Include="ppy.osu.Game.Resources" Version="2026.411.0" />
+    <PackageVersion Include="Microsoft.Maui.Essentials" Version="10.0.51" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
+    <PackageVersion Include="NUnit" Version="4.5.1" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.12.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="6.2.0" />
+    <PackageVersion Include="coverlet.collector" Version="8.0.1" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{582CA384-1345-4F2E-9BCF-477FD0FE70BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OsuDroid.Game", "src\OsuDroid.Game\OsuDroid.Game.csproj", "{A2D861B7-E4ED-4AB6-A93B-972DC14057CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OsuDroid.Android", "src\OsuDroid.Android\OsuDroid.Android.csproj", "{87ED6441-BE56-4C3D-9D32-EABEAE96088F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OsuDroid.iOS", "src\OsuDroid.iOS\OsuDroid.iOS.csproj", "{F4D3F8E8-1B1B-482B-8D28-36294B84D59C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{BE689662-736E-4E15-BCA3-530D0285AD48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OsuDroid.Game.Tests", "tests\OsuDroid.Game.Tests\OsuDroid.Game.Tests.csproj", "{9A33C58E-6563-4AD4-8519-0DFE279FBEC8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A2D861B7-E4ED-4AB6-A93B-972DC14057CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2D861B7-E4ED-4AB6-A93B-972DC14057CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2D861B7-E4ED-4AB6-A93B-972DC14057CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2D861B7-E4ED-4AB6-A93B-972DC14057CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87ED6441-BE56-4C3D-9D32-EABEAE96088F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87ED6441-BE56-4C3D-9D32-EABEAE96088F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87ED6441-BE56-4C3D-9D32-EABEAE96088F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87ED6441-BE56-4C3D-9D32-EABEAE96088F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4D3F8E8-1B1B-482B-8D28-36294B84D59C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4D3F8E8-1B1B-482B-8D28-36294B84D59C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4D3F8E8-1B1B-482B-8D28-36294B84D59C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4D3F8E8-1B1B-482B-8D28-36294B84D59C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A33C58E-6563-4AD4-8519-0DFE279FBEC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A33C58E-6563-4AD4-8519-0DFE279FBEC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A33C58E-6563-4AD4-8519-0DFE279FBEC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A33C58E-6563-4AD4-8519-0DFE279FBEC8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A2D861B7-E4ED-4AB6-A93B-972DC14057CC} = {582CA384-1345-4F2E-9BCF-477FD0FE70BA}
+		{87ED6441-BE56-4C3D-9D32-EABEAE96088F} = {582CA384-1345-4F2E-9BCF-477FD0FE70BA}
+		{F4D3F8E8-1B1B-482B-8D28-36294B84D59C} = {582CA384-1345-4F2E-9BCF-477FD0FE70BA}
+		{9A33C58E-6563-4AD4-8519-0DFE279FBEC8} = {BE689662-736E-4E15-BCA3-530D0285AD48}
+	EndGlobalSection
+EndGlobal

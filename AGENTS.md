@@ -1,22 +1,20 @@
 # Repository Guidance
 
 ## Rewrite Direction
-- This repository is now the active libGDX rewrite root.
-- Preserve gameplay behavior, data semantics, and compatibility expectations from the legacy analysis docs.
-- Do not reintroduce AndEngine, the old Android app architecture, or Kotlin-era dependencies into the rewrite root.
-
-## Default Workflow
-- Use `scripts/oabtw-preflight` before starting a new libGDX or peer-analysis session.
-- Use `scripts/oabtw-explore-peer` and `scripts/oabtw-review-peer` for the active libGDX root plus the preserved legacy dossiers in `docs/original-codebase/`.
-- Use `scripts/oabtw-architecture-peer` to synthesize current implementation state and preserved analysis into rewrite architecture docs.
-- Use `scripts/oabtw-implement-peer` only after the analysis/docs lane has produced concrete hotspots.
-
-## Docs and Output
-- Durable local analysis and architecture docs live under `docs/`.
-- Ephemeral peer-run state lives under `.openagentsbtw/`.
-- The rewrite architecture follows official libGDX guidance first, then adapts around project-specific gameplay needs.
+- This repository is the active `.NET 8` mobile rewrite root for osu!droid.
+- Runtime and platform structure follow `ppy/osu-framework`.
+- Behavior and strings follow `ppy/osu`.
+- Mobile layout cues may be studied from a local gitignored checkout of the original `osudroid/osu-droid`.
 
 ## Architecture Defaults
-- Favor thin platform launchers and a shared `core`.
-- Keep platform APIs out of shared gameplay code.
-- Favor explicit subsystem boundaries, deterministic gameplay logic, and small cohesive modules over god objects.
+- Android and iOS only. Do not add a desktop target.
+- Keep platform-specific APIs in the mobile heads or thin adapters.
+- Keep shared game code in `src/OsuDroid.Game`.
+- Do not reintroduce libGDX, Gradle, RoboVM, AndEngine, or the old Android app architecture.
+
+## Local Study Sources
+- `third_party/osu-framework`
+- `third_party/ppy-osu`
+- `third_party/osu-droid-legacy`
+
+Prepare them with `scripts/bootstrap-third-party.sh`.

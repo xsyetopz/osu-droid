@@ -1,0 +1,26 @@
+using Foundation;
+using OsuDroid.Game;
+using osu.Framework.iOS;
+using UIKit;
+
+namespace OsuDroid.iOS;
+
+[Register("AppDelegate")]
+public class AppDelegate : GameApplicationDelegate, IUIApplicationDelegate
+{
+    protected override osu.Framework.Game CreateGame() =>
+        createGame();
+
+    private static OsuDroidGame createGame()
+    {
+        var authState = new StubAuthState();
+
+        return new OsuDroidGame(
+            new IOSAudioService(),
+            new StubAccountService(authState),
+            new StubSessionService(authState),
+            new StubBeatmapLibraryService(),
+            new IOSExternalUriLauncher(),
+            new IOSPlatformStorage());
+    }
+}

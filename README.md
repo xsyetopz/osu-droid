@@ -1,74 +1,24 @@
 # osu-droid
 
-This repository is now the in-place libGDX rewrite root for osu!droid.
+This repository is the active `.NET 8` mobile rewrite root for osu!droid.
+
+## Source of Truth
+- `ppy/osu-framework`: runtime, graphics, audio, input, and mobile app structure
+- `ppy/osu`: behavior, route separation, and strings/localisation keys
+- original `osudroid/osu-droid`: mobile layout cues only
 
 ## Layout
-- `core`: shared gameplay/runtime code under `moe.osudroid`
-- `android`: Android launcher and Android-only adapters
-- `ios`: iOS launcher and iOS-only adapters
-- `lwjgl3`: desktop development launcher
-- `tools`: asset and migration utilities
-- `assets`: runtime assets used by libGDX
-- `assets-raw`: editable source assets that will later feed build-time packing
+- `src/OsuDroid.Game`: shared runtime, UI, localisation, and service contracts
+- `src/OsuDroid.Android`: Android app head
+- `src/OsuDroid.iOS`: iOS app head
+- `tests/OsuDroid.Game.Tests`: shared tests
+- `third_party/`: local gitignored study checkouts
 
-## Current State
-- The root has been reset to a clean libGDX-style project layout.
-- Legacy Android/AndEngine/Kotlin code has been removed from the working tree.
-- The first runnable baseline is a bootstrap app that uses `AssetManager` and the `moe.osudroid` namespace.
-
-## Build
-
-Use the generated Gradle wrapper:
-
-```sh
-./gradlew build
-./gradlew lwjgl3:run
-./gradlew android:assembleDebug
-```
-
-The rewrite uses Java 8 source/target compatibility for the generated libGDX Android+iOS layout, while JDK 17 remains the expected installed JDK.
-
-## VS Code
-
-This workspace is set up for the Red Hat Java tooling stack in VS Code:
-
-- `redhat.java`
-- `vscjava.vscode-gradle`
-- `vscjava.vscode-java-debug`
-
-The Android module relies on the Java extension's experimental Android Gradle import support. If VS Code still shows unresolved Android or `:core` imports:
-
-1. Disable `oracle.oracle-java` for this workspace.
-2. Install the recommended workspace extensions.
-3. Run `Java: Clean the Java Language Server Workspace`.
-4. Run `Java: Import Java Projects into Workspace` or `Java: Reload Projects`.
-5. Reload the VS Code window once.
-
-Do not commit machine-specific Java or Android SDK paths into workspace settings. Keep SDK discovery in `local.properties` and your local shell environment.
-
-## Pre-game UI Lane
-
-The rewrite now includes a shared pre-game shell in `core` for login, main menu, song select, settings, multiplayer, and the gameplay-loader boundary.
-
-UI resources follow a raw-to-runtime pipeline:
-
-- `assets-raw/`: editable source lane for upstream checkouts and local overrides
-- `assets/ui/theme-manifest.json`: runtime theme manifest used by Android, iOS, and desktop
-- `upstream-sources.lock.json`: tracked upstream source contract
-- `scripts/sync-upstream-ui-assets.sh`: sync entrypoint backed by `tools:run --args="sync-ui"`
-
-Expected upstream sibling checkouts:
-
-- `../osu`
-- `../osu-resources`
-
-Shared pre-game data currently uses:
-
-- `OSUDROID_ONLINE_USERNAME` and `OSUDROID_ONLINE_PASSWORD` for environment-backed session restore
-- `OSUDROID_SONGS_PATH` to point song select at an installed local beatmap directory when it is not under the platform storage root
-
-Do not ship upstream `osu!` or `ppy` brand marks directly. Replace them through the local override lane before packaging runtime assets.
-
-## Notes
-- The rewrite follows the official libGDX module layout rather than a custom root-level shared `src/`.
-- Durable rewrite architecture and migration notes live under `docs/`.
+## Bootstrap
+1. Clone the local study repos with `scripts/bootstrap-third-party.sh`.
+2. Install the required .NET workloads:
+   - `dotnet workload install android`
+   - `dotnet workload install ios`
+3. Restore and build:
+   - `dotnet restore OsuDroid.sln`
+   - `dotnet build OsuDroid.sln`

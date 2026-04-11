@@ -1,78 +1,22 @@
 {
-  "schemaVersion": 2,
-  "themeBundle": {
-    "schemaVersion": 1,
-    "id": "osudroid-upstream-pre-game-ui-v1",
-    "name": "osudroid-upstream-pre-game-ui",
-    "manifestPath": "assets/ui/theme-manifest.json",
-    "noticePath": "assets/ui/NOTICE-upstream.txt",
-    "contractPath": "assets/ui/theme-sync-contract.json",
-    "stagingIndexPath": "assets-raw/upstream/theme-staging/source-index.json",
-    "defaultRoute": "LOGIN",
-    "maxContractEntries": 6000,
-    "allowedExtensions": [
-      ".atlas",
-      ".fnt",
-      ".jpg",
-      ".jpeg",
-      ".json",
-      ".mp3",
-      ".ogg",
-      ".png",
-      ".svg",
-      ".txt",
-      ".wav"
-    ],
-    "includeRoots": [
-      {
-        "sourceId": "ppy-osu-resources",
-        "sourcePath": "osu.Game.Resources/Textures",
-        "outputPrefix": "upstream/ppy-osu-resources/textures"
-      },
-      {
-        "sourceId": "ppy-osu-resources",
-        "sourcePath": "osu.Game.Resources/Fonts",
-        "outputPrefix": "upstream/ppy-osu-resources/fonts"
-      },
-      {
-        "sourceId": "ppy-osu-resources",
-        "sourcePath": "osu.Game.Resources/Samples/Menu",
-        "outputPrefix": "upstream/ppy-osu-resources/samples/menu"
-      },
-      {
-        "sourceId": "ppy-osu-resources",
-        "sourcePath": "osu.Game.Resources/Samples/SongSelect",
-        "outputPrefix": "upstream/ppy-osu-resources/samples/song-select"
-      }
-    ]
-  },
-  "sources": [
-    {
-      "id": "ppy-osu",
-      "displayName": "ppy/osu",
-      "repoUrl": "https://github.com/ppy/osu",
-      "defaultPath": "../osu",
-      "pinnedRevision": "6231e06ebe874ff3a0f0524dd204df56e85ed1cf",
-      "license": "MIT (code); branding and embedded resources follow upstream policy",
-      "attribution": "Contains pre-game UI resources, layouts, and visual assets used as upstream reference."
+  "sources": {
+    "osu-framework": {
+      "path": "third_party/osu-framework",
+      "remote": "https://github.com/ppy/osu-framework.git",
+      "branch": "master",
+      "commit": "UNPINNED"
     },
-    {
-      "id": "ppy-osu-resources",
-      "displayName": "ppy/osu-resources",
-      "repoUrl": "https://github.com/ppy/osu-resources",
-      "defaultPath": "../osu-resources",
-      "pinnedRevision": "9c760df5ea3c52db1dd527112e57656d43cbc504",
-      "license": "CC-BY-NC 4.0 and upstream exceptions",
-      "attribution": "Contains shared texture resources consumed by the upstream osu! client."
+    "ppy-osu": {
+      "path": "third_party/ppy-osu",
+      "remote": "https://github.com/ppy/osu.git",
+      "branch": "master",
+      "commit": "UNPINNED"
+    },
+    "osu-droid-legacy": {
+      "path": "third_party/osu-droid-legacy",
+      "remote": "https://github.com/osudroid/osu-droid.git",
+      "branch": "master",
+      "commit": "UNPINNED"
     }
-  ],
-  "brandingPolicy": {
-    "replaceUpstreamMarks": true,
-    "forbiddenMarks": [
-      "osu!",
-      "ppy"
-    ],
-    "replacementBrandName": "osu!droid",
-    "notes": "Do not ship upstream osu!/ppy marks in generated runtime assets. Replace forbidden marks in any exported texture or localized text before release packaging."
   }
 }

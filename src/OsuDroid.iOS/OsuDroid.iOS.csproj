@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-ios</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>OsuDroid.iOS</RootNamespace>
+    <AssemblyName>OsuDroid.iOS</AssemblyName>
+    <SupportedOSPlatformVersion>13.4</SupportedOSPlatformVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OsuDroid.Game\OsuDroid.Game.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Essentials" />
+    <PackageReference Include="ppy.osu.Framework.iOS" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Info.plist" LogicalName="Info.plist" />
+  </ItemGroup>
+</Project>
