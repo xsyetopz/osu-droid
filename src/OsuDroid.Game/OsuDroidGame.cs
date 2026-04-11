@@ -2,7 +2,7 @@ using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using OsuDroid.Game.UI;
+using OsuDroid.Game.UI.Views;
 
 namespace OsuDroid.Game;
 
@@ -34,7 +34,7 @@ public partial class OsuDroidGame : osu.Framework.Game
     [BackgroundDependencyLoader]
     private void load()
     {
-        AddInternal(new Container
+        Add(new Container
         {
             RelativeSizeAxes = Axes.Both,
             Child = new RootView(audioService, sessionService, accountService, beatmapLibraryService, externalUriLauncher)

@@ -7,7 +7,7 @@ using osu.Framework.Input.Events;
 using osuTK;
 using osuTK.Graphics;
 
-namespace OsuDroid.Game.UI;
+namespace OsuDroid.Game.UI.Controls;
 
 public partial class ShearedButton : ClickableContainer
 {

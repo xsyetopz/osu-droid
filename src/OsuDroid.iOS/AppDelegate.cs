@@ -1,5 +1,9 @@
 using Foundation;
 using OsuDroid.Game;
+using OsuDroid.Game.Services.Stubs;
+using OsuDroid.iOS.Platform.Audio;
+using OsuDroid.iOS.Platform.External;
+using OsuDroid.iOS.Platform.Storage;
 using osu.Framework.iOS;
 using UIKit;
 

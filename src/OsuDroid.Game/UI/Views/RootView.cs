@@ -4,8 +4,10 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osuTK;
 using osuTK.Graphics;
+using OsuDroid.Game.UI.Controls;
+using OsuDroid.Game.UI.Navigation;
 
-namespace OsuDroid.Game.UI;
+namespace OsuDroid.Game.UI.Views;
 
 public partial class RootView : CompositeDrawable
 {

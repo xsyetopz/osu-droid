@@ -6,8 +6,9 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osuTK;
 using osuTK.Graphics;
+using OsuDroid.Game.UI.Controls;
 
-namespace OsuDroid.Game.UI;
+namespace OsuDroid.Game.UI.Views;
 
 public partial class MainMenuView : CompositeDrawable
 {

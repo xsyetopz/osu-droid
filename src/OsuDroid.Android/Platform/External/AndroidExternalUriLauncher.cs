@@ -1,16 +1,7 @@
-using System;
-using System.Collections.Generic;
 using Android.Content;
 using OsuDroid.Game;
 
-namespace OsuDroid.Android;
-
-internal sealed class AndroidAudioService : IAudioService
-{
-    public void PlayMenuSample(MenuSample sample)
-    {
-    }
-}
+namespace OsuDroid.Android.Platform.External;
 
 internal sealed class AndroidExternalUriLauncher(Context context) : IExternalUriLauncher
 {
@@ -20,9 +11,4 @@ internal sealed class AndroidExternalUriLauncher(Context context) : IExternalUri
         intent.AddFlags(ActivityFlags.NewTask);
         context.StartActivity(intent);
     }
-}
-
-internal sealed class AndroidPlatformStorage : IPlatformStorage
-{
-    public IReadOnlyList<string> GetSongRoots() => Array.Empty<string>();
 }

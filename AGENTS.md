@@ -11,6 +11,7 @@
 - Keep platform-specific APIs in the mobile heads or thin adapters.
 - Keep shared game code in `src/OsuDroid.Game`.
 - Do not reintroduce libGDX, Gradle, RoboVM, AndEngine, or the old Android app architecture.
+- Follow `.editorconfig` for C# style and [`docs/csharp-guidelines.md`](docs/csharp-guidelines.md) for repo structure.
 
 ## Local Study Sources
 - `third_party/osu-framework`
