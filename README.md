@@ -46,6 +46,29 @@ The Android module relies on the Java extension's experimental Android Gradle im
 
 Do not commit machine-specific Java or Android SDK paths into workspace settings. Keep SDK discovery in `local.properties` and your local shell environment.
 
+## Pre-game UI Lane
+
+The rewrite now includes a shared pre-game shell in `core` for login, main menu, song select, settings, multiplayer, and the gameplay-loader boundary.
+
+UI resources follow a raw-to-runtime pipeline:
+
+- `assets-raw/`: editable source lane for upstream checkouts and local overrides
+- `assets/ui/theme-manifest.json`: runtime theme manifest used by Android, iOS, and desktop
+- `upstream-sources.lock.json`: tracked upstream source contract
+- `scripts/sync-upstream-ui-assets.sh`: sync entrypoint backed by `tools:run --args="sync-ui"`
+
+Expected upstream sibling checkouts:
+
+- `../osu`
+- `../osu-resources`
+
+Shared pre-game data currently uses:
+
+- `OSUDROID_ONLINE_USERNAME` and `OSUDROID_ONLINE_PASSWORD` for environment-backed session restore
+- `OSUDROID_SONGS_PATH` to point song select at an installed local beatmap directory when it is not under the platform storage root
+
+Do not ship upstream `osu!` or `ppy` brand marks directly. Replace them through the local override lane before packaging runtime assets.
+
 ## Notes
 - The rewrite follows the official libGDX module layout rather than a custom root-level shared `src/`.
 - Durable rewrite architecture and migration notes live under `docs/`.

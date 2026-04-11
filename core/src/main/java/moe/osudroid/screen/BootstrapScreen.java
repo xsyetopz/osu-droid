@@ -7,17 +7,21 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+import moe.osudroid.app.OsuDroidGame;
 import moe.osudroid.assets.BootstrapAssets;
 import moe.osudroid.platform.PlatformServices;
 
 public final class BootstrapScreen extends ScreenAdapter {
+    private final OsuDroidGame game;
     private final AssetManager assetManager;
     private final PlatformServices platformServices;
     private final SpriteBatch spriteBatch;
 
     private Texture bootstrapPixel;
+    private boolean switchedToShell;
 
-    public BootstrapScreen(AssetManager assetManager, PlatformServices platformServices) {
+    public BootstrapScreen(OsuDroidGame game, AssetManager assetManager, PlatformServices platformServices) {
+        this.game = game;
         this.assetManager = assetManager;
         this.platformServices = platformServices;
         this.spriteBatch = new SpriteBatch();
@@ -37,6 +41,12 @@ public final class BootstrapScreen extends ScreenAdapter {
         if (bootstrapPixel == null && assetManager.update()) {
             bootstrapPixel = assetManager.get(BootstrapAssets.BOOTSTRAP_PIXEL, Texture.class);
             bootstrapPixel.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
+
+        if (bootstrapPixel != null && !switchedToShell) {
+            switchedToShell = true;
+            game.showAppShell();
+            return;
         }
 
         if (bootstrapPixel == null) {
@@ -61,9 +71,6 @@ public final class BootstrapScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         spriteBatch.dispose();
-        if (assetManager.isLoaded(BootstrapAssets.BOOTSTRAP_PIXEL, Texture.class)) {
-            assetManager.unload(BootstrapAssets.BOOTSTRAP_PIXEL);
-        }
     }
 
     public PlatformServices getPlatformServices() {
