@@ -15,3 +15,6 @@
 - Legacy-style main menu first/second-menu behavior
 - Compatible `osudroid.moe` login request/response path
 - Compatible Room v4 SQLite schema creation
+
+## UI porting
+- Follow [`docs/ui-porting-guidelines.md`](ui-porting-guidelines.md) when translating legacy Android screens to shared MonoGame UI.

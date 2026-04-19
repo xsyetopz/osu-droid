@@ -1,0 +1,743 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="MainMenu_Play"
+          xml:space="preserve">
+        <value>Play</value>
+    </data>
+    <data name="MainMenu_Options"
+          xml:space="preserve">
+        <value>Options</value>
+    </data>
+    <data name="MainMenu_Exit"
+          xml:space="preserve">
+        <value>Exit</value>
+    </data>
+    <data name="MainMenu_Solo"
+          xml:space="preserve">
+        <value>Solo</value>
+    </data>
+    <data name="MainMenu_Multiplayer"
+          xml:space="preserve">
+        <value>Multiplayer</value>
+    </data>
+    <data name="MainMenu_Back"
+          xml:space="preserve">
+        <value>Back</value>
+    </data>
+    <data name="Options_Title"
+          xml:space="preserve">
+        <value>Options</value>
+    </data>
+    <data name="Options_Subtitle"
+          xml:space="preserve">
+        <value>Change osu! settings</value>
+    </data>
+    <data name="Options_Close"
+          xml:space="preserve">
+        <value>×</value>
+    </data>
+    <data name="Options_Unavailable"
+          xml:space="preserve">
+        <value>Unavailable in this build</value>
+    </data>
+    <data name="Options_General"
+          xml:space="preserve">
+        <value>General</value>
+    </data>
+    <data name="Options_Gameplay"
+          xml:space="preserve">
+        <value>Gameplay</value>
+    </data>
+    <data name="Options_Graphics"
+          xml:space="preserve">
+        <value>Graphics</value>
+    </data>
+    <data name="Options_Audio"
+          xml:space="preserve">
+        <value>Audio</value>
+    </data>
+    <data name="Options_Library"
+          xml:space="preserve">
+        <value>Library</value>
+    </data>
+    <data name="Options_Input"
+          xml:space="preserve">
+        <value>Input</value>
+    </data>
+    <data name="Options_Advanced"
+          xml:space="preserve">
+        <value>Advanced</value>
+    </data>
+    <data name="Options_Account"
+          xml:space="preserve">
+        <value>osu!droid account</value>
+    </data>
+    <data name="Options_RegisterAccount"
+          xml:space="preserve">
+        <value>Register account</value>
+    </data>
+    <data name="Options_CheckUpdates"
+          xml:space="preserve">
+        <value>Check for updates</value>
+    </data>
+    <data name="Options_BackupSettings"
+          xml:space="preserve">
+        <value>Backup settings</value>
+    </data>
+    <data name="Options_RestoreSettings"
+          xml:space="preserve">
+        <value>Restore settings</value>
+    </data>
+    <data name="Options_DifficultyAlgorithm"
+          xml:space="preserve">
+        <value>Difficulty algorithm</value>
+    </data>
+    <data name="Options_Language"
+          xml:space="preserve">
+        <value>Language</value>
+    </data>
+    <data name="Options_CategoryOnline"
+          xml:space="preserve">
+        <value>Online</value>
+    </data>
+    <data name="Options_ServerConnectionTitle"
+          xml:space="preserve">
+        <value>Server Connection</value>
+    </data>
+    <data name="Options_ServerConnectionSummary"
+          xml:space="preserve">
+        <value>Connect to osu!droid server</value>
+    </data>
+    <data name="Options_LoadAvatarTitle"
+          xml:space="preserve">
+        <value>Load Avatar</value>
+    </data>
+    <data name="Options_LoadAvatarSummary"
+          xml:space="preserve">
+        <value>Load avatar in online leaderboard</value>
+    </data>
+    <data name="Options_DifficultyAlgorithmTitle"
+          xml:space="preserve">
+        <value>Difficulty algorithm</value>
+    </data>
+    <data name="Options_DifficultyAlgorithmSummary"
+          xml:space="preserve">
+        <value>Choose the algorithm used to calculate difficulty and performance points</value>
+    </data>
+    <data name="Options_CategoryAccount"
+          xml:space="preserve">
+        <value>Account</value>
+    </data>
+    <data name="Options_LoginTitle"
+          xml:space="preserve">
+        <value>Login</value>
+    </data>
+    <data name="Options_LoginSummary"
+          xml:space="preserve">
+        <value>Username for online services</value>
+    </data>
+    <data name="Options_PasswordTitle"
+          xml:space="preserve">
+        <value>Password</value>
+    </data>
+    <data name="Options_PasswordSummary"
+          xml:space="preserve">
+        <value>Password for online services</value>
+    </data>
+    <data name="Options_RegisterTitle"
+          xml:space="preserve">
+        <value>Register account</value>
+    </data>
+    <data name="Options_RegisterSummary"
+          xml:space="preserve">
+        <value>Create an osu!droid account</value>
+    </data>
+    <data name="Options_CategoryCommunity"
+          xml:space="preserve">
+        <value>Community</value>
+    </data>
+    <data name="Options_ReceiveAnnouncementsTitle"
+          xml:space="preserve">
+        <value>Receive announcements</value>
+    </data>
+    <data name="Options_ReceiveAnnouncementsSummary"
+          xml:space="preserve">
+        <value>Receive osu!droid announcements</value>
+    </data>
+    <data name="Options_CategoryUpdates"
+          xml:space="preserve">
+        <value>Updates</value>
+    </data>
+    <data name="Options_UpdateTitle"
+          xml:space="preserve">
+        <value>Check for updates</value>
+    </data>
+    <data name="Options_UpdateSummary"
+          xml:space="preserve">
+        <value>Check for latest osu!droid version</value>
+    </data>
+    <data name="Options_CategoryConfigBackup"
+          xml:space="preserve">
+        <value>Config backup</value>
+    </data>
+    <data name="Options_BackupTitle"
+          xml:space="preserve">
+        <value>Backup settings</value>
+    </data>
+    <data name="Options_BackupSummary"
+          xml:space="preserve">
+        <value>Export current settings</value>
+    </data>
+    <data name="Options_RestoreTitle"
+          xml:space="preserve">
+        <value>Restore settings</value>
+    </data>
+    <data name="Options_RestoreSummary"
+          xml:space="preserve">
+        <value>Import backed up settings</value>
+    </data>
+    <data name="Options_CategoryLocalization"
+          xml:space="preserve">
+        <value>Localization</value>
+    </data>
+    <data name="Options_LanguageTitle"
+          xml:space="preserve">
+        <value>Language</value>
+    </data>
+    <data name="Options_LanguageSummary"
+          xml:space="preserve">
+        <value>Change the language of the game. Requires a restart.</value>
+    </data>
+    <data name="Options_DifficultyAlgorithmValue"
+          xml:space="preserve">
+        <value>Default</value>
+    </data>
+    <data name="Options_LanguageValue"
+          xml:space="preserve">
+        <value>System</value>
+    </data>
+    <data name="Options_CategoryHitObjects"
+          xml:space="preserve">
+        <value>Hit objects</value>
+    </data>
+    <data name="Options_ShowFirstApproachCircleTitle"
+          xml:space="preserve">
+        <value>Show first approach circle</value>
+    </data>
+    <data name="Options_ShowFirstApproachCircleSummary"
+          xml:space="preserve">
+        <value>Show the first approach circle before gameplay starts</value>
+    </data>
+    <data name="Options_CategoryBackground"
+          xml:space="preserve">
+        <value>Background</value>
+    </data>
+    <data name="Options_KeepBackgroundAspectRatioTitle"
+          xml:space="preserve">
+        <value>Keep background aspect ratio</value>
+    </data>
+    <data name="Options_KeepBackgroundAspectRatioSummary"
+          xml:space="preserve">
+        <value>Preserve beatmap background proportions</value>
+    </data>
+    <data name="Options_EnableStoryboardTitle"
+          xml:space="preserve">
+        <value>Enable storyboard</value>
+    </data>
+    <data name="Options_EnableStoryboardSummary"
+          xml:space="preserve">
+        <value>Show beatmap storyboard elements</value>
+    </data>
+    <data name="Options_EnableVideoTitle"
+          xml:space="preserve">
+        <value>Enable video</value>
+    </data>
+    <data name="Options_EnableVideoSummary"
+          xml:space="preserve">
+        <value>Play beatmap background videos</value>
+    </data>
+    <data name="Options_CategoryPlayfield"
+          xml:space="preserve">
+        <value>Playfield</value>
+    </data>
+    <data name="Options_DisplayPlayfieldBorderTitle"
+          xml:space="preserve">
+        <value>Display playfield border</value>
+    </data>
+    <data name="Options_DisplayPlayfieldBorderSummary"
+          xml:space="preserve">
+        <value>Draw the osu!droid playfield boundary</value>
+    </data>
+    <data name="Options_CategoryHud"
+          xml:space="preserve">
+        <value>HUD</value>
+    </data>
+    <data name="Options_HideInGameUiTitle"
+          xml:space="preserve">
+        <value>Hide in-game UI</value>
+    </data>
+    <data name="Options_HideInGameUiSummary"
+          xml:space="preserve">
+        <value>Hide gameplay HUD elements</value>
+    </data>
+    <data name="Options_HideReplayMarqueeTitle"
+          xml:space="preserve">
+        <value>Hide replay marquee</value>
+    </data>
+    <data name="Options_HideReplayMarqueeSummary"
+          xml:space="preserve">
+        <value>Hide scrolling replay text</value>
+    </data>
+    <data name="Options_FpsTitle"
+          xml:space="preserve">
+        <value>FPS counter</value>
+    </data>
+    <data name="Options_FpsSummary"
+          xml:space="preserve">
+        <value>Display frames per second</value>
+    </data>
+    <data name="Options_DisplayScoreStatisticsTitle"
+          xml:space="preserve">
+        <value>Display score statistics</value>
+    </data>
+    <data name="Options_DisplayScoreStatisticsSummary"
+          xml:space="preserve">
+        <value>Show score statistics during gameplay</value>
+    </data>
+    <data name="Options_CategoryComboColors"
+          xml:space="preserve">
+        <value>Combo colors</value>
+    </data>
+    <data name="Options_ComboColorsTitle"
+          xml:space="preserve">
+        <value>Custom combo colors</value>
+    </data>
+    <data name="Options_ComboColorsSummary"
+          xml:space="preserve">
+        <value>Use custom combo colors</value>
+    </data>
+    <data name="Options_CategorySkin"
+          xml:space="preserve">
+        <value>Skin</value>
+    </data>
+    <data name="Options_HudEditorTitle"
+          xml:space="preserve">
+        <value>HUD editor</value>
+    </data>
+    <data name="Options_HudEditorSummary"
+          xml:space="preserve">
+        <value>Adjust gameplay HUD layout</value>
+    </data>
+    <data name="Options_SkinTitle"
+          xml:space="preserve">
+        <value>Use beatmap skin</value>
+    </data>
+    <data name="Options_SkinSummary"
+          xml:space="preserve">
+        <value>Use beatmap-provided skin elements</value>
+    </data>
+    <data name="Options_CategoryCursor"
+          xml:space="preserve">
+        <value>Cursor</value>
+    </data>
+    <data name="Options_ShowCursorTitle"
+          xml:space="preserve">
+        <value>Show cursor</value>
+    </data>
+    <data name="Options_ShowCursorSummary"
+          xml:space="preserve">
+        <value>Show touch cursor during gameplay</value>
+    </data>
+    <data name="Options_ParticlesTitle"
+          xml:space="preserve">
+        <value>Particles</value>
+    </data>
+    <data name="Options_ParticlesSummary"
+          xml:space="preserve">
+        <value>Display cursor particles</value>
+    </data>
+    <data name="Options_CategoryAnimations"
+          xml:space="preserve">
+        <value>Animations</value>
+    </data>
+    <data name="Options_DimHitObjectsTitle"
+          xml:space="preserve">
+        <value>Dim hit objects</value>
+    </data>
+    <data name="Options_DimHitObjectsSummary"
+          xml:space="preserve">
+        <value>Dim hit objects while playing</value>
+    </data>
+    <data name="Options_ComboBurstTitle"
+          xml:space="preserve">
+        <value>Combo burst</value>
+    </data>
+    <data name="Options_ComboBurstSummary"
+          xml:space="preserve">
+        <value>Show combo burst graphics</value>
+    </data>
+    <data name="Options_LargeImagesTitle"
+          xml:space="preserve">
+        <value>Large images</value>
+    </data>
+    <data name="Options_LargeImagesSummary"
+          xml:space="preserve">
+        <value>Use large skin images</value>
+    </data>
+    <data name="Options_AnimateFollowCircleTitle"
+          xml:space="preserve">
+        <value>Animate follow circle</value>
+    </data>
+    <data name="Options_AnimateFollowCircleSummary"
+          xml:space="preserve">
+        <value>Animate slider follow circles</value>
+    </data>
+    <data name="Options_AnimateComboTextTitle"
+          xml:space="preserve">
+        <value>Animate combo text</value>
+    </data>
+    <data name="Options_AnimateComboTextSummary"
+          xml:space="preserve">
+        <value>Animate combo text changes</value>
+    </data>
+    <data name="Options_SnakingInSlidersTitle"
+          xml:space="preserve">
+        <value>Snaking-in sliders</value>
+    </data>
+    <data name="Options_SnakingInSlidersSummary"
+          xml:space="preserve">
+        <value>Animate slider bodies appearing</value>
+    </data>
+    <data name="Options_SnakingOutSlidersTitle"
+          xml:space="preserve">
+        <value>Snaking-out sliders</value>
+    </data>
+    <data name="Options_SnakingOutSlidersSummary"
+          xml:space="preserve">
+        <value>Animate slider bodies disappearing</value>
+    </data>
+    <data name="Options_NoChangeDimInBreaksTitle"
+          xml:space="preserve">
+        <value>Keep dim in breaks</value>
+    </data>
+    <data name="Options_NoChangeDimInBreaksSummary"
+          xml:space="preserve">
+        <value>Do not change background dim during breaks</value>
+    </data>
+    <data name="Options_BurstsTitle"
+          xml:space="preserve">
+        <value>Bursts</value>
+    </data>
+    <data name="Options_BurstsSummary"
+          xml:space="preserve">
+        <value>Show burst effects</value>
+    </data>
+    <data name="Options_HitLightingTitle"
+          xml:space="preserve">
+        <value>Hit lighting</value>
+    </data>
+    <data name="Options_HitLightingSummary"
+          xml:space="preserve">
+        <value>Show hit lighting effects</value>
+    </data>
+    <data name="Options_CategoryVolume"
+          xml:space="preserve">
+        <value>Volume</value>
+    </data>
+    <data name="Options_BgmVolumeTitle"
+          xml:space="preserve">
+        <value>Music volume</value>
+    </data>
+    <data name="Options_BgmVolumeSummary"
+          xml:space="preserve">
+        <value>Adjust music volume</value>
+    </data>
+    <data name="Options_SoundVolumeTitle"
+          xml:space="preserve">
+        <value>Effect volume</value>
+    </data>
+    <data name="Options_SoundVolumeSummary"
+          xml:space="preserve">
+        <value>Adjust sound effect volume</value>
+    </data>
+    <data name="Options_CategoryOffset"
+          xml:space="preserve">
+        <value>Offset</value>
+    </data>
+    <data name="Options_OffsetTitle"
+          xml:space="preserve">
+        <value>Universal offset</value>
+    </data>
+    <data name="Options_OffsetSummary"
+          xml:space="preserve">
+        <value>Adjust global audio offset</value>
+    </data>
+    <data name="Options_OffsetCalibrationTitle"
+          xml:space="preserve">
+        <value>Offset calibration</value>
+    </data>
+    <data name="Options_OffsetCalibrationSummary"
+          xml:space="preserve">
+        <value>Calibrate audio offset</value>
+    </data>
+    <data name="Options_GameAudioSynchronizationThresholdTitle"
+          xml:space="preserve">
+        <value>Audio synchronization threshold</value>
+    </data>
+    <data name="Options_GameAudioSynchronizationThresholdSummary"
+          xml:space="preserve">
+        <value>Adjust audio synchronization tolerance</value>
+    </data>
+    <data name="Options_CategoryEffect"
+          xml:space="preserve">
+        <value>Effect</value>
+    </data>
+    <data name="Options_MetronomeSwitchTitle"
+          xml:space="preserve">
+        <value>Metronome</value>
+    </data>
+    <data name="Options_MetronomeSwitchSummary"
+          xml:space="preserve">
+        <value>Enable metronome sounds</value>
+    </data>
+    <data name="Options_MetronomeSwitchValue"
+          xml:space="preserve">
+        <value>All</value>
+    </data>
+    <data name="Options_ShiftPitchTitle"
+          xml:space="preserve">
+        <value>Shift pitch in rate change</value>
+    </data>
+    <data name="Options_ShiftPitchSummary"
+          xml:space="preserve">
+        <value>Shift audio pitch when playback rate changes</value>
+    </data>
+    <data name="Options_CategoryMiscellaneous"
+          xml:space="preserve">
+        <value>Miscellaneous</value>
+    </data>
+    <data name="Options_BeatmapSoundsTitle"
+          xml:space="preserve">
+        <value>Beatmap sounds</value>
+    </data>
+    <data name="Options_BeatmapSoundsSummary"
+          xml:space="preserve">
+        <value>Play beatmap sound effects</value>
+    </data>
+    <data name="Options_MusicPreviewTitle"
+          xml:space="preserve">
+        <value>Music preview</value>
+    </data>
+    <data name="Options_MusicPreviewSummary"
+          xml:space="preserve">
+        <value>Play music preview in song select</value>
+    </data>
+    <data name="Options_CategoryImport"
+          xml:space="preserve">
+        <value>Import</value>
+    </data>
+    <data name="Options_DeleteOszTitle"
+          xml:space="preserve">
+        <value>Delete OSZ after import</value>
+    </data>
+    <data name="Options_DeleteOszSummary"
+          xml:space="preserve">
+        <value>Remove imported beatmap archives</value>
+    </data>
+    <data name="Options_ScanDownloadTitle"
+          xml:space="preserve">
+        <value>Scan downloads</value>
+    </data>
+    <data name="Options_ScanDownloadSummary"
+          xml:space="preserve">
+        <value>Scan download folder for beatmaps</value>
+    </data>
+    <data name="Options_DeleteUnimportedTitle"
+          xml:space="preserve">
+        <value>Delete unimported beatmaps</value>
+    </data>
+    <data name="Options_DeleteUnimportedSummary"
+          xml:space="preserve">
+        <value>Delete unsupported or failed beatmap imports</value>
+    </data>
+    <data name="Options_DeleteUnsupportedVideosTitle"
+          xml:space="preserve">
+        <value>Delete unsupported videos</value>
+    </data>
+    <data name="Options_DeleteUnsupportedVideosSummary"
+          xml:space="preserve">
+        <value>Remove unsupported video files on import</value>
+    </data>
+    <data name="Options_PreferNoVideoDownloadsTitle"
+          xml:space="preserve">
+        <value>Prefer no-video downloads</value>
+    </data>
+    <data name="Options_PreferNoVideoDownloadsSummary"
+          xml:space="preserve">
+        <value>Prefer downloads without video assets</value>
+    </data>
+    <data name="Options_ImportReplayTitle"
+          xml:space="preserve">
+        <value>Import replay</value>
+    </data>
+    <data name="Options_ImportReplaySummary"
+          xml:space="preserve">
+        <value>Import osu!droid replay files</value>
+    </data>
+    <data name="Options_CategoryMetadata"
+          xml:space="preserve">
+        <value>Metadata</value>
+    </data>
+    <data name="Options_ForceRomanizedTitle"
+          xml:space="preserve">
+        <value>Force romanized metadata</value>
+    </data>
+    <data name="Options_ForceRomanizedSummary"
+          xml:space="preserve">
+        <value>Prefer romanized artist and title metadata</value>
+    </data>
+    <data name="Options_CategoryStorage"
+          xml:space="preserve">
+        <value>Storage</value>
+    </data>
+    <data name="Options_ClearBeatmapCacheTitle"
+          xml:space="preserve">
+        <value>Clear beatmap cache</value>
+    </data>
+    <data name="Options_ClearBeatmapCacheSummary"
+          xml:space="preserve">
+        <value>Clear generated beatmap cache data</value>
+    </data>
+    <data name="Options_ClearPropertiesTitle"
+          xml:space="preserve">
+        <value>Clear properties</value>
+    </data>
+    <data name="Options_ClearPropertiesSummary"
+          xml:space="preserve">
+        <value>Clear cached beatmap properties</value>
+    </data>
+    <data name="Options_CategoryGameplay"
+          xml:space="preserve">
+        <value>Gameplay</value>
+    </data>
+    <data name="Options_BlockAreasTitle"
+          xml:space="preserve">
+        <value>Blocked areas</value>
+    </data>
+    <data name="Options_BlockAreasSummary"
+          xml:space="preserve">
+        <value>Configure touch areas blocked during gameplay</value>
+    </data>
+    <data name="Options_HighPrecisionInputTitle"
+          xml:space="preserve">
+        <value>High precision input</value>
+    </data>
+    <data name="Options_HighPrecisionInputSummary"
+          xml:space="preserve">
+        <value>Use high precision touch input</value>
+    </data>
+    <data name="Options_RemoveSliderLockTitle"
+          xml:space="preserve">
+        <value>Remove slider/spinner lock</value>
+    </data>
+    <data name="Options_RemoveSliderLockSummary"
+          xml:space="preserve">
+        <value>Disable slider lock and spinner lock</value>
+    </data>
+    <data name="Options_CategoryVibration"
+          xml:space="preserve">
+        <value>Vibration</value>
+    </data>
+    <data name="Options_VibrationCircleTitle"
+          xml:space="preserve">
+        <value>Circle</value>
+    </data>
+    <data name="Options_VibrationSliderTitle"
+          xml:space="preserve">
+        <value>Slider</value>
+    </data>
+    <data name="Options_VibrationSpinnerTitle"
+          xml:space="preserve">
+        <value>Spinner</value>
+    </data>
+    <data name="Options_VibrationSummary"
+          xml:space="preserve">
+        <value>Vibrate on object interaction</value>
+    </data>
+    <data name="Options_CategorySynchronization"
+          xml:space="preserve">
+        <value>Synchronization</value>
+    </data>
+    <data name="Options_FixFrameOffsetTitle"
+          xml:space="preserve">
+        <value>Fix frame offset</value>
+    </data>
+    <data name="Options_FixFrameOffsetSummary"
+          xml:space="preserve">
+        <value>Synchronize input with frame timing</value>
+    </data>
+    <data name="Options_CategoryDirectories"
+          xml:space="preserve">
+        <value>Directories</value>
+    </data>
+    <data name="Options_SongDirectoryTitle"
+          xml:space="preserve">
+        <value>Songs directory</value>
+    </data>
+    <data name="Options_ForceMaxRefreshRateTitle"
+          xml:space="preserve">
+        <value>Force maximum refresh rate</value>
+    </data>
+    <data name="Options_ForceMaxRefreshRateSummary"
+          xml:space="preserve">
+        <value>Request the highest display refresh rate</value>
+    </data>
+    <data name="Options_SafeBeatmapBgTitle"
+          xml:space="preserve">
+        <value>Safe beatmap background</value>
+    </data>
+    <data name="Options_SafeBeatmapBgSummary"
+          xml:space="preserve">
+        <value>Use safer beatmap background handling</value>
+    </data>
+    <data name="Options_CorePathTitle"
+          xml:space="preserve">
+        <value>Core path</value>
+    </data>
+    <data name="Options_CorePathSummary"
+          xml:space="preserve">
+        <value>Path to the osu!droid data directory</value>
+    </data>
+    <data name="Options_SkinTopPathTitle"
+          xml:space="preserve">
+        <value>Skin top path</value>
+    </data>
+    <data name="Options_SkinTopPathSummary"
+          xml:space="preserve">
+        <value>Path used for top-level skin lookup</value>
+    </data>
+    <data name="Options_DirectoryTitle"
+          xml:space="preserve">
+        <value>Songs directory</value>
+    </data>
+    <data name="Options_DirectorySummary"
+          xml:space="preserve">
+        <value>Path to imported beatmaps</value>
+    </data>
+    <data name="Options_DirectoryValue"
+          xml:space="preserve">
+        <value>/sdcard/osu!droid/Songs</value>
+    </data>
+</root>

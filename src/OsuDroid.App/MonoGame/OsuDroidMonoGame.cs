@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
+using Microsoft.Maui.ApplicationModel;
 using OsuDroid.App.MonoGame.Rendering;
 using OsuDroid.Game;
 using OsuDroid.Game.UI;
@@ -23,8 +24,14 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
     private SpriteBatch? spriteBatch;
     private UiFrameSnapshot? frame;
     private string? lastRenderBoundsLog;
+    private const float TouchDragThreshold = 10f;
+
     private readonly bool showRenderDiagnostics = IsRenderDiagnosticsEnabled();
     private string? platformDisplayLog;
+    private int? activeTouchId;
+    private UiPoint touchStart;
+    private UiPoint previousTouch;
+    private bool isTouchDragging;
 
     public OsuDroidMonoGame(OsuDroidGameCore core)
     {
@@ -64,6 +71,7 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         core.Update(gameTime.ElapsedGameTime);
         frame = CreateCurrentFrame();
         RouteTouch(frame);
+        OpenPendingExternalUrl();
         base.Update(gameTime);
     }
 
@@ -74,7 +82,7 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
 
         if (spriteBatch is not null && renderer is not null)
         {
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.LinearClamp);
             renderer.Draw(spriteBatch, frame);
 
             if (showRenderDiagnostics)
@@ -165,6 +173,15 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         Console.WriteLine(message);
     }
 
+    private void OpenPendingExternalUrl()
+    {
+        var pendingUrl = core.ConsumePendingExternalUrl();
+        if (pendingUrl is null)
+            return;
+
+        _ = Launcher.OpenAsync(pendingUrl);
+    }
+
     private static bool IsRenderDiagnosticsEnabled()
     {
 #if DEBUG
@@ -183,19 +200,48 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
     {
         foreach (var touch in TouchPanel.GetState())
         {
-            if (touch.State != TouchLocationState.Released)
+            var virtualPoint = currentFrame.Viewport.ToVirtual(touch.Position.X, touch.Position.Y);
+            if (touch.State == TouchLocationState.Pressed)
+            {
+                activeTouchId = touch.Id;
+                touchStart = virtualPoint;
+                previousTouch = virtualPoint;
+                isTouchDragging = false;
+                continue;
+            }
+
+            if (activeTouchId != touch.Id)
                 continue;
 
-            var virtualPoint = currentFrame.Viewport.ToVirtual(touch.Position.X, touch.Position.Y);
+            if (touch.State == TouchLocationState.Moved)
+            {
+                var movedX = virtualPoint.X - touchStart.X;
+                var movedY = virtualPoint.Y - touchStart.Y;
+                if (!isTouchDragging && MathF.Sqrt(movedX * movedX + movedY * movedY) > TouchDragThreshold)
+                    isTouchDragging = true;
+
+                if (isTouchDragging)
+                    core.ScrollActiveScene(previousTouch.Y - virtualPoint.Y, touchStart, currentFrame.Viewport);
+
+                previousTouch = virtualPoint;
+                continue;
+            }
+
+            if (touch.State is not (TouchLocationState.Released or TouchLocationState.Invalid))
+                continue;
+
+            activeTouchId = null;
+            if (isTouchDragging)
+            {
+                isTouchDragging = false;
+                continue;
+            }
+
             var element = currentFrame.HitTest(virtualPoint);
             if (element is null || element.Action == UiAction.None)
                 continue;
 
-            if (element.Action == UiAction.MainMenuCookie)
-                core.TapMainMenuCookie();
-            else
-                core.TapMainMenu(UiActionRouter.ToMainMenuSlot(element.Action));
-
+            core.HandleUiAction(element.Action, currentFrame.Viewport);
             break;
         }
     }

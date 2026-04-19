@@ -1,5 +1,6 @@
 #if ANDROID || IOS
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Hosting;
 using OsuDroid.App.Platform;
 using OsuDroid.Game;
@@ -17,10 +18,11 @@ public static class MauiProgram
             .AddSingleton(static services => OsuDroidGameCore.Create(
                 services.GetRequiredService<IPlatformPaths>().CorePath,
 #if DEBUG
-                "debug"
+                "debug",
 #else
-                "release"
+                "release",
 #endif
+                AppInfo.Current.VersionString
             ));
 
         return builder.Build();

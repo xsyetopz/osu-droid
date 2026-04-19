@@ -49,21 +49,13 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(BuildMobile)' == 'true'">
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\gfx\menu-background.png" LogicalName="legacy/gfx/menu-background.png" />
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\gfx\emptyavatar.png" LogicalName="legacy/gfx/emptyavatar.png" />
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\beatmap_downloader.png" LogicalName="legacy/beatmap_downloader.png" />
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\logo.png" LogicalName="legacy/logo.png" />
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\play.png" LogicalName="legacy/play.png" />
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\solo.png" LogicalName="legacy/solo.png" />
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\options.png" LogicalName="legacy/options.png" />
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\multi.png" LogicalName="legacy/multi.png" />
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\exit.png" LogicalName="legacy/exit.png" />
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\back.png" LogicalName="legacy/back.png" />
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\music_prev.png" LogicalName="legacy/music_prev.png" />
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\music_play.png" LogicalName="legacy/music_play.png" />
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\music_pause.png" LogicalName="legacy/music_pause.png" />
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\music_stop.png" LogicalName="legacy/music_stop.png" />
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\music_next.png" LogicalName="legacy/music_next.png" />
-    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\music_np.png" LogicalName="legacy/music_np.png" />
+    <MauiAsset Include="Resources\Raw\assets\droid\**\*.png" LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
+    <MauiAsset Include="Resources\Raw\assets\droid\**\*.jpg" LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
+    <MauiAsset Include="Resources\Raw\assets\droid\**\*.jpeg" LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Material.Icons" />
+    <PackageReference Include="SkiaSharp" />
   </ItemGroup>
 </Project>
