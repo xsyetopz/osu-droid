@@ -1,43 +1,5 @@
 namespace OsuDroid.Game.UI;
 
-public enum UiAssetProvenance
-{
-    OsuDroid,
-    OfficialOsu,
-    PortLocal,
-}
-
-public enum UiAssetKind
-{
-    Texture,
-    Sound,
-    Font,
-}
-
-public sealed record UiAssetEntry(
-    string LogicalName,
-    string PackagePath,
-    UiAssetKind Kind,
-    UiAssetProvenance Provenance,
-    UiSize NativeSize);
-
-public sealed class UiAssetManifest
-{
-    private readonly Dictionary<string, UiAssetEntry> entriesByName;
-
-    public UiAssetManifest(IEnumerable<UiAssetEntry> entries)
-    {
-        ArgumentNullException.ThrowIfNull(entries);
-        entriesByName = entries.ToDictionary(static entry => entry.LogicalName, StringComparer.Ordinal);
-    }
-
-    public IReadOnlyCollection<UiAssetEntry> Entries => entriesByName.Values;
-
-    public UiAssetEntry Get(string logicalName) => entriesByName[logicalName];
-
-    public bool Contains(string logicalName) => entriesByName.ContainsKey(logicalName);
-}
-
 public static class DroidAssets
 {
     public const string MenuBackground = "menu-background";

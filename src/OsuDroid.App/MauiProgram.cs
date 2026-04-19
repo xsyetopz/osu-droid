@@ -16,7 +16,7 @@ public static class MauiProgram
             .UseMauiApp<App>()
             .Services.AddSingleton<IPlatformPaths, MauiPlatformPaths>()
             .AddSingleton(static services => OsuDroidGameCore.Create(
-                services.GetRequiredService<IPlatformPaths>().CorePath,
+                services.GetRequiredService<IPlatformPaths>().Roots,
 #if DEBUG
                 "debug",
 #else

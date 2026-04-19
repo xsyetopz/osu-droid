@@ -1,6 +1,7 @@
 using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Localization;
 using OsuDroid.Game.Runtime;
+using OsuDroid.Game.Runtime.Paths;
 using OsuDroid.Game.Scenes;
 using OsuDroid.Game.UI;
 
@@ -35,12 +36,16 @@ public sealed class OsuDroidGameCore
 
     public MenuMusicCommand LastMusicCommand => musicController.LastCommand;
 
-    public static OsuDroidGameCore Create(string corePath, string buildType, string displayVersion = "1.0")
+    public static OsuDroidGameCore Create(string corePath, string buildType, string displayVersion = "1.0") =>
+        Create(DroidPathRoots.FromCoreRoot(corePath), buildType, displayVersion);
+
+    public static OsuDroidGameCore Create(DroidPathRoots pathRoots, string buildType, string displayVersion = "1.0")
     {
-        var databasePath = DroidDatabaseConstants.GetDatabasePath(corePath, buildType);
-        var database = new DroidDatabase(databasePath);
+        var pathLayout = new DroidGamePathLayout(pathRoots);
+        pathLayout.EnsureDirectories();
+        var database = new DroidDatabase(pathLayout.GetDatabasePath(buildType));
         database.EnsureCreated();
-        return new OsuDroidGameCore(new GameServices(database, corePath, buildType, displayVersion));
+        return new OsuDroidGameCore(new GameServices(database, pathLayout, buildType, displayVersion));
     }
 
     public GameFrameSnapshot CurrentFrame => CreateFrame(VirtualViewport.LegacyLandscape);
@@ -52,15 +57,57 @@ public sealed class OsuDroidGameCore
         _ => throw new InvalidOperationException($"Unknown scene: {activeScene}"),
     };
 
+    public IReadOnlyList<UiFrameSnapshot> CreateWarmupFrames(VirtualViewport viewport)
+    {
+        var frames = new List<UiFrameSnapshot>(OptionsScene.AllSections.Count + 2)
+        {
+            mainMenu.CreateSnapshot(viewport).UiFrame,
+            mainMenu.CreateAboutDialogSnapshot(viewport).UiFrame,
+        };
+
+        foreach (var section in OptionsScene.AllSections)
+            frames.Add(options.CreateSnapshotForSection(section, viewport).UiFrame);
+
+        return frames;
+    }
+
     public void Update(TimeSpan elapsed)
     {
-        if (activeScene == ActiveScene.MainMenu)
-            mainMenu.Update(elapsed);
+        if (activeScene != ActiveScene.MainMenu)
+            return;
+
+        mainMenu.Update(elapsed);
+        var pendingRoute = mainMenu.ConsumePendingRoute();
+        if (pendingRoute == MainMenuRoute.None)
+            return;
+
+        LastRoute = pendingRoute;
+        ApplyRoute(pendingRoute);
     }
 
     public void TapMainMenuCookie() => mainMenu.ToggleCookie();
 
-    public void BackToMainMenu() => activeScene = ActiveScene.MainMenu;
+    public void BackToMainMenu() => BackToMainMenu(MainMenuReturnTransition.None);
+
+    public void BackToMainMenu(MainMenuReturnTransition transition)
+    {
+        activeScene = ActiveScene.MainMenu;
+
+        if (transition == MainMenuReturnTransition.SongSelectBack)
+            mainMenu.StartReturnTransition();
+    }
+
+    public void PressUiAction(UiAction action)
+    {
+        if (activeScene == ActiveScene.MainMenu)
+            mainMenu.Press(action);
+    }
+
+    public void ReleaseUiAction()
+    {
+        if (activeScene == ActiveScene.MainMenu)
+            mainMenu.ReleasePress();
+    }
 
     public void ScrollActiveScene(float deltaY, UiPoint point, VirtualViewport viewport)
     {
@@ -133,6 +180,9 @@ public sealed class OsuDroidGameCore
 
             case UiAction.MainMenuAboutDiscord:
                 PendingExternalUrl = "https://discord.gg/nyD92cE";
+                break;
+
+            case UiAction.MainMenuBeatmapDownloader:
                 break;
 
             case UiAction.MainMenuMusicPrevious:

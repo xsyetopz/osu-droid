@@ -1,4 +1,5 @@
 using OsuDroid.Game.Compatibility.Database;
+using OsuDroid.Game.Runtime.Paths;
 
 namespace OsuDroid.Game.Runtime;
 
@@ -18,8 +19,11 @@ public sealed record MenuNowPlayingState(string? ArtistTitle = null, bool IsPlay
 
 public sealed record GameServices(
     DroidDatabase Database,
-    string CorePath,
+    DroidGamePathLayout Paths,
     string BuildType,
     string DisplayVersion = "1.0",
     IMenuMusicController? MusicController = null,
-    MenuNowPlayingState? NowPlaying = null);
+    MenuNowPlayingState? NowPlaying = null)
+{
+    public string CorePath => Paths.CoreRoot;
+}

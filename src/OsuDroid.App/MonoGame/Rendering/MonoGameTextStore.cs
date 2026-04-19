@@ -19,13 +19,14 @@ internal sealed class MonoGameTextStore(GraphicsDevice graphicsDevice)
 {
     private readonly Dictionary<TextKey, Texture2D> textures = new();
 
-    public Texture2D GetTexture(string text, UiTextStyle style, UiColor color, float alpha, float renderScale)
+    public Texture2D GetTexture(string text, UiTextStyle style, UiColor color, float alpha, float renderScale, RenderCacheMetrics? metrics = null)
     {
         var scaledSize = Math.Max(1f, style.Size * renderScale);
         var key = new TextKey(text, scaledSize, style.Bold, color.Red, color.Green, color.Blue, (byte)Math.Clamp((int)MathF.Round(color.Alpha * alpha), 0, 255));
         if (textures.TryGetValue(key, out var texture))
             return texture;
 
+        metrics?.AddTextMiss();
         texture = CreateTexture(key);
         textures.Add(key, texture);
         return texture;

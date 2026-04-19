@@ -1,6 +1,7 @@
 using Foundation;
 using OsuDroid.App.MonoGame;
 using OsuDroid.Game;
+using OsuDroid.Game.Runtime.Paths;
 using UIKit;
 
 namespace OsuDroid.App;
@@ -13,7 +14,7 @@ public sealed class AppDelegate : UIApplicationDelegate
     public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
     {
         application.IdleTimerDisabled = true;
-        game = new OsuDroidMonoGame(OsuDroidGameCore.Create(GetCorePath(), BuildType));
+        game = new OsuDroidMonoGame(OsuDroidGameCore.Create(GetPathRoots(), BuildType));
         game.Run();
         return true;
     }
@@ -40,11 +41,10 @@ public sealed class AppDelegate : UIApplicationDelegate
         }
     }
 
-    private static string GetCorePath()
+    private static DroidPathRoots GetPathRoots()
     {
         var libraryPath = NSSearchPath.GetDirectories(NSSearchPathDirectory.LibraryDirectory, NSSearchPathDomain.User)[0];
-        var corePath = Path.Combine(libraryPath, "osu-droid");
-        Directory.CreateDirectory(corePath);
-        return corePath;
+        var cachePath = NSSearchPath.GetDirectories(NSSearchPathDirectory.CachesDirectory, NSSearchPathDomain.User)[0];
+        return new DroidPathRoots(Path.Combine(libraryPath, "osu-droid"), cachePath);
     }
 }

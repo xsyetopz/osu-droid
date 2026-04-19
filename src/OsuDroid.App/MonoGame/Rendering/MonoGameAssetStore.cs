@@ -10,11 +10,12 @@ internal sealed class MonoGameAssetStore(GraphicsDevice graphicsDevice)
 {
     private readonly Dictionary<string, Texture2D> textures = new(StringComparer.Ordinal);
 
-    public Texture2D? GetTexture(UiAssetManifest manifest, string logicalName)
+    public Texture2D? GetTexture(UiAssetManifest manifest, string logicalName, RenderCacheMetrics? metrics = null)
     {
         if (textures.TryGetValue(logicalName, out var cachedTexture))
             return cachedTexture;
 
+        metrics?.AddSpriteMiss();
         var entry = manifest.Get(logicalName);
         using var stream = OpenAssetStream(entry.PackagePath);
         var texture = Texture2D.FromStream(graphicsDevice, stream);

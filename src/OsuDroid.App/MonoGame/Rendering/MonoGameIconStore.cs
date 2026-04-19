@@ -11,7 +11,7 @@ internal sealed class MonoGameIconStore(GraphicsDevice graphicsDevice) : IDispos
 {
     private readonly Dictionary<IconCacheKey, Texture2D> cache = new();
 
-    public Texture2D GetIcon(UiMaterialIcon icon, int width, int height, UiColor color, float alpha)
+    public Texture2D GetIcon(UiMaterialIcon icon, int width, int height, UiColor color, float alpha, RenderCacheMetrics? metrics = null)
     {
         width = Math.Max(1, width);
         height = Math.Max(1, height);
@@ -19,6 +19,7 @@ internal sealed class MonoGameIconStore(GraphicsDevice graphicsDevice) : IDispos
         if (cache.TryGetValue(key, out var texture))
             return texture;
 
+        metrics?.AddIconMiss();
         texture = CreateIconTexture(icon, width, height, color, alpha);
         cache[key] = texture;
         return texture;

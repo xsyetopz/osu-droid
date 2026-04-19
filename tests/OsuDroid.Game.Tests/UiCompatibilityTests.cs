@@ -1,5 +1,6 @@
 using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Runtime;
+using OsuDroid.Game.Runtime.Paths;
 using OsuDroid.Game.Scenes;
 using OsuDroid.Game.UI;
 
@@ -162,8 +163,10 @@ public sealed class UiCompatibilityTests
 
         var menuIndex = elements.FindIndex(element => element.Id == "menu-1");
         var logoIndex = elements.FindIndex(element => element.Id == "logo");
+        var overlayIndex = elements.FindIndex(element => element.Id == "logo-glow");
 
         Assert.That(menuIndex, Is.LessThan(logoIndex));
+        Assert.That(logoIndex, Is.LessThan(overlayIndex));
     }
 
 
@@ -341,6 +344,195 @@ public sealed class UiCompatibilityTests
         Assert.That(bottom.Alpha, Is.EqualTo(0.9f));
     }
 
+    [Test]
+    public void MainMenuCookieUsesAndroidHeartbeatBeat()
+    {
+        var scene = new MainMenuScene();
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+        var baseFrame = scene.CreateSnapshot(viewport).UiFrame;
+        var baseLogo = baseFrame.Elements.Single(element => element.Id == "logo");
+        var baseOverlay = baseFrame.Elements.Single(element => element.Id == "logo-glow");
+
+        scene.Update(TimeSpan.FromMilliseconds(MainMenuScene.LogoBeatMilliseconds - 1d));
+        var beforeBeat = scene.CreateSnapshot(viewport).UiFrame.Elements.Single(element => element.Id == "logo");
+
+        scene.Update(TimeSpan.FromMilliseconds(1d));
+        scene.Update(TimeSpan.FromMilliseconds(450d));
+        var heartbeatFrame = scene.CreateSnapshot(viewport).UiFrame;
+        var heartbeat = heartbeatFrame.Elements.Single(element => element.Id == "logo");
+        var heartbeatOverlay = heartbeatFrame.Elements.Single(element => element.Id == "logo-glow");
+
+        AssertRectClose(beforeBeat.Bounds, baseLogo.Bounds);
+        Assert.That(heartbeat.Bounds.Width, Is.GreaterThan(baseLogo.Bounds.Width * 1.03f));
+        Assert.That(heartbeat.Bounds.Width, Is.LessThanOrEqualTo(baseLogo.Bounds.Width * 1.07f + 0.01f));
+        AssertRectClose(heartbeatOverlay.Bounds, baseOverlay.Bounds);
+        Assert.That(heartbeatOverlay.Alpha, Is.EqualTo(0.2f));
+    }
+
+    [Test]
+    public void MainMenuCollapseUsesAndroidFadeAndLeftDrift()
+    {
+        var scene = new MainMenuScene();
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+        var expanded = ExpandedFrame(scene, viewport).Elements.Single(element => element.Id == "menu-0");
+
+        scene.ToggleCookie();
+        scene.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuCollapseDurationMilliseconds / 2d));
+        var collapsing = scene.CreateSnapshot(viewport).UiFrame.Elements.Single(element => element.Id == "menu-0");
+
+        Assert.That(collapsing.Alpha, Is.LessThan(0.1f));
+        Assert.That(collapsing.Bounds.X, Is.LessThan(expanded.Bounds.X));
+    }
+
+    [Test]
+    public void MainMenuPressTintMatchesAndroidButtonColor()
+    {
+        var scene = new MainMenuScene();
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+        _ = ExpandedFrame(scene, viewport);
+
+        scene.Press(UiAction.MainMenuFirst);
+        var pressed = scene.CreateSnapshot(viewport).UiFrame.Elements.Single(element => element.Id == "menu-0");
+
+        scene.ReleasePress();
+        var released = scene.CreateSnapshot(viewport).UiFrame.Elements.Single(element => element.Id == "menu-0");
+
+        Assert.That(pressed.Color.Red, Is.InRange(178, 179));
+        Assert.That(pressed.Color.Green, Is.InRange(178, 179));
+        Assert.That(pressed.Color.Blue, Is.InRange(178, 179));
+        Assert.That(released.Color, Is.EqualTo(UiColor.Opaque(255, 255, 255)));
+    }
+
+    [Test]
+    public void MainMenuCookiePressDoesNotTint()
+    {
+        var scene = new MainMenuScene();
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+
+        scene.Press(UiAction.MainMenuCookie);
+        var logo = scene.CreateSnapshot(viewport).UiFrame.Elements.Single(element => element.Id == "logo");
+
+        Assert.That(logo.Color, Is.EqualTo(UiColor.Opaque(255, 255, 255)));
+    }
+
+    [Test]
+    public void MainMenuDownloaderTabUsesAndroidPressTint()
+    {
+        var scene = new MainMenuScene();
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+
+        scene.Press(UiAction.MainMenuBeatmapDownloader);
+        var tab = scene.CreateSnapshot(viewport).UiFrame.Elements.Single(element => element.Id == "beatmap-downloader");
+
+        Assert.That(tab.Action, Is.EqualTo(UiAction.MainMenuBeatmapDownloader));
+        Assert.That(tab.Color.Red, Is.InRange(178, 179));
+        Assert.That(tab.Color.Green, Is.InRange(178, 179));
+        Assert.That(tab.Color.Blue, Is.InRange(178, 179));
+    }
+
+    [Test]
+    public void MainMenuExitUsesAndroidFadeOutBeforeRoute()
+    {
+        var scene = new MainMenuScene();
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+        var expanded = ExpandedFrame(scene, viewport).Elements.Single(element => element.Id == "logo");
+
+        Assert.That(scene.Tap(MainMenuButtonSlot.Third), Is.EqualTo(MainMenuRoute.None));
+        Assert.That(scene.IsExitAnimating, Is.True);
+        Assert.That(scene.ConsumePendingRoute(), Is.EqualTo(MainMenuRoute.None));
+
+        scene.Update(TimeSpan.FromMilliseconds(MainMenuScene.ExitAnimationMilliseconds / 2d));
+        var midway = scene.CreateSnapshot(viewport).UiFrame;
+        var logo = midway.Elements.Single(element => element.Id == "logo");
+        var overlay = midway.Elements.Single(element => element.Id == "logo-glow");
+        var blackout = midway.Elements.Single(element => element.Id == "exit-blackout");
+
+        Assert.That(midway.Elements.Any(element => element.Id == "menu-0"), Is.False);
+        Assert.That(blackout.Alpha, Is.EqualTo(0.5f).Within(0.001f));
+        Assert.That(logo.RotationDegrees, Is.EqualTo(-7.5f).Within(0.001f));
+        Assert.That(overlay.RotationDegrees, Is.EqualTo(-7.5f).Within(0.001f));
+        Assert.That(logo.Bounds.Width, Is.LessThan(expanded.Bounds.Width));
+        Assert.That(scene.ConsumePendingRoute(), Is.EqualTo(MainMenuRoute.None));
+
+        scene.Update(TimeSpan.FromMilliseconds(MainMenuScene.ExitAnimationMilliseconds / 2d));
+
+        Assert.That(scene.ConsumePendingRoute(), Is.EqualTo(MainMenuRoute.Exit));
+        Assert.That(scene.ConsumePendingRoute(), Is.EqualTo(MainMenuRoute.None));
+    }
+
+    [Test]
+    public void GameCorePublishesExitRouteAfterMainMenuExitAnimation()
+    {
+        var database = new DroidDatabase(Path.Combine(TestContext.CurrentContext.WorkDirectory, $"main-menu-exit-{Guid.NewGuid():N}.db"));
+        database.EnsureCreated();
+        var core = new OsuDroidGameCore(new GameServices(database, new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(TestContext.CurrentContext.WorkDirectory)), "test", "1.0"));
+
+        core.HandleUiAction(UiAction.MainMenuCookie);
+        core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
+        core.HandleUiAction(UiAction.MainMenuThird);
+
+        Assert.That(core.LastRoute, Is.EqualTo(MainMenuRoute.None));
+
+        core.Update(TimeSpan.FromMilliseconds(MainMenuScene.ExitAnimationMilliseconds));
+
+        Assert.That(core.LastRoute, Is.EqualTo(MainMenuRoute.Exit));
+    }
+
+    [Test]
+    public void MainMenuReturnTransitionFadesPreviousBackgroundLikeAndroidSongMenuBack()
+    {
+        var scene = new MainMenuScene();
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+
+        scene.StartReturnTransition();
+        var start = scene.CreateSnapshot(viewport).UiFrame;
+        var startFade = start.Elements.Single(element => element.Id == "return-background-fade");
+
+        scene.Update(TimeSpan.FromMilliseconds(MainMenuScene.ReturnBackgroundFadeDurationMilliseconds / 2d));
+        var midway = scene.CreateSnapshot(viewport).UiFrame;
+        var midwayFade = midway.Elements.Single(element => element.Id == "return-background-fade");
+
+        scene.Update(TimeSpan.FromMilliseconds(MainMenuScene.ReturnBackgroundFadeDurationMilliseconds / 2d));
+        var finished = scene.CreateSnapshot(viewport).UiFrame;
+
+        Assert.That(startFade.Alpha, Is.EqualTo(1f));
+        Assert.That(midwayFade.Alpha, Is.EqualTo(0.5f).Within(0.001f));
+        Assert.That(finished.Elements.Any(element => element.Id == "return-background-fade"), Is.False);
+        Assert.That(scene.IsReturnTransitionActive, Is.False);
+    }
+
+    [Test]
+    public void MainMenuReturnTransitionDrawsBetweenBackgroundAndSceneShell()
+    {
+        var scene = new MainMenuScene();
+        scene.StartReturnTransition();
+        var elements = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame.Elements.ToList();
+
+        var backgroundIndex = elements.FindIndex(element => element.Id == "menu-background");
+        var fadeIndex = elements.FindIndex(element => element.Id == "return-background-fade");
+        var logoIndex = elements.FindIndex(element => element.Id == "logo");
+        var profileIndex = elements.FindIndex(element => element.Id == "profile-panel");
+
+        Assert.That(fadeIndex, Is.GreaterThan(backgroundIndex));
+        Assert.That(fadeIndex, Is.LessThan(logoIndex));
+        Assert.That(fadeIndex, Is.LessThan(profileIndex));
+    }
+
+    [Test]
+    public void GameCoreCanStartSongSelectBackReturnTransition()
+    {
+        var database = new DroidDatabase(Path.Combine(TestContext.CurrentContext.WorkDirectory, $"main-menu-return-{Guid.NewGuid():N}.db"));
+        database.EnsureCreated();
+        var core = new OsuDroidGameCore(new GameServices(database, new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(TestContext.CurrentContext.WorkDirectory)), "test", "1.0"));
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+
+        core.BackToMainMenu();
+        Assert.That(core.CreateFrame(viewport).UiFrame.Elements.Any(element => element.Id == "return-background-fade"), Is.False);
+
+        core.BackToMainMenu(MainMenuReturnTransition.SongSelectBack);
+        Assert.That(core.CreateFrame(viewport).UiFrame.Elements.Any(element => element.Id == "return-background-fade"), Is.True);
+    }
+
 
     private static void AssertRectClose(UiRect actual, UiRect expected)
     {
@@ -390,7 +582,7 @@ public sealed class UiCompatibilityTests
         var database = new DroidDatabase(Path.Combine(TestContext.CurrentContext.WorkDirectory, $"main-menu-{Guid.NewGuid():N}.db"));
         database.EnsureCreated();
         var musicController = new NoOpMenuMusicController();
-        var core = new OsuDroidGameCore(new GameServices(database, TestContext.CurrentContext.WorkDirectory, "test", "1.2.3", musicController));
+        var core = new OsuDroidGameCore(new GameServices(database, new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(TestContext.CurrentContext.WorkDirectory)), "test", "1.2.3", musicController));
 
         core.HandleUiAction(UiAction.MainMenuMusicNext);
         Assert.That(core.LastMusicCommand, Is.EqualTo(MenuMusicCommand.Next));

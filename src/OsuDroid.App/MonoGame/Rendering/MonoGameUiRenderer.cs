@@ -7,7 +7,7 @@ using XnaRect = Microsoft.Xna.Framework.Rectangle;
 
 namespace OsuDroid.App.MonoGame.Rendering;
 
-internal sealed class MonoGameUiRenderer(GraphicsDevice graphicsDevice)
+internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice)
 {
     private const int DiagnosticsBorderThickness = 6;
     private const int DiagnosticsMarkerSize = 36;
@@ -18,23 +18,18 @@ internal sealed class MonoGameUiRenderer(GraphicsDevice graphicsDevice)
     private readonly MonoGameTextStore textStore = new(graphicsDevice);
     private Texture2D? pixel;
 
-    public void Draw(SpriteBatch spriteBatch, UiFrameSnapshot frame)
+    public void Draw(SpriteBatch spriteBatch, UiFrameSnapshot frame, RenderCacheMetrics? metrics = null)
     {
         pixel ??= CreatePixel(graphicsDevice);
 
         foreach (var element in frame.Elements)
         {
-            var bounds = frame.Viewport.ToSurface(element.Bounds);
-            var destination = new XnaRect(
-                (int)MathF.Round(bounds.X),
-                (int)MathF.Round(bounds.Y),
-                (int)MathF.Round(bounds.Width),
-                (int)MathF.Round(bounds.Height));
+            var destination = ToSurfaceRect(frame, element);
             var color = ToXnaColor(element.Color, element.Alpha);
 
             if (element.Kind == UiElementKind.Fill)
             {
-                DrawFill(spriteBatch, destination, color, element.CornerRadius * frame.Viewport.Scale, element.CornerMode);
+                DrawFill(spriteBatch, destination, color, element.CornerRadius * frame.Viewport.Scale, element.CornerMode, metrics);
                 continue;
             }
 
@@ -49,7 +44,7 @@ internal sealed class MonoGameUiRenderer(GraphicsDevice graphicsDevice)
             {
                 if (element.MaterialIcon is not null)
                 {
-                    var iconTexture = iconStore.GetIcon(element.MaterialIcon.Value, destination.Width, destination.Height, element.Color, element.Alpha);
+                    var iconTexture = iconStore.GetIcon(element.MaterialIcon.Value, destination.Width, destination.Height, element.Color, element.Alpha, metrics);
                     spriteBatch.Draw(iconTexture, destination, XnaColor.White);
                 }
                 continue;
@@ -60,7 +55,7 @@ internal sealed class MonoGameUiRenderer(GraphicsDevice graphicsDevice)
                 if (element.Text is null || element.TextStyle is null)
                     continue;
 
-                var texture = textStore.GetTexture(element.Text, element.TextStyle, element.Color, element.Alpha, frame.Viewport.Scale);
+                var texture = textStore.GetTexture(element.Text, element.TextStyle, element.Color, element.Alpha, frame.Viewport.Scale, metrics);
                 var textDestination = FitTextTexture(texture, destination, element.TextStyle.Alignment);
                 spriteBatch.Draw(texture, textDestination, XnaColor.White);
                 if (element.TextStyle.Underline)
@@ -71,10 +66,44 @@ internal sealed class MonoGameUiRenderer(GraphicsDevice graphicsDevice)
             if (element.AssetName is null)
                 continue;
 
-            var textureAsset = assetStore.GetTexture(frame.AssetManifest, element.AssetName);
+            var textureAsset = assetStore.GetTexture(frame.AssetManifest, element.AssetName, metrics);
             if (textureAsset is not null)
-                spriteBatch.Draw(textureAsset, destination, color);
+                DrawSprite(spriteBatch, textureAsset, destination, color, element.RotationDegrees);
         }
+    }
+
+    public int WarmUp(UiFrameSnapshot frame, int startElementIndex, DateTime deadline, RenderCacheMetrics metrics)
+    {
+        pixel ??= CreatePixel(graphicsDevice);
+        var elementIndex = Math.Max(0, startElementIndex);
+        var processedElements = 0;
+
+        while (elementIndex < frame.Elements.Count)
+        {
+            WarmUpElement(frame, frame.Elements[elementIndex], metrics);
+            metrics.AddWarmupElement();
+            elementIndex++;
+            processedElements++;
+
+            if (processedElements > 0 && DateTime.UtcNow >= deadline)
+                break;
+        }
+
+        return elementIndex;
+    }
+
+    private static void DrawSprite(SpriteBatch spriteBatch, Texture2D texture, XnaRect destination, XnaColor color, float rotationDegrees)
+    {
+        if (Math.Abs(rotationDegrees) < 0.001f)
+        {
+            spriteBatch.Draw(texture, destination, color);
+            return;
+        }
+
+        var position = new Vector2(destination.X + destination.Width / 2f, destination.Y + destination.Height / 2f);
+        var origin = new Vector2(texture.Width / 2f, texture.Height / 2f);
+        var scale = new Vector2(destination.Width / (float)texture.Width, destination.Height / (float)texture.Height);
+        spriteBatch.Draw(texture, position, null, color, MathHelper.ToRadians(rotationDegrees), origin, scale, SpriteEffects.None, 0f);
     }
 
     public void DrawDiagnostics(SpriteBatch spriteBatch, RenderBoundsDiagnostics diagnostics)
@@ -103,7 +132,40 @@ internal sealed class MonoGameUiRenderer(GraphicsDevice graphicsDevice)
         return texture;
     }
 
-    private void DrawFill(SpriteBatch spriteBatch, XnaRect bounds, XnaColor color, float radius, UiCornerMode cornerMode = UiCornerMode.All)
+    private void WarmUpElement(UiFrameSnapshot frame, UiElementSnapshot element, RenderCacheMetrics metrics)
+    {
+        if (element.Alpha <= 0f)
+            return;
+
+        var destination = ToSurfaceRect(frame, element);
+        if (destination.Width <= 0 || destination.Height <= 0)
+            return;
+
+        switch (element.Kind)
+        {
+            case UiElementKind.Fill:
+                if (element.CornerRadius > 1f && element.CornerMode != UiCornerMode.None)
+                    _ = shapeStore.GetRoundedFill(destination.Width, destination.Height, element.CornerRadius * frame.Viewport.Scale, element.CornerMode, ToXnaColor(element.Color, element.Alpha), metrics);
+                break;
+
+            case UiElementKind.MaterialIcon:
+                if (element.MaterialIcon is not null)
+                    _ = iconStore.GetIcon(element.MaterialIcon.Value, destination.Width, destination.Height, element.Color, element.Alpha, metrics);
+                break;
+
+            case UiElementKind.Text:
+                if (element.Text is not null && element.TextStyle is not null)
+                    _ = textStore.GetTexture(element.Text, element.TextStyle, element.Color, element.Alpha, frame.Viewport.Scale, metrics);
+                break;
+
+            case UiElementKind.Sprite:
+                if (element.AssetName is not null)
+                    _ = assetStore.GetTexture(frame.AssetManifest, element.AssetName, metrics);
+                break;
+        }
+    }
+
+    private void DrawFill(SpriteBatch spriteBatch, XnaRect bounds, XnaColor color, float radius, UiCornerMode cornerMode = UiCornerMode.All, RenderCacheMetrics? metrics = null)
     {
         if (pixel is null || bounds.Width <= 0 || bounds.Height <= 0 || color.A == 0)
             return;
@@ -114,122 +176,8 @@ internal sealed class MonoGameUiRenderer(GraphicsDevice graphicsDevice)
             return;
         }
 
-        var texture = shapeStore.GetRoundedFill(bounds.Width, bounds.Height, radius, cornerMode, color);
+        var texture = shapeStore.GetRoundedFill(bounds.Width, bounds.Height, radius, cornerMode, color, metrics);
         spriteBatch.Draw(texture, bounds, XnaColor.White);
-    }
-
-    private void DrawIcon(SpriteBatch spriteBatch, XnaRect bounds, XnaColor color, UiIcon icon)
-    {
-        switch (icon)
-        {
-            case UiIcon.BackArrow:
-                DrawLine(spriteBatch, bounds.Right - bounds.Width * 0.25f, bounds.Y + bounds.Height * 0.15f, bounds.X + bounds.Width * 0.25f, bounds.Y + bounds.Height * 0.5f, color, bounds.Width * 0.12f);
-                DrawLine(spriteBatch, bounds.X + bounds.Width * 0.25f, bounds.Y + bounds.Height * 0.5f, bounds.Right - bounds.Width * 0.25f, bounds.Bottom - bounds.Height * 0.15f, color, bounds.Width * 0.12f);
-                break;
-
-            case UiIcon.Check:
-                DrawLine(spriteBatch, bounds.X + bounds.Width * 0.18f, bounds.Y + bounds.Height * 0.52f, bounds.X + bounds.Width * 0.42f, bounds.Bottom - bounds.Height * 0.22f, color, bounds.Width * 0.11f);
-                DrawLine(spriteBatch, bounds.X + bounds.Width * 0.42f, bounds.Bottom - bounds.Height * 0.22f, bounds.Right - bounds.Width * 0.14f, bounds.Y + bounds.Height * 0.2f, color, bounds.Width * 0.11f);
-                break;
-
-            case UiIcon.CheckboxChecked:
-                DrawFill(spriteBatch, bounds, color, bounds.Width * 0.08f);
-                DrawIcon(spriteBatch, Inset(bounds, bounds.Width * 0.12f), XnaColor.Black * 0.75f, UiIcon.Check);
-                break;
-
-            case UiIcon.CheckboxUnchecked:
-                DrawBorder(spriteBatch, bounds, color, Math.Max(2, bounds.Width / 12));
-                break;
-
-            case UiIcon.ChevronRight:
-                DrawLine(spriteBatch, bounds.X + bounds.Width * 0.35f, bounds.Y + bounds.Height * 0.2f, bounds.Right - bounds.Width * 0.28f, bounds.Y + bounds.Height * 0.5f, color, bounds.Width * 0.12f);
-                DrawLine(spriteBatch, bounds.Right - bounds.Width * 0.28f, bounds.Y + bounds.Height * 0.5f, bounds.X + bounds.Width * 0.35f, bounds.Bottom - bounds.Height * 0.2f, color, bounds.Width * 0.12f);
-                break;
-
-            case UiIcon.ChevronDown:
-                DrawLine(spriteBatch, bounds.X + bounds.Width * 0.18f, bounds.Y + bounds.Height * 0.35f, bounds.X + bounds.Width * 0.5f, bounds.Bottom - bounds.Height * 0.25f, color, bounds.Width * 0.12f);
-                DrawLine(spriteBatch, bounds.X + bounds.Width * 0.5f, bounds.Bottom - bounds.Height * 0.25f, bounds.Right - bounds.Width * 0.18f, bounds.Y + bounds.Height * 0.35f, color, bounds.Width * 0.12f);
-                break;
-
-            case UiIcon.Grid:
-                DrawGrid(spriteBatch, bounds, color);
-                break;
-
-            case UiIcon.Square:
-                DrawBorder(spriteBatch, CenterSquare(bounds), color, Math.Max(2, bounds.Width / 10));
-                break;
-
-            case UiIcon.Display:
-                DrawDisplay(spriteBatch, bounds, color);
-                break;
-
-            case UiIcon.Headphones:
-                DrawHeadphones(spriteBatch, bounds, color);
-                break;
-
-            case UiIcon.MusicLibrary:
-                DrawMusic(spriteBatch, bounds, color);
-                break;
-
-            case UiIcon.Input:
-                DrawInput(spriteBatch, bounds, color);
-                break;
-
-            case UiIcon.Gear:
-                DrawGear(spriteBatch, bounds, color);
-                break;
-        }
-    }
-
-    private void DrawGrid(SpriteBatch spriteBatch, XnaRect bounds, XnaColor color)
-    {
-        var cell = Math.Max(3, bounds.Width / 5);
-        var gap = Math.Max(2, bounds.Width / 8);
-        var startX = bounds.X + (bounds.Width - cell * 3 - gap * 2) / 2;
-        var startY = bounds.Y + (bounds.Height - cell * 3 - gap * 2) / 2;
-        for (var y = 0; y < 3; y++)
-        for (var x = 0; x < 3; x++)
-            DrawFill(spriteBatch, new XnaRect(startX + x * (cell + gap), startY + y * (cell + gap), cell, cell), color, 0f);
-    }
-
-    private void DrawDisplay(SpriteBatch spriteBatch, XnaRect bounds, XnaColor color)
-    {
-        var screen = new XnaRect(bounds.X + bounds.Width / 8, bounds.Y + bounds.Height / 6, bounds.Width * 3 / 4, bounds.Height / 2);
-        DrawBorder(spriteBatch, screen, color, Math.Max(2, bounds.Width / 12));
-        DrawFill(spriteBatch, new XnaRect(bounds.X + bounds.Width * 2 / 5, screen.Bottom, bounds.Width / 5, bounds.Height / 6), color, 0f);
-        DrawFill(spriteBatch, new XnaRect(bounds.X + bounds.Width / 3, bounds.Bottom - bounds.Height / 8, bounds.Width / 3, Math.Max(2, bounds.Height / 10)), color, 0f);
-    }
-
-    private void DrawHeadphones(SpriteBatch spriteBatch, XnaRect bounds, XnaColor color)
-    {
-        var thickness = Math.Max(2, bounds.Width / 10);
-        DrawLine(spriteBatch, bounds.X + bounds.Width * 0.25f, bounds.Y + bounds.Height * 0.5f, bounds.X + bounds.Width * 0.25f, bounds.Bottom - bounds.Height * 0.18f, color, thickness);
-        DrawLine(spriteBatch, bounds.Right - bounds.Width * 0.25f, bounds.Y + bounds.Height * 0.5f, bounds.Right - bounds.Width * 0.25f, bounds.Bottom - bounds.Height * 0.18f, color, thickness);
-        DrawLine(spriteBatch, bounds.X + bounds.Width * 0.25f, bounds.Y + bounds.Height * 0.5f, bounds.X + bounds.Width * 0.5f, bounds.Y + bounds.Height * 0.22f, color, thickness);
-        DrawLine(spriteBatch, bounds.X + bounds.Width * 0.5f, bounds.Y + bounds.Height * 0.22f, bounds.Right - bounds.Width * 0.25f, bounds.Y + bounds.Height * 0.5f, color, thickness);
-    }
-
-    private void DrawMusic(SpriteBatch spriteBatch, XnaRect bounds, XnaColor color)
-    {
-        var thickness = Math.Max(2, bounds.Width / 10);
-        DrawLine(spriteBatch, bounds.X + bounds.Width * 0.62f, bounds.Y + bounds.Height * 0.18f, bounds.X + bounds.Width * 0.62f, bounds.Bottom - bounds.Height * 0.28f, color, thickness);
-        DrawLine(spriteBatch, bounds.X + bounds.Width * 0.62f, bounds.Y + bounds.Height * 0.18f, bounds.Right - bounds.Width * 0.2f, bounds.Y + bounds.Height * 0.26f, color, thickness);
-        DrawCircle(spriteBatch, bounds.X + bounds.Width * 0.45f, bounds.Bottom - bounds.Height * 0.25f, Math.Max(4, bounds.Width / 6), color);
-    }
-
-    private void DrawInput(SpriteBatch spriteBatch, XnaRect bounds, XnaColor color)
-    {
-        var thickness = Math.Max(2, bounds.Width / 12);
-        DrawLine(spriteBatch, bounds.X + bounds.Width * 0.15f, bounds.Bottom - bounds.Height * 0.25f, bounds.Right - bounds.Width * 0.15f, bounds.Bottom - bounds.Height * 0.25f, color, thickness);
-        DrawLine(spriteBatch, bounds.X + bounds.Width * 0.25f, bounds.Bottom - bounds.Height * 0.25f, bounds.X + bounds.Width * 0.35f, bounds.Y + bounds.Height * 0.3f, color, thickness);
-        DrawLine(spriteBatch, bounds.X + bounds.Width * 0.35f, bounds.Y + bounds.Height * 0.3f, bounds.Right - bounds.Width * 0.2f, bounds.Y + bounds.Height * 0.3f, color, thickness);
-    }
-
-    private void DrawGear(SpriteBatch spriteBatch, XnaRect bounds, XnaColor color)
-    {
-        DrawBorder(spriteBatch, Inset(bounds, bounds.Width * 0.2f), color, Math.Max(2, bounds.Width / 10));
-        var center = CenterSquare(Inset(bounds, bounds.Width * 0.35f));
-        DrawFill(spriteBatch, center, color, center.Width / 2f);
     }
 
     private void DrawLine(SpriteBatch spriteBatch, float x1, float y1, float x2, float y2, XnaColor color, float thickness)
@@ -336,6 +284,16 @@ internal sealed class MonoGameUiRenderer(GraphicsDevice graphicsDevice)
         };
 
         return new XnaRect(x, bounds.Y, width, height);
+    }
+
+    private static XnaRect ToSurfaceRect(UiFrameSnapshot frame, UiElementSnapshot element)
+    {
+        var bounds = frame.Viewport.ToSurface(element.Bounds);
+        return new XnaRect(
+            (int)MathF.Round(bounds.X),
+            (int)MathF.Round(bounds.Y),
+            (int)MathF.Round(bounds.Width),
+            (int)MathF.Round(bounds.Height));
     }
 
     private static XnaColor ToXnaColor(UiColor color, float alpha)

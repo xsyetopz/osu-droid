@@ -1,3 +1,5 @@
+using OsuDroid.Game.Runtime.Paths;
+
 namespace OsuDroid.Game.Compatibility.Database;
 
 public static class DroidDatabaseConstants
@@ -7,8 +9,6 @@ public static class DroidDatabaseConstants
 
     public static string GetDatabaseFileName(string buildType) => $"room-{buildType}.db";
 
-    public static string GetDatabasePath(string corePath, string buildType) => Path.Combine(
-        corePath,
-        DatabaseDirectory,
-        GetDatabaseFileName(buildType));
+    public static string GetDatabasePath(string corePath, string buildType) =>
+        new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(corePath)).GetDatabasePath(buildType);
 }

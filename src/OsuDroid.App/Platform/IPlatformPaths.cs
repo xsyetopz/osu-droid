@@ -1,8 +1,12 @@
 #if ANDROID || IOS
+using OsuDroid.Game.Runtime.Paths;
+
 namespace OsuDroid.App.Platform;
 
 public interface IPlatformPaths
 {
-    string CorePath { get; }
+    DroidPathRoots Roots { get; }
+
+    string CorePath => Roots.CoreRoot;
 }
 #endif

@@ -1,11 +1,12 @@
 #if ANDROID || IOS
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input.Touch;
 using Microsoft.Maui.ApplicationModel;
+using OsuDroid.App.MonoGame.Input;
 using OsuDroid.App.MonoGame.Rendering;
 using OsuDroid.Game;
 using OsuDroid.Game.UI;
+using System.Diagnostics;
 using XnaColor = Microsoft.Xna.Framework.Color;
 using XnaDisplayOrientation = Microsoft.Xna.Framework.DisplayOrientation;
 #if IOS
@@ -17,25 +18,26 @@ namespace OsuDroid.App.MonoGame;
 public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
 {
     private const string RenderDiagnosticsEnvironmentVariable = "OSUDROID_RENDER_DIAGNOSTICS";
+    private static readonly TimeSpan WarmupBudget = TimeSpan.FromMilliseconds(4);
+    private static readonly TimeSpan DrawLogThreshold = TimeSpan.FromMilliseconds(16);
 
     private readonly OsuDroidGameCore core;
     private readonly GraphicsDeviceManager graphics;
+    private readonly MonoGameTouchRouter touchRouter;
+    private readonly RenderWarmupQueue warmupQueue = new();
     private MonoGameUiRenderer? renderer;
     private SpriteBatch? spriteBatch;
     private UiFrameSnapshot? frame;
+    private VirtualViewport? warmupViewport;
     private string? lastRenderBoundsLog;
-    private const float TouchDragThreshold = 10f;
-
+    private bool hasRenderedFrame;
     private readonly bool showRenderDiagnostics = IsRenderDiagnosticsEnabled();
     private string? platformDisplayLog;
-    private int? activeTouchId;
-    private UiPoint touchStart;
-    private UiPoint previousTouch;
-    private bool isTouchDragging;
 
     public OsuDroidMonoGame(OsuDroidGameCore core)
     {
         this.core = core;
+        touchRouter = new MonoGameTouchRouter(core);
         graphics = new GraphicsDeviceManager(this)
         {
             SupportedOrientations = XnaDisplayOrientation.LandscapeLeft | XnaDisplayOrientation.LandscapeRight,
@@ -70,7 +72,7 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         LogRenderBoundsIfChanged("Update");
         core.Update(gameTime.ElapsedGameTime);
         frame = CreateCurrentFrame();
-        RouteTouch(frame);
+        touchRouter.Route(frame);
         OpenPendingExternalUrl();
         base.Update(gameTime);
     }
@@ -82,13 +84,17 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
 
         if (spriteBatch is not null && renderer is not null)
         {
+            var drawMetrics = showRenderDiagnostics ? new RenderCacheMetrics() : null;
+            var drawStart = showRenderDiagnostics ? Stopwatch.GetTimestamp() : 0L;
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.LinearClamp);
-            renderer.Draw(spriteBatch, frame);
+            renderer.Draw(spriteBatch, frame, drawMetrics);
 
             if (showRenderDiagnostics)
                 renderer.DrawDiagnostics(spriteBatch, CreateRenderDiagnostics());
 
             spriteBatch.End();
+            LogDrawMetrics(drawStart, drawMetrics);
+            RunWarmup(frame.Viewport);
         }
 
         base.Draw(gameTime);
@@ -173,6 +179,49 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         Console.WriteLine(message);
     }
 
+    private void RunWarmup(VirtualViewport viewport)
+    {
+        if (renderer is null || touchRouter.IsPointerActive)
+            return;
+
+        if (!hasRenderedFrame)
+        {
+            hasRenderedFrame = true;
+            return;
+        }
+
+        if (warmupViewport != viewport)
+        {
+            warmupViewport = viewport;
+            warmupQueue.Reset(core.CreateWarmupFrames(viewport));
+        }
+
+        if (warmupQueue.IsComplete)
+            return;
+
+        var metrics = new RenderCacheMetrics();
+        var start = Stopwatch.GetTimestamp();
+        warmupQueue.Run(renderer, WarmupBudget, metrics);
+
+        if (showRenderDiagnostics && (metrics.WarmupElements > 0 || metrics.HasCacheMisses))
+        {
+            var elapsed = Stopwatch.GetElapsedTime(start);
+            Console.WriteLine($"osu!droid render-cache phase=warmup elapsedMs={elapsed.TotalMilliseconds:0.###} {metrics}");
+        }
+    }
+
+    private void LogDrawMetrics(long drawStart, RenderCacheMetrics? metrics)
+    {
+        if (!showRenderDiagnostics || metrics is null)
+            return;
+
+        var elapsed = Stopwatch.GetElapsedTime(drawStart);
+        if (elapsed < DrawLogThreshold && !metrics.HasCacheMisses)
+            return;
+
+        Console.WriteLine($"osu!droid render-cache phase=draw elapsedMs={elapsed.TotalMilliseconds:0.###} {metrics}");
+    }
+
     private void OpenPendingExternalUrl()
     {
         var pendingUrl = core.ConsumePendingExternalUrl();
@@ -196,54 +245,6 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
 
     private readonly record struct BackBufferSize(int Width, int Height);
 
-    private void RouteTouch(UiFrameSnapshot currentFrame)
-    {
-        foreach (var touch in TouchPanel.GetState())
-        {
-            var virtualPoint = currentFrame.Viewport.ToVirtual(touch.Position.X, touch.Position.Y);
-            if (touch.State == TouchLocationState.Pressed)
-            {
-                activeTouchId = touch.Id;
-                touchStart = virtualPoint;
-                previousTouch = virtualPoint;
-                isTouchDragging = false;
-                continue;
-            }
 
-            if (activeTouchId != touch.Id)
-                continue;
-
-            if (touch.State == TouchLocationState.Moved)
-            {
-                var movedX = virtualPoint.X - touchStart.X;
-                var movedY = virtualPoint.Y - touchStart.Y;
-                if (!isTouchDragging && MathF.Sqrt(movedX * movedX + movedY * movedY) > TouchDragThreshold)
-                    isTouchDragging = true;
-
-                if (isTouchDragging)
-                    core.ScrollActiveScene(previousTouch.Y - virtualPoint.Y, touchStart, currentFrame.Viewport);
-
-                previousTouch = virtualPoint;
-                continue;
-            }
-
-            if (touch.State is not (TouchLocationState.Released or TouchLocationState.Invalid))
-                continue;
-
-            activeTouchId = null;
-            if (isTouchDragging)
-            {
-                isTouchDragging = false;
-                continue;
-            }
-
-            var element = currentFrame.HitTest(virtualPoint);
-            if (element is null || element.Action == UiAction.None)
-                continue;
-
-            core.HandleUiAction(element.Action, currentFrame.Viewport);
-            break;
-        }
-    }
 }
 #endif

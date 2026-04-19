@@ -10,7 +10,7 @@ internal sealed class MonoGameShapeStore(GraphicsDevice graphicsDevice) : IDispo
 {
     private readonly Dictionary<ShapeCacheKey, Texture2D> cache = new();
 
-    public Texture2D GetRoundedFill(int width, int height, float radius, UiCornerMode cornerMode, XnaColor color)
+    public Texture2D GetRoundedFill(int width, int height, float radius, UiCornerMode cornerMode, XnaColor color, RenderCacheMetrics? metrics = null)
     {
         width = Math.Max(1, width);
         height = Math.Max(1, height);
@@ -19,6 +19,7 @@ internal sealed class MonoGameShapeStore(GraphicsDevice graphicsDevice) : IDispo
         if (cache.TryGetValue(key, out var texture))
             return texture;
 
+        metrics?.AddShapeMiss();
         texture = CreateRoundedFillTexture(width, height, roundedRadius, cornerMode, color);
         cache[key] = texture;
         return texture;
