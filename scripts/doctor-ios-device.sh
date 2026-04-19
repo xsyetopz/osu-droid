@@ -13,9 +13,16 @@ EOF
 fi
 
 IOS_DEVICE_ID="${IOS_DEVICE_ID:-}"
+IOS_DEVELOPER_DIR="${IOS_DEVELOPER_DIR:-/Applications/Xcode_26.3.app/Contents/Developer}"
+export DEVELOPER_DIR="$IOS_DEVELOPER_DIR"
 
 if [ -z "$IOS_DEVICE_ID" ]; then
   echo "IOS_DEVICE_ID is required. Example: IOS_DEVICE_ID=<device-id> ./scripts/doctor-ios-device.sh" >&2
+  exit 1
+fi
+
+if [ ! -d "$IOS_DEVELOPER_DIR" ]; then
+  echo "IOS_DEVELOPER_DIR does not exist: $IOS_DEVELOPER_DIR" >&2
   exit 1
 fi
 

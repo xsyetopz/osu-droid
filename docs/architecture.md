@@ -1,16 +1,17 @@
 # Rewrite Architecture
 
 ## Source split
-- `osu-framework` supplies runtime and mobile platform integration.
-- `ppy/osu` supplies screen behavior, route structure, and localisation wording.
-- `osu-droid-legacy` supplies mobile layout cues only.
+- MonoGame supplies rendering, input, and the game loop.
+- .NET MAUI supplies Android/iOS lifecycle, permissions, paths, and native services.
+- `osu-droid-legacy` supplies behavior, assets, online protocols, database schema, and UI flow references.
 
 ## Product boundaries
 - Android and iOS only.
 - No desktop launcher.
+- No osu-framework runtime dependency.
 
 ## First milestone
-- Guest-first main menu
-- Optional login overlay
-- Local song select
-- Separate online browse surface
+- MAUI-hosted MonoGame boot shell
+- Legacy-style main menu first/second-menu behavior
+- Compatible `osudroid.moe` login request/response path
+- Compatible Room v4 SQLite schema creation

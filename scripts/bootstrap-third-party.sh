@@ -30,12 +30,6 @@ clone_if_missing() {
   fi
 }
 
-clone_if_missing "third_party/osu-framework" "https://github.com/ppy/osu-framework.git"
-clone_if_missing "third_party/ppy-osu" "https://github.com/ppy/osu.git"
 clone_if_missing "third_party/osu-droid-legacy" "https://github.com/osudroid/osu-droid.git"
-
-if [ -x "$root_dir/scripts/apply-third-party-patches.sh" ]; then
-  "$root_dir/scripts/apply-third-party-patches.sh"
-fi
 
 echo "third_party checkouts prepared under $root_dir/third_party"

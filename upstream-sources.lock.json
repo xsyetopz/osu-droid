@@ -1,17 +1,5 @@
 {
   "sources": {
-    "osu-framework": {
-      "path": "third_party/osu-framework",
-      "remote": "https://github.com/ppy/osu-framework.git",
-      "branch": "master",
-      "commit": "UNPINNED"
-    },
-    "ppy-osu": {
-      "path": "third_party/ppy-osu",
-      "remote": "https://github.com/ppy/osu.git",
-      "branch": "master",
-      "commit": "UNPINNED"
-    },
     "osu-droid-legacy": {
       "path": "third_party/osu-droid-legacy",
       "remote": "https://github.com/osudroid/osu-droid.git",

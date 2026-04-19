@@ -1,0 +1,69 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks Condition="'$(BuildMobile)' != 'true'">net9.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(BuildMobile)' == 'true' and '$(MobileTarget)' == 'android'">net9.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="'$(BuildMobile)' == 'true' and '$(MobileTarget)' == 'ios'">net9.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(BuildMobile)' == 'true' and '$(MobileTarget)' == ''">net9.0-android;net9.0-ios</TargetFrameworks>
+    <OutputType Condition="'$(BuildMobile)' == 'true'">Exe</OutputType>
+    <OutputType Condition="'$(BuildMobile)' != 'true'">Library</OutputType>
+    <RootNamespace>OsuDroid.App</RootNamespace>
+    <AssemblyName>OsuDroid.App</AssemblyName>
+    <UseMaui Condition="'$(BuildMobile)' == 'true'">true</UseMaui>
+    <SingleProject Condition="'$(BuildMobile)' == 'true'">true</SingleProject>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RollForward>Major</RollForward>
+    <ApplicationTitle>osu!droid</ApplicationTitle>
+    <ApplicationId>moe.osudroid</ApplicationId>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">13.4</SupportedOSPlatformVersion>
+    <SupportedInterfaceOrientations Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">UIInterfaceOrientationLandscapeLeft;UIInterfaceOrientationLandscapeRight</SupportedInterfaceOrientations>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OsuDroid.Game\OsuDroid.Game.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
+    <Compile Remove="App.cs" />
+    <Compile Remove="MainPage.cs" />
+    <Compile Remove="MauiProgram.cs" />
+    <Compile Remove="MonoGame\**\*.cs" />
+    <Compile Remove="Platform\**\*.cs" />
+    <Compile Remove="Platforms\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(BuildMobile)' == 'true'">
+    <PackageReference Include="Microsoft.Maui.Controls" />
+    <PackageReference Include="SocketIOClient" />
+  </ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <PackageReference Include="MonoGame.Framework.Android" />
+  </ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
+    <InterfaceDefinition Remove="Platforms\iOS\LaunchScreen.storyboard" />
+    <BundleResource Include="Platforms\iOS\LaunchScreen.storyboard" Link="LaunchScreen.storyboard" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
+    <PackageReference Include="MonoGame.Framework.iOS" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(BuildMobile)' == 'true'">
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\gfx\menu-background.png" LogicalName="legacy/gfx/menu-background.png" />
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\gfx\emptyavatar.png" LogicalName="legacy/gfx/emptyavatar.png" />
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\beatmap_downloader.png" LogicalName="legacy/beatmap_downloader.png" />
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\logo.png" LogicalName="legacy/logo.png" />
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\play.png" LogicalName="legacy/play.png" />
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\solo.png" LogicalName="legacy/solo.png" />
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\options.png" LogicalName="legacy/options.png" />
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\multi.png" LogicalName="legacy/multi.png" />
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\exit.png" LogicalName="legacy/exit.png" />
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\back.png" LogicalName="legacy/back.png" />
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\music_prev.png" LogicalName="legacy/music_prev.png" />
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\music_play.png" LogicalName="legacy/music_play.png" />
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\music_pause.png" LogicalName="legacy/music_pause.png" />
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\music_stop.png" LogicalName="legacy/music_stop.png" />
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\music_next.png" LogicalName="legacy/music_next.png" />
+    <MauiAsset Include="..\..\third_party\osu-droid-legacy\assets\music_np.png" LogicalName="legacy/music_np.png" />
+  </ItemGroup>
+</Project>
