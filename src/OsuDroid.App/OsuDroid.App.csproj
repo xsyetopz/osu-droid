@@ -49,6 +49,10 @@
         <PackageReference Include="MonoGame.Framework.iOS" />
     </ItemGroup>
     <ItemGroup Condition="'$(BuildMobile)' == 'true'">
+        <MauiIcon Include="Resources\AppIcon\appicon.png"
+                  BaseSize="192,192" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(BuildMobile)' == 'true'">
         <MauiAsset Include="Resources\Raw\assets\droid\**\*.png"
                    LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
         <MauiAsset Include="Resources\Raw\assets\droid\**\*.jpg"

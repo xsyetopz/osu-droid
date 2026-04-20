@@ -32,3 +32,4 @@ Prepare them with `scripts/bootstrap-third-party.sh`.
 - Architecture audit: run `python3 scripts/dev/architecture_audit.py --write docs/architecture-audit.md` before adding new large scenes/subsystems.
 - Runtime folder layout is owned by `DroidGamePathLayout`; platform code supplies only native roots.
 - Shared UI primitives are grouped by concern under `src/OsuDroid.Game/UI/{Actions,Assets,Elements,Geometry,Style}`.
+- iOS uses a direct MonoGame `UIApplicationDelegate` host; platform services must be wired in `Platforms/iOS/AppDelegate.cs`, not only `MainPage`. See [`docs/ios-monogame-input.md`](docs/ios-monogame-input.md).

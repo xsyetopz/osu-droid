@@ -28,6 +28,8 @@ public static class DroidAssets
     public const string SettingsAdvanced = "settings-advanced";
     public const string SettingsCheck = "settings-check";
     public const string SettingsArrowDropDown = "settings-arrow-drop-down";
+    public const string BeatmapDownloaderOsuDirect = "beatmap-downloader-osudirect";
+    public const string BeatmapDownloaderCatboy = "beatmap-downloader-catboy";
 
     public static UiAssetManifest MainMenuManifest { get; } = new(CreateMainMenuEntries());
 
@@ -59,6 +61,8 @@ public static class DroidAssets
         yield return Texture(SettingsAdvanced, "assets/droid/settings/category-advanced.png", 192, 192);
         yield return Texture(SettingsCheck, "assets/droid/settings/check.png", 192, 192);
         yield return Texture(SettingsArrowDropDown, "assets/droid/settings/arrow-drop-down.png", 192, 192);
+        yield return Texture(BeatmapDownloaderOsuDirect, "assets/droid/beatmap-downloader/osudirect.png", 96, 96);
+        yield return Texture(BeatmapDownloaderCatboy, "assets/droid/beatmap-downloader/catboy.png", 96, 96);
     }
 
     private static UiAssetEntry Texture(string logicalName, string packagePath, float width, float height) =>

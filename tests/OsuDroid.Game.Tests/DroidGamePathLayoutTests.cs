@@ -20,6 +20,7 @@ public sealed class DroidGamePathLayoutTests
         Assert.That(layout.Scores, Is.EqualTo(Path.Combine(Path.GetFullPath(root), "Scores")));
         Assert.That(layout.Databases, Is.EqualTo(Path.Combine(Path.GetFullPath(root), "databases")));
         Assert.That(layout.Log, Is.EqualTo(Path.Combine(Path.GetFullPath(root), "Log")));
+        Assert.That(layout.Downloads, Is.EqualTo(Path.Combine(Path.GetFullPath(cache), "Downloads")));
         Assert.That(layout.NoMedia, Is.EqualTo(Path.Combine(Path.GetFullPath(root), ".nomedia")));
     }
 
@@ -47,6 +48,7 @@ public sealed class DroidGamePathLayoutTests
         Assert.That(Directory.Exists(layout.Databases), Is.True);
         Assert.That(Directory.Exists(layout.Log), Is.True);
         Assert.That(Directory.Exists(layout.CacheRoot), Is.True);
+        Assert.That(Directory.Exists(layout.Downloads), Is.True);
         Assert.That(File.Exists(layout.NoMedia), Is.True);
 
         Directory.Delete(layout.CoreRoot, true);

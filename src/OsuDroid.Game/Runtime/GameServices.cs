@@ -1,3 +1,6 @@
+using OsuDroid.Game.Beatmaps;
+using OsuDroid.Game.Beatmaps.Import;
+using OsuDroid.Game.Beatmaps.Online;
 using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Runtime.Paths;
 
@@ -23,7 +26,13 @@ public sealed record GameServices(
     string BuildType,
     string DisplayVersion = "1.0",
     IMenuMusicController? MusicController = null,
-    MenuNowPlayingState? NowPlaying = null)
+    MenuNowPlayingState? NowPlaying = null,
+    IBeatmapLibrary? BeatmapLibrary = null,
+    IBeatmapImportService? BeatmapImportService = null,
+    IBeatmapDownloadService? BeatmapDownloadService = null,
+    IBeatmapMirrorClient? BeatmapMirrorClient = null,
+    ITextInputService? TextInputService = null,
+    IBeatmapPreviewPlayer? BeatmapPreviewPlayer = null)
 {
     public string CorePath => Paths.CoreRoot;
 }

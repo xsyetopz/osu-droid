@@ -56,19 +56,18 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice)
                     continue;
 
                 var texture = textStore.GetTexture(element.Text, element.TextStyle, element.Color, element.Alpha, frame.Viewport.Scale, metrics);
-                var textDestination = FitTextTexture(texture, destination, element.TextStyle.Alignment);
+                var textDestination = FitTextTexture(texture, destination, element.TextStyle);
                 spriteBatch.Draw(texture, textDestination, XnaColor.White);
                 if (element.TextStyle.Underline)
                     DrawUnderline(spriteBatch, textDestination, color);
                 continue;
             }
 
-            if (element.AssetName is null)
-                continue;
-
-            var textureAsset = assetStore.GetTexture(frame.AssetManifest, element.AssetName, metrics);
+            var textureAsset = element.ExternalAssetPath is not null
+                ? assetStore.GetFileTexture(element.ExternalAssetPath, metrics)
+                : element.AssetName is null ? null : assetStore.GetTexture(frame.AssetManifest, element.AssetName, metrics);
             if (textureAsset is not null)
-                DrawSprite(spriteBatch, textureAsset, destination, color, element.RotationDegrees);
+                DrawSprite(spriteBatch, textureAsset, destination, color, element.RotationDegrees, element.SpriteFit);
         }
     }
 
@@ -92,18 +91,40 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice)
         return elementIndex;
     }
 
-    private static void DrawSprite(SpriteBatch spriteBatch, Texture2D texture, XnaRect destination, XnaColor color, float rotationDegrees)
+    private static void DrawSprite(SpriteBatch spriteBatch, Texture2D texture, XnaRect destination, XnaColor color, float rotationDegrees, UiSpriteFit fit)
     {
+        var source = fit == UiSpriteFit.Stretch ? null : CalculateSourceRect(texture, destination, fit);
+
         if (Math.Abs(rotationDegrees) < 0.001f)
         {
-            spriteBatch.Draw(texture, destination, color);
+            spriteBatch.Draw(texture, destination, source, color);
             return;
         }
 
         var position = new Vector2(destination.X + destination.Width / 2f, destination.Y + destination.Height / 2f);
-        var origin = new Vector2(texture.Width / 2f, texture.Height / 2f);
-        var scale = new Vector2(destination.Width / (float)texture.Width, destination.Height / (float)texture.Height);
-        spriteBatch.Draw(texture, position, null, color, MathHelper.ToRadians(rotationDegrees), origin, scale, SpriteEffects.None, 0f);
+        var origin = new Vector2(source?.Width / 2f ?? texture.Width / 2f, source?.Height / 2f ?? texture.Height / 2f);
+        var sourceWidth = source?.Width ?? texture.Width;
+        var sourceHeight = source?.Height ?? texture.Height;
+        var scale = new Vector2(destination.Width / (float)sourceWidth, destination.Height / (float)sourceHeight);
+        spriteBatch.Draw(texture, position, source, color, MathHelper.ToRadians(rotationDegrees), origin, scale, SpriteEffects.None, 0f);
+    }
+
+    private static XnaRect? CalculateSourceRect(Texture2D texture, XnaRect destination, UiSpriteFit fit)
+    {
+        var textureRatio = texture.Width / (float)texture.Height;
+        var destinationRatio = destination.Width / (float)destination.Height;
+
+        if (fit == UiSpriteFit.Contain)
+            return null;
+
+        if (destinationRatio > textureRatio)
+        {
+            var sourceHeight = Math.Max(1, (int)MathF.Round(texture.Width / destinationRatio));
+            return new XnaRect(0, (texture.Height - sourceHeight) / 2, texture.Width, sourceHeight);
+        }
+
+        var sourceWidth = Math.Max(1, (int)MathF.Round(texture.Height * destinationRatio));
+        return new XnaRect((texture.Width - sourceWidth) / 2, 0, sourceWidth, texture.Height);
     }
 
     public void DrawDiagnostics(SpriteBatch spriteBatch, RenderBoundsDiagnostics diagnostics)
@@ -159,7 +180,9 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice)
                 break;
 
             case UiElementKind.Sprite:
-                if (element.AssetName is not null)
+                if (element.ExternalAssetPath is not null)
+                    _ = assetStore.GetFileTexture(element.ExternalAssetPath, metrics);
+                else if (element.AssetName is not null)
                     _ = assetStore.GetTexture(frame.AssetManifest, element.AssetName, metrics);
                 break;
         }
@@ -265,7 +288,7 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice)
         spriteBatch.Draw(pixel, new XnaRect(bounds.X, bounds.Bottom - thickness, bounds.Width, thickness), color);
     }
 
-    private static XnaRect FitTextTexture(Texture2D texture, XnaRect bounds, UiTextAlignment alignment)
+    private static XnaRect FitTextTexture(Texture2D texture, XnaRect bounds, UiTextStyle style)
     {
         var width = texture.Width;
         var height = texture.Height;
@@ -276,14 +299,17 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice)
             height = Math.Max(1, (int)MathF.Round(texture.Height * scale));
         }
 
-        var x = alignment switch
+        var x = style.Alignment switch
         {
             UiTextAlignment.Center => bounds.X + (bounds.Width - width) / 2,
             UiTextAlignment.Right => bounds.Right - width,
             _ => bounds.X,
         };
+        var y = style.VerticalAlignment == UiTextVerticalAlignment.Middle
+            ? bounds.Y + (bounds.Height - height) / 2
+            : bounds.Y;
 
-        return new XnaRect(x, bounds.Y, width, height);
+        return new XnaRect(x, y, width, height);
     }
 
     private static XnaRect ToSurfaceRect(UiFrameSnapshot frame, UiElementSnapshot element)

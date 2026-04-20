@@ -1,9 +1,10 @@
 #if ANDROID || IOS
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Maui.Controls;
 using MauiColor = Microsoft.Maui.Graphics.Color;
 using XnaGameRunBehavior = Microsoft.Xna.Framework.GameRunBehavior;
 using OsuDroid.App.MonoGame;
+using OsuDroid.App.Platform.Audio;
+using OsuDroid.App.Platform.Input;
 using OsuDroid.Game;
 
 namespace OsuDroid.App;
@@ -11,6 +12,8 @@ namespace OsuDroid.App;
 public sealed class MainPage : ContentPage
 {
     private readonly OsuDroidGameCore game;
+    private readonly PlatformTextInputService textInputService = new();
+    private readonly PlatformBeatmapPreviewPlayer previewPlayer = new();
     private OsuDroidMonoGame? monoGame;
 
     public MainPage(IServiceProvider services)
@@ -18,6 +21,8 @@ public sealed class MainPage : ContentPage
         game = services.GetRequiredService<OsuDroidGameCore>();
         BackgroundColor = MauiColor.FromArgb("#4681fc");
         Content = new Grid();
+        textInputService.Attach();
+        game.AttachPlatformServices(textInputService, previewPlayer);
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
     }
@@ -35,6 +40,8 @@ public sealed class MainPage : ContentPage
     {
         monoGame?.Dispose();
         monoGame = null;
+        textInputService.Detach();
+        previewPlayer.StopPreview();
     }
 }
 #endif

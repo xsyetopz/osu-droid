@@ -26,6 +26,8 @@ public sealed class DroidDatabase
             command.CommandText = statement;
             command.ExecuteNonQuery();
         }
+
+        EnsureBeatmapInfoColumns(connection);
     }
 
     public SqliteConnection OpenConnection()
@@ -34,5 +36,28 @@ public sealed class DroidDatabase
         var connection = new SqliteConnection(builder.ToString());
         connection.Open();
         return connection;
+    }
+
+    private static void EnsureBeatmapInfoColumns(SqliteConnection connection)
+    {
+        using var readCommand = connection.CreateCommand();
+        readCommand.CommandText = "PRAGMA table_info(BeatmapInfo)";
+        using var reader = readCommand.ExecuteReader();
+        var existingColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        while (reader.Read())
+            existingColumns.Add(reader.GetString(1));
+
+        reader.Close();
+
+        foreach (var column in DroidDatabaseSchema.BeatmapInfoColumns)
+        {
+            if (existingColumns.Contains(column.Name))
+                continue;
+
+            using var alterCommand = connection.CreateCommand();
+            alterCommand.CommandText = $"ALTER TABLE BeatmapInfo ADD COLUMN {column.Name} {column.Definition}";
+            alterCommand.ExecuteNonQuery();
+        }
     }
 }

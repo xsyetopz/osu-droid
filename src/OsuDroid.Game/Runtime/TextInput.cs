@@ -1,0 +1,28 @@
+using OsuDroid.Game.UI;
+
+namespace OsuDroid.Game.Runtime;
+
+public interface ITextInputService
+{
+    void RequestTextInput(TextInputRequest request);
+
+    void HideTextInput();
+}
+
+public sealed record TextInputRequest(
+    string Text,
+    Action<string> OnTextChanged,
+    Action<string> OnSubmitted,
+    UiRect? SurfaceBounds = null,
+    Action? OnCanceled = null);
+
+public sealed class NoOpTextInputService : ITextInputService
+{
+    public void RequestTextInput(TextInputRequest request)
+    {
+    }
+
+    public void HideTextInput()
+    {
+    }
+}

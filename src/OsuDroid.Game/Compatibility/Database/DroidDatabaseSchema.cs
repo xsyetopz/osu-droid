@@ -22,19 +22,22 @@ public static class DroidDatabaseSchema
             version TEXT NOT NULL,
             tags TEXT NOT NULL,
             source TEXT NOT NULL DEFAULT '',
-            length INTEGER NOT NULL DEFAULT 0,
-            bpmMin REAL NOT NULL DEFAULT 0,
-            bpmMax REAL NOT NULL DEFAULT 0,
-            circleSize REAL NOT NULL DEFAULT 0,
+            dateImported INTEGER NOT NULL DEFAULT 0,
             approachRate REAL NOT NULL DEFAULT 0,
             overallDifficulty REAL NOT NULL DEFAULT 0,
+            circleSize REAL NOT NULL DEFAULT 0,
             hpDrainRate REAL NOT NULL DEFAULT 0,
-            sliderMultiplier REAL NOT NULL DEFAULT 0,
-            sliderTickRate REAL NOT NULL DEFAULT 0,
-            starRating REAL,
-            localOffset INTEGER NOT NULL DEFAULT 0,
-            dateAdded INTEGER NOT NULL DEFAULT 0,
-            lastModified INTEGER NOT NULL DEFAULT 0,
+            droidStarRating REAL,
+            standardStarRating REAL,
+            bpmMax REAL NOT NULL DEFAULT 0,
+            bpmMin REAL NOT NULL DEFAULT 0,
+            mostCommonBPM REAL NOT NULL DEFAULT 0,
+            length INTEGER NOT NULL DEFAULT 0,
+            previewTime INTEGER NOT NULL DEFAULT -1,
+            hitCircleCount INTEGER NOT NULL DEFAULT 0,
+            sliderCount INTEGER NOT NULL DEFAULT 0,
+            spinnerCount INTEGER NOT NULL DEFAULT 0,
+            maxCombo INTEGER NOT NULL DEFAULT 0,
             epilepsyWarning INTEGER NOT NULL DEFAULT 0,
             PRIMARY KEY(filename, setDirectory)
         )
@@ -100,6 +103,20 @@ public static class DroidDatabaseSchema
         $"PRAGMA user_version = {DroidDatabaseConstants.CurrentVersion}",
     };
 
+    public static IReadOnlyList<DatabaseColumn> BeatmapInfoColumns { get; } = new[]
+    {
+        new DatabaseColumn("dateImported", "INTEGER NOT NULL DEFAULT 0"),
+        new DatabaseColumn("droidStarRating", "REAL"),
+        new DatabaseColumn("standardStarRating", "REAL"),
+        new DatabaseColumn("mostCommonBPM", "REAL NOT NULL DEFAULT 0"),
+        new DatabaseColumn("previewTime", "INTEGER NOT NULL DEFAULT -1"),
+        new DatabaseColumn("hitCircleCount", "INTEGER NOT NULL DEFAULT 0"),
+        new DatabaseColumn("sliderCount", "INTEGER NOT NULL DEFAULT 0"),
+        new DatabaseColumn("spinnerCount", "INTEGER NOT NULL DEFAULT 0"),
+        new DatabaseColumn("maxCombo", "INTEGER NOT NULL DEFAULT 0"),
+        new DatabaseColumn("epilepsyWarning", "INTEGER NOT NULL DEFAULT 0"),
+    };
+
     public static IReadOnlyList<string> RequiredTables { get; } = new[]
     {
         "BeatmapInfo",
@@ -111,3 +128,5 @@ public static class DroidDatabaseSchema
         "ModPreset",
     };
 }
+
+public sealed record DatabaseColumn(string Name, string Definition);

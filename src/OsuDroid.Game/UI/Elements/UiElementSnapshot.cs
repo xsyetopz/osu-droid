@@ -15,4 +15,6 @@ public sealed record UiElementSnapshot(
     float CornerRadius = 0f,
     UiMaterialIcon? MaterialIcon = null,
     UiCornerMode CornerMode = UiCornerMode.All,
-    float RotationDegrees = 0f);
+    float RotationDegrees = 0f,
+    string? ExternalAssetPath = null,
+    UiSpriteFit SpriteFit = UiSpriteFit.Stretch);

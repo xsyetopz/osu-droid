@@ -36,3 +36,8 @@
 
 ## UI porting
 - Follow [`docs/ui-porting-guidelines.md`](ui-porting-guidelines.md) when translating legacy Android screens to shared MonoGame UI.
+
+## iOS platform services
+- iOS currently uses a direct MonoGame `UIApplicationDelegate` host, so shared-game platform services must be attached in `Platforms/iOS/AppDelegate.cs`.
+- Android/MAUI host wiring in `MainPage` does not affect the current iOS game instance.
+- See [`docs/ios-monogame-input.md`](ios-monogame-input.md) for the text-input trap and keyboard wiring pattern.

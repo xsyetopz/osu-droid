@@ -11,6 +11,7 @@ public sealed record DroidGamePathLayout
         Scores = Path.Combine(CoreRoot, "Scores");
         Databases = Path.Combine(CoreRoot, "databases");
         Log = Path.Combine(CoreRoot, "Log");
+        Downloads = Path.Combine(CacheRoot, "Downloads");
         NoMedia = Path.Combine(CoreRoot, ".nomedia");
     }
 
@@ -28,6 +29,8 @@ public sealed record DroidGamePathLayout
 
     public string Log { get; }
 
+    public string Downloads { get; }
+
     public string NoMedia { get; }
 
     public string GetDatabasePath(string buildType) => Path.Combine(Databases, $"room-{buildType}.db");
@@ -41,6 +44,7 @@ public sealed record DroidGamePathLayout
         Directory.CreateDirectory(Databases);
         Directory.CreateDirectory(Log);
         Directory.CreateDirectory(CacheRoot);
+        Directory.CreateDirectory(Downloads);
 
         if (!File.Exists(NoMedia))
             File.WriteAllText(NoMedia, string.Empty);

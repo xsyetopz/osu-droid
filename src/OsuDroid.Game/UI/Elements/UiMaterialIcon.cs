@@ -4,6 +4,12 @@ public enum UiMaterialIcon
 {
     ArrowBack,
     ArrowDropDown,
+    Refresh,
+    Search,
+    Tune,
+    PlayArrow,
+    Pause,
+    Download,
     ChevronRight,
     Check,
     CheckboxBlankOutline,

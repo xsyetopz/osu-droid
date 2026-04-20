@@ -21,9 +21,8 @@ public sealed partial class OptionsScene
 
     private static void AddAppBar(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        elements.Add(Fill("options-appbar", new UiRect(0f, 0f, viewport.VirtualWidth, AppBarHeight), appBarBackground));
-        elements.Add(Fill("options-back-hit", new UiRect(0f, 0f, AppBarHeight, AppBarHeight), selectedSection, 1f, UiAction.OptionsBack));
-        elements.Add(MaterialIcon("options-back", UiMaterialIcon.ArrowBack, new UiRect(16f * AndroidDpScale, 16f * AndroidDpScale, SectionIconSize, SectionIconSize), white, 1f, UiAction.OptionsBack));
+        DroidSceneChrome.AddAppBar(elements, "options", viewport.VirtualWidth, appBarBackground);
+        DroidSceneChrome.AddBackButton(elements, "options", UiAction.OptionsBack, selectedSection, white);
     }
 
     private void AddSections(List<UiElementSnapshot> elements, VirtualViewport viewport, OptionsSection selectedSectionValue, float activeSectionScrollOffset)

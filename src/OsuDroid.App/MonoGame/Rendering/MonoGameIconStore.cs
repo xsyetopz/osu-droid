@@ -71,6 +71,12 @@ internal sealed class MonoGameIconStore(GraphicsDevice graphicsDevice) : IDispos
     {
         UiMaterialIcon.ArrowBack => MaterialIconKind.ArrowBack,
         UiMaterialIcon.ArrowDropDown => MaterialIconKind.ArrowDropDown,
+        UiMaterialIcon.Refresh => MaterialIconKind.Refresh,
+        UiMaterialIcon.Search => MaterialIconKind.Magnify,
+        UiMaterialIcon.Tune => MaterialIconKind.Tune,
+        UiMaterialIcon.PlayArrow => MaterialIconKind.PlayArrow,
+        UiMaterialIcon.Pause => MaterialIconKind.Pause,
+        UiMaterialIcon.Download => MaterialIconKind.Download,
         UiMaterialIcon.ChevronRight => MaterialIconKind.ChevronRight,
         UiMaterialIcon.Check => MaterialIconKind.Check,
         UiMaterialIcon.CheckboxBlankOutline => MaterialIconKind.CheckboxBlankOutline,
