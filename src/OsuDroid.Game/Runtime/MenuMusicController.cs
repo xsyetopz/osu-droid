@@ -1,56 +1,12 @@
 namespace OsuDroid.Game.Runtime;
 
-public enum MenuMusicCommand
-{
-    None,
-    Previous,
-    Play,
-    Pause,
-    Stop,
-    Next,
-}
 
-public interface IMenuMusicController
-{
-    MenuMusicCommand LastCommand { get; }
 
-    MenuNowPlayingState State { get; }
-
-    void SetPreviewPlayer(IBeatmapPreviewPlayer player);
-
-    void Queue(MenuTrack track, bool play);
-
-    void Execute(MenuMusicCommand command);
-
-    void Update(TimeSpan elapsed);
-
-    bool TryReadSpectrum1024(float[] destination);
-}
-
-public sealed class NoOpMenuMusicController : IMenuMusicController
-{
-    public MenuMusicCommand LastCommand { get; private set; }
-
-    public MenuNowPlayingState State { get; private set; } = new();
-
-    public void SetPreviewPlayer(IBeatmapPreviewPlayer player)
-    {
-    }
-
-    public void Queue(MenuTrack track, bool play) => State = MenuMusicStateFactory.Create(track, false);
-
-    public void Execute(MenuMusicCommand command) => LastCommand = command;
-
-    public void Update(TimeSpan elapsed)
-    {
-    }
-
-    public bool TryReadSpectrum1024(float[] destination) => false;
-}
 
 public sealed class PreviewMenuMusicController(IBeatmapPreviewPlayer initialPreviewPlayer) : IMenuMusicController
 {
     private readonly List<MenuTrack> queue = [];
+    private readonly Dictionary<string, int> queueIndexByIdentity = new(StringComparer.Ordinal);
     private IBeatmapPreviewPlayer previewPlayer = initialPreviewPlayer;
     private int currentIndex = -1;
 
@@ -62,13 +18,15 @@ public sealed class PreviewMenuMusicController(IBeatmapPreviewPlayer initialPrev
 
     public void Queue(MenuTrack track, bool play)
     {
+        var start = PerfDiagnostics.Start();
         var wasPlayingBefore = State.IsPlaying;
-        var existing = queue.FindIndex(item => item.Identity == track.Identity);
+        var existing = queueIndexByIdentity.GetValueOrDefault(track.Identity, -1);
         var wasCurrentTrack = false;
         if (existing < 0)
         {
             queue.Add(track);
             currentIndex = queue.Count - 1;
+            queueIndexByIdentity[track.Identity] = currentIndex;
         }
         else
         {
@@ -94,8 +52,36 @@ public sealed class PreviewMenuMusicController(IBeatmapPreviewPlayer initialPrev
                 return;
             }
 
-            PlayCurrent();
+            PlayCurrentOrNext();
         }
+
+        PerfDiagnostics.Log("menuMusic.queue", start, $"play={play} queue={queue.Count} current={currentIndex}");
+    }
+
+    public void SetPlaylist(IReadOnlyList<MenuTrack> tracks, int startIndex, bool play)
+    {
+        var start = PerfDiagnostics.Start();
+        queue.Clear();
+        queueIndexByIdentity.Clear();
+
+        for (var i = 0; i < tracks.Count; i++)
+        {
+            queue.Add(tracks[i]);
+            queueIndexByIdentity[tracks[i].Identity] = i;
+        }
+
+        currentIndex = queue.Count == 0 ? -1 : Math.Clamp(startIndex, 0, queue.Count - 1);
+        if (currentIndex < 0)
+        {
+            State = new MenuNowPlayingState();
+            return;
+        }
+
+        State = MenuMusicStateFactory.Create(queue[currentIndex], false);
+        if (play)
+            PlayCurrentOrNext();
+
+        PerfDiagnostics.Log("menuMusic.setPlaylist", start, $"play={play} queue={queue.Count} current={currentIndex}");
     }
 
     public void Execute(MenuMusicCommand command)
@@ -113,7 +99,7 @@ public sealed class PreviewMenuMusicController(IBeatmapPreviewPlayer initialPrev
                     State = State with { IsPlaying = previewPlayer.IsPlaying, PositionMilliseconds = previewPlayer.PositionMilliseconds };
                 }
                 else
-                    PlayCurrent();
+                    PlayCurrentOrNext();
                 break;
             case MenuMusicCommand.Pause:
                 previewPlayer.PausePreview();
@@ -132,19 +118,47 @@ public sealed class PreviewMenuMusicController(IBeatmapPreviewPlayer initialPrev
     public void Update(TimeSpan elapsed)
     {
         if (!State.IsPlaying)
+        {
+            if (currentIndex >= 0 && currentIndex < queue.Count && previewPlayer.IsPlaying)
+            {
+                var track = queue[currentIndex];
+                State = State with
+                {
+                    IsPlaying = true,
+                    PositionMilliseconds = previewPlayer.PositionMilliseconds,
+                    ArtistTitle = track.DisplayTitle,
+                    LengthMilliseconds = Math.Max(track.LengthMilliseconds, 0),
+                    Bpm = track.Bpm,
+                    BeatmapSetDirectory = track.BeatmapSetDirectory,
+                    BeatmapFilename = track.BeatmapFilename,
+                };
+            }
+
             return;
+        }
 
         if (!previewPlayer.IsPlaying)
         {
-            State = State with { IsPlaying = false, PositionMilliseconds = previewPlayer.PositionMilliseconds };
+            if (queue.Count > 1)
+                Step(1);
+            else
+                State = State with { IsPlaying = false, PositionMilliseconds = previewPlayer.PositionMilliseconds };
             return;
         }
 
         var position = previewPlayer.PositionMilliseconds;
         if (position <= 0)
             position = State.PositionMilliseconds + (int)Math.Max(0d, elapsed.TotalMilliseconds);
-        if (State.LengthMilliseconds > 0 && position > State.LengthMilliseconds)
+        if (State.LengthMilliseconds > 0 && position >= State.LengthMilliseconds)
+        {
+            if (queue.Count > 1)
+            {
+                Step(1);
+                return;
+            }
+
             position = State.LengthMilliseconds;
+        }
 
         State = State with { PositionMilliseconds = position };
     }
@@ -157,19 +171,38 @@ public sealed class PreviewMenuMusicController(IBeatmapPreviewPlayer initialPrev
             return;
 
         currentIndex = (currentIndex + queue.Count + direction) % queue.Count;
-        PlayCurrent();
+        PlayCurrentOrNext();
     }
 
-    private void PlayCurrent()
+    private void PlayCurrentOrNext()
     {
-        if (currentIndex < 0 || currentIndex >= queue.Count)
+        if (queue.Count == 0)
             return;
+
+        var attempts = queue.Count;
+        while (attempts-- > 0)
+        {
+            if (TryPlayCurrent())
+                return;
+
+            if (queue.Count <= 1)
+                return;
+
+            currentIndex = (currentIndex + 1) % queue.Count;
+        }
+    }
+
+    private bool TryPlayCurrent()
+    {
+        var start = PerfDiagnostics.Start();
+        if (currentIndex < 0 || currentIndex >= queue.Count)
+            return false;
 
         var track = queue[currentIndex];
         if (!File.Exists(track.AudioPath))
         {
             State = MenuMusicStateFactory.Create(track, false);
-            return;
+            return false;
         }
 
         try
@@ -179,7 +212,7 @@ public sealed class PreviewMenuMusicController(IBeatmapPreviewPlayer initialPrev
         catch
         {
             State = MenuMusicStateFactory.Create(track, false);
-            return;
+            return false;
         }
 
         var isPlaying = previewPlayer.IsPlaying;
@@ -193,28 +226,10 @@ public sealed class PreviewMenuMusicController(IBeatmapPreviewPlayer initialPrev
             BeatmapSetDirectory = track.BeatmapSetDirectory,
             BeatmapFilename = track.BeatmapFilename,
         };
+        PerfDiagnostics.Log("menuMusic.playCurrent", start, $"identity=\"{track.Identity}\" isPlaying={isPlaying}");
+        return isPlaying;
     }
 
 }
 
-internal static class MenuMusicStateFactory
-{
-    public static MenuNowPlayingState Create(MenuTrack track, bool isPlaying) => new(
-        track.DisplayTitle,
-        isPlaying,
-        Math.Clamp(track.PreviewTimeMilliseconds, 0, Math.Max(track.LengthMilliseconds, 0)),
-        Math.Max(track.LengthMilliseconds, 0),
-        track.Bpm,
-        track.BeatmapSetDirectory,
-        track.BeatmapFilename);
-}
 
-public sealed record MenuTrack(
-    string Identity,
-    string DisplayTitle,
-    string AudioPath,
-    int PreviewTimeMilliseconds,
-    int LengthMilliseconds = 0,
-    float Bpm = 0f,
-    string? BeatmapSetDirectory = null,
-    string? BeatmapFilename = null);

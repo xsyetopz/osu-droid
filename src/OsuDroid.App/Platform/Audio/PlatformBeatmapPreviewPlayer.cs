@@ -9,12 +9,16 @@ using Foundation;
 
 namespace OsuDroid.App.Platform.Audio;
 
-public sealed class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer, IDisposable
+public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer, IDisposable
 {
     private const int SpectrumSize = 512;
 
     private readonly object playbackGate = new();
+    private readonly SemaphoreSlim playSignal = new(0);
     private readonly float[] spectrumFrame = new float[SpectrumSize];
+    private PreviewRequest? pendingPlayRequest;
+    private Task? playWorker;
+    private long playGeneration;
     private int channel;
 #if IOS
     private AVAudioPlayer? fallbackPlayer;
@@ -69,28 +73,42 @@ public sealed class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer, IDispo
 
         lock (playbackGate)
         {
-            if (!BassAudioEngine.EnsureReady())
+            pendingPlayRequest = new PreviewRequest(audioPath, previewTimeMilliseconds, ++playGeneration);
+            playWorker ??= Task.Run(ProcessPlayRequests);
+        }
+
+        playSignal.Release();
+    }
+
+    private async Task ProcessPlayRequests()
+    {
+        while (true)
+        {
+            await playSignal.WaitAsync().ConfigureAwait(false);
+
+            PreviewRequest? request;
+            lock (playbackGate)
             {
-                PlayFallbackLocked(audioPath, previewTimeMilliseconds);
-                return;
+                if (disposed)
+                    return;
+
+                request = pendingPlayRequest;
+                pendingPlayRequest = null;
             }
 
-            FreeCurrentChannel();
-            var handle = CreateLocalPlaybackStream(audioPath);
-            if (handle == 0)
+            if (request is null)
+                continue;
+
+            while (playSignal.Wait(0))
             {
-                PlayFallbackLocked(audioPath, previewTimeMilliseconds);
-                return;
+                lock (playbackGate)
+                {
+                    request = pendingPlayRequest ?? request;
+                    pendingPlayRequest = null;
+                }
             }
 
-            channel = handle;
-            SeekLocked(previewTimeMilliseconds);
-            if (!Bass.ChannelPlay(channel, false))
-            {
-                BassAudioEngine.LogBassError($"BASS_ChannelPlay({Path.GetFileName(audioPath)})");
-                FreeCurrentChannel();
-                PlayFallbackLocked(audioPath, previewTimeMilliseconds);
-            }
+            PlayLatestRequest(request);
         }
     }
 
@@ -149,7 +167,11 @@ public sealed class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer, IDispo
     public void StopPreview()
     {
         lock (playbackGate)
+        {
+            pendingPlayRequest = null;
+            playGeneration++;
             FreeCurrentChannel();
+        }
     }
 
     public bool TryReadSpectrum1024(float[] destination)
@@ -181,87 +203,7 @@ public sealed class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer, IDispo
 
         disposed = true;
         StopPreview();
+        playSignal.Release();
     }
-
-    private static int CreateLocalPlaybackStream(string audioPath)
-    {
-        var flags = BassFlags.Prescan | BassFlags.AutoFree;
-        var stream = Bass.CreateStream(audioPath, 0L, 0L, flags);
-        if (stream == 0)
-            stream = Bass.CreateStream(audioPath, 0L, 0L, flags | BassFlags.Unicode);
-        if (stream == 0)
-        {
-            BassAudioEngine.LogBassError($"BASS_StreamCreateFile({audioPath})");
-            return 0;
-        }
-
-        _ = Bass.ChannelSetAttribute(stream, ChannelAttribute.Buffer, 0.03f);
-        return stream;
-    }
-
-    private void PlayFallbackLocked(string audioPath, int previewTimeMilliseconds)
-    {
-#if IOS
-        FreeFallbackPlayer();
-        try
-        {
-            using var url = NSUrl.FromFilename(audioPath);
-            fallbackPlayer = AVAudioPlayer.FromUrl(url);
-            if (fallbackPlayer is null)
-            {
-                Console.Error.WriteLine($"[osu-droid] AVAudioPlayer.FromUrl failed: {audioPath}");
-                return;
-            }
-
-            fallbackPlayer.PrepareToPlay();
-            if (previewTimeMilliseconds > 0)
-                fallbackPlayer.CurrentTime = previewTimeMilliseconds / 1000d;
-            fallbackPlayer.Play();
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"[osu-droid] AVAudioPlayer fallback exception: {ex}");
-            FreeFallbackPlayer();
-        }
-#endif
-    }
-
-    private void SeekLocked(int milliseconds)
-    {
-        if (channel == 0 || milliseconds <= 0)
-            return;
-
-        var bytes = Bass.ChannelSeconds2Bytes(channel, milliseconds / 1000d);
-        if (bytes >= 0 && !Bass.ChannelSetPosition(channel, bytes, PositionFlags.Bytes))
-            BassAudioEngine.LogBassError("BASS_ChannelSetPosition");
-    }
-
-    private void FreeCurrentChannel()
-    {
-        if (channel == 0)
-        {
-#if IOS
-            FreeFallbackPlayer();
-#endif
-            return;
-        }
-
-        Bass.ChannelStop(channel);
-        Bass.StreamFree(channel);
-        channel = 0;
-        Array.Clear(spectrumFrame, 0, spectrumFrame.Length);
-#if IOS
-        FreeFallbackPlayer();
-#endif
-    }
-
-#if IOS
-    private void FreeFallbackPlayer()
-    {
-        fallbackPlayer?.Stop();
-        fallbackPlayer?.Dispose();
-        fallbackPlayer = null;
-    }
-#endif
 }
 #endif

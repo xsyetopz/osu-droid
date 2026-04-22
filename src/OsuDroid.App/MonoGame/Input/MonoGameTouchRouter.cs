@@ -1,6 +1,7 @@
 #if ANDROID || IOS
 using Microsoft.Xna.Framework.Input.Touch;
 using OsuDroid.Game;
+using OsuDroid.Game.Runtime;
 using OsuDroid.Game.UI;
 
 namespace OsuDroid.App.MonoGame.Input;
@@ -45,6 +46,8 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
                 touchStartedUtc = DateTime.UtcNow;
                 longPressFired = false;
                 core.PressUiAction(pressedAction);
+                if (PerfDiagnostics.Enabled)
+                    Console.WriteLine($"osu!droid perf phase=input.pressed action={pressedAction}");
                 continue;
             }
 
@@ -85,7 +88,9 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
             if (element is null || element.Action == UiAction.None)
                 continue;
 
+            var start = PerfDiagnostics.Start();
             core.HandleUiAction(element.Action, currentFrame.Viewport);
+            PerfDiagnostics.Log("input.releasedAction", start, $"pressed={pressedAction} released={element.Action}");
             break;
         }
     }

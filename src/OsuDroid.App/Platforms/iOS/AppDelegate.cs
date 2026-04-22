@@ -1,8 +1,10 @@
 using Foundation;
 using OsuDroid.App.MonoGame;
+using OsuDroid.App.MonoGame.Bootstrap;
 using OsuDroid.App.Platform.Audio;
 using OsuDroid.App.Platform.Input;
 using OsuDroid.Game;
+using OsuDroid.Game.Runtime;
 using OsuDroid.Game.Runtime.Paths;
 using UIKit;
 
@@ -19,16 +21,27 @@ public sealed class AppDelegate : UIApplicationDelegate
     public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
     {
         application.IdleTimerDisabled = true;
-        var core = OsuDroidGameCore.Create(GetPathRoots(), BuildType);
         textInputService = new PlatformTextInputService();
         previewPlayer = new PlatformBeatmapPreviewPlayer();
         menuSfxPlayer = new PlatformMenuSfxPlayer(Path.Combine(NSBundle.MainBundle.ResourcePath!, "assets", "droid", "sfx"));
-        textInputService.Attach();
-        core.AttachPlatformServices(textInputService, previewPlayer, menuSfxPlayer);
 
-        game = new OsuDroidMonoGame(core);
+        var bootstrapper = new GameBootstrapper(
+            () => OsuDroidGameCore.Create(GetPathRoots(), BuildType, DisplayVersion, showStartupScene: true),
+            AttachPlatformServices);
+
+        game = new OsuDroidMonoGame(bootstrapper);
         game.Run();
         return true;
+    }
+
+    private void AttachPlatformServices(OsuDroidGameCore core)
+    {
+        var audioStart = PerfDiagnostics.Start();
+        _ = BassAudioEngine.EnsureReady();
+        PerfDiagnostics.Log("bootstrap.bassInit", audioStart);
+        menuSfxPlayer?.Preload("welcome", "welcome_piano", "seeya", "menuclick", "menuhit", "menuback", "click-short", "click-short-confirm", "check-on", "check-off");
+        textInputService?.Attach();
+        core.AttachPlatformServices(textInputService, previewPlayer, menuSfxPlayer);
     }
 
     public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations(UIApplication application, UIWindow? forWindow) =>
@@ -58,6 +71,9 @@ public sealed class AppDelegate : UIApplicationDelegate
 #endif
         }
     }
+
+    private static string DisplayVersion =>
+        NSBundle.MainBundle.InfoDictionary?["CFBundleShortVersionString"]?.ToString() ?? "1.0";
 
     private static DroidPathRoots GetPathRoots()
     {

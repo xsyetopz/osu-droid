@@ -45,7 +45,8 @@ public sealed record GameServices(
     IBeatmapDifficultyService? BeatmapDifficultyService = null,
     IGameSettingsStore? SettingsStore = null,
     IMenuSfxPlayer? MenuSfxPlayer = null,
-    OnlineProfileSnapshot? OnlineProfile = null)
+    OnlineProfileSnapshot? OnlineProfile = null,
+    bool ShowStartupScene = false)
 {
     public string CorePath => Paths.CoreRoot;
 }

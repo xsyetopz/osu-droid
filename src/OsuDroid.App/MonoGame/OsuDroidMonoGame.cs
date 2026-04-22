@@ -2,9 +2,12 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Maui.ApplicationModel;
+using OsuDroid.App.MonoGame.Bootstrap;
 using OsuDroid.App.MonoGame.Input;
 using OsuDroid.App.MonoGame.Rendering;
 using OsuDroid.Game;
+using OsuDroid.Game.Runtime;
+using OsuDroid.Game.Scenes;
 using OsuDroid.Game.UI;
 using System.Diagnostics;
 using XnaColor = Microsoft.Xna.Framework.Color;
@@ -21,14 +24,16 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
     private static readonly TimeSpan WarmupBudget = TimeSpan.FromMilliseconds(4);
     private static readonly TimeSpan DrawLogThreshold = TimeSpan.FromMilliseconds(16);
 
-    private readonly OsuDroidGameCore core;
     private readonly GraphicsDeviceManager graphics;
-    private readonly MonoGameTouchRouter touchRouter;
     private readonly RenderWarmupQueue warmupQueue = new();
+    private readonly GameBootstrapper? bootstrapper;
+    private OsuDroidGameCore? core;
+    private MonoGameTouchRouter? touchRouter;
     private MonoGameUiRenderer? renderer;
     private SpriteBatch? spriteBatch;
     private UiFrameSnapshot? frame;
     private VirtualViewport? warmupViewport;
+    private TimeSpan bootstrapElapsed;
     private string? lastRenderBoundsLog;
     private bool hasRenderedFrame;
     private readonly bool showRenderDiagnostics = IsRenderDiagnosticsEnabled();
@@ -37,7 +42,21 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
     public OsuDroidMonoGame(OsuDroidGameCore core)
     {
         this.core = core;
+        Content.RootDirectory = "Content";
         touchRouter = new MonoGameTouchRouter(core);
+        graphics = new GraphicsDeviceManager(this)
+        {
+            SupportedOrientations = XnaDisplayOrientation.LandscapeLeft | XnaDisplayOrientation.LandscapeRight,
+            IsFullScreen = true,
+            PreferMultiSampling = true,
+        };
+        IsMouseVisible = false;
+    }
+
+    public OsuDroidMonoGame(GameBootstrapper bootstrapper)
+    {
+        this.bootstrapper = bootstrapper;
+        Content.RootDirectory = "Content";
         graphics = new GraphicsDeviceManager(this)
         {
             SupportedOrientations = XnaDisplayOrientation.LandscapeLeft | XnaDisplayOrientation.LandscapeRight,
@@ -56,7 +75,10 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
     protected override void LoadContent()
     {
         spriteBatch = new SpriteBatch(GraphicsDevice);
-        renderer = new MonoGameUiRenderer(GraphicsDevice);
+        renderer = new MonoGameUiRenderer(GraphicsDevice, Content);
+        var preloadStart = PerfDiagnostics.Start();
+        renderer.PreloadStatic(DroidAssets.StartupManifest);
+        PerfDiagnostics.Log("bootstrap.contentPreload", preloadStart);
         LogRenderBoundsIfChanged("LoadContent");
     }
 
@@ -70,9 +92,32 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
     protected override void Update(GameTime gameTime)
     {
         LogRenderBoundsIfChanged("Update");
+        bootstrapElapsed += gameTime.ElapsedGameTime;
+        frame ??= CreateCurrentFrame();
+        if (core is null)
+        {
+            bootstrapper?.Start();
+            if (bootstrapper?.TryConsumeCore(out var loadedCore) == true)
+            {
+                core = loadedCore;
+                touchRouter = new MonoGameTouchRouter(core);
+                frame = CreateCurrentFrame();
+            }
+            else
+            {
+                frame = CreateBootstrapFrame();
+                base.Update(gameTime);
+                return;
+            }
+        }
+
+        var inputStart = PerfDiagnostics.Start();
+        touchRouter?.Route(frame);
+        PerfDiagnostics.Log("monoGame.routeInput", inputStart);
         core.Update(gameTime.ElapsedGameTime);
+        var frameStart = PerfDiagnostics.Start();
         frame = CreateCurrentFrame();
-        touchRouter.Route(frame);
+        PerfDiagnostics.Log("monoGame.createCurrentFrame", frameStart, $"elements={frame.Elements.Count}");
         OpenPendingExternalUrl();
         base.Update(gameTime);
     }
@@ -80,12 +125,12 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
     protected override void Draw(GameTime gameTime)
     {
         frame ??= CreateCurrentFrame();
-        GraphicsDevice.Clear(new XnaColor(70, 129, 252));
+        GraphicsDevice.Clear(XnaColor.Black);
 
         if (spriteBatch is not null && renderer is not null)
         {
             var drawMetrics = showRenderDiagnostics ? new RenderCacheMetrics() : null;
-            var drawStart = showRenderDiagnostics ? Stopwatch.GetTimestamp() : 0L;
+            var drawStart = showRenderDiagnostics || PerfDiagnostics.Enabled ? Stopwatch.GetTimestamp() : 0L;
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.LinearClamp);
             renderer.Draw(spriteBatch, frame, drawMetrics);
 
@@ -93,8 +138,9 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
                 renderer.DrawDiagnostics(spriteBatch, CreateRenderDiagnostics());
 
             spriteBatch.End();
+            PerfDiagnostics.Log("monoGame.draw", drawStart, $"elements={frame.Elements.Count}");
             LogDrawMetrics(drawStart, drawMetrics);
-            RunWarmup(frame.Viewport);
+            RunWarmup(frame);
         }
 
         base.Draw(gameTime);
@@ -143,7 +189,18 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         var viewport = VirtualViewport.FromSurface(
             GraphicsDevice.Viewport.Width,
             GraphicsDevice.Viewport.Height);
+        if (core is null)
+            return BootstrapLoadingScene.CreateSnapshot(viewport, bootstrapper?.Progress ?? new BootstrapLoadingProgress(0, "Loading skin..."), bootstrapElapsed).UiFrame;
+
         return core.CreateFrame(viewport).UiFrame;
+    }
+
+    private UiFrameSnapshot CreateBootstrapFrame()
+    {
+        var viewport = VirtualViewport.FromSurface(
+            GraphicsDevice.Viewport.Width,
+            GraphicsDevice.Viewport.Height);
+        return BootstrapLoadingScene.CreateSnapshot(viewport, bootstrapper?.Progress ?? new BootstrapLoadingProgress(0, "Loading skin..."), bootstrapElapsed).UiFrame;
     }
 
     private RenderBoundsDiagnostics CreateRenderDiagnostics()
@@ -179,9 +236,9 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         Console.WriteLine(message);
     }
 
-    private void RunWarmup(VirtualViewport viewport)
+    private void RunWarmup(UiFrameSnapshot activeFrame)
     {
-        if (renderer is null || touchRouter.IsPointerActive)
+        if (renderer is null || core is null || touchRouter?.IsPointerActive == true)
             return;
 
         if (!hasRenderedFrame)
@@ -190,6 +247,18 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
             return;
         }
 
+        var metrics = new RenderCacheMetrics();
+        var start = Stopwatch.GetTimestamp();
+        var deadline = DateTime.UtcNow + WarmupBudget;
+        _ = renderer.WarmUp(activeFrame, 0, deadline, metrics);
+
+        if (showRenderDiagnostics && (metrics.WarmupElements > 0 || metrics.HasCacheMisses))
+        {
+            var elapsed = Stopwatch.GetElapsedTime(start);
+            Console.WriteLine($"osu!droid render-cache phase=active-warmup elapsedMs={elapsed.TotalMilliseconds:0.###} {metrics}");
+        }
+
+        var viewport = activeFrame.Viewport;
         if (warmupViewport != viewport)
         {
             warmupViewport = viewport;
@@ -199,8 +268,8 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         if (warmupQueue.IsComplete)
             return;
 
-        var metrics = new RenderCacheMetrics();
-        var start = Stopwatch.GetTimestamp();
+        metrics = new RenderCacheMetrics();
+        start = Stopwatch.GetTimestamp();
         warmupQueue.Run(renderer, WarmupBudget, metrics);
 
         if (showRenderDiagnostics && (metrics.WarmupElements > 0 || metrics.HasCacheMisses))
@@ -224,6 +293,9 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
 
     private void OpenPendingExternalUrl()
     {
+        if (core is null)
+            return;
+
         var pendingUrl = core.ConsumePendingExternalUrl();
         if (pendingUrl is null)
             return;

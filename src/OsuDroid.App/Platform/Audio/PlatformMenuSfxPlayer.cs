@@ -8,11 +8,12 @@ namespace OsuDroid.App.Platform.Audio;
 public sealed class PlatformMenuSfxPlayer(string assetsRoot) : IMenuSfxPlayer, IDisposable
 {
     private readonly ConcurrentDictionary<string, string> paths = new(StringComparer.Ordinal);
-    private readonly ConcurrentBag<int> activeChannels = [];
+    private readonly ConcurrentDictionary<string, int> channels = new(StringComparer.Ordinal);
     private bool disposed;
 
     public void Play(string key)
     {
+        var start = PerfDiagnostics.Start();
         if (disposed || !BassAudioEngine.EnsureReady())
             return;
 
@@ -20,48 +21,56 @@ public sealed class PlatformMenuSfxPlayer(string assetsRoot) : IMenuSfxPlayer, I
         if (!File.Exists(path))
             return;
 
-        var channel = Bass.CreateStream(path, 0L, 0L, BassFlags.AutoFree);
+        var channel = channels.GetOrAdd(key, _ => CreateChannel(path, key));
         if (channel == 0)
-            channel = Bass.CreateStream(path, 0L, 0L, BassFlags.AutoFree | BassFlags.Unicode);
-        if (channel == 0)
-        {
-            BassAudioEngine.LogBassError($"BASS_StreamCreateFile(sfx:{key})");
             return;
-        }
 
-        activeChannels.Add(channel);
         if (!Bass.ChannelPlay(channel, true))
         {
             BassAudioEngine.LogBassError($"BASS_ChannelPlay(sfx:{key})");
-            Bass.StreamFree(channel);
+            if (channels.TryRemove(key, out var failed))
+                Bass.StreamFree(failed);
         }
 
-        TrimFinishedChannels();
+        PerfDiagnostics.Log("audio.sfxPlay", start, $"key={key}");
+    }
+
+    public void Preload(params string[] keys)
+    {
+        var start = PerfDiagnostics.Start();
+        if (disposed || !BassAudioEngine.EnsureReady())
+            return;
+
+        foreach (var key in keys)
+        {
+            var path = paths.GetOrAdd(key, ResolvePath);
+            if (File.Exists(path))
+                _ = channels.GetOrAdd(key, _ => CreateChannel(path, key));
+        }
+
+        PerfDiagnostics.Log("audio.sfxPreload", start, $"count={keys.Length}");
     }
 
     public void Dispose()
     {
         disposed = true;
-        while (activeChannels.TryTake(out var channel))
+        foreach (var channel in channels.Values)
         {
             Bass.ChannelStop(channel);
             Bass.StreamFree(channel);
         }
+
+        channels.Clear();
     }
 
-    private void TrimFinishedChannels()
+    private static int CreateChannel(string path, string key)
     {
-        var keep = new List<int>();
-        while (activeChannels.TryTake(out var channel))
-        {
-            if (Bass.ChannelIsActive(channel) == PlaybackState.Stopped)
-                Bass.StreamFree(channel);
-            else
-                keep.Add(channel);
-        }
-
-        foreach (var channel in keep)
-            activeChannels.Add(channel);
+        var channel = Bass.CreateStream(path, 0L, 0L, BassFlags.Default);
+        if (channel == 0)
+            channel = Bass.CreateStream(path, 0L, 0L, BassFlags.Unicode);
+        if (channel == 0)
+            BassAudioEngine.LogBassError($"BASS_StreamCreateFile(sfx:{key})");
+        return channel;
     }
 
     private string ResolvePath(string key) => Path.Combine(assetsRoot, $"{key}.ogg");
