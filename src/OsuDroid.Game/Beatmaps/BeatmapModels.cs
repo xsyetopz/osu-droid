@@ -58,18 +58,6 @@ public sealed record BeatmapInfo(
         : Math.Clamp(PreviewTime < 0 ? 0 : PreviewTime, 0, (int)Math.Min(Length, int.MaxValue));
 }
 
-public sealed record BeatmapSetInfo(int? Id, string Directory, IReadOnlyList<BeatmapInfo> Beatmaps)
-{
-    public int Count => Beatmaps.Count;
 
-    public string GetPath(string songsPath) => Path.Combine(songsPath, Directory);
-}
 
-public sealed record BeatmapOptions(string SetDirectory, bool IsFavorite = false, int Offset = 0);
 
-public sealed record BeatmapCollection(string Name, int BeatmapCount = 0, bool ContainsSelectedSet = false);
-
-public sealed record BeatmapLibrarySnapshot(IReadOnlyList<BeatmapSetInfo> Sets)
-{
-    public static BeatmapLibrarySnapshot Empty { get; } = new([]);
-}
