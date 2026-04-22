@@ -75,13 +75,14 @@ internal sealed class MonoGameTextStore(GraphicsDevice graphicsDevice)
 #if IOS
     private Texture2D CreateIosTexture(TextKey key)
     {
+        var safeText = SanitizeForPlatformText(key.Text);
         using var font = key.Bold ? UIFont.BoldSystemFontOfSize(key.Size) : UIFont.SystemFontOfSize(key.Size);
         var attributes = new UIStringAttributes
         {
             Font = font,
             ForegroundColor = UIColor.FromRGBA(key.Red, key.Green, key.Blue, key.Alpha),
         };
-        using var nsText = new NSString(key.Text);
+        using var nsText = new NSString(safeText);
         var measured = nsText.GetSizeUsingAttributes(attributes);
         var width = Math.Max(1, (int)Math.Ceiling(measured.Width) + 4);
         var height = Math.Max(1, (int)Math.Ceiling(measured.Height) + 4);
@@ -97,6 +98,42 @@ internal sealed class MonoGameTextStore(GraphicsDevice graphicsDevice)
 
         using var stream = data.AsStream();
         return Texture2D.FromStream(graphicsDevice, stream);
+    }
+
+    private static string SanitizeForPlatformText(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return string.Empty;
+
+        var builder = new System.Text.StringBuilder(text.Length);
+        for (var i = 0; i < text.Length; i++)
+        {
+            var current = text[i];
+            if (char.IsHighSurrogate(current))
+            {
+                if (i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+                {
+                    builder.Append(current);
+                    builder.Append(text[i + 1]);
+                    i++;
+                }
+                else
+                {
+                    builder.Append('\uFFFD');
+                }
+                continue;
+            }
+
+            if (char.IsLowSurrogate(current))
+            {
+                builder.Append('\uFFFD');
+                continue;
+            }
+
+            builder.Append(current);
+        }
+
+        return builder.ToString();
     }
 #endif
 

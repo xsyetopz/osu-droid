@@ -87,6 +87,45 @@ public sealed class BeatmapDownloaderTests
     }
 
     [Test]
+    public async Task SearchParserKeepsOnlyOsuStandardDifficulties()
+    {
+        var client = new OsuDirectMirrorClient(new HttpClient(new JsonHandler("""
+            [
+              {
+                "id": 123,
+                "title": "Mixed",
+                "artist": "Artist",
+                "ranked": 1,
+                "creator": "Mapper",
+                "beatmaps": [
+                  { "id": 1, "version": "Standard", "mode_int": 0, "difficulty_rating": 2.1 },
+                  { "id": 2, "version": "Taiko", "mode_int": 1, "difficulty_rating": 3.1 },
+                  { "id": 3, "version": "Catch", "mode": "fruits", "difficulty_rating": 4.1 },
+                  { "id": 4, "version": "Mania", "ruleset": "mania", "difficulty_rating": 5.1 }
+                ]
+              },
+              {
+                "id": 124,
+                "title": "Nonstandard",
+                "artist": "Artist",
+                "ranked": 1,
+                "creator": "Mapper",
+                "beatmaps": [
+                  { "id": 5, "version": "Taiko", "ruleset_id": 1, "difficulty_rating": 3.1 }
+                ]
+              }
+            ]
+            """)));
+
+        var sets = await client.SearchAsync(new BeatmapMirrorSearchRequest("mixed"), CancellationToken.None).ConfigureAwait(false);
+
+        Assert.That(sets, Has.Count.EqualTo(1));
+        Assert.That(sets[0].Beatmaps, Has.Count.EqualTo(1));
+        Assert.That(sets[0].Beatmaps[0].Version, Is.EqualTo("Standard"));
+        Assert.That(sets[0].Beatmaps[0].Mode, Is.EqualTo(0));
+    }
+
+    [Test]
     public void DownloaderBackButtonUsesSharedMaterialIcon()
     {
         var scene = CreateScene();
@@ -205,7 +244,28 @@ public sealed class BeatmapDownloaderTests
         Assert.That(frame.Elements.Any(element => element.Text?.Contains('⬇') == true || element.Text?.Contains('▶') == true), Is.False);
     }
 
+    [Test]
+    public void DownloaderHeaderRendersAboveScrolledCards()
+    {
+        var scene = CreateScene();
+        SetSets(scene, Enumerable.Range(0, 20).Select(_ => CreateSet()).ToArray());
+        var viewport = VirtualViewport.LegacyLandscape;
 
+        scene.Scroll(360f * DroidUiMetrics.DpScale, viewport);
+
+        var frame = scene.CreateSnapshot(viewport).UiFrame;
+        var cardIndex = ElementIndex(frame, "downloader-card-0");
+        var appBarIndex = ElementIndex(frame, "downloader-appbar");
+        var searchIndex = ElementIndex(frame, "downloader-search");
+        var backIndex = ElementIndex(frame, "downloader-back");
+        var card = frame.Elements[cardIndex];
+
+        Assert.That(card.Bounds.Y, Is.LessThan(DroidUiMetrics.AppBarHeight));
+        Assert.That(cardIndex, Is.LessThan(appBarIndex));
+        Assert.That(cardIndex, Is.LessThan(searchIndex));
+        Assert.That(cardIndex, Is.LessThan(backIndex));
+        Assert.That(frame.HitTest(new UiPoint(20f * DroidUiMetrics.DpScale, 20f * DroidUiMetrics.DpScale))!.Action, Is.EqualTo(UiAction.DownloaderBack));
+    }
 
     [Test]
     public void StatusPillUsesAndroidPanelColorAndCenteredText()
@@ -353,6 +413,18 @@ public sealed class BeatmapDownloaderTests
         typeof(BeatmapDownloaderScene).GetField("sets", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(scene, sets);
     }
 
+    private static int ElementIndex(UiFrameSnapshot frame, string id)
+    {
+        for (var index = 0; index < frame.Elements.Count; index++)
+        {
+            if (frame.Elements[index].Id == id)
+                return index;
+        }
+
+        Assert.Fail($"Missing element {id}");
+        return -1;
+    }
+
     private static BeatmapMirrorSet CreateSet() => new(
         BeatmapMirrorKind.OsuDirect,
         100,
@@ -365,8 +437,8 @@ public sealed class BeatmapDownloaderTests
         null,
         false,
         [
-            new BeatmapMirrorBeatmap(1, "Normal", 2.4f, 5, 4, 5, 5, 120, 90, 10, 20, 0),
-            new BeatmapMirrorBeatmap(2, "Hard", 5.1f, 8, 4, 6, 8, 180, 120, 50, 40, 1),
+            new BeatmapMirrorBeatmap(1, "Normal", 2.4f, 5, 4, 5, 5, 120, 90, 10, 20, 0, 0),
+            new BeatmapMirrorBeatmap(2, "Hard", 5.1f, 8, 4, 6, 8, 180, 120, 50, 40, 1, 0),
         ]);
 
     private sealed class CapturingTextInputService : ITextInputService

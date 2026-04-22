@@ -67,7 +67,8 @@ public sealed record BeatmapMirrorBeatmap(
     int HitLength,
     int CircleCount,
     int SliderCount,
-    int SpinnerCount);
+    int SpinnerCount,
+    int Mode);
 
 public sealed record BeatmapMirrorSet(
     BeatmapMirrorKind Mirror,

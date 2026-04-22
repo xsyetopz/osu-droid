@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using OsuDroid.Game.Beatmaps.Difficulty;
 
 namespace OsuDroid.Game.Beatmaps;
 
@@ -15,9 +16,13 @@ public sealed class BeatmapFileParser
         var events = sections.GetValueOrDefault("Events") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var timingPoints = sections.GetValueOrDefault("TimingPoints") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var hitObjects = sections.GetValueOrDefault("HitObjects") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (GetRulesetMode(general) != 0)
+            throw new NotSupportedException("Only osu!standard beatmaps are supported.");
+
         var beatmapTimes = ParseHitObjects(hitObjects.Values);
         var bpm = ParseBpm(timingPoints.Values, beatmapTimes.LastTime);
         var setDirectory = Path.GetRelativePath(songsPath, Path.GetDirectoryName(osuFilePath) ?? songsPath);
+        var ratings = CalculateStarRatings(osuFilePath);
 
         return new BeatmapInfo(
             Filename: Path.GetFileName(osuFilePath),
@@ -41,8 +46,8 @@ public sealed class BeatmapFileParser
             OverallDifficulty: ParseFloat(difficulty.GetValueOrDefault("OverallDifficulty")),
             CircleSize: ParseFloat(difficulty.GetValueOrDefault("CircleSize")),
             HpDrainRate: ParseFloat(difficulty.GetValueOrDefault("HPDrainRate")),
-            DroidStarRating: null,
-            StandardStarRating: null,
+            DroidStarRating: ratings.Droid,
+            StandardStarRating: ratings.Standard,
             BpmMax: bpm.Max,
             BpmMin: bpm.Min,
             MostCommonBpm: bpm.Common,
@@ -53,6 +58,49 @@ public sealed class BeatmapFileParser
             SpinnerCount: beatmapTimes.Spinners,
             MaxCombo: beatmapTimes.Circles + beatmapTimes.Sliders + beatmapTimes.Spinners,
             EpilepsyWarning: ParseInt(general.GetValueOrDefault("EpilepsyWarning")) == 1);
+    }
+
+    public static bool IsStandardRulesetFile(string osuFilePath)
+    {
+        try
+        {
+            return ReadRulesetMode(osuFilePath) == 0;
+        }
+        catch
+        {
+            return true;
+        }
+    }
+
+    private static int ReadRulesetMode(string path)
+    {
+        var inGeneral = false;
+        foreach (var rawLine in File.ReadLines(path, Encoding.UTF8))
+        {
+            var line = rawLine.Trim();
+            if (line.Length == 0 || line.StartsWith("//", StringComparison.Ordinal))
+                continue;
+
+            if (line[0] == '[' && line[^1] == ']')
+            {
+                if (inGeneral)
+                    return 0;
+
+                inGeneral = string.Equals(line[1..^1], "General", StringComparison.OrdinalIgnoreCase);
+                continue;
+            }
+
+            if (!inGeneral)
+                continue;
+
+            var separator = line.IndexOf(':', StringComparison.Ordinal);
+            if (separator <= 0 || !string.Equals(line[..separator].Trim(), "Mode", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            return ParseInt(line[(separator + 1)..].Trim()) ?? 0;
+        }
+
+        return 0;
     }
 
     private static Dictionary<string, Dictionary<string, string>> ReadSections(string path)
@@ -95,6 +143,8 @@ public sealed class BeatmapFileParser
 
         return sections;
     }
+
+    private static int GetRulesetMode(IReadOnlyDictionary<string, string> general) => ParseInt(general.GetValueOrDefault("Mode")) ?? 0;
 
     private static string? ParseBackgroundFilename(IEnumerable<string> eventLines)
     {
@@ -181,6 +231,18 @@ public sealed class BeatmapFileParser
     }
 
     private static string NormalizeSetDirectory(string path) => path.Replace(Path.DirectorySeparatorChar, '/').Replace(Path.AltDirectorySeparatorChar, '/');
+
+    private static BeatmapStarRatings CalculateStarRatings(string osuFilePath)
+    {
+        try
+        {
+            return new BeatmapDifficultyCalculator().Calculate(osuFilePath);
+        }
+        catch (Exception)
+        {
+            return new BeatmapStarRatings(null, null);
+        }
+    }
 
     private static int? ParseInt(string? text) => int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) ? parsed : null;
 

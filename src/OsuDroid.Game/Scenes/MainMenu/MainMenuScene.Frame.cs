@@ -168,29 +168,14 @@ public sealed partial class MainMenuScene
             DroidAssets.MenuBackground));
     }
 
-    private static void AddProfileShell(List<UiElementSnapshot> elements)
+    private void AddProfileShell(List<UiElementSnapshot> elements)
     {
-        elements.Add(new UiElementSnapshot(
-            "profile-panel",
-            UiElementKind.Fill,
+        OnlineProfilePanelSnapshots.Add(
+            elements,
+            "profile",
             new UiRect(OnlinePanelX, OnlinePanelY, OnlinePanelWidth, OnlinePanelHeight),
-            onlinePanelBackground,
-            1f));
-
-        elements.Add(new UiElementSnapshot(
-            "profile-avatar-footer",
-            UiElementKind.Fill,
-            new UiRect(OnlinePanelX, OnlinePanelY, OnlinePanelAvatarFooterSize, OnlinePanelAvatarFooterSize),
-            onlinePanelAvatarFooter,
-            1f));
-
-        elements.Add(new UiElementSnapshot(
-            "profile-avatar",
-            UiElementKind.Sprite,
-            new UiRect(OnlinePanelX, OnlinePanelY, OnlinePanelAvatarFooterSize, OnlinePanelAvatarFooterSize),
-            white,
-            1f,
-            DroidAssets.EmptyAvatar));
+            OnlinePanelAvatarFooterSize,
+            profile);
     }
 
     private void AddVersionPill(List<UiElementSnapshot> elements, VirtualViewport viewport)
@@ -230,6 +215,8 @@ public sealed partial class MainMenuScene
 
         var rotation = Lerp(0f, ExitLogoRotationDegrees, exitProgress);
 
+        AddLogoSpectrumBars(elements, baseLogoBounds);
+
         elements.Add(new UiElementSnapshot(
             "logo",
             UiElementKind.Sprite,
@@ -248,6 +235,38 @@ public sealed partial class MainMenuScene
             0.2f,
             DroidAssets.Logo,
             RotationDegrees: rotation));
+    }
+
+    private void AddLogoSpectrumBars(List<UiElementSnapshot> elements, UiRect baseLogoBounds)
+    {
+        if (!nowPlaying.IsPlaying || !hasRawSpectrum)
+            return;
+
+        var centerX = baseLogoBounds.X + baseLogoBounds.Width * 0.5f;
+        var centerY = baseLogoBounds.Y + baseLogoBounds.Height * 0.5f;
+
+        const float barHeight = 10f / MainMenuReferenceToVirtualScale;
+        const float baselineWidth = 250f / MainMenuReferenceToVirtualScale;
+        for (var i = 0; i < SpectrumBarCount; i++)
+        {
+            var width = baselineWidth + spectrumPeakLevel[i];
+            if (width <= 0.1f || spectrumPeakAlpha[i] <= 0.001f)
+                continue;
+
+            var angle = -220f + i * 3f;
+            var alpha = Math.Clamp(spectrumPeakAlpha[i], 0f, 0.4f);
+
+            elements.Add(new UiElementSnapshot(
+                $"logo-spectrum-{i}",
+                UiElementKind.Fill,
+                new UiRect(centerX, centerY - barHeight * 0.5f, width, barHeight),
+                white,
+                alpha,
+                CornerRadius: 0f,
+                RotationDegrees: angle,
+                RotationOriginX: 0f,
+                RotationOriginY: 0.5f));
+        }
     }
 
 }

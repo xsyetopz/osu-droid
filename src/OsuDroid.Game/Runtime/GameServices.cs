@@ -1,8 +1,10 @@
 using OsuDroid.Game.Beatmaps;
+using OsuDroid.Game.Beatmaps.Difficulty;
 using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Beatmaps.Online;
 using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Runtime.Paths;
+using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Runtime;
 
@@ -18,7 +20,14 @@ public sealed class ManualGameClock : IGameClock
     public void Advance(TimeSpan elapsed) => Elapsed = elapsed;
 }
 
-public sealed record MenuNowPlayingState(string? ArtistTitle = null, bool IsPlaying = false);
+public sealed record MenuNowPlayingState(
+    string? ArtistTitle = null,
+    bool IsPlaying = false,
+    int PositionMilliseconds = 0,
+    int LengthMilliseconds = 0,
+    float Bpm = 0f,
+    string? BeatmapSetDirectory = null,
+    string? BeatmapFilename = null);
 
 public sealed record GameServices(
     DroidDatabase Database,
@@ -32,7 +41,11 @@ public sealed record GameServices(
     IBeatmapDownloadService? BeatmapDownloadService = null,
     IBeatmapMirrorClient? BeatmapMirrorClient = null,
     ITextInputService? TextInputService = null,
-    IBeatmapPreviewPlayer? BeatmapPreviewPlayer = null)
+    IBeatmapPreviewPlayer? BeatmapPreviewPlayer = null,
+    IBeatmapDifficultyService? BeatmapDifficultyService = null,
+    IGameSettingsStore? SettingsStore = null,
+    IMenuSfxPlayer? MenuSfxPlayer = null,
+    OnlineProfileSnapshot? OnlineProfile = null)
 {
     public string CorePath => Paths.CoreRoot;
 }

@@ -129,6 +129,10 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
             {
                 foreach (var beatmapElement in beatmapsElement.EnumerateArray())
                 {
+                    var mode = GetMode(beatmapElement);
+                    if (mode is not 0)
+                        continue;
+
                     beatmaps.Add(new BeatmapMirrorBeatmap(
                         Id: GetInt64(beatmapElement, "id"),
                         Version: GetString(beatmapElement, "version"),
@@ -141,9 +145,13 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
                         HitLength: GetInt32(beatmapElement, "hit_length"),
                         CircleCount: GetInt32(beatmapElement, "count_circles"),
                         SliderCount: GetInt32(beatmapElement, "count_sliders"),
-                        SpinnerCount: GetInt32(beatmapElement, "count_spinners")));
+                        SpinnerCount: GetInt32(beatmapElement, "count_spinners"),
+                        Mode: mode));
                 }
             }
+
+            if (beatmaps.Count == 0)
+                continue;
 
             sets.Add(new BeatmapMirrorSet(
                 Mirror: mirror,
@@ -213,4 +221,38 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
     private static string GetString(JsonElement element, string name) => element.TryGetProperty(name, out var property) && property.ValueKind == JsonValueKind.String ? property.GetString() ?? string.Empty : string.Empty;
 
     private static bool GetBoolean(JsonElement element, string name) => element.TryGetProperty(name, out var property) && property.ValueKind == JsonValueKind.True;
+
+    private static int GetMode(JsonElement element)
+    {
+        foreach (var name in new[] { "mode_int", "ruleset_id", "mode" })
+        {
+            if (!element.TryGetProperty(name, out var property))
+                continue;
+
+            if (property.ValueKind == JsonValueKind.Number && property.TryGetInt32(out var number))
+                return number;
+
+            if (property.ValueKind == JsonValueKind.String)
+                return ParseModeString(property.GetString());
+        }
+
+        if (element.TryGetProperty("ruleset", out var ruleset))
+        {
+            if (ruleset.ValueKind == JsonValueKind.Number && ruleset.TryGetInt32(out var number))
+                return number;
+            if (ruleset.ValueKind == JsonValueKind.String)
+                return ParseModeString(ruleset.GetString());
+        }
+
+        return 0;
+    }
+
+    private static int ParseModeString(string? value) => value?.Trim().ToLowerInvariant() switch
+    {
+        null or "" or "osu" or "standard" or "0" => 0,
+        "taiko" or "1" => 1,
+        "fruits" or "catch" or "ctb" or "2" => 2,
+        "mania" or "3" => 3,
+        _ => -1,
+    };
 }

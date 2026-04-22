@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFrameworks Condition="'$(BuildMobile)' != 'true'">net9.0</TargetFrameworks>
@@ -39,28 +39,43 @@
     </ItemGroup>
     <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
         <PackageReference Include="MonoGame.Framework.Android" />
+        <AndroidNativeLibrary Include="Native\Android\**\*.so" />
     </ItemGroup>
     <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
         <InterfaceDefinition Remove="Platforms\iOS\LaunchScreen.storyboard" />
-        <BundleResource Include="Platforms\iOS\LaunchScreen.storyboard"
-                        Link="LaunchScreen.storyboard" />
+        <BundleResource Include="Platforms\iOS\LaunchScreen.storyboard" Link="LaunchScreen.storyboard" />
+        <BundleResource Include="Platforms\iOS\Icons\Icon-60@2x.png" Link="Icon-60@2x.png" />
+        <BundleResource Include="Platforms\iOS\Icons\Icon-60@3x.png" Link="Icon-60@3x.png" />
+        <BundleResource Include="Platforms\iOS\Icons\Icon-76@2x.png" Link="Icon-76@2x.png" />
+        <BundleResource Include="Platforms\iOS\Icons\Icon-83.5@2x.png" Link="Icon-83.5@2x.png" />
     </ItemGroup>
     <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
         <PackageReference Include="MonoGame.Framework.iOS" />
+        <NativeReference Include="Native\iOS\bass.xcframework">
+            <Kind>Framework</Kind>
+            <ForceLoad>true</ForceLoad>
+        </NativeReference>
+        <NativeReference Include="Native\iOS\bass_fx.xcframework">
+            <Kind>Framework</Kind>
+            <ForceLoad>true</ForceLoad>
+        </NativeReference>
+    </ItemGroup>
+    <ItemGroup Condition="'$(BuildMobile)' == 'true' and '$(MobileTarget)' != 'ios'">
+        <MauiIcon Include="Resources\AppIcon\appicon.png" BaseSize="192,192" />
+    </ItemGroup>
+    <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+        <AndroidResource Remove="Platforms\Android\Resources\drawable-*\ic_launcher.png" />
+        <AndroidResource Include="Platforms\Android\Resources\drawable-*\ic_launcher.png" />
     </ItemGroup>
     <ItemGroup Condition="'$(BuildMobile)' == 'true'">
-        <MauiIcon Include="Resources\AppIcon\appicon.png"
-                  BaseSize="192,192" />
-    </ItemGroup>
-    <ItemGroup Condition="'$(BuildMobile)' == 'true'">
-        <MauiAsset Include="Resources\Raw\assets\droid\**\*.png"
-                   LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
-        <MauiAsset Include="Resources\Raw\assets\droid\**\*.jpg"
-                   LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
-        <MauiAsset Include="Resources\Raw\assets\droid\**\*.jpeg"
-                   LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
+        <MauiAsset Include="Resources\Raw\assets\droid\**\*.png" LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
+        <MauiAsset Include="Resources\Raw\assets\droid\**\*.jpg" LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
+        <MauiAsset Include="Resources\Raw\assets\droid\**\*.jpeg" LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
+        <MauiAsset Include="Resources\Raw\assets\droid\**\*.ogg" LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="ManagedBass" />
+        <PackageReference Include="ManagedBass.Fx" />
         <PackageReference Include="Material.Icons" />
         <PackageReference Include="SkiaSharp" />
     </ItemGroup>

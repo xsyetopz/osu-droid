@@ -8,16 +8,29 @@ namespace OsuDroid.App.MonoGame.Input;
 internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
 {
     private const float TouchDragThreshold = 10f;
+    private static readonly TimeSpan LongPressDelay = TimeSpan.FromMilliseconds(500);
 
     private int? activeTouchId;
     private UiPoint touchStart;
     private UiPoint previousTouch;
+    private DateTime touchStartedUtc;
+    private UiAction pressedAction;
     private bool isTouchDragging;
+    private bool longPressFired;
 
     public bool IsPointerActive => activeTouchId is not null || isTouchDragging;
 
     public void Route(UiFrameSnapshot currentFrame)
     {
+        if (activeTouchId is not null && !isTouchDragging && !longPressFired && DateTime.UtcNow - touchStartedUtc >= LongPressDelay)
+        {
+            if (core.HandleUiLongPress(pressedAction, currentFrame.Viewport))
+            {
+                longPressFired = true;
+                core.ReleaseUiAction();
+            }
+        }
+
         foreach (var touch in TouchPanel.GetState())
         {
             var virtualPoint = currentFrame.Viewport.ToVirtual(touch.Position.X, touch.Position.Y);
@@ -28,7 +41,10 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
                 previousTouch = virtualPoint;
                 isTouchDragging = false;
                 var pressedElement = currentFrame.HitTest(virtualPoint);
-                core.PressUiAction(pressedElement?.Action ?? UiAction.None);
+                pressedAction = pressedElement?.Action ?? UiAction.None;
+                touchStartedUtc = DateTime.UtcNow;
+                longPressFired = false;
+                core.PressUiAction(pressedAction);
                 continue;
             }
 
@@ -42,6 +58,7 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
                 if (!isTouchDragging && MathF.Sqrt(movedX * movedX + movedY * movedY) > TouchDragThreshold)
                 {
                     isTouchDragging = true;
+                    longPressFired = false;
                     core.ReleaseUiAction();
                 }
 
@@ -57,9 +74,10 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
 
             activeTouchId = null;
             core.ReleaseUiAction();
-            if (isTouchDragging)
+            if (isTouchDragging || longPressFired)
             {
                 isTouchDragging = false;
+                longPressFired = false;
                 continue;
             }
 

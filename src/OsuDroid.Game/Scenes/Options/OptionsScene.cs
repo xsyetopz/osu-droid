@@ -54,19 +54,21 @@ public sealed partial class OptionsScene
     private readonly Dictionary<string, bool> boolValues = new(StringComparer.Ordinal);
     private readonly Dictionary<string, int> intValues = new(StringComparer.Ordinal);
     private readonly GameLocalizer localizer;
+    private readonly IGameSettingsStore? settingsStore;
     private OptionsSection activeSection;
     private float contentScrollOffset;
     private float sectionScrollOffset;
 
-    public OptionsScene(GameLocalizer localizer)
+    public OptionsScene(GameLocalizer localizer, IGameSettingsStore? settingsStore = null)
     {
         this.localizer = localizer;
+        this.settingsStore = settingsStore;
         foreach (var row in sections.SelectMany(section => section.Categories).SelectMany(category => category.Rows))
         {
             if (row.Kind == SettingsRowKind.Checkbox)
-                boolValues[row.Key] = row.DefaultChecked;
+                boolValues[row.Key] = settingsStore?.GetBool(row.Key, row.DefaultChecked) ?? row.DefaultChecked;
             else if (row.Kind == SettingsRowKind.Slider)
-                intValues[row.Key] = row.DefaultValue;
+                intValues[row.Key] = settingsStore?.GetInt(row.Key, row.DefaultValue) ?? row.DefaultValue;
         }
     }
 
@@ -210,7 +212,11 @@ public sealed partial class OptionsScene
     private void Toggle(string key)
     {
         if (boolValues.TryGetValue(key, out var value))
-            boolValues[key] = !value;
+        {
+            var updated = !value;
+            boolValues[key] = updated;
+            settingsStore?.SetBool(key, updated);
+        }
     }
 
     private void ClampScroll(VirtualViewport viewport)

@@ -57,8 +57,8 @@ public sealed partial class MainMenuScene
         if (heartbeatMilliseconds < 0d)
             return 1f;
 
-        var growDuration = LogoBeatMilliseconds * 0.9d;
-        var shrinkDuration = LogoBeatMilliseconds * 0.07d;
+        var growDuration = currentBeatMilliseconds * 0.9d;
+        var shrinkDuration = currentBeatMilliseconds * 0.07d;
         if (heartbeatMilliseconds <= growDuration)
             return Lerp(1f, LogoBeatScale, (float)(heartbeatMilliseconds / growDuration));
 

@@ -1,4 +1,5 @@
 using OsuDroid.Game.Beatmaps;
+using OsuDroid.Game.Beatmaps.Difficulty;
 using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Beatmaps.Online;
 using OsuDroid.Game.Compatibility.Database;
@@ -24,25 +25,45 @@ public sealed class OsuDroidGameCore
     private readonly OptionsScene options;
     private readonly BeatmapDownloaderScene beatmapDownloader;
     private readonly SongSelectScene songSelect;
+    private readonly IBeatmapLibrary beatmapLibrary;
     private readonly IMenuMusicController musicController;
+    private readonly IMenuSfxPlayer menuSfxPlayer;
+    private readonly IGameSettingsStore settingsStore;
+    private readonly Random random = new();
+    private readonly float[] menuSpectrumBuffer = new float[512];
     private ITextInputService textInputService;
     private IBeatmapPreviewPlayer previewPlayer;
+    private IMenuSfxPlayer attachedMenuSfxPlayer;
     private ActiveScene activeScene;
+    private bool menuMusicPreviewEnabled;
+    private MenuNowPlayingState? preservedDownloaderMusicState;
 
     public OsuDroidGameCore(GameServices services)
     {
         Services = services;
-        mainMenu = new MainMenuScene(services.DisplayVersion, services.NowPlaying ?? new MenuNowPlayingState());
-        options = new OptionsScene(new GameLocalizer());
+        settingsStore = services.SettingsStore ?? new JsonGameSettingsStore(Path.Combine(services.Paths.CoreRoot, "config", "settings.json"));
+        menuMusicPreviewEnabled = settingsStore.GetBool("musicpreview", true);
+        var profile = services.OnlineProfile ?? OnlineProfileSnapshot.Guest;
+        mainMenu = new MainMenuScene(services.DisplayVersion, services.NowPlaying ?? new MenuNowPlayingState(), profile);
+        options = new OptionsScene(new GameLocalizer(), settingsStore);
         textInputService = services.TextInputService ?? new NoOpTextInputService();
         previewPlayer = services.BeatmapPreviewPlayer ?? new NoOpBeatmapPreviewPlayer();
-        var library = services.BeatmapLibrary ?? CreateBeatmapLibrary(services.Database, services.Paths);
+        var difficultyService = services.BeatmapDifficultyService ?? new BeatmapDifficultyService(new BeatmapLibraryRepository(services.Database), services.Paths.Songs);
+        difficultyService.EnsureCalculatorVersions();
+        beatmapLibrary = services.BeatmapLibrary ?? CreateBeatmapLibrary(services.Database, services.Paths);
+        var initialLibrary = beatmapLibrary.Load();
+        if (initialLibrary.Sets.Count == 0 || beatmapLibrary.NeedsScanRefresh())
+            _ = Task.Run(() => beatmapLibrary.Scan());
         var mirrorClient = services.BeatmapMirrorClient ?? new OsuDirectMirrorClient(new HttpClient());
-        var importService = services.BeatmapImportService ?? new BeatmapImportService(services.Paths, library);
+        var importService = services.BeatmapImportService ?? new BeatmapImportService(services.Paths, beatmapLibrary);
         var downloadService = services.BeatmapDownloadService ?? new BeatmapDownloadService(services.Paths, mirrorClient, importService);
         beatmapDownloader = new BeatmapDownloaderScene(mirrorClient, downloadService, textInputService, previewPlayer, Path.Combine(services.Paths.CacheRoot, "Covers"));
-        songSelect = new SongSelectScene(library, previewPlayer, services.Paths.Songs);
-        musicController = services.MusicController ?? new NoOpMenuMusicController();
+        musicController = services.MusicController ?? new PreviewMenuMusicController(previewPlayer);
+        menuSfxPlayer = services.MenuSfxPlayer ?? new NoOpMenuSfxPlayer();
+        attachedMenuSfxPlayer = menuSfxPlayer;
+        songSelect = new SongSelectScene(beatmapLibrary, musicController, difficultyService, services.Paths.Songs, profile, textInputService);
+        QueueStartupPreview(beatmapLibrary);
+        mainMenu.SetNowPlaying(musicController.State);
     }
 
     public GameServices Services { get; }
@@ -54,20 +75,30 @@ public sealed class OsuDroidGameCore
     public MenuMusicCommand LastMusicCommand => musicController.LastCommand;
 
 
-    public void AttachPlatformServices(ITextInputService? platformTextInputService, IBeatmapPreviewPlayer? platformPreviewPlayer)
+    public void AttachPlatformServices(ITextInputService? platformTextInputService, IBeatmapPreviewPlayer? platformPreviewPlayer, IMenuSfxPlayer? platformMenuSfxPlayer = null)
     {
         if (platformTextInputService is not null)
         {
             textInputService = platformTextInputService;
             beatmapDownloader.SetTextInputService(platformTextInputService);
+            songSelect.SetTextInputService(platformTextInputService);
         }
 
         if (platformPreviewPlayer is not null)
         {
             previewPlayer = platformPreviewPlayer;
+            musicController.SetPreviewPlayer(platformPreviewPlayer);
             songSelect.SetPreviewPlayer(platformPreviewPlayer);
             beatmapDownloader.SetPreviewPlayer(platformPreviewPlayer);
+            if (menuMusicPreviewEnabled && !string.IsNullOrWhiteSpace(musicController.State.ArtistTitle))
+            {
+                musicController.Execute(MenuMusicCommand.Play);
+                mainMenu.SetNowPlaying(musicController.State);
+            }
         }
+
+        if (platformMenuSfxPlayer is not null)
+            attachedMenuSfxPlayer = platformMenuSfxPlayer;
     }
 
     public static OsuDroidGameCore Create(string corePath, string buildType, string displayVersion = "1.0") =>
@@ -83,7 +114,8 @@ public sealed class OsuDroidGameCore
         var mirrorClient = new OsuDirectMirrorClient(new HttpClient());
         var importService = new BeatmapImportService(pathLayout, library);
         var downloadService = new BeatmapDownloadService(pathLayout, mirrorClient, importService);
-        return new OsuDroidGameCore(new GameServices(database, pathLayout, buildType, displayVersion, BeatmapLibrary: library, BeatmapImportService: importService, BeatmapDownloadService: downloadService, BeatmapMirrorClient: mirrorClient));
+        var settingsStore = new JsonGameSettingsStore(Path.Combine(pathLayout.CoreRoot, "config", "settings.json"));
+        return new OsuDroidGameCore(new GameServices(database, pathLayout, buildType, displayVersion, BeatmapLibrary: library, BeatmapImportService: importService, BeatmapDownloadService: downloadService, BeatmapMirrorClient: mirrorClient, SettingsStore: settingsStore));
     }
 
     public GameFrameSnapshot CurrentFrame => CreateFrame(VirtualViewport.LegacyLandscape);
@@ -113,6 +145,10 @@ public sealed class OsuDroidGameCore
 
     public void Update(TimeSpan elapsed)
     {
+        musicController.Update(elapsed);
+        mainMenu.SetNowPlaying(musicController.State);
+        mainMenu.SetSpectrum(menuSpectrumBuffer, musicController.TryReadSpectrum1024(menuSpectrumBuffer));
+
         if (activeScene == ActiveScene.BeatmapDownloader)
         {
             var importedSet = beatmapDownloader.ConsumeImportedSetDirectory();
@@ -121,6 +157,12 @@ public sealed class OsuDroidGameCore
                 activeScene = ActiveScene.SongSelect;
                 songSelect.Enter(importedSet);
             }
+            return;
+        }
+
+        if (activeScene == ActiveScene.SongSelect)
+        {
+            songSelect.Update(elapsed);
             return;
         }
 
@@ -142,15 +184,22 @@ public sealed class OsuDroidGameCore
 
     public void BackToMainMenu(MainMenuReturnTransition transition)
     {
+        var returnBackgroundPath = activeScene == ActiveScene.SongSelect && transition == MainMenuReturnTransition.SongSelectBack
+            ? songSelect.SelectedBackgroundPath
+            : null;
+
         if (activeScene == ActiveScene.SongSelect)
             songSelect.Leave();
         else if (activeScene == ActiveScene.BeatmapDownloader)
+        {
             beatmapDownloader.Leave();
+            RestoreDownloaderMusic();
+        }
 
         activeScene = ActiveScene.MainMenu;
 
         if (transition == MainMenuReturnTransition.SongSelectBack)
-            mainMenu.StartReturnTransition();
+            mainMenu.StartReturnTransition(returnBackgroundPath);
     }
 
     public void PressUiAction(UiAction action)
@@ -171,6 +220,8 @@ public sealed class OsuDroidGameCore
             options.Scroll(deltaY, point, viewport);
         else if (activeScene == ActiveScene.BeatmapDownloader)
             beatmapDownloader.Scroll(deltaY, viewport);
+        else if (activeScene == ActiveScene.SongSelect)
+            songSelect.Scroll(deltaY, point, viewport);
     }
 
     public void ScrollActiveScene(float deltaY, VirtualViewport viewport)
@@ -179,6 +230,8 @@ public sealed class OsuDroidGameCore
             options.Scroll(deltaY, viewport);
         else if (activeScene == ActiveScene.BeatmapDownloader)
             beatmapDownloader.Scroll(deltaY, viewport);
+        else if (activeScene == ActiveScene.SongSelect)
+            songSelect.Scroll(deltaY, viewport);
     }
 
     public MainMenuRoute HandleMainMenu(MainMenuAction action)
@@ -203,8 +256,23 @@ public sealed class OsuDroidGameCore
 
     public void HandleUiAction(UiAction action) => HandleUiAction(action, VirtualViewport.LegacyLandscape);
 
+    public bool HandleUiLongPress(UiAction action, VirtualViewport viewport)
+    {
+        if (activeScene != ActiveScene.SongSelect || !UiActionGroups.TryGetSongSelectDifficultyIndex(action, out var index))
+            return false;
+
+        PlayMenuSfx(UiAction.SongSelectBeatmapOptions);
+        songSelect.OpenPropertiesForDifficulty(index);
+        return true;
+    }
+
     public void HandleUiAction(UiAction action, VirtualViewport viewport)
     {
+        PlayMenuSfx(action);
+
+        if (HandleIndexedUiAction(action))
+            return;
+
         switch (action)
         {
             case UiAction.MainMenuCookie:
@@ -243,28 +311,34 @@ public sealed class OsuDroidGameCore
                 break;
 
             case UiAction.MainMenuBeatmapDownloader:
+                PreserveDownloaderMusic();
                 activeScene = ActiveScene.BeatmapDownloader;
                 beatmapDownloader.Enter();
                 break;
 
             case UiAction.MainMenuMusicPrevious:
                 musicController.Execute(MenuMusicCommand.Previous);
+                mainMenu.SetNowPlaying(musicController.State);
                 break;
 
             case UiAction.MainMenuMusicPlay:
                 musicController.Execute(MenuMusicCommand.Play);
+                mainMenu.SetNowPlaying(musicController.State);
                 break;
 
             case UiAction.MainMenuMusicPause:
                 musicController.Execute(MenuMusicCommand.Pause);
+                mainMenu.SetNowPlaying(musicController.State);
                 break;
 
             case UiAction.MainMenuMusicStop:
                 musicController.Execute(MenuMusicCommand.Stop);
+                mainMenu.SetNowPlaying(musicController.State);
                 break;
 
             case UiAction.MainMenuMusicNext:
                 musicController.Execute(MenuMusicCommand.Next);
+                mainMenu.SetNowPlaying(musicController.State);
                 break;
 
             case UiAction.OptionsBack:
@@ -396,28 +470,6 @@ public sealed class OsuDroidGameCore
                 beatmapDownloader.SetStatus(BeatmapRankedStatus.Graveyard);
                 break;
 
-            case UiAction.DownloaderCard0:
-            case UiAction.DownloaderCard1:
-            case UiAction.DownloaderCard2:
-            case UiAction.DownloaderCard3:
-            case UiAction.DownloaderCard4:
-            case UiAction.DownloaderCard5:
-            case UiAction.DownloaderCard6:
-            case UiAction.DownloaderCard7:
-                beatmapDownloader.SelectCard(BeatmapDownloaderScene.CardIndex(action));
-                break;
-
-            case UiAction.DownloaderPreview0:
-            case UiAction.DownloaderPreview1:
-            case UiAction.DownloaderPreview2:
-            case UiAction.DownloaderPreview3:
-            case UiAction.DownloaderPreview4:
-            case UiAction.DownloaderPreview5:
-            case UiAction.DownloaderPreview6:
-            case UiAction.DownloaderPreview7:
-                beatmapDownloader.PreviewCard(BeatmapDownloaderScene.PreviewIndex(action));
-                break;
-
             case UiAction.DownloaderDetailsClose:
                 beatmapDownloader.CloseDetails();
                 break;
@@ -435,25 +487,6 @@ public sealed class OsuDroidGameCore
 
             case UiAction.DownloaderDetailsDownloadNoVideo:
                 beatmapDownloader.DownloadDetails(false);
-                break;
-
-            case UiAction.DownloaderDetailsDifficulty0:
-            case UiAction.DownloaderDetailsDifficulty1:
-            case UiAction.DownloaderDetailsDifficulty2:
-            case UiAction.DownloaderDetailsDifficulty3:
-            case UiAction.DownloaderDetailsDifficulty4:
-            case UiAction.DownloaderDetailsDifficulty5:
-            case UiAction.DownloaderDetailsDifficulty6:
-            case UiAction.DownloaderDetailsDifficulty7:
-            case UiAction.DownloaderDetailsDifficulty8:
-            case UiAction.DownloaderDetailsDifficulty9:
-            case UiAction.DownloaderDetailsDifficulty10:
-            case UiAction.DownloaderDetailsDifficulty11:
-            case UiAction.DownloaderDetailsDifficulty12:
-            case UiAction.DownloaderDetailsDifficulty13:
-            case UiAction.DownloaderDetailsDifficulty14:
-            case UiAction.DownloaderDetailsDifficulty15:
-                beatmapDownloader.SelectDetailsDifficulty(BeatmapDownloaderScene.DifficultyIndex(action));
                 break;
 
             case UiAction.DownloaderDownloadCancel:
@@ -485,16 +518,83 @@ public sealed class OsuDroidGameCore
                 BackToMainMenu(MainMenuReturnTransition.SongSelectBack);
                 break;
 
-            case UiAction.SongSelectFirstSet:
-            case UiAction.SongSelectSet0:
-            case UiAction.SongSelectSet1:
-            case UiAction.SongSelectSet2:
-            case UiAction.SongSelectSet3:
-            case UiAction.SongSelectSet4:
-            case UiAction.SongSelectSet5:
-            case UiAction.SongSelectSet6:
-            case UiAction.SongSelectSet7:
-                songSelect.SelectSet(SongSelectScene.SetIndex(action));
+            case UiAction.SongSelectBeatmapOptions:
+                songSelect.OpenBeatmapOptions();
+                break;
+
+            case UiAction.SongSelectBeatmapOptionsSearch:
+                songSelect.FocusBeatmapOptionsSearch(viewport);
+                break;
+
+            case UiAction.SongSelectBeatmapOptionsFavorite:
+                songSelect.ToggleBeatmapOptionsFavoriteOnly();
+                break;
+
+            case UiAction.SongSelectBeatmapOptionsAlgorithm:
+                songSelect.ToggleBeatmapOptionsAlgorithm();
+                break;
+
+            case UiAction.SongSelectBeatmapOptionsSort:
+                songSelect.CycleBeatmapOptionsSort();
+                break;
+
+            case UiAction.SongSelectBeatmapOptionsFolder:
+                songSelect.ToggleCollectionFilterPicker();
+                break;
+
+            case UiAction.SongSelectPropertiesDismiss:
+                songSelect.ClosePopups();
+                break;
+
+            case UiAction.SongSelectPropertiesPanel:
+                break;
+
+            case UiAction.SongSelectPropertiesOffsetInput:
+                songSelect.FocusOffsetInput(viewport);
+                break;
+
+            case UiAction.SongSelectPropertiesOffsetMinus:
+                songSelect.AdjustOffset(-1);
+                break;
+
+            case UiAction.SongSelectPropertiesOffsetPlus:
+                songSelect.AdjustOffset(1);
+                break;
+
+            case UiAction.SongSelectPropertiesFavorite:
+                songSelect.ToggleFavorite();
+                break;
+
+            case UiAction.SongSelectPropertiesManageCollections:
+                songSelect.OpenCollections();
+                break;
+
+            case UiAction.SongSelectPropertiesDelete:
+                songSelect.RequestDeleteBeatmap();
+                break;
+
+            case UiAction.SongSelectPropertiesDeleteConfirm:
+                songSelect.ConfirmDeleteBeatmap();
+                break;
+
+            case UiAction.SongSelectPropertiesDeleteCancel:
+                songSelect.CancelDeleteBeatmap();
+                break;
+
+            case UiAction.SongSelectCollectionsNewFolder:
+                songSelect.FocusNewCollectionInput(viewport);
+                break;
+
+            case UiAction.SongSelectCollectionsClose:
+                songSelect.CloseCollections();
+                break;
+
+            case UiAction.SongSelectCollectionDeleteConfirm:
+                songSelect.ConfirmDeleteCollection();
+                break;
+
+            case UiAction.SongSelectCollectionDeleteCancel:
+                songSelect.CancelDeleteCollection();
                 break;
 
             case UiAction.OptionsSectionGeneral:
@@ -511,9 +611,62 @@ public sealed class OsuDroidGameCore
             case UiAction.OptionsToggleShiftPitch:
             case UiAction.OptionsToggleBeatmapSounds:
                 if (activeScene == ActiveScene.Options)
+                {
                     options.HandleAction(action, viewport);
+                    if (action == UiAction.OptionsToggleMusicPreview)
+                        ApplyMusicPreviewSetting();
+                }
                 break;
         }
+    }
+
+    private bool HandleIndexedUiAction(UiAction action)
+    {
+        if (UiActionGroups.TryGetDownloaderCardIndex(action, out var downloaderCardIndex))
+        {
+            beatmapDownloader.SelectCard(downloaderCardIndex);
+            return true;
+        }
+
+        if (UiActionGroups.TryGetDownloaderPreviewIndex(action, out var downloaderPreviewIndex))
+        {
+            beatmapDownloader.PreviewCard(downloaderPreviewIndex);
+            return true;
+        }
+
+        if (UiActionGroups.TryGetDownloaderDetailsDifficultyIndex(action, out var downloaderDetailsDifficultyIndex))
+        {
+            beatmapDownloader.SelectDetailsDifficulty(downloaderDetailsDifficultyIndex);
+            return true;
+        }
+
+        if (UiActionGroups.TryGetSongSelectSetIndex(action, out var songSelectSetIndex))
+        {
+            songSelect.SelectSet(songSelectSetIndex);
+            mainMenu.SetNowPlaying(musicController.State);
+            return true;
+        }
+
+        if (UiActionGroups.TryGetSongSelectDifficultyIndex(action, out var songSelectDifficultyIndex))
+        {
+            songSelect.SelectDifficulty(songSelectDifficultyIndex);
+            mainMenu.SetNowPlaying(musicController.State);
+            return true;
+        }
+
+        if (UiActionGroups.TryGetSongSelectCollectionToggleIndex(action, out var songSelectCollectionToggleIndex))
+        {
+            songSelect.HandleCollectionPrimaryAction(songSelectCollectionToggleIndex);
+            return true;
+        }
+
+        if (UiActionGroups.TryGetSongSelectCollectionDeleteIndex(action, out var songSelectCollectionDeleteIndex))
+        {
+            songSelect.RequestDeleteCollection(songSelectCollectionDeleteIndex);
+            return true;
+        }
+
+        return false;
     }
 
     public string? ConsumePendingExternalUrl()
@@ -530,7 +683,7 @@ public sealed class OsuDroidGameCore
         else if (route == MainMenuRoute.Solo)
         {
             activeScene = ActiveScene.SongSelect;
-            songSelect.Enter();
+            songSelect.Enter(musicController.State.BeatmapSetDirectory, musicController.State.BeatmapFilename);
         }
     }
 
@@ -539,4 +692,163 @@ public sealed class OsuDroidGameCore
         var repository = new BeatmapLibraryRepository(database);
         return new BeatmapLibrary(pathLayout, repository);
     }
+
+    private void ApplyMusicPreviewSetting()
+    {
+        menuMusicPreviewEnabled = options.GetBoolValue("musicpreview");
+        if (!menuMusicPreviewEnabled)
+        {
+            musicController.Execute(MenuMusicCommand.Stop);
+            mainMenu.SetNowPlaying(musicController.State);
+            return;
+        }
+
+        musicController.Execute(MenuMusicCommand.Play);
+        if (!musicController.State.IsPlaying)
+            QueueStartupPreview(beatmapLibrary);
+
+        mainMenu.SetNowPlaying(musicController.State);
+    }
+
+    private void QueueStartupPreview(IBeatmapLibrary library)
+    {
+        if (!menuMusicPreviewEnabled)
+            return;
+
+        var snapshot = library.Snapshot;
+        if (snapshot.Sets.Count == 0)
+            snapshot = library.Load();
+        if (snapshot.Sets.Count == 0)
+            return;
+
+        var startIndex = random.Next(snapshot.Sets.Count);
+        for (var offset = 0; offset < snapshot.Sets.Count; offset++)
+        {
+            var set = snapshot.Sets[(startIndex + offset) % snapshot.Sets.Count];
+            var beatmap = set.Beatmaps.FirstOrDefault(static map => !string.IsNullOrWhiteSpace(map.AudioFilename));
+            if (beatmap is null)
+                continue;
+
+            var audioPath = beatmap.GetAudioPath(Services.Paths.Songs);
+            if (!File.Exists(audioPath))
+                continue;
+
+            musicController.Queue(
+                new MenuTrack(
+                    $"beatmap:{set.Directory}/{beatmap.Filename}",
+                    $"{DisplayArtist(beatmap)} - {DisplayTitle(beatmap)}",
+                    audioPath,
+                    beatmap.EffectivePreviewTime,
+                    (int)Math.Clamp(beatmap.Length, 0L, int.MaxValue),
+                    beatmap.MostCommonBpm,
+                    set.Directory,
+                    beatmap.Filename),
+                true);
+            return;
+        }
+    }
+
+    private void PreserveDownloaderMusic()
+    {
+        preservedDownloaderMusicState = musicController.State;
+    }
+
+    private void RestoreDownloaderMusic()
+    {
+        if (!menuMusicPreviewEnabled || preservedDownloaderMusicState is not { IsPlaying: true } state)
+            return;
+
+        preservedDownloaderMusicState = null;
+        if (TryQueueBeatmapPreview(state.BeatmapSetDirectory, state.BeatmapFilename, true))
+            mainMenu.SetNowPlaying(musicController.State);
+    }
+
+    private bool TryQueueBeatmapPreview(string? setDirectory, string? beatmapFilename, bool play)
+    {
+        if (string.IsNullOrWhiteSpace(setDirectory) || string.IsNullOrWhiteSpace(beatmapFilename))
+            return false;
+
+        var snapshot = beatmapLibrary.Snapshot;
+        if (snapshot.Sets.Count == 0)
+            snapshot = beatmapLibrary.Load();
+
+        var set = snapshot.Sets.FirstOrDefault(candidate => string.Equals(candidate.Directory, setDirectory, StringComparison.Ordinal));
+        var beatmap = set?.Beatmaps.FirstOrDefault(candidate => string.Equals(candidate.Filename, beatmapFilename, StringComparison.Ordinal));
+        if (set is null || beatmap is null)
+            return false;
+
+        var audioPath = beatmap.GetAudioPath(Services.Paths.Songs);
+        if (!File.Exists(audioPath))
+            return false;
+
+        musicController.Queue(
+            new MenuTrack(
+                $"beatmap:{set.Directory}/{beatmap.Filename}",
+                $"{DisplayArtist(beatmap)} - {DisplayTitle(beatmap)}",
+                audioPath,
+                beatmap.EffectivePreviewTime,
+                (int)Math.Clamp(beatmap.Length, 0L, int.MaxValue),
+                beatmap.MostCommonBpm,
+                set.Directory,
+                beatmap.Filename),
+            play);
+        return true;
+    }
+
+    private static string DisplayTitle(BeatmapInfo beatmap) => string.IsNullOrWhiteSpace(beatmap.TitleUnicode) ? beatmap.Title : beatmap.TitleUnicode;
+
+    private static string DisplayArtist(BeatmapInfo beatmap) => string.IsNullOrWhiteSpace(beatmap.ArtistUnicode) ? beatmap.Artist : beatmap.ArtistUnicode;
+
+    private void PlayMenuSfx(UiAction action)
+    {
+        var key = MenuSfxKeyFor(action);
+
+        if (key is not null)
+            attachedMenuSfxPlayer.Play(key);
+    }
+
+    private static string? MenuSfxKeyFor(UiAction action)
+    {
+        if (UiActionGroups.IsOptionsSection(action) ||
+            UiActionGroups.IsDownloaderSortChoice(action) ||
+            UiActionGroups.IsDownloaderStatusChoice(action) ||
+            UiActionGroups.TryGetDownloaderDetailsDifficultyIndex(action, out _) ||
+            UiActionGroups.TryGetSongSelectDifficultyIndex(action, out _) ||
+            UiActionGroups.TryGetSongSelectCollectionToggleIndex(action, out _))
+            return "menuclick";
+
+        if (UiActionGroups.IsOptionsToggle(action) ||
+            UiActionGroups.TryGetDownloaderCardIndex(action, out _) ||
+            UiActionGroups.TryGetDownloaderPreviewIndex(action, out _) ||
+            UiActionGroups.TryGetSongSelectCollectionDeleteIndex(action, out _) ||
+            IsBetween(action, UiAction.DownloaderDownload0, UiAction.DownloaderDownloadNoVideo7) ||
+            UiActionGroups.TryGetSongSelectSetIndex(action, out _))
+            return "menuhit";
+
+        return action switch
+        {
+            UiAction.MainMenuCookie or UiAction.MainMenuFirst or UiAction.MainMenuSecond or UiAction.MainMenuThird => "menuhit",
+            UiAction.MainMenuBeatmapDownloader or UiAction.DownloaderDetailsPanel => "menuhit",
+            UiAction.DownloaderDetailsPreview or UiAction.DownloaderDetailsDownload or UiAction.DownloaderDetailsDownloadNoVideo => "menuhit",
+            UiAction.DownloaderDownloadFirst or UiAction.DownloaderDownloadFirstNoVideo => "menuhit",
+            UiAction.SongSelectPropertiesOffsetMinus or UiAction.SongSelectPropertiesOffsetPlus => "menuhit",
+            UiAction.SongSelectPropertiesFavorite or UiAction.SongSelectPropertiesManageCollections or UiAction.SongSelectPropertiesDelete => "menuclick",
+            UiAction.SongSelectPropertiesOffsetInput or UiAction.SongSelectCollectionsNewFolder => "menuclick",
+            UiAction.SongSelectPropertiesDeleteConfirm or UiAction.SongSelectCollectionDeleteConfirm => "menuhit",
+            UiAction.SongSelectPropertiesDeleteCancel or UiAction.SongSelectCollectionDeleteCancel => "menuback",
+            UiAction.SongSelectPropertiesDismiss or UiAction.SongSelectCollectionsClose => "menuback",
+            UiAction.MainMenuVersionPill or UiAction.MainMenuAboutClose or UiAction.MainMenuAboutChangelog => "menuclick",
+            UiAction.MainMenuAboutOsuWebsite or UiAction.MainMenuAboutOsuDroidWebsite or UiAction.MainMenuAboutDiscord => "menuclick",
+            UiAction.MainMenuMusicPrevious or UiAction.MainMenuMusicPlay or UiAction.MainMenuMusicPause => "menuclick",
+            UiAction.MainMenuMusicStop or UiAction.MainMenuMusicNext or UiAction.DownloaderSearchBox => "menuclick",
+            UiAction.SongSelectMods or UiAction.SongSelectBeatmapOptions or UiAction.SongSelectBeatmapOptionsSearch or UiAction.SongSelectBeatmapOptionsFavorite or UiAction.SongSelectBeatmapOptionsAlgorithm or UiAction.SongSelectBeatmapOptionsSort or UiAction.SongSelectBeatmapOptionsFolder or UiAction.SongSelectRandom => "menuclick",
+            UiAction.DownloaderSearchSubmit or UiAction.DownloaderRefresh or UiAction.DownloaderMirrorOsuDirect or UiAction.DownloaderMirrorCatboy => "menuclick",
+            UiAction.DownloaderFilters or UiAction.DownloaderMirror or UiAction.DownloaderSort or UiAction.DownloaderOrder or UiAction.DownloaderStatus => "menuhit",
+            UiAction.OptionsBack or UiAction.DownloaderBack or UiAction.SongSelectBack => "menuback",
+            UiAction.DownloaderDetailsClose or UiAction.DownloaderDownloadCancel => "menuback",
+            _ => null,
+        };
+    }
+
+    private static bool IsBetween(UiAction action, UiAction first, UiAction last) => action >= first && action <= last;
 }

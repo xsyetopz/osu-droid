@@ -58,6 +58,7 @@ public sealed class BeatmapDownloaderScene
     private int previewPlayCount;
     private DateTime lastPreviewStartedUtc;
     private int? previewingSetIndex;
+    private bool ownsPreviewPlayback;
     private int offset;
     private int visibleStartIndex;
     private int? selectedSetIndex;
@@ -106,8 +107,10 @@ public sealed class BeatmapDownloaderScene
     public void Leave()
     {
         HideSearchInput();
-        previewPlayer.StopPreview();
+        if (ownsPreviewPlayback)
+            previewPlayer.StopPreview();
         previewingSetIndex = null;
+        ownsPreviewPlayback = false;
         searchCancellation.Cancel();
         filtersOpen = false;
         sortDropdownOpen = false;
@@ -123,8 +126,11 @@ public sealed class BeatmapDownloaderScene
         if (ReferenceEquals(previewPlayer, player))
             return;
 
-        previewPlayer.StopPreview();
+        if (ownsPreviewPlayback)
+            previewPlayer.StopPreview();
         previewPlayer = player;
+        previewingSetIndex = null;
+        ownsPreviewPlayback = false;
     }
 
     public void FocusSearch(VirtualViewport viewport)
@@ -295,11 +301,11 @@ public sealed class BeatmapDownloaderScene
             Fill("downloader-background", new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), Background),
         };
 
+        AddCards(elements, viewport);
+
         DroidSceneChrome.AddAppBar(elements, "downloader", viewport.VirtualWidth, AppBar);
         DroidSceneChrome.AddBackButton(elements, "downloader", UiAction.DownloaderBack, AppBar, White);
-
         AddTopBar(elements, viewport);
-        AddCards(elements, viewport);
 
         if (filtersOpen)
             AddFilterPanel(elements, viewport);
@@ -690,8 +696,10 @@ public sealed class BeatmapDownloaderScene
 
         if (previewingSetIndex == index)
         {
-            previewPlayer.StopPreview();
+            if (ownsPreviewPlayback)
+                previewPlayer.StopPreview();
             previewingSetIndex = null;
+            ownsPreviewPlayback = false;
             return;
         }
 
@@ -701,9 +709,11 @@ public sealed class BeatmapDownloaderScene
         if (DateTime.UtcNow - lastPreviewStartedUtc >= TimeSpan.FromSeconds(5))
             previewPlayCount = 0;
 
-        previewPlayer.StopPreview();
+        if (ownsPreviewPlayback)
+            previewPlayer.StopPreview();
         previewPlayer.Play(mirrorClient.CreatePreviewUri(sets[index].Mirror, sets[index].Beatmaps[0].Id));
         previewingSetIndex = index;
+        ownsPreviewPlayback = true;
         previewPlayCount++;
         lastPreviewStartedUtc = DateTime.UtcNow;
     }

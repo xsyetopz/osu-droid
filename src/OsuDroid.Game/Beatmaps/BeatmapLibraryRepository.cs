@@ -9,11 +9,41 @@ public interface IBeatmapLibraryRepository
 
     void DeleteBeatmapSets(IReadOnlyList<string> directories);
 
+    void DeleteBeatmapSetData(string directory);
+
+    void UpdateStarRatings(string md5, string setDirectory, string filename, float? droidStarRating, float? standardStarRating);
+
+    long GetDifficultyMetadata(string key);
+
+    void SetDifficultyMetadata(string key, long value);
+
+    void ResetDroidStarRatings();
+
+    void ResetStandardStarRatings();
+
     bool IsBeatmapSetImported(string directory);
 
     IReadOnlyList<string> GetBeatmapSetDirectories();
 
     BeatmapLibrarySnapshot LoadLibrary();
+
+    BeatmapOptions GetBeatmapOptions(string setDirectory);
+
+    void UpsertBeatmapOptions(BeatmapOptions options);
+
+    IReadOnlyList<BeatmapCollection> GetCollections(string? selectedSetDirectory = null);
+
+    IReadOnlySet<string> GetCollectionSetDirectories(string name);
+
+    bool CollectionExists(string name);
+
+    void CreateCollection(string name);
+
+    void DeleteCollection(string name);
+
+    void AddBeatmapToCollection(string name, string setDirectory);
+
+    void RemoveBeatmapFromCollection(string name, string setDirectory);
 }
 
 public sealed class BeatmapLibraryRepository(DroidDatabase database) : IBeatmapLibraryRepository
@@ -55,6 +85,16 @@ public sealed class BeatmapLibraryRepository(DroidDatabase database) : IBeatmapL
         transaction.Commit();
     }
 
+    public void DeleteBeatmapSetData(string directory)
+    {
+        using var connection = database.OpenConnection();
+        using var transaction = connection.BeginTransaction();
+        ExecuteSetDirectoryDelete(connection, transaction, "DELETE FROM BeatmapInfo WHERE setDirectory = $setDirectory", directory);
+        ExecuteSetDirectoryDelete(connection, transaction, "DELETE FROM BeatmapOptions WHERE setDirectory = $setDirectory", directory);
+        ExecuteSetDirectoryDelete(connection, transaction, "DELETE FROM BeatmapSetCollection_BeatmapSetInfo WHERE setDirectory = $setDirectory", directory);
+        transaction.Commit();
+    }
+
     public bool IsBeatmapSetImported(string directory)
     {
         using var connection = database.OpenConnection();
@@ -62,6 +102,68 @@ public sealed class BeatmapLibraryRepository(DroidDatabase database) : IBeatmapL
         command.CommandText = "SELECT EXISTS(SELECT setDirectory FROM BeatmapInfo WHERE setDirectory = $setDirectory LIMIT 1)";
         command.Parameters.AddWithValue("$setDirectory", directory);
         return Convert.ToInt32(command.ExecuteScalar(), System.Globalization.CultureInfo.InvariantCulture) != 0;
+    }
+
+    public void UpdateStarRatings(string md5, string setDirectory, string filename, float? droidStarRating, float? standardStarRating)
+    {
+        using var connection = database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            UPDATE BeatmapInfo
+            SET droidStarRating = $droidStarRating,
+                standardStarRating = $standardStarRating
+            WHERE md5 = $md5
+               OR (setDirectory = $setDirectory AND filename = $filename)
+            """;
+        command.Parameters.AddWithValue("$droidStarRating", droidStarRating is null ? DBNull.Value : droidStarRating.Value);
+        command.Parameters.AddWithValue("$standardStarRating", standardStarRating is null ? DBNull.Value : standardStarRating.Value);
+        command.Parameters.AddWithValue("$md5", md5);
+        command.Parameters.AddWithValue("$setDirectory", setDirectory);
+        command.Parameters.AddWithValue("$filename", filename);
+        command.ExecuteNonQuery();
+    }
+
+    public long GetDifficultyMetadata(string key)
+    {
+        using var connection = database.OpenConnection();
+        EnsureDifficultyMetadataTable(connection);
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT value FROM BeatmapDifficultyMetadata WHERE key = $key";
+        command.Parameters.AddWithValue("$key", key);
+        return command.ExecuteScalar() is { } value
+            ? Convert.ToInt64(value, System.Globalization.CultureInfo.InvariantCulture)
+            : 0L;
+    }
+
+    public void SetDifficultyMetadata(string key, long value)
+    {
+        using var connection = database.OpenConnection();
+        EnsureDifficultyMetadataTable(connection);
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            INSERT INTO BeatmapDifficultyMetadata (key, value)
+            VALUES ($key, $value)
+            ON CONFLICT(key) DO UPDATE SET value = excluded.value
+            """;
+        command.Parameters.AddWithValue("$key", key);
+        command.Parameters.AddWithValue("$value", value);
+        command.ExecuteNonQuery();
+    }
+
+    public void ResetDroidStarRatings()
+    {
+        using var connection = database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = "UPDATE BeatmapInfo SET droidStarRating = NULL";
+        command.ExecuteNonQuery();
+    }
+
+    public void ResetStandardStarRatings()
+    {
+        using var connection = database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = "UPDATE BeatmapInfo SET standardStarRating = NULL";
+        command.ExecuteNonQuery();
     }
 
     public IReadOnlyList<string> GetBeatmapSetDirectories()
@@ -97,6 +199,126 @@ public sealed class BeatmapLibraryRepository(DroidDatabase database) : IBeatmapL
             .ToArray();
 
         return new BeatmapLibrarySnapshot(sets);
+    }
+
+    public BeatmapOptions GetBeatmapOptions(string setDirectory)
+    {
+        using var connection = database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT setDirectory, isFavorite, offset FROM BeatmapOptions WHERE setDirectory = $setDirectory";
+        command.Parameters.AddWithValue("$setDirectory", setDirectory);
+        using var reader = command.ExecuteReader();
+
+        return reader.Read()
+            ? new BeatmapOptions(reader.GetString(0), reader.GetInt32(1) != 0, reader.GetInt32(2))
+            : new BeatmapOptions(setDirectory);
+    }
+
+    public void UpsertBeatmapOptions(BeatmapOptions options)
+    {
+        using var connection = database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            INSERT INTO BeatmapOptions (setDirectory, isFavorite, offset)
+            VALUES ($setDirectory, $isFavorite, $offset)
+            ON CONFLICT(setDirectory) DO UPDATE SET
+                isFavorite = excluded.isFavorite,
+                offset = excluded.offset
+            """;
+        command.Parameters.AddWithValue("$setDirectory", options.SetDirectory);
+        command.Parameters.AddWithValue("$isFavorite", options.IsFavorite ? 1 : 0);
+        command.Parameters.AddWithValue("$offset", Math.Clamp(options.Offset, -250, 250));
+        command.ExecuteNonQuery();
+    }
+
+    public IReadOnlyList<BeatmapCollection> GetCollections(string? selectedSetDirectory = null)
+    {
+        using var connection = database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT c.name,
+                   COUNT(j.setDirectory) AS beatmapCount,
+                   SUM(CASE WHEN j.setDirectory = $selectedSetDirectory THEN 1 ELSE 0 END) AS containsSelected
+            FROM BeatmapSetCollection c
+            LEFT JOIN BeatmapSetCollection_BeatmapSetInfo j ON j.collectionName = c.name
+            GROUP BY c.name
+            ORDER BY LOWER(c.name), c.name
+            """;
+        command.Parameters.AddWithValue("$selectedSetDirectory", selectedSetDirectory ?? string.Empty);
+        using var reader = command.ExecuteReader();
+        var collections = new List<BeatmapCollection>();
+
+        while (reader.Read())
+        {
+            collections.Add(new BeatmapCollection(
+                reader.GetString(0),
+                reader.GetInt32(1),
+                reader.GetInt32(2) > 0));
+        }
+
+        return collections;
+    }
+
+    public IReadOnlySet<string> GetCollectionSetDirectories(string name)
+    {
+        using var connection = database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT setDirectory FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = $name";
+        command.Parameters.AddWithValue("$name", name);
+        using var reader = command.ExecuteReader();
+        var directories = new HashSet<string>(StringComparer.Ordinal);
+
+        while (reader.Read())
+            directories.Add(reader.GetString(0));
+
+        return directories;
+    }
+
+    public bool CollectionExists(string name)
+    {
+        using var connection = database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT EXISTS(SELECT name FROM BeatmapSetCollection WHERE name = $name LIMIT 1)";
+        command.Parameters.AddWithValue("$name", name);
+        return Convert.ToInt32(command.ExecuteScalar(), System.Globalization.CultureInfo.InvariantCulture) != 0;
+    }
+
+    public void CreateCollection(string name)
+    {
+        using var connection = database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = "INSERT OR IGNORE INTO BeatmapSetCollection (name) VALUES ($name)";
+        command.Parameters.AddWithValue("$name", name);
+        command.ExecuteNonQuery();
+    }
+
+    public void DeleteCollection(string name)
+    {
+        using var connection = database.OpenConnection();
+        using var transaction = connection.BeginTransaction();
+        ExecuteCollectionDelete(connection, transaction, "DELETE FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = $name", name);
+        ExecuteCollectionDelete(connection, transaction, "DELETE FROM BeatmapSetCollection WHERE name = $name", name);
+        transaction.Commit();
+    }
+
+    public void AddBeatmapToCollection(string name, string setDirectory)
+    {
+        using var connection = database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = "INSERT OR IGNORE INTO BeatmapSetCollection_BeatmapSetInfo (collectionName, setDirectory) VALUES ($name, $setDirectory)";
+        command.Parameters.AddWithValue("$name", name);
+        command.Parameters.AddWithValue("$setDirectory", setDirectory);
+        command.ExecuteNonQuery();
+    }
+
+    public void RemoveBeatmapFromCollection(string name, string setDirectory)
+    {
+        using var connection = database.OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = "DELETE FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = $name AND setDirectory = $setDirectory";
+        command.Parameters.AddWithValue("$name", name);
+        command.Parameters.AddWithValue("$setDirectory", setDirectory);
+        command.ExecuteNonQuery();
     }
 
     private static void UpsertBeatmap(SqliteConnection connection, SqliteTransaction transaction, BeatmapInfo beatmap)
@@ -152,6 +374,36 @@ public sealed class BeatmapLibraryRepository(DroidDatabase database) : IBeatmapL
         command.Parameters.AddWithValue("$spinnerCount", beatmap.SpinnerCount);
         command.Parameters.AddWithValue("$maxCombo", beatmap.MaxCombo);
         command.Parameters.AddWithValue("$epilepsyWarning", beatmap.EpilepsyWarning ? 1 : 0);
+        command.ExecuteNonQuery();
+    }
+
+    private static void ExecuteSetDirectoryDelete(SqliteConnection connection, SqliteTransaction transaction, string text, string setDirectory)
+    {
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = text;
+        command.Parameters.AddWithValue("$setDirectory", setDirectory);
+        command.ExecuteNonQuery();
+    }
+
+    private static void ExecuteCollectionDelete(SqliteConnection connection, SqliteTransaction transaction, string text, string name)
+    {
+        using var command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = text;
+        command.Parameters.AddWithValue("$name", name);
+        command.ExecuteNonQuery();
+    }
+
+    private static void EnsureDifficultyMetadataTable(SqliteConnection connection)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            CREATE TABLE IF NOT EXISTS BeatmapDifficultyMetadata (
+                key TEXT NOT NULL PRIMARY KEY,
+                value INTEGER NOT NULL
+            )
+            """;
         command.ExecuteNonQuery();
     }
 

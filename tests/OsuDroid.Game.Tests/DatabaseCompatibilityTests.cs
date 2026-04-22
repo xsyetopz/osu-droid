@@ -13,7 +13,7 @@ public sealed class DatabaseCompatibilityTests
     }
 
     [Test]
-    public void SchemaCreatesRequiredTablesAtVersionFour()
+    public void SchemaCreatesRequiredTablesAtCurrentVersion()
     {
         var path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"schema-{Guid.NewGuid():N}.db");
         try
@@ -35,7 +35,7 @@ public sealed class DatabaseCompatibilityTests
 
             using var version = connection.CreateCommand();
             version.CommandText = "PRAGMA user_version";
-            Assert.That(Convert.ToInt32(version.ExecuteScalar(), System.Globalization.CultureInfo.InvariantCulture), Is.EqualTo(4));
+            Assert.That(Convert.ToInt32(version.ExecuteScalar(), System.Globalization.CultureInfo.InvariantCulture), Is.EqualTo(DroidDatabaseConstants.CurrentVersion));
         }
         finally
         {

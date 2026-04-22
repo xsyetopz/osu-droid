@@ -14,6 +14,7 @@ public sealed class MainPage : ContentPage
     private readonly OsuDroidGameCore game;
     private readonly PlatformTextInputService textInputService = new();
     private readonly PlatformBeatmapPreviewPlayer previewPlayer = new();
+    private readonly PlatformMenuSfxPlayer menuSfxPlayer = new(Path.Combine(AppContext.BaseDirectory, "assets", "droid", "sfx"));
     private OsuDroidMonoGame? monoGame;
 
     public MainPage(IServiceProvider services)
@@ -22,7 +23,7 @@ public sealed class MainPage : ContentPage
         BackgroundColor = MauiColor.FromArgb("#4681fc");
         Content = new Grid();
         textInputService.Attach();
-        game.AttachPlatformServices(textInputService, previewPlayer);
+        game.AttachPlatformServices(textInputService, previewPlayer, menuSfxPlayer);
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
     }
@@ -42,6 +43,7 @@ public sealed class MainPage : ContentPage
         monoGame = null;
         textInputService.Detach();
         previewPlayer.StopPreview();
+        menuSfxPlayer.Dispose();
     }
 }
 #endif

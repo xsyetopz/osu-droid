@@ -72,10 +72,24 @@ public sealed partial class MainMenuScene
         var scale = viewport.VirtualWidth / background.NativeSize.Width;
         var width = background.NativeSize.Width * scale;
         var height = background.NativeSize.Height * scale;
+        var bounds = new UiRect((viewport.VirtualWidth - width) / 2f, (viewport.VirtualHeight - height) / 2f, width, height);
+        if (returnTransitionBackgroundPath is not null)
+        {
+            elements.Add(new UiElementSnapshot(
+                "return-background-fade",
+                UiElementKind.Sprite,
+                new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight),
+                white,
+                1f - (float)Math.Clamp(returnTransitionMilliseconds / ReturnBackgroundFadeDurationMilliseconds, 0d, 1d),
+                ExternalAssetPath: returnTransitionBackgroundPath,
+                SpriteFit: UiSpriteFit.Cover));
+            return;
+        }
+
         elements.Add(new UiElementSnapshot(
             "return-background-fade",
             UiElementKind.Sprite,
-            new UiRect((viewport.VirtualWidth - width) / 2f, (viewport.VirtualHeight - height) / 2f, width, height),
+            bounds,
             white,
             1f - (float)Math.Clamp(returnTransitionMilliseconds / ReturnBackgroundFadeDurationMilliseconds, 0d, 1d),
             DroidAssets.MenuBackground));
@@ -83,10 +97,14 @@ public sealed partial class MainMenuScene
 
     private void AddMusicControls(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
+        var nowPlayingBounds = GetAndroidMusicNowPlayingBounds();
+        var titleX = nowPlayingBounds.X + MusicNowPlayingTitleLeftInset;
+        var titleBounds = new UiRect(titleX, nowPlayingBounds.Y + 3f, MusicNowPlayingTitleRightEdge - titleX, 35f);
+
         elements.Add(new UiElementSnapshot(
             "music-now-playing",
             UiElementKind.Sprite,
-            GetAndroidMusicNowPlayingBounds(),
+            nowPlayingBounds,
             white,
             1f,
             DroidAssets.MusicNowPlaying));
@@ -96,11 +114,12 @@ public sealed partial class MainMenuScene
             elements.Add(new UiElementSnapshot(
                 "music-title",
                 UiElementKind.Text,
-                new UiRect(GetAndroidMusicNowPlayingBounds().X + 80f, GetAndroidMusicNowPlayingBounds().Y + 3f, 270f, 35f),
+                titleBounds,
                 white,
                 1f,
                 Text: nowPlaying.ArtistTitle,
-                TextStyle: new UiTextStyle(22f, false, UiTextAlignment.Right)));
+                TextStyle: new UiTextStyle(22f, false, UiTextAlignment.Right),
+                ClipToBounds: true));
         }
 
         AddMusicControl(elements, DroidAssets.MusicPrevious, UiAction.MainMenuMusicPrevious, 6f);
@@ -108,6 +127,8 @@ public sealed partial class MainMenuScene
         AddMusicControl(elements, DroidAssets.MusicPause, UiAction.MainMenuMusicPause, 4f);
         AddMusicControl(elements, DroidAssets.MusicStop, UiAction.MainMenuMusicStop, 3f);
         AddMusicControl(elements, DroidAssets.MusicNext, UiAction.MainMenuMusicNext, 2f);
+
+        AddSongProgress(elements);
     }
 
     private void AddMusicControl(List<UiElementSnapshot> elements, string assetName, UiAction action, float legacyIndex)
@@ -121,6 +142,39 @@ public sealed partial class MainMenuScene
             assetName,
             action));
     }
+
+    private void AddSongProgress(List<UiElementSnapshot> elements)
+    {
+        var progressBounds = new UiRect(MusicProgressX, MusicProgressY, MusicProgressWidth, MusicProgressHeight);
+        elements.Add(new UiElementSnapshot(
+            "music-progress-bg",
+            UiElementKind.Fill,
+            progressBounds,
+            UiColor.Opaque(0, 0, 0),
+            0.3f,
+            CornerRadius: 3f));
+
+        var ratio = GetMusicProgressRatio();
+        if (ratio <= 0f)
+            return;
+
+        elements.Add(new UiElementSnapshot(
+            "music-progress-fg",
+            UiElementKind.Fill,
+            new UiRect(progressBounds.X, progressBounds.Y, progressBounds.Width * ratio, progressBounds.Height),
+            UiColor.Opaque(235, 112, 112),
+            0.8f,
+            CornerRadius: 3f));
+    }
+
+    private float GetMusicProgressRatio()
+    {
+        if (nowPlaying.LengthMilliseconds <= 0)
+            return 0f;
+
+        return Math.Clamp(nowPlaying.PositionMilliseconds / (float)nowPlaying.LengthMilliseconds, 0f, 1f);
+    }
+
 
     private void AddExitOverlay(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {

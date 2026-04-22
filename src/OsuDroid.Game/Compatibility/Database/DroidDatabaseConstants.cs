@@ -4,7 +4,7 @@ namespace OsuDroid.Game.Compatibility.Database;
 
 public static class DroidDatabaseConstants
 {
-    public const int CurrentVersion = 4;
+    public const int CurrentVersion = 5;
     public const string DatabaseDirectory = "databases";
 
     public static string GetDatabaseFileName(string buildType) => $"room-{buildType}.db";

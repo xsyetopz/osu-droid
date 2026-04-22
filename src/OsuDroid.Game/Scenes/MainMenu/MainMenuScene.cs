@@ -22,9 +22,6 @@ public sealed partial class MainMenuScene
     private static readonly UiColor modalPanel = new(24, 24, 38, 255);
     private static readonly UiColor modalDivider = new(42, 42, 60, 255);
     private static readonly UiColor modalLink = new(243, 115, 115, 255);
-    private static readonly UiColor onlinePanelBackground = new(51, 51, 51, 128);
-    private static readonly UiColor onlinePanelAvatarFooter = new(51, 51, 51, 204);
-
     public const float OnlinePanelX = 5f;
     public const float OnlinePanelY = 5f;
     public const float OnlinePanelWidth = 410f;
@@ -36,6 +33,12 @@ public sealed partial class MainMenuScene
     public const float MusicControlRightOffset = 35f;
     public const float MusicNowPlayingXOffset = 500f;
     public const float MusicNowPlayingHeight = 40f;
+    public const float MusicNowPlayingTitleLeftInset = 150f;
+    public const float MusicNowPlayingTitleRightEdge = VirtualViewport.LegacyWidth - 30f;
+    public const float MusicProgressX = VirtualViewport.LegacyWidth - 320f;
+    public const float MusicProgressY = 100f;
+    public const float MusicProgressWidth = 300f;
+    public const float MusicProgressHeight = 7f;
     public const float VersionPillMargin = 10f;
     public const float VersionPillTextXInset = 10f;
     public const float VersionPillTextYInset = 2f;
@@ -73,29 +76,39 @@ public sealed partial class MainMenuScene
     private const float FirstButtonReferenceY = 203f;
     private const float SecondButtonReferenceY = 462f;
     private const float ThirdButtonReferenceY = 721f;
+    private const int SpectrumBarCount = 120;
 
     private static readonly UiColor white = UiColor.Opaque(255, 255, 255);
 
     private readonly string displayVersion;
-    private readonly MenuNowPlayingState nowPlaying;
+    private readonly OnlineProfileSnapshot profile;
+    private MenuNowPlayingState nowPlaying;
     private int selectedIndex;
     private MenuVisibility menuVisibility;
     private double transitionMilliseconds;
     private double shownMilliseconds;
     private double beatMilliseconds;
     private double heartbeatMilliseconds = -1d;
+    private double currentBeatMilliseconds = LogoBeatMilliseconds;
     private double exitMilliseconds;
     private double returnTransitionMilliseconds;
+    private string? returnTransitionBackgroundPath;
     private bool isReturnTransitionActive;
     private bool hasPendingExitRoute;
     private bool exitRoutePublished;
     private bool isAboutDialogOpen;
     private UiAction pressedAction;
+    private readonly float[] spectrumPeakLevel = new float[SpectrumBarCount];
+    private readonly float[] spectrumPeakDownRate = new float[SpectrumBarCount];
+    private readonly float[] spectrumPeakAlpha = new float[SpectrumBarCount];
+    private readonly float[] rawSpectrum = new float[512];
+    private bool hasRawSpectrum;
 
-    public MainMenuScene(string displayVersion = "1.0", MenuNowPlayingState? nowPlaying = null)
+    public MainMenuScene(string displayVersion = "1.0", MenuNowPlayingState? nowPlaying = null, OnlineProfileSnapshot? profile = null)
     {
         this.displayVersion = string.IsNullOrWhiteSpace(displayVersion) ? "1.0" : displayVersion;
         this.nowPlaying = nowPlaying ?? new MenuNowPlayingState();
+        this.profile = profile ?? OnlineProfileSnapshot.Guest;
     }
 
     public bool IsSecondMenu { get; private set; }
@@ -107,6 +120,27 @@ public sealed partial class MainMenuScene
     public bool IsReturnTransitionActive => isReturnTransitionActive;
 
     public bool IsAboutDialogOpen => isAboutDialogOpen;
+
+    public void SetNowPlaying(MenuNowPlayingState state)
+    {
+        nowPlaying = state;
+        if (state.IsPlaying && state.Bpm > 0.01f)
+            currentBeatMilliseconds = Math.Clamp(60000d / state.Bpm, 260d, 2000d);
+        else
+            currentBeatMilliseconds = LogoBeatMilliseconds;
+    }
+
+    public void SetSpectrum(float[] spectrum1024, bool available)
+    {
+        if (!available || spectrum1024.Length < rawSpectrum.Length)
+        {
+            hasRawSpectrum = false;
+            return;
+        }
+
+        Array.Copy(spectrum1024, rawSpectrum, rawSpectrum.Length);
+        hasRawSpectrum = true;
+    }
 
     public MainMenuRoute Handle(MainMenuAction action)
     {
@@ -177,10 +211,11 @@ public sealed partial class MainMenuScene
 
     public void CloseAboutDialog() => isAboutDialogOpen = false;
 
-    public void StartReturnTransition()
+    public void StartReturnTransition(string? backgroundPath = null)
     {
         isReturnTransitionActive = true;
         returnTransitionMilliseconds = 0d;
+        returnTransitionBackgroundPath = backgroundPath;
     }
 
     public void Press(UiAction action)
@@ -205,19 +240,40 @@ public sealed partial class MainMenuScene
     public void Update(TimeSpan elapsed)
     {
         var elapsedMilliseconds = Math.Max(0d, elapsed.TotalMilliseconds);
-        beatMilliseconds += elapsedMilliseconds;
-        if (beatMilliseconds >= LogoBeatMilliseconds)
+        if (nowPlaying.IsPlaying)
         {
-            beatMilliseconds %= LogoBeatMilliseconds;
-            heartbeatMilliseconds = 0d;
+            beatMilliseconds += elapsedMilliseconds;
+            if (beatMilliseconds >= currentBeatMilliseconds)
+            {
+                beatMilliseconds %= currentBeatMilliseconds;
+                heartbeatMilliseconds = 0d;
+            }
+
+            if (heartbeatMilliseconds >= 0d)
+            {
+                heartbeatMilliseconds += elapsedMilliseconds;
+                if (heartbeatMilliseconds > currentBeatMilliseconds * 0.97d)
+                    heartbeatMilliseconds = -1d;
+            }
+        }
+        else
+        {
+            beatMilliseconds += elapsedMilliseconds;
+            if (beatMilliseconds >= LogoBeatMilliseconds)
+            {
+                beatMilliseconds %= LogoBeatMilliseconds;
+                heartbeatMilliseconds = 0d;
+            }
+
+            if (heartbeatMilliseconds >= 0d)
+            {
+                heartbeatMilliseconds += elapsedMilliseconds;
+                if (heartbeatMilliseconds > LogoBeatMilliseconds * 0.97d)
+                    heartbeatMilliseconds = -1d;
+            }
         }
 
-        if (heartbeatMilliseconds >= 0d)
-        {
-            heartbeatMilliseconds += elapsedMilliseconds;
-            if (heartbeatMilliseconds > LogoBeatMilliseconds * 0.97d)
-                heartbeatMilliseconds = -1d;
-        }
+        UpdateSpectrumState(elapsedMilliseconds);
 
         if (isReturnTransitionActive)
         {
@@ -226,6 +282,7 @@ public sealed partial class MainMenuScene
             {
                 returnTransitionMilliseconds = ReturnBackgroundFadeDurationMilliseconds;
                 isReturnTransitionActive = false;
+                returnTransitionBackgroundPath = null;
             }
         }
 
@@ -277,6 +334,67 @@ public sealed partial class MainMenuScene
 
         if ((menuVisibility is MenuVisibility.Expanding or MenuVisibility.Expanded) && shownMilliseconds > MenuIdleCollapseMilliseconds)
             BeginCollapse();
+    }
+
+    private void UpdateSpectrumState(double elapsedMilliseconds)
+    {
+        const float gradient = 20f;
+        const float initialAlpha = 0.4f;
+
+        if (!nowPlaying.IsPlaying)
+        {
+            for (var i = 0; i < SpectrumBarCount; i++)
+            {
+                spectrumPeakLevel[i] = 0f;
+                spectrumPeakAlpha[i] = 0f;
+            }
+
+            return;
+        }
+
+        if (!hasRawSpectrum)
+        {
+            for (var i = 0; i < SpectrumBarCount; i++)
+            {
+                spectrumPeakLevel[i] = 0f;
+                spectrumPeakAlpha[i] = 0f;
+            }
+
+            return;
+        }
+
+        const int windowSize = 240;
+        var leftBound = 0;
+        for (var i = 0; i < SpectrumBarCount; i++)
+        {
+            var rightBound = (int)Math.Pow(2d, i * 9d / (windowSize - 1));
+            if (rightBound <= leftBound)
+                rightBound = leftBound + 1;
+            rightBound = Math.Clamp(rightBound, 0, rawSpectrum.Length - 2);
+
+            var peak = 0f;
+            while (leftBound < rightBound)
+            {
+                peak = MathF.Max(peak, rawSpectrum[1 + leftBound]);
+                leftBound++;
+            }
+
+            leftBound = rightBound;
+
+            var currentPeak = peak * 500f / MainMenuReferenceToVirtualScale;
+
+            if (currentPeak > spectrumPeakLevel[i])
+            {
+                spectrumPeakLevel[i] = currentPeak;
+                spectrumPeakDownRate[i] = spectrumPeakLevel[i] / gradient;
+                spectrumPeakAlpha[i] = initialAlpha;
+            }
+            else
+            {
+                spectrumPeakLevel[i] = MathF.Max(spectrumPeakLevel[i] - spectrumPeakDownRate[i], 0f);
+                spectrumPeakAlpha[i] = MathF.Max(spectrumPeakAlpha[i] - initialAlpha / gradient, 0f);
+            }
+        }
     }
 
 }

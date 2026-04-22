@@ -30,6 +30,24 @@ public static class DroidAssets
     public const string SettingsArrowDropDown = "settings-arrow-drop-down";
     public const string BeatmapDownloaderOsuDirect = "beatmap-downloader-osudirect";
     public const string BeatmapDownloaderCatboy = "beatmap-downloader-catboy";
+    public const string SongSelectTop = "songselect-top";
+    public const string SongSelectButtonBackground = "songselect-button-background";
+    public const string SongSelectBack = "songselect-back";
+    public const string SongSelectMods = "songselect-mods";
+    public const string SongSelectModsOver = "songselect-mods-over";
+    public const string SongSelectOptions = "songselect-options";
+    public const string SongSelectOptionsOver = "songselect-options-over";
+    public const string SongSelectRandom = "songselect-random";
+    public const string SongSelectRandomOver = "songselect-random-over";
+    public const string SongSelectStar = "songselect-star";
+    public const string RankingDisabled = "ranking-disabled";
+    public const string RankingEnabledScore = "ranking-enabled-score";
+    public const string RankingEnabledPerformance = "ranking-enabled-performance";
+    public const string SelectionRanked = "selection-ranked";
+    public const string SelectionApproved = "selection-approved";
+    public const string SelectionLoved = "selection-loved";
+    public const string SelectionQuestion = "selection-question";
+    public const string RankingASmall = "ranking-a-small";
 
     public static UiAssetManifest MainMenuManifest { get; } = new(CreateMainMenuEntries());
 
@@ -63,6 +81,24 @@ public static class DroidAssets
         yield return Texture(SettingsArrowDropDown, "assets/droid/settings/arrow-drop-down.png", 192, 192);
         yield return Texture(BeatmapDownloaderOsuDirect, "assets/droid/beatmap-downloader/osudirect.png", 96, 96);
         yield return Texture(BeatmapDownloaderCatboy, "assets/droid/beatmap-downloader/catboy.png", 96, 96);
+        yield return Texture(SongSelectTop, "assets/droid/common/songselect-top.png", 2560, 378);
+        yield return Texture(SongSelectButtonBackground, "assets/droid/main-menu/button-background.png", 724, 127);
+        yield return Texture(SongSelectBack, "assets/droid/main-menu/back.png", 125, 125);
+        yield return Texture(SongSelectMods, "assets/droid/song-select/mods.png", 74, 74);
+        yield return Texture(SongSelectModsOver, "assets/droid/song-select/mods-over.png", 74, 74);
+        yield return Texture(SongSelectOptions, "assets/droid/song-select/options.png", 74, 74);
+        yield return Texture(SongSelectOptionsOver, "assets/droid/song-select/options-over.png", 74, 74);
+        yield return Texture(SongSelectRandom, "assets/droid/song-select/random.png", 74, 74);
+        yield return Texture(SongSelectRandomOver, "assets/droid/song-select/random-over.png", 74, 74);
+        yield return Texture(SongSelectStar, "assets/droid/common/star.png", 46, 47);
+        yield return Texture(RankingDisabled, "assets/droid/ranking/ranking-disabled.png", 50, 50);
+        yield return Texture(RankingEnabledScore, "assets/droid/ranking/ranking-enabled-score.png", 50, 50);
+        yield return Texture(RankingEnabledPerformance, "assets/droid/ranking/ranking-enabled-pp.png", 50, 50);
+        yield return Texture(SelectionRanked, "assets/droid/common/selection-ranked.png", 50, 50);
+        yield return Texture(SelectionApproved, "assets/droid/common/selection-approved.png", 50, 50);
+        yield return Texture(SelectionLoved, "assets/droid/common/selection-loved.png", 50, 50);
+        yield return Texture(SelectionQuestion, "assets/droid/common/selection-question.png", 50, 50);
+        yield return Texture(RankingASmall, "assets/droid/ranking/a-small.png", 30, 30);
     }
 
     private static UiAssetEntry Texture(string logicalName, string packagePath, float width, float height) =>

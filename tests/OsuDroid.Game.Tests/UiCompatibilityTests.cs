@@ -76,6 +76,85 @@ public sealed class UiCompatibilityTests
     }
 
     [Test]
+    public void AppIconUsesOriginalOsuDroidLauncherArtwork()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var appIcon = File.ReadAllBytes(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Resources", "AppIcon", "appicon.png"));
+        var legacyIcon = File.ReadAllBytes(Path.Combine(repositoryRoot, "third_party", "osu-droid-legacy", "res", "drawable-xxxhdpi", "ic_launcher.png"));
+
+        Assert.That(appIcon, Is.EqualTo(legacyIcon));
+    }
+
+    [Test]
+    public void AndroidPlatformDeclaresLegacyLauncherIcon()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var mainActivity = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "Android", "MainActivity.cs"));
+        var mainApplication = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "Android", "MainApplication.cs"));
+        var densities = new[] { "ldpi", "mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi" };
+
+        Assert.That(mainActivity, Does.Contain("Icon = \"@drawable/ic_launcher\""));
+        Assert.That(mainApplication, Does.Contain("[Application(Icon = \"@drawable/ic_launcher\")]"));
+        foreach (var density in densities)
+        {
+            var androidIcon = Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "Android", "Resources", $"drawable-{density}", "ic_launcher.png");
+            var legacyIcon = Path.Combine(repositoryRoot, "third_party", "osu-droid-legacy", "res", $"drawable-{density}", "ic_launcher.png");
+
+            Assert.That(File.Exists(androidIcon), Is.True, density);
+            Assert.That(File.ReadAllBytes(androidIcon), Is.EqualTo(File.ReadAllBytes(legacyIcon)), density);
+        }
+    }
+
+    [Test]
+    public void MobileProjectDeclaresIconSources()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var project = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "OsuDroid.App.csproj"));
+        var infoPlist = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "iOS", "Info.plist"));
+
+        Assert.That(project, Does.Contain("<MauiIcon Include=\"Resources\\AppIcon\\appicon.png\" BaseSize=\"192,192\" />"));
+        Assert.That(project, Does.Not.Contain("<AppIcon"));
+        Assert.That(project, Does.Contain("<BundleResource Include=\"Platforms\\iOS\\Icons\\Icon-60@2x.png\" Link=\"Icon-60@2x.png\" />"));
+        Assert.That(project, Does.Not.Contain("XSAppIconAssets"));
+        Assert.That(project, Does.Not.Contain("<ImageAsset Include=\"Platforms\\iOS\\Assets.xcassets\\AppIcon.appiconset\\Contents.json\" />"));
+        Assert.That(infoPlist, Does.Not.Contain("XSAppIconAssets"));
+    }
+
+    [Test]
+    public void IosAppIconBundleResourcesContainRequiredImages()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var icons = Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "iOS", "Icons");
+        var expectedFiles = new[]
+        {
+            "Icon-60@2x.png",
+            "Icon-60@3x.png",
+            "Icon-76@2x.png",
+            "Icon-83.5@2x.png",
+        };
+
+        foreach (var file in expectedFiles)
+        {
+            var path = Path.Combine(icons, file);
+            Assert.That(new FileInfo(path).Length, Is.GreaterThan(0), file);
+        }
+    }
+
+    [Test]
+    public void IosBundleVerifierRequiresDirectAppIcons()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var script = File.ReadAllText(Path.Combine(repositoryRoot, "scripts", "verify-ios-bundle.sh"));
+        var infoPlist = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "iOS", "Info.plist"));
+
+        Assert.That(infoPlist, Does.Contain("<key>CFBundleIcons</key>"));
+        Assert.That(infoPlist, Does.Contain("<string>Icon-60</string>"));
+        Assert.That(infoPlist, Does.Not.Contain("XSAppIconAssets"));
+        Assert.That(script, Does.Contain("Icon-60@2x.png Icon-60@3x.png Icon-76@2x.png Icon-83.5@2x.png"));
+        Assert.That(script, Does.Contain("iOS app icon file missing from app bundle"));
+    }
+
+    [Test]
     public void MainMenuFramePlacesDroidButtonsAsTouchableSprites()
     {
         var scene = new MainMenuScene();
@@ -202,6 +281,20 @@ public sealed class UiCompatibilityTests
 
         Assert.That(avatar.Bounds, Is.EqualTo(avatarFooter.Bounds));
         Assert.That(avatar.AssetName, Is.EqualTo(DroidAssets.EmptyAvatar));
+        Assert.That(frame.Elements.Single(element => element.Id == "profile-player").Text, Is.EqualTo("Guest"));
+        Assert.That(frame.Elements.Any(element => element.Id == "profile-pp"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "profile-acc"), Is.False);
+    }
+
+    [Test]
+    public void MainMenuLoggedInProfileBadgeShowsPerformanceAndAccuracy()
+    {
+        var scene = new MainMenuScene(profile: new OnlineProfileSnapshot("Player", DroidAssets.EmptyAvatar, PerformancePoints: 12345, Accuracy: 98.76f));
+        var frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+
+        Assert.That(frame.Elements.Single(element => element.Id == "profile-player").Text, Is.EqualTo("Player"));
+        Assert.That(frame.Elements.Single(element => element.Id == "profile-pp").Text, Does.Contain("12,345pp"));
+        Assert.That(frame.Elements.Single(element => element.Id == "profile-acc").Text, Is.EqualTo("98.76%"));
     }
 
     [Test]
@@ -275,11 +368,16 @@ public sealed class UiCompatibilityTests
     {
         var viewport = VirtualViewport.FromSurface(1280, 720);
         var emptyFrame = new MainMenuScene().CreateSnapshot(viewport).UiFrame;
-        var populatedFrame = new MainMenuScene(nowPlaying: new MenuNowPlayingState("artist - title", true)).CreateSnapshot(viewport).UiFrame;
+        var populatedFrame = new MainMenuScene(nowPlaying: new MenuNowPlayingState("artist - title", false)).CreateSnapshot(viewport).UiFrame;
+        var title = populatedFrame.Elements.Single(element => element.Id == "music-title");
 
         Assert.That(emptyFrame.Elements.Any(element => element.Id == "music-title"), Is.False);
-        Assert.That(populatedFrame.Elements.Single(element => element.Id == "music-title").Text, Is.EqualTo("artist - title"));
-        Assert.That(populatedFrame.Elements.Single(element => element.Id == "music-title").TextStyle?.Alignment, Is.EqualTo(UiTextAlignment.Right));
+        Assert.That(title.Text, Is.EqualTo("artist - title"));
+        Assert.That(title.TextStyle?.Alignment, Is.EqualTo(UiTextAlignment.Right));
+        Assert.That(title.ClipToBounds, Is.True);
+        Assert.That(title.Bounds.X, Is.EqualTo(MainMenuScene.GetAndroidMusicNowPlayingBounds().X + MainMenuScene.MusicNowPlayingTitleLeftInset));
+        Assert.That(title.Bounds.Right, Is.EqualTo(MainMenuScene.MusicNowPlayingTitleRightEdge));
+        Assert.That(title.Bounds.Right, Is.LessThanOrEqualTo(VirtualViewport.LegacyWidth));
     }
 
     [Test]

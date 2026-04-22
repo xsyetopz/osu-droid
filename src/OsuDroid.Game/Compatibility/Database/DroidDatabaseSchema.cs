@@ -100,6 +100,12 @@ public static class DroidDatabaseSchema
             serializedMods TEXT NOT NULL
         )
         """,
+        """
+        CREATE TABLE IF NOT EXISTS BeatmapDifficultyMetadata (
+            key TEXT NOT NULL PRIMARY KEY,
+            value INTEGER NOT NULL
+        )
+        """,
         $"PRAGMA user_version = {DroidDatabaseConstants.CurrentVersion}",
     };
 
@@ -126,6 +132,7 @@ public static class DroidDatabaseSchema
         "BeatmapSetCollection_BeatmapSetInfo",
         "BlockArea",
         "ModPreset",
+        "BeatmapDifficultyMetadata",
     };
 }
 

@@ -36,6 +36,28 @@ verify_codesign() {
   exit 1
 }
 
+verify_app_icon() {
+  info_plist="$APP_PATH/Info.plist"
+
+  if [ ! -f "$info_plist" ]; then
+    echo "Info.plist missing from app bundle: $info_plist" >&2
+    exit 1
+  fi
+
+  icon_dictionary="$(plutil -extract CFBundleIcons xml1 -o - "$info_plist" 2>/dev/null || true)"
+  if [ -z "$icon_dictionary" ]; then
+    echo "iOS app icon metadata missing from Info.plist" >&2
+    exit 1
+  fi
+
+  for icon_file in Icon-60@2x.png Icon-60@3x.png Icon-76@2x.png Icon-83.5@2x.png; do
+    if [ ! -f "$APP_PATH/$icon_file" ]; then
+      echo "iOS app icon file missing from app bundle: $icon_file" >&2
+      exit 1
+    fi
+  done
+}
+
 require_app_path
 
 if printf '%s' "$IOS_CODESIGN_KEY" | grep -Eq '^[0-9A-Fa-f]{40}$'; then
@@ -51,4 +73,5 @@ if [ "$FIX_MODE" != "" ] && [ "$FIX_MODE" != "--fix" ]; then
   exit 1
 fi
 
+verify_app_icon
 verify_codesign

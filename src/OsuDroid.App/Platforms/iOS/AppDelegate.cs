@@ -14,6 +14,7 @@ public sealed class AppDelegate : UIApplicationDelegate
     private OsuDroidMonoGame? game;
     private PlatformTextInputService? textInputService;
     private PlatformBeatmapPreviewPlayer? previewPlayer;
+    private PlatformMenuSfxPlayer? menuSfxPlayer;
 
     public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
     {
@@ -21,8 +22,9 @@ public sealed class AppDelegate : UIApplicationDelegate
         var core = OsuDroidGameCore.Create(GetPathRoots(), BuildType);
         textInputService = new PlatformTextInputService();
         previewPlayer = new PlatformBeatmapPreviewPlayer();
+        menuSfxPlayer = new PlatformMenuSfxPlayer(Path.Combine(NSBundle.MainBundle.ResourcePath!, "assets", "droid", "sfx"));
         textInputService.Attach();
-        core.AttachPlatformServices(textInputService, previewPlayer);
+        core.AttachPlatformServices(textInputService, previewPlayer, menuSfxPlayer);
 
         game = new OsuDroidMonoGame(core);
         game.Run();
@@ -40,6 +42,8 @@ public sealed class AppDelegate : UIApplicationDelegate
         textInputService = null;
         previewPlayer?.StopPreview();
         previewPlayer = null;
+        menuSfxPlayer?.Dispose();
+        menuSfxPlayer = null;
         base.WillTerminate(application);
     }
 
