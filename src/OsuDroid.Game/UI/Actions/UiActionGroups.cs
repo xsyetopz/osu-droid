@@ -25,9 +25,13 @@ public static class UiActionGroups
 
     public static bool TryGetSongSelectCollectionDeleteIndex(UiAction action, out int index) => TryGetContiguousIndex(action, UiAction.SongSelectCollectionDelete0, UiAction.SongSelectCollectionDelete7, out index);
 
+    public static bool TryGetOptionsRowIndex(UiAction action, out int index) => TryGetContiguousIndex(action, UiAction.OptionsRow0, UiAction.OptionsRow63, out index);
+
     public static bool IsOptionsSection(UiAction action) => IsContiguous(action, UiAction.OptionsSectionGeneral, UiAction.OptionsSectionAdvanced);
 
     public static bool IsOptionsToggle(UiAction action) => IsContiguous(action, UiAction.OptionsToggleServerConnection, UiAction.OptionsToggleBeatmapSounds);
+
+    public static bool IsOptionsRow(UiAction action) => IsContiguous(action, UiAction.OptionsRow0, UiAction.OptionsRow63);
 
     public static bool IsDownloaderSortChoice(UiAction action) => IsContiguous(action, UiAction.DownloaderSortTitle, UiAction.DownloaderSortSubmittedDate);
 

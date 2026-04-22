@@ -1,5 +1,6 @@
 using System.Globalization;
 using OsuDroid.Game.UI;
+using static OsuDroid.Game.UI.DroidUiMetrics;
 
 namespace OsuDroid.Game.Scenes;
 
@@ -89,7 +90,7 @@ public sealed partial class OptionsScene
     private void AddRow(List<UiElementSnapshot> elements, SettingsRow row, int index, UiRect bounds)
     {
         var rowAlpha = row.IsEnabled ? 1f : 0.5f;
-        var rowAction = row.IsEnabled ? row.Action : UiAction.None;
+        var rowAction = row.IsEnabled ? RowAction(row, index) : UiAction.None;
         var rowCornerRadius = row.IsBottom ? AndroidRoundedRectRadius : 0f;
         elements.Add(Fill($"options-row-{index}", bounds, rowBackground, rowAlpha, rowAction, rowCornerRadius, row.IsEnabled, row.IsBottom ? UiCornerMode.Bottom : UiCornerMode.None));
 
@@ -101,23 +102,23 @@ public sealed partial class OptionsScene
 
         var titleHeight = RowTitleSize + 4f;
         var summaryHeight = RowSummarySize + 4f;
-        var textBlockHeight = titleHeight + summaryHeight + 6f * AndroidDpScale;
+        var textBlockHeight = titleHeight + summaryHeight + 6f * DpScale;
         var textTop = row.Kind is SettingsRowKind.Input or SettingsRowKind.Slider
             ? bounds.Y + RowPadding
             : bounds.Y + (bounds.Height - textBlockHeight) / 2f;
         var reservedControlWidth = row.Kind switch
         {
             SettingsRowKind.Slider => 0f,
-            SettingsRowKind.Select => 150f * AndroidDpScale,
-            _ => 96f * AndroidDpScale,
+            SettingsRowKind.Select => 150f * DpScale,
+            _ => 96f * DpScale,
         };
         var textWidth = row.Kind == SettingsRowKind.Input
             ? bounds.Width - RowPadding * 2f
-            : Math.Max(80f * AndroidDpScale, bounds.Width - RowPadding * 3f - reservedControlWidth);
+            : Math.Max(80f * DpScale, bounds.Width - RowPadding * 3f - reservedControlWidth);
         var textColor = row.IsEnabled ? disabledWhite : secondaryText;
         elements.Add(Text($"options-row-{index}-label", localizer[row.TitleKey], bounds.X + RowPadding, textTop, textWidth, titleHeight, RowTitleSize, textColor, rowAlpha * 0.94f, true, rowAction, row.IsEnabled));
         if (!string.IsNullOrEmpty(localizer[row.SummaryKey]))
-            elements.Add(Text($"options-row-{index}-summary", localizer[row.SummaryKey], bounds.X + RowPadding, textTop + titleHeight + 6f * AndroidDpScale, textWidth, summaryHeight, RowSummarySize, secondaryText, rowAlpha * 0.86f, false, rowAction, row.IsEnabled));
+            elements.Add(Text($"options-row-{index}-summary", localizer[row.SummaryKey], bounds.X + RowPadding, textTop + titleHeight + 6f * DpScale, textWidth, summaryHeight, RowSummarySize, secondaryText, rowAlpha * 0.86f, false, rowAction, row.IsEnabled));
 
         switch (row.Kind)
         {
@@ -144,11 +145,11 @@ public sealed partial class OptionsScene
     {
         var checkbox = new UiRect(bounds.Right - RowPadding - SectionIconSize, bounds.Y + (bounds.Height - SectionIconSize) / 2f, SectionIconSize, SectionIconSize);
         var isChecked = GetBoolValue(row.Key);
-        var rowAction = row.IsEnabled ? row.Action : UiAction.None;
+        var rowAction = row.IsEnabled ? RowAction(row, index) : UiAction.None;
         var alpha = row.IsEnabled ? 1f : 0.55f;
         if (isChecked)
         {
-            elements.Add(Fill($"options-row-{index}-checkbox-box", checkbox, checkboxAccent, alpha, rowAction, 2f * AndroidDpScale, row.IsEnabled));
+            elements.Add(Fill($"options-row-{index}-checkbox-box", checkbox, checkboxAccent, alpha, rowAction, 2f * DpScale, row.IsEnabled));
             elements.Add(MaterialIcon($"options-row-{index}-checkbox", UiMaterialIcon.Check, checkbox, UiColor.Opaque(32, 32, 46), alpha, rowAction, row.IsEnabled));
         }
         else
@@ -161,11 +162,11 @@ public sealed partial class OptionsScene
     {
         var chevron = new UiRect(bounds.Right - RowPadding - SectionIconSize, bounds.Y + (bounds.Height - SectionIconSize) / 2f, SectionIconSize, SectionIconSize);
         var alpha = row.IsEnabled ? 0.9f : 0.45f;
-        var rowAction = row.IsEnabled ? row.Action : UiAction.None;
+        var rowAction = row.IsEnabled ? RowAction(row, index) : UiAction.None;
         if (row.ValueKey is not null)
         {
-            var valueWidth = 86f * AndroidDpScale;
-            elements.Add(Text($"options-row-{index}-value", localizer[row.ValueKey], chevron.X - 12f * AndroidDpScale - valueWidth, bounds.Y + (bounds.Height - RowTitleSize - 4f) / 2f, valueWidth, RowTitleSize + 4f, RowTitleSize, secondaryText, alpha, false, rowAction, row.IsEnabled));
+            var valueWidth = 86f * DpScale;
+            elements.Add(Text($"options-row-{index}-value", localizer[row.ValueKey], chevron.X - 12f * DpScale - valueWidth, bounds.Y + (bounds.Height - RowTitleSize - 4f) / 2f, valueWidth, RowTitleSize + 4f, RowTitleSize, secondaryText, alpha, false, rowAction, row.IsEnabled));
         }
 
         elements.Add(MaterialIcon($"options-row-{index}-dropdown", UiMaterialIcon.ArrowDropDown, chevron, secondaryText, alpha, rowAction, row.IsEnabled));
@@ -173,12 +174,15 @@ public sealed partial class OptionsScene
 
     private void AddInputControl(List<UiElementSnapshot> elements, SettingsRow row, int index, UiRect bounds)
     {
-        var rowAction = row.IsEnabled ? row.Action : UiAction.None;
+        var rowAction = row.IsEnabled ? RowAction(row, index) : UiAction.None;
         var alpha = row.IsEnabled ? 1f : 0.5f;
-        var inputBounds = new UiRect(bounds.X + RowPadding, bounds.Y + RowPadding + RowTitleSize + 4f + 6f * AndroidDpScale + RowSummarySize + 4f + InputGap, bounds.Width - RowPadding * 2f, InputHeight);
+        var inputBounds = new UiRect(bounds.X + RowPadding, bounds.Y + RowPadding + RowTitleSize + 4f + 6f * DpScale + RowSummarySize + 4f + InputGap, bounds.Width - RowPadding * 2f, InputHeight);
         elements.Add(Fill($"options-row-{index}-input", inputBounds, inputBackground, alpha, rowAction, AndroidRoundedRectRadius, row.IsEnabled));
-        if (row.ValueKey is not null)
-            elements.Add(Text($"options-row-{index}-input-value", localizer[row.ValueKey], inputBounds.X + 14f * AndroidDpScale, inputBounds.Y + 8f * AndroidDpScale, inputBounds.Width - 28f * AndroidDpScale, RowTitleSize + 4f, RowTitleSize, UiColor.Opaque(235, 235, 245), 0.85f * alpha, false, rowAction, row.IsEnabled));
+        var value = GetStringValue(row.Key);
+        if (string.IsNullOrEmpty(value) && row.ValueKey is not null)
+            value = localizer[row.ValueKey];
+        if (!string.IsNullOrEmpty(value))
+            elements.Add(Text($"options-row-{index}-input-value", value, inputBounds.X + 14f * DpScale, inputBounds.Y + 8f * DpScale, inputBounds.Width - 28f * DpScale, RowTitleSize + 4f, RowTitleSize, UiColor.Opaque(235, 235, 245), 0.85f * alpha, false, rowAction, row.IsEnabled));
     }
 
     private void AddSliderControl(List<UiElementSnapshot> elements, SettingsRow row, int index, UiRect bounds)
@@ -190,11 +194,11 @@ public sealed partial class OptionsScene
         var summaryHeight = RowSummarySize + 4f;
         var containerX = bounds.X + SeekbarContainerMarginX;
         var containerWidth = bounds.Width - SeekbarContainerMarginX * 2f;
-        var valueWidth = 72f * AndroidDpScale;
-        var controlWidth = Math.Min(ControlColumnWidth, Math.Max(96f * AndroidDpScale, containerWidth * 0.44f));
-        var textWidth = Math.Max(80f * AndroidDpScale, containerWidth - controlWidth - ControlGap);
+        var valueWidth = 72f * DpScale;
+        var controlWidth = Math.Min(ControlColumnWidth, Math.Max(96f * DpScale, containerWidth * 0.44f));
+        var textWidth = Math.Max(80f * DpScale, containerWidth - controlWidth - ControlGap);
         var textTop = bounds.Y + RowPadding;
-        var summaryTop = textTop + titleHeight + 6f * AndroidDpScale;
+        var summaryTop = textTop + titleHeight + 6f * DpScale;
         var valueTop = textTop;
         var trackWidth = controlWidth;
         var trackX = bounds.Right - SeekbarContainerMarginX - trackWidth;
@@ -202,19 +206,20 @@ public sealed partial class OptionsScene
         var thumbX = trackX + trackWidth * normalized - SeekbarThumbSize / 2f;
         var thumbY = trackY + SeekbarTrackHeight / 2f - SeekbarThumbSize / 2f;
 
-        elements.Add(Text($"options-row-{index}-label", localizer[row.TitleKey], containerX, textTop, textWidth, titleHeight, RowTitleSize, disabledWhite, alpha * 0.94f, true, UiAction.None, row.IsEnabled));
+        var rowAction = row.IsEnabled ? RowAction(row, index) : UiAction.None;
+        elements.Add(Text($"options-row-{index}-label", localizer[row.TitleKey], containerX, textTop, textWidth, titleHeight, RowTitleSize, disabledWhite, alpha * 0.94f, true, rowAction, row.IsEnabled));
         if (!string.IsNullOrEmpty(localizer[row.SummaryKey]))
-            elements.Add(Text($"options-row-{index}-summary", localizer[row.SummaryKey], containerX, summaryTop, textWidth, summaryHeight, RowSummarySize, secondaryText, alpha * 0.86f, false, UiAction.None, row.IsEnabled));
+            elements.Add(Text($"options-row-{index}-summary", localizer[row.SummaryKey], containerX, summaryTop, textWidth, summaryHeight, RowSummarySize, secondaryText, alpha * 0.86f, false, rowAction, row.IsEnabled));
 
-        elements.Add(Text($"options-row-{index}-value", value.ToString(CultureInfo.InvariantCulture), trackX + trackWidth - valueWidth, valueTop, valueWidth, titleHeight, RowTitleSize, secondaryText, 0.9f * alpha, false, UiAction.None, row.IsEnabled));
-        elements.Add(Fill($"options-row-{index}-slider-track", new UiRect(trackX, trackY, trackWidth, SeekbarTrackHeight), sliderTrack, alpha, UiAction.None, 12f * AndroidDpScale, row.IsEnabled));
-        elements.Add(Fill($"options-row-{index}-slider-fill", new UiRect(trackX, trackY, trackWidth * normalized, SeekbarTrackHeight), checkboxAccent, alpha, UiAction.None, 12f * AndroidDpScale, row.IsEnabled));
-        elements.Add(Fill($"options-row-{index}-slider-thumb", new UiRect(thumbX, thumbY, SeekbarThumbSize, SeekbarThumbSize), white, alpha, UiAction.None, 12f * AndroidDpScale, row.IsEnabled));
+        elements.Add(Text($"options-row-{index}-value", value.ToString(CultureInfo.InvariantCulture), trackX + trackWidth - valueWidth, valueTop, valueWidth, titleHeight, RowTitleSize, secondaryText, 0.9f * alpha, false, rowAction, row.IsEnabled));
+        elements.Add(Fill($"options-row-{index}-slider-track", new UiRect(trackX, trackY, trackWidth, SeekbarTrackHeight), sliderTrack, alpha, rowAction, 12f * DpScale, row.IsEnabled));
+        elements.Add(Fill($"options-row-{index}-slider-fill", new UiRect(trackX, trackY, trackWidth * normalized, SeekbarTrackHeight), checkboxAccent, alpha, rowAction, 12f * DpScale, row.IsEnabled));
+        elements.Add(Fill($"options-row-{index}-slider-thumb", new UiRect(thumbX, thumbY, SeekbarThumbSize, SeekbarThumbSize), white, alpha, rowAction, 12f * DpScale, row.IsEnabled));
     }
 
     private static float CalculateContentHeight(IReadOnlyList<SettingsCategory> categories) => categories.Sum(category => CategoryTopMargin + CalculateCategoryHeight(category));
 
-    private static float CalculateSectionHeight() => 32f * AndroidDpScale + sections.Length * SectionStep + 32f * AndroidDpScale;
+    private static float CalculateSectionHeight() => 32f * DpScale + sections.Length * SectionStep + 32f * DpScale;
 
     private static float CalculateCategoryHeight(SettingsCategory category) => CategoryHeaderHeight + category.Rows.Sum(GetRowHeight);
 
@@ -224,6 +229,10 @@ public sealed partial class OptionsScene
         SettingsRowKind.Slider => SliderRowHeight,
         _ => RowHeight,
     };
+
+    private static UiAction RowAction(SettingsRow row, int index) => row.Action == UiAction.None
+        ? (UiAction)((int)UiAction.OptionsRow0 + index)
+        : row.Action;
 
     private static float VisibleContentHeight(VirtualViewport viewport) => Math.Max(0f, viewport.VirtualHeight - ContentTop);
 

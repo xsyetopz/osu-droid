@@ -48,7 +48,7 @@ public sealed partial class MainMenuScene
     public const double MenuIdleCollapseMilliseconds = 10000d;
     public const double LogoBeatMilliseconds = 1000d;
     public const double ExitAnimationMilliseconds = 3000d;
-    public const double ReturnBackgroundFadeDurationMilliseconds = 1500d;
+    public const double ReturnBackgroundFadeDurationMilliseconds = DroidUiTimings.MainMenuReturnBackgroundFadeMilliseconds;
 
     private const float ButtonExpandOffset = 100f;
     private const float ButtonCollapseOffset = 50f;
@@ -67,6 +67,7 @@ public sealed partial class MainMenuScene
     private const float LogoBeatScale = 1.07f;
     private const float ExitLogoScale = 0.8f;
     private const float ExitLogoRotationDegrees = -15f;
+    private const float ExitInstructionTextSize = 22f;
     private const float ExpandedLogoReferenceX = 266f;
     private const float ExpandedLogoReferenceY = 52f;
     private const float ExpandedLogoReferenceSize = 1026f;
@@ -81,6 +82,7 @@ public sealed partial class MainMenuScene
     private static readonly UiColor white = UiColor.Opaque(255, 255, 255);
 
     private readonly string displayVersion;
+    private readonly bool isDevelopmentBuild;
     private readonly OnlineProfileSnapshot profile;
     private MenuNowPlayingState nowPlaying;
     private int selectedIndex;
@@ -104,9 +106,10 @@ public sealed partial class MainMenuScene
     private readonly float[] rawSpectrum = new float[512];
     private bool hasRawSpectrum;
 
-    public MainMenuScene(string displayVersion = "1.0", MenuNowPlayingState? nowPlaying = null, OnlineProfileSnapshot? profile = null)
+    public MainMenuScene(string displayVersion = "1.0", MenuNowPlayingState? nowPlaying = null, OnlineProfileSnapshot? profile = null, bool isDevelopmentBuild = false)
     {
         this.displayVersion = string.IsNullOrWhiteSpace(displayVersion) ? "1.0" : displayVersion;
+        this.isDevelopmentBuild = isDevelopmentBuild;
         this.nowPlaying = nowPlaying ?? new MenuNowPlayingState();
         this.profile = profile ?? OnlineProfileSnapshot.Guest;
     }
@@ -336,65 +339,5 @@ public sealed partial class MainMenuScene
             BeginCollapse();
     }
 
-    private void UpdateSpectrumState(double elapsedMilliseconds)
-    {
-        const float gradient = 20f;
-        const float initialAlpha = 0.4f;
-
-        if (!nowPlaying.IsPlaying)
-        {
-            for (var i = 0; i < SpectrumBarCount; i++)
-            {
-                spectrumPeakLevel[i] = 0f;
-                spectrumPeakAlpha[i] = 0f;
-            }
-
-            return;
-        }
-
-        if (!hasRawSpectrum)
-        {
-            for (var i = 0; i < SpectrumBarCount; i++)
-            {
-                spectrumPeakLevel[i] = 0f;
-                spectrumPeakAlpha[i] = 0f;
-            }
-
-            return;
-        }
-
-        const int windowSize = 240;
-        var leftBound = 0;
-        for (var i = 0; i < SpectrumBarCount; i++)
-        {
-            var rightBound = (int)Math.Pow(2d, i * 9d / (windowSize - 1));
-            if (rightBound <= leftBound)
-                rightBound = leftBound + 1;
-            rightBound = Math.Clamp(rightBound, 0, rawSpectrum.Length - 2);
-
-            var peak = 0f;
-            while (leftBound < rightBound)
-            {
-                peak = MathF.Max(peak, rawSpectrum[1 + leftBound]);
-                leftBound++;
-            }
-
-            leftBound = rightBound;
-
-            var currentPeak = peak * 500f / MainMenuReferenceToVirtualScale;
-
-            if (currentPeak > spectrumPeakLevel[i])
-            {
-                spectrumPeakLevel[i] = currentPeak;
-                spectrumPeakDownRate[i] = spectrumPeakLevel[i] / gradient;
-                spectrumPeakAlpha[i] = initialAlpha;
-            }
-            else
-            {
-                spectrumPeakLevel[i] = MathF.Max(spectrumPeakLevel[i] - spectrumPeakDownRate[i], 0f);
-                spectrumPeakAlpha[i] = MathF.Max(spectrumPeakAlpha[i] - initialAlpha / gradient, 0f);
-            }
-        }
-    }
 
 }

@@ -2,6 +2,7 @@ using System.Globalization;
 using OsuDroid.Game.Localization;
 using OsuDroid.Game.Runtime;
 using OsuDroid.Game.UI;
+using static OsuDroid.Game.UI.DroidUiMetrics;
 
 namespace OsuDroid.Game.Scenes;
 
@@ -18,57 +19,30 @@ public sealed partial class OptionsScene
     private static readonly UiColor checkboxAccent = UiColor.Opaque(243, 115, 115);
     private static readonly UiColor sliderTrack = UiColor.Opaque(54, 54, 83);
 
-    public const float AndroidReferencePixelWidth = 2340f;
-    public const float AndroidReferenceDensity = 3f;
-    public const float AndroidDpScale = VirtualViewport.LegacyWidth / (AndroidReferencePixelWidth / AndroidReferenceDensity);
-    public const float AppBarHeight = 56f * AndroidDpScale;
-    public const float ContentPaddingX = 32f * AndroidDpScale;
-    public const float ContentTop = AppBarHeight + 32f * AndroidDpScale;
-    public const float SectionRailWidth = 200f * AndroidDpScale;
-    public const float SectionHeight = 48f * AndroidDpScale;
-    public const float SectionStep = SectionHeight;
-    public const float SectionIconSize = 24f * AndroidDpScale;
-    public const float SectionPadding = 12f * AndroidDpScale;
-    public const float SectionDrawablePadding = 12f * AndroidDpScale;
-    public const float ListGap = 32f * AndroidDpScale;
-    public const float CategoryTopMargin = 12f * AndroidDpScale;
-    public const float CategoryHeaderHeight = 48f * AndroidDpScale;
-    public const float RowPadding = 18f * AndroidDpScale;
-    public const float RowHeight = 64f * AndroidDpScale;
-    public const float RowTitleSize = 14f * AndroidDpScale;
-    public const float RowSummarySize = 12f * AndroidDpScale;
-    public const float InputHeight = 34f * AndroidDpScale;
-    public const float InputGap = 8f * AndroidDpScale;
-    public const float AndroidRoundedRectRadius = 14f * AndroidDpScale;
-    public const float AndroidSidebarRadius = 15f * AndroidDpScale;
-    public const float SeekbarContainerMarginX = 18f * AndroidDpScale;
-    public const float SeekbarTrackMarginX = 2f * AndroidDpScale;
-    public const float SeekbarTopMargin = 16f * AndroidDpScale;
-    public const float SeekbarTrackHeight = 6f * AndroidDpScale;
-    public const float SeekbarThumbSize = 16f * AndroidDpScale;
-    public const float ControlColumnWidth = 280f * AndroidDpScale;
-    public const float ControlGap = 18f * AndroidDpScale;
-    public const float InputRowHeight = RowPadding * 2f + RowTitleSize + 4f + 6f * AndroidDpScale + RowSummarySize + 4f + InputGap + InputHeight;
-    public const float SliderRowHeight = RowPadding * 2f + RowTitleSize + 4f + 6f * AndroidDpScale + RowSummarySize + 4f + SeekbarTopMargin + SeekbarThumbSize;
-
     private readonly Dictionary<string, bool> boolValues = new(StringComparer.Ordinal);
     private readonly Dictionary<string, int> intValues = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> stringValues = new(StringComparer.Ordinal);
     private readonly GameLocalizer localizer;
     private readonly IGameSettingsStore? settingsStore;
+    private ITextInputService textInputService;
     private OptionsSection activeSection;
     private float contentScrollOffset;
     private float sectionScrollOffset;
+    private string? pendingSfxKey;
 
-    public OptionsScene(GameLocalizer localizer, IGameSettingsStore? settingsStore = null)
+    public OptionsScene(GameLocalizer localizer, IGameSettingsStore? settingsStore = null, ITextInputService? textInputService = null)
     {
         this.localizer = localizer;
         this.settingsStore = settingsStore;
+        this.textInputService = textInputService ?? new NoOpTextInputService();
         foreach (var row in sections.SelectMany(section => section.Categories).SelectMany(category => category.Rows))
         {
             if (row.Kind == SettingsRowKind.Checkbox)
                 boolValues[row.Key] = settingsStore?.GetBool(row.Key, row.DefaultChecked) ?? row.DefaultChecked;
             else if (row.Kind == SettingsRowKind.Slider)
                 intValues[row.Key] = settingsStore?.GetInt(row.Key, row.DefaultValue) ?? row.DefaultValue;
+            else if (row.Kind == SettingsRowKind.Input)
+                stringValues[row.Key] = settingsStore?.GetString(row.Key, string.Empty) ?? string.Empty;
         }
     }
 
@@ -91,6 +65,15 @@ public sealed partial class OptionsScene
     public IReadOnlyList<string> ActiveRows => ActiveSectionData.Categories.SelectMany(category => category.Rows).Select(row => localizer.Get(row.TitleKey)).ToArray();
 
     public IReadOnlyList<string> ActiveCategories => ActiveSectionData.Categories.Select(category => localizer.Get(category.TitleKey)).ToArray();
+
+    public void SetTextInputService(ITextInputService service) => textInputService = service;
+
+    public string? ConsumePendingSfxKey()
+    {
+        var key = pendingSfxKey;
+        pendingSfxKey = null;
+        return key;
+    }
 
     public static float MaxScrollOffset(VirtualViewport viewport) => MaxContentScrollOffset(viewport);
 
@@ -117,30 +100,37 @@ public sealed partial class OptionsScene
         {
             case UiAction.OptionsSectionGeneral:
                 SelectSection(OptionsSection.General, viewport);
+                pendingSfxKey = "click-short";
                 break;
 
             case UiAction.OptionsSectionGameplay:
                 SelectSection(OptionsSection.Gameplay, viewport);
+                pendingSfxKey = "click-short";
                 break;
 
             case UiAction.OptionsSectionGraphics:
                 SelectSection(OptionsSection.Graphics, viewport);
+                pendingSfxKey = "click-short";
                 break;
 
             case UiAction.OptionsSectionAudio:
                 SelectSection(OptionsSection.Audio, viewport);
+                pendingSfxKey = "click-short";
                 break;
 
             case UiAction.OptionsSectionLibrary:
                 SelectSection(OptionsSection.Library, viewport);
+                pendingSfxKey = "click-short";
                 break;
 
             case UiAction.OptionsSectionInput:
                 SelectSection(OptionsSection.Input, viewport);
+                pendingSfxKey = "click-short";
                 break;
 
             case UiAction.OptionsSectionAdvanced:
                 SelectSection(OptionsSection.Advanced, viewport);
+                pendingSfxKey = "click-short";
                 break;
 
             case UiAction.OptionsToggleServerConnection:
@@ -166,12 +156,19 @@ public sealed partial class OptionsScene
             case UiAction.OptionsToggleBeatmapSounds:
                 Toggle("beatmapSounds");
                 break;
+
+            default:
+                if (UiActionGroups.TryGetOptionsRowIndex(action, out var rowIndex))
+                    HandleRowAction(rowIndex, viewport);
+                break;
         }
     }
 
     public bool GetBoolValue(string key) => boolValues.TryGetValue(key, out var value) && value;
 
     public int GetIntValue(string key) => intValues.TryGetValue(key, out var value) ? value : 0;
+
+    public string GetStringValue(string key) => stringValues.TryGetValue(key, out var value) ? value : string.Empty;
 
     public void Scroll(float deltaY, VirtualViewport viewport) => Scroll(deltaY, new UiPoint(ContentPaddingX + SectionRailWidth + ListGap, ContentTop), viewport);
 
@@ -216,7 +213,104 @@ public sealed partial class OptionsScene
             var updated = !value;
             boolValues[key] = updated;
             settingsStore?.SetBool(key, updated);
+            pendingSfxKey = updated ? "check-on" : "check-off";
         }
+    }
+
+    private void HandleRowAction(int rowIndex, VirtualViewport viewport)
+    {
+        var rows = ActiveSectionData.Categories.SelectMany(category => category.Rows).ToArray();
+        if ((uint)rowIndex >= (uint)rows.Length)
+            return;
+
+        var row = rows[rowIndex];
+        if (!row.IsEnabled)
+            return;
+
+        switch (row.Kind)
+        {
+            case SettingsRowKind.Checkbox:
+                Toggle(row.Key);
+                break;
+
+            case SettingsRowKind.Slider:
+                StepSlider(row);
+                pendingSfxKey = "click-short";
+                break;
+
+            case SettingsRowKind.Input:
+                FocusInput(row, rowIndex, viewport);
+                pendingSfxKey = "click-short";
+                break;
+
+            case SettingsRowKind.Select:
+                CycleSelect(row);
+                pendingSfxKey = "click-short";
+                break;
+
+            case SettingsRowKind.Button:
+                pendingSfxKey = "click-short-confirm";
+                break;
+        }
+    }
+
+    private void StepSlider(SettingsRow row)
+    {
+        var current = GetIntValue(row.Key);
+        var step = Math.Max(1, (row.Max - row.Min) / 10);
+        var next = current + step;
+        if (next > row.Max)
+            next = row.Min;
+        intValues[row.Key] = next;
+        settingsStore?.SetInt(row.Key, next);
+    }
+
+    private void CycleSelect(SettingsRow row)
+    {
+        var current = settingsStore?.GetInt(row.Key, 0) ?? 0;
+        var next = (current + 1) % 3;
+        settingsStore?.SetInt(row.Key, next);
+    }
+
+    private void FocusInput(SettingsRow row, int rowIndex, VirtualViewport viewport)
+    {
+        var rowBounds = FindRowBounds(rowIndex, viewport);
+        textInputService.RequestTextInput(new TextInputRequest(
+            GetStringValue(row.Key),
+            text =>
+            {
+                stringValues[row.Key] = text;
+                settingsStore?.SetString(row.Key, text);
+            },
+            text =>
+            {
+                stringValues[row.Key] = text;
+                settingsStore?.SetString(row.Key, text);
+            },
+            rowBounds));
+    }
+
+    private UiRect? FindRowBounds(int targetRowIndex, VirtualViewport viewport)
+    {
+        var listX = ContentPaddingX + SectionRailWidth + ListGap;
+        var listWidth = viewport.VirtualWidth - listX - ContentPaddingX;
+        var y = ContentTop - contentScrollOffset;
+        var rowIndex = 0;
+
+        foreach (var category in ActiveSectionData.Categories)
+        {
+            y += CategoryTopMargin + CategoryHeaderHeight;
+            foreach (var row in category.Rows)
+            {
+                var rowHeight = GetRowHeight(row);
+                if (rowIndex == targetRowIndex)
+                    return new UiRect(listX, y, listWidth, rowHeight);
+                y += rowHeight;
+                rowIndex++;
+            }
+        }
+
+        return null;
     }
 
     private void ClampScroll(VirtualViewport viewport)

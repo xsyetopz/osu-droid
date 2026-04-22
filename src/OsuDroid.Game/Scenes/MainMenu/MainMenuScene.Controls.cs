@@ -188,6 +188,52 @@ public sealed partial class MainMenuScene
             new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight),
             UiColor.Opaque(0, 0, 0),
             progress));
+
+        if (progress < 1f)
+            return;
+
+        elements.Add(new UiElementSnapshot(
+            "exit-instruction",
+            UiElementKind.Text,
+            new UiRect(0f, viewport.VirtualHeight * 0.5f - 18f, viewport.VirtualWidth, 40f),
+            white,
+            1f,
+            Text: "Done playing? Swipe this app away to close it.",
+            TextStyle: new UiTextStyle(ExitInstructionTextSize, Alignment: UiTextAlignment.Center)));
+    }
+
+    private void AddDevelopmentBuildOverlay(List<UiElementSnapshot> elements, VirtualViewport viewport)
+    {
+        if (!isDevelopmentBuild)
+            return;
+
+        var asset = DroidAssets.MainMenuManifest.Get(DroidAssets.DevBuildOverlay);
+        var scale = viewport.VirtualWidth / asset.NativeSize.Width;
+        var height = Math.Max(1f, asset.NativeSize.Height * scale);
+        elements.Add(new UiElementSnapshot(
+            "dev-build-overlay",
+            UiElementKind.Sprite,
+            new UiRect(0f, viewport.VirtualHeight - height, viewport.VirtualWidth, height),
+            white,
+            1f,
+            DroidAssets.DevBuildOverlay));
+        var textBounds = new UiRect(0f, viewport.VirtualHeight - height - 24f, viewport.VirtualWidth, 22f);
+        elements.Add(new UiElementSnapshot(
+            "dev-build-text-shadow",
+            UiElementKind.Text,
+            new UiRect(textBounds.X + 2f, textBounds.Y + 2f, textBounds.Width, textBounds.Height),
+            UiColor.Opaque(0, 0, 0),
+            0.5f,
+            Text: "DEVELOPMENT BUILD",
+            TextStyle: new UiTextStyle(16f, Alignment: UiTextAlignment.Center)));
+        elements.Add(new UiElementSnapshot(
+            "dev-build-text",
+            UiElementKind.Text,
+            textBounds,
+            UiColor.Opaque(255, 237, 0),
+            1f,
+            Text: "DEVELOPMENT BUILD",
+            TextStyle: new UiTextStyle(16f, Alignment: UiTextAlignment.Center)));
     }
 
 }

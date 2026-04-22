@@ -145,6 +145,7 @@ public sealed partial class MainMenuScene
         AddVersionPill(elements, viewport);
         AddDownloaderTab(elements, viewport);
         AddMusicControls(elements, viewport);
+        AddDevelopmentBuildOverlay(elements, viewport);
         AddExitOverlay(elements, viewport);
 
         if (isAboutDialogOpen || forceAboutDialog)
@@ -245,8 +246,8 @@ public sealed partial class MainMenuScene
         var centerX = baseLogoBounds.X + baseLogoBounds.Width * 0.5f;
         var centerY = baseLogoBounds.Y + baseLogoBounds.Height * 0.5f;
 
-        const float barHeight = 10f / MainMenuReferenceToVirtualScale;
-        const float baselineWidth = 250f / MainMenuReferenceToVirtualScale;
+        const float barHeight = 10f;
+        const float baselineWidth = 250f;
         for (var i = 0; i < SpectrumBarCount; i++)
         {
             var width = baselineWidth + spectrumPeakLevel[i];

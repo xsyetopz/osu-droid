@@ -8,9 +8,13 @@ public interface IGameSettingsStore
 
     int GetInt(string key, int defaultValue);
 
+    string GetString(string key, string defaultValue);
+
     void SetBool(string key, bool value);
 
     void SetInt(string key, int value);
+
+    void SetString(string key, string value);
 }
 
 public sealed class JsonGameSettingsStore(string filePath) : IGameSettingsStore
@@ -58,6 +62,28 @@ public sealed class JsonGameSettingsStore(string filePath) : IGameSettingsStore
         {
             EnsureLoaded();
             values![key] = JsonDocument.Parse(value.ToString(System.Globalization.CultureInfo.InvariantCulture)).RootElement.Clone();
+            Save();
+        }
+    }
+
+    public string GetString(string key, string defaultValue)
+    {
+        lock (gate)
+        {
+            EnsureLoaded();
+            if (values is null || !values.TryGetValue(key, out var element))
+                return defaultValue;
+
+            return element.ValueKind == JsonValueKind.String ? element.GetString() ?? defaultValue : defaultValue;
+        }
+    }
+
+    public void SetString(string key, string value)
+    {
+        lock (gate)
+        {
+            EnsureLoaded();
+            values![key] = JsonDocument.Parse(JsonSerializer.Serialize(value)).RootElement.Clone();
             Save();
         }
     }
