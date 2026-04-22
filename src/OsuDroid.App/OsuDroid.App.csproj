@@ -35,7 +35,9 @@
     </ItemGroup>
     <ItemGroup Condition="'$(BuildMobile)' == 'true'">
         <PackageReference Include="Microsoft.Maui.Controls" />
+        <PackageReference Include="MonoGame.Content.Builder.Task" />
         <PackageReference Include="SocketIOClient" />
+        <MonoGameContentReference Include="Content\DroidAssets.mgcb" />
     </ItemGroup>
     <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
         <PackageReference Include="MonoGame.Framework.Android" />
@@ -68,9 +70,6 @@
         <AndroidResource Include="Platforms\Android\Resources\drawable-*\ic_launcher.png" />
     </ItemGroup>
     <ItemGroup Condition="'$(BuildMobile)' == 'true'">
-        <MauiAsset Include="Resources\Raw\assets\droid\**\*.png" LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
-        <MauiAsset Include="Resources\Raw\assets\droid\**\*.jpg" LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
-        <MauiAsset Include="Resources\Raw\assets\droid\**\*.jpeg" LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
         <MauiAsset Include="Resources\Raw\assets\droid\**\*.ogg" LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
     <ItemGroup>

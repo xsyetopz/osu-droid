@@ -73,7 +73,7 @@ clean:
 	rm -rf tests/OsuDroid.Game.Tests/bin tests/OsuDroid.Game.Tests/obj
 
 build-android:
-	dotnet build $(APP_PROJECT) -c Debug -f net9.0-android $(DOTNET_BUILD_FLAGS) $(LOCAL_AUDIT_BYPASS_FLAGS) -p:BuildMobile=true -p:MobileTarget=android
+	OSUDROID_VERSION_NAME=$$(date -u +%Y.%-m%d.0); OSUDROID_VERSION_CODE=$$(date -u +%s); dotnet build $(APP_PROJECT) -c Debug -f net9.0-android $(DOTNET_BUILD_FLAGS) $(LOCAL_AUDIT_BYPASS_FLAGS) -p:BuildMobile=true -p:MobileTarget=android -p:ApplicationDisplayVersion=$$OSUDROID_VERSION_NAME -p:ApplicationVersion=$$OSUDROID_VERSION_CODE
 
 verify-android-bass:
 	@echo "BASS verification skipped: MonoGame build does not package osu-framework BASS natives."

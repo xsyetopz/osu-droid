@@ -12,6 +12,8 @@ IOS_PROVISIONING_PROFILE="${IOS_PROVISIONING_PROFILE:-}"
 IOS_CODESIGN_KEY="${IOS_CODESIGN_KEY:-}"
 IOS_TEAM_ID="${IOS_TEAM_ID:-}"
 IOS_BUNDLE_ID="${IOS_BUNDLE_ID:-moe.osudroid}"
+OSUDROID_VERSION_NAME="${OSUDROID_VERSION_NAME:-$(date -u +%Y.%-m%d.0)}"
+OSUDROID_VERSION_CODE="${OSUDROID_VERSION_CODE:-$(date -u +%s)}"
 REQUIRED_XCODE_MAJOR_MINOR="${REQUIRED_XCODE_MAJOR_MINOR:-26.3}"
 IOS_DEVICE_ID="${IOS_DEVICE_ID:-}"
 IOS_SIGNING_HELPER="$ROOT_DIR/scripts/ios-signing.sh"
@@ -125,6 +127,8 @@ if [ -n "${CODESIGN_PROVISION:-}" ]; then
     -p:WarningsNotAsErrors=NU1900 \
     -p:BuildMobile=true \
     -p:MobileTarget=ios \
+    -p:ApplicationDisplayVersion="$OSUDROID_VERSION_NAME" \
+    -p:ApplicationVersion="$OSUDROID_VERSION_CODE" \
     -p:CodesignKey="$IOS_CODESIGN_KEY" \
     -p:CodesignTeamId="$IOS_TEAM_ID" \
     -p:CodesignProvision="$CODESIGN_PROVISION"
@@ -138,6 +142,8 @@ else
     -p:WarningsNotAsErrors=NU1900 \
     -p:BuildMobile=true \
     -p:MobileTarget=ios \
+    -p:ApplicationDisplayVersion="$OSUDROID_VERSION_NAME" \
+    -p:ApplicationVersion="$OSUDROID_VERSION_CODE" \
     -p:CodesignKey="$IOS_CODESIGN_KEY" \
     -p:CodesignTeamId="$IOS_TEAM_ID"
 fi

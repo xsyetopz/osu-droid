@@ -9,6 +9,7 @@
     <PackageVersion Include="Material.Icons" Version="3.0.2" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="9.0.15" />
     <PackageVersion Include="Microsoft.Maui.Controls" Version="9.0.120" />
+    <PackageVersion Include="MonoGame.Content.Builder.Task" Version="3.8.4.1" />
     <PackageVersion Include="MonoGame.Framework.Android" Version="3.8.4.1" />
     <PackageVersion Include="MonoGame.Framework.iOS" Version="3.8.4.1" />
     <PackageVersion Include="SkiaSharp" Version="3.119.0" />

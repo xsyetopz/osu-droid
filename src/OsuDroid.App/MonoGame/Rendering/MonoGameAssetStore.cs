@@ -1,15 +1,15 @@
 #if ANDROID || IOS
-using Microsoft.Maui.Storage;
-using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using OsuDroid.Game.Runtime;
 using OsuDroid.Game.UI;
 
 namespace OsuDroid.App.MonoGame.Rendering;
 
-internal sealed class MonoGameAssetStore(GraphicsDevice graphicsDevice)
+internal sealed class MonoGameAssetStore(GraphicsDevice graphicsDevice, ContentManager contentManager)
 {
     private readonly Dictionary<string, Texture2D> textures = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, Texture2D> fileTextures = new(StringComparer.Ordinal);
+    private readonly ExternalTextureCache externalTextures = new(graphicsDevice);
 
     public Texture2D? GetTexture(UiAssetManifest manifest, string logicalName, RenderCacheMetrics? metrics = null)
     {
@@ -17,50 +17,36 @@ internal sealed class MonoGameAssetStore(GraphicsDevice graphicsDevice)
             return cachedTexture;
 
         metrics?.AddSpriteMiss();
+        var start = PerfDiagnostics.Start();
         var entry = manifest.Get(logicalName);
-        using var stream = OpenAssetStream(entry.PackagePath);
-        var texture = Texture2D.FromStream(graphicsDevice, stream);
+        var texture = contentManager.Load<Texture2D>(entry.ContentName);
         textures.Add(logicalName, texture);
+        PerfDiagnostics.Log("asset.contentTextureLoad", start, $"asset=\"{logicalName}\"");
         return texture;
     }
 
-    public Texture2D? GetFileTexture(string path, RenderCacheMetrics? metrics = null)
+    public Texture2D? TryGetExternalTexture(string path) => externalTextures.TryGet(path);
+
+    public void RequestExternalTexture(string path, int maxWidth, int maxHeight, RenderCacheMetrics? metrics = null) =>
+        externalTextures.Request(path, maxWidth, maxHeight, metrics);
+
+    public void UploadReadyExternalTextures(RenderCacheMetrics? metrics = null) =>
+        externalTextures.UploadReady(metrics);
+
+    public void Preload(UiAssetManifest manifest, RenderCacheMetrics? metrics = null)
     {
-        if (fileTextures.TryGetValue(path, out var cachedTexture))
-            return cachedTexture;
-
-        if (!File.Exists(path))
-            return null;
-
-        metrics?.AddSpriteMiss();
-        using var stream = File.OpenRead(path);
-        var texture = Texture2D.FromStream(graphicsDevice, stream);
-        fileTextures.Add(path, texture);
-        return texture;
-    }
-
-    private static Stream OpenAssetStream(string packagePath)
-    {
-        try
+        foreach (var entry in manifest.Entries)
         {
-            return FileSystem.OpenAppPackageFileAsync(packagePath).GetAwaiter().GetResult();
-        }
-        catch (Exception)
-        {
-            return TitleContainer.OpenStream(packagePath);
+            if (entry.Kind == UiAssetKind.Texture)
+                _ = GetTexture(manifest, entry.LogicalName, metrics);
         }
     }
 
     public void Dispose()
     {
-        foreach (var texture in textures.Values)
-            texture.Dispose();
-
-        foreach (var texture in fileTextures.Values)
-            texture.Dispose();
-
+        externalTextures.Dispose();
         textures.Clear();
-        fileTextures.Clear();
+        contentManager.Unload();
     }
 }
 #endif
