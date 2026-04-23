@@ -1,104 +1,120 @@
-using System.Globalization;
-using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Beatmaps.Online;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.UI;
 
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.BeatmapDownloader;
 
 public sealed partial class BeatmapDownloaderScene
 {
     private async Task SearchAsync(bool append)
     {
-        if (isSearching)
+        if (_isSearching)
+        {
             return;
+        }
 
         if (!append)
         {
-            searchCancellation.Cancel();
-            searchCancellation.Dispose();
-            searchCancellation = new CancellationTokenSource();
-            offset = 0;
-            scrollOffset = 0f;
-            sets = [];
-            hasMore = true;
+            _searchCancellation.Cancel();
+            _searchCancellation.Dispose();
+            _searchCancellation = new CancellationTokenSource();
+            _offset = 0;
+            _scrollOffset = 0f;
+            _sets = [];
+            _hasMore = true;
         }
 
-        if (!hasMore)
+        if (!_hasMore)
+        {
             return;
+        }
 
         try
         {
-            isSearching = true;
-            hasSearchError = false;
-            message = null;
-            var request = new BeatmapMirrorSearchRequest(query, offset, PageSize, sort, order, status, mirror);
-            var result = await mirrorClient.SearchAsync(request, searchCancellation.Token).ConfigureAwait(false);
-            sets = append ? sets.Concat(result).ToArray() : result;
-            offset += result.Count;
-            hasMore = result.Count >= PageSize;
-            message = sets.Count == 0 ? "No beatmaps found" : null;
+            _isSearching = true;
+            _hasSearchError = false;
+            _message = null;
+            var request = new BeatmapMirrorSearchRequest(_query, _offset, PageSize, _sort, _order, _status, _mirror);
+            IReadOnlyList<BeatmapMirrorSet> result = await _mirrorClient.SearchAsync(request, _searchCancellation.Token).ConfigureAwait(false);
+            _sets = append ? _sets.Concat(result).ToArray() : result;
+            _offset += result.Count;
+            _hasMore = result.Count >= PageSize;
+            _message = _sets.Count == 0 ? _localizer["BeatmapDownloader_NoBeatmapsFound"] : null;
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            message = "Failed to connect to server, please check your internet connection.";
-            hasSearchError = true;
-            hasMore = false;
+            _message = _localizer["BeatmapDownloader_ConnectionFailed"];
+            _hasSearchError = true;
+            _hasMore = false;
         }
         finally
         {
-            isSearching = false;
+            _isSearching = false;
         }
     }
 
     private async Task DownloadAsync(int index, bool withVideo)
     {
-        if (index < 0 || index >= sets.Count)
+        if (index < 0 || index >= _sets.Count)
+        {
             return;
+        }
 
-        var set = sets[index];
-        if (preferNoVideoDownloads && withVideo && MirrorDefinition(set.Mirror).SupportsNoVideoDownloads && set.HasVideo)
+        BeatmapMirrorSet set = _sets[index];
+        if (_preferNoVideoDownloads && withVideo && MirrorDefinition(set.Mirror).SupportsNoVideoDownloads && set.HasVideo)
+        {
             withVideo = false;
+        }
 
-        var downloadResult = await downloadService.DownloadAsync(set, withVideo, CancellationToken.None).ConfigureAwait(false);
+        BeatmapDownloadResult downloadResult = await _downloadService.DownloadAsync(set, withVideo, CancellationToken.None).ConfigureAwait(false);
         if (downloadResult.IsSuccess)
         {
-            selectedSetIndex = null;
-            lastImportedSetDirectory = downloadResult.ArchivePath is null ? null : Path.GetFileNameWithoutExtension(downloadResult.ArchivePath);
-            message = "Beatmap downloaded";
+            _selectedSetIndex = null;
+            _lastImportedSetDirectory = downloadResult.ArchivePath is null ? null : Path.GetFileNameWithoutExtension(downloadResult.ArchivePath);
+            _message = _localizer["BeatmapDownloader_Downloaded"];
         }
         else
         {
-            message = downloadResult.ErrorMessage;
+            _message = downloadResult.ErrorMessage;
         }
     }
 
     private void Preview(int index)
     {
-        if (index < 0 || index >= sets.Count || sets[index].Beatmaps.Count == 0)
-            return;
-
-        if (previewingSetIndex == index)
+        if (index < 0 || index >= _sets.Count || _sets[index].Beatmaps.Count == 0)
         {
-            if (ownsPreviewPlayback)
-                previewPlayer.StopPreview();
-            previewingSetIndex = null;
-            ownsPreviewPlayback = false;
             return;
         }
 
-        if (previewPlayCount >= 2 && DateTime.UtcNow - lastPreviewStartedUtc < TimeSpan.FromSeconds(5))
+        if (_previewingSetIndex == index)
+        {
+            if (_ownsPreviewPlayback)
+            {
+                _previewPlayer.StopPreview();
+            }
+
+            _previewingSetIndex = null;
+            _ownsPreviewPlayback = false;
             return;
+        }
 
-        if (DateTime.UtcNow - lastPreviewStartedUtc >= TimeSpan.FromSeconds(5))
-            previewPlayCount = 0;
+        if (_previewPlayCount >= 2 && DateTime.UtcNow - _lastPreviewStartedUtc < TimeSpan.FromSeconds(5))
+        {
+            return;
+        }
 
-        if (ownsPreviewPlayback)
-            previewPlayer.StopPreview();
-        previewPlayer.Play(mirrorClient.CreatePreviewUri(sets[index].Mirror, sets[index].Beatmaps[0].Id));
-        previewingSetIndex = index;
-        ownsPreviewPlayback = true;
-        previewPlayCount++;
-        lastPreviewStartedUtc = DateTime.UtcNow;
+        if (DateTime.UtcNow - _lastPreviewStartedUtc >= TimeSpan.FromSeconds(5))
+        {
+            _previewPlayCount = 0;
+        }
+
+        if (_ownsPreviewPlayback)
+        {
+            _previewPlayer.StopPreview();
+        }
+
+        _previewPlayer.Play(_mirrorClient.CreatePreviewUri(_sets[index].Mirror, _sets[index].Beatmaps[0].Id));
+        _previewingSetIndex = index;
+        _ownsPreviewPlayback = true;
+        _previewPlayCount++;
+        _lastPreviewStartedUtc = DateTime.UtcNow;
     }
 }

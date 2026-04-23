@@ -1,7 +1,6 @@
 using OsuDroid.Game.Runtime;
-using OsuDroid.Game.UI;
 
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.Startup;
 
 public sealed class StartupScene
 {
@@ -12,36 +11,37 @@ public sealed class StartupScene
     private const double WelcomeDelayMilliseconds = DroidUiTimings.StartupWelcomeDelayMilliseconds;
     private const double WelcomeStretchMilliseconds = DroidUiTimings.StartupWelcomeStretchMilliseconds;
 
-    private static readonly UiColor fallbackBackground = UiColor.Opaque(0, 0, 0);
-    private static readonly UiColor white = UiColor.Opaque(255, 255, 255);
+    private static readonly UiColor s_fallbackBackground = UiColor.Opaque(0, 0, 0);
+    private static readonly UiColor s_white = UiColor.Opaque(255, 255, 255);
 
-    private double elapsedMilliseconds;
-    private bool welcomeSoundsRequested;
+    private double _elapsedMilliseconds;
+    private bool _welcomeSoundsRequested;
 
-    public bool IsComplete => elapsedMilliseconds >= WelcomeStartMilliseconds + WelcomeMilliseconds;
+    public bool IsComplete => _elapsedMilliseconds >= WelcomeStartMilliseconds + WelcomeMilliseconds;
 
     public bool ConsumeWelcomeSoundsRequest()
     {
-        if (welcomeSoundsRequested)
+        if (_welcomeSoundsRequested)
+        {
             return false;
+        }
 
-        if (elapsedMilliseconds < WelcomeStartMilliseconds)
+        if (_elapsedMilliseconds < WelcomeStartMilliseconds)
+        {
             return false;
+        }
 
-        welcomeSoundsRequested = true;
+        _welcomeSoundsRequested = true;
         return true;
     }
 
-    public void Update(TimeSpan elapsed)
-    {
-        elapsedMilliseconds = Math.Min(elapsedMilliseconds + elapsed.TotalMilliseconds, WelcomeStartMilliseconds + WelcomeMilliseconds);
-    }
+    public void Update(TimeSpan elapsed) => _elapsedMilliseconds = Math.Min(_elapsedMilliseconds + elapsed.TotalMilliseconds, WelcomeStartMilliseconds + WelcomeMilliseconds);
 
     public GameFrameSnapshot CreateSnapshot(VirtualViewport viewport)
     {
         var elements = new List<UiElementSnapshot>
         {
-            new("startup-background", UiElementKind.Fill, new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), fallbackBackground, 1f),
+            new("startup-background", UiElementKind.Fill, new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), s_fallbackBackground, 1f),
         };
 
         AddLoadingSpinner(elements, viewport);
@@ -52,18 +52,20 @@ public sealed class StartupScene
 
     private void AddLoadingSpinner(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        var alpha = LoadingAlpha;
+        float alpha = LoadingAlpha;
         if (alpha <= 0f)
+        {
             return;
+        }
 
-        var asset = DroidAssets.StartupManifest.Get(DroidAssets.Loading);
-        var size = asset.NativeSize.Width * 0.4f;
-        var progress = (float)(elapsedMilliseconds / 2000d);
+        UiAssetEntry asset = DroidAssets.StartupManifest.Get(DroidAssets.Loading);
+        float size = asset.NativeSize.Width * 0.4f;
+        float progress = (float)(_elapsedMilliseconds / 2000d);
         elements.Add(new UiElementSnapshot(
             "startup-loading-spinner",
             UiElementKind.Sprite,
             new UiRect((viewport.VirtualWidth - size) / 2f, (viewport.VirtualHeight - size) / 2f, size, size),
-            white,
+            s_white,
             alpha,
             DroidAssets.Loading,
             RotationDegrees: progress * 360f));
@@ -71,27 +73,29 @@ public sealed class StartupScene
 
     private void AddWelcome(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        if (elapsedMilliseconds < WelcomeStartMilliseconds)
+        if (_elapsedMilliseconds < WelcomeStartMilliseconds)
+        {
             return;
+        }
 
-        var welcomeElapsed = elapsedMilliseconds - WelcomeStartMilliseconds;
-        var fade = (float)Math.Clamp(welcomeElapsed / WelcomeMilliseconds, 0d, 1d);
-        var yScale = welcomeElapsed < WelcomeStretchMilliseconds
+        double welcomeElapsed = _elapsedMilliseconds - WelcomeStartMilliseconds;
+        float fade = (float)Math.Clamp(welcomeElapsed / WelcomeMilliseconds, 0d, 1d);
+        float yScale = welcomeElapsed < WelcomeStretchMilliseconds
             ? (float)Math.Clamp(welcomeElapsed / WelcomeStretchMilliseconds, 0d, 1d)
             : 1f + 0.1f * (float)Math.Clamp((welcomeElapsed - WelcomeStretchMilliseconds) / (WelcomeMilliseconds - WelcomeStretchMilliseconds), 0d, 1d);
-        var asset = DroidAssets.StartupManifest.Get(DroidAssets.Welcome);
-        var width = asset.NativeSize.Width * (welcomeElapsed < WelcomeStretchMilliseconds ? 1f : yScale);
-        var height = asset.NativeSize.Height * yScale;
+        UiAssetEntry asset = DroidAssets.StartupManifest.Get(DroidAssets.Welcome);
+        float width = asset.NativeSize.Width * (welcomeElapsed < WelcomeStretchMilliseconds ? 1f : yScale);
+        float height = asset.NativeSize.Height * yScale;
         elements.Add(new UiElementSnapshot(
             "startup-welcome",
             UiElementKind.Sprite,
             new UiRect((viewport.VirtualWidth - width) / 2f, (viewport.VirtualHeight - height) / 2f, width, height),
-            white,
+            s_white,
             fade,
             DroidAssets.Welcome));
     }
 
     private static double WelcomeStartMilliseconds => WelcomeDelayMilliseconds;
 
-    private float LoadingAlpha => 1f - (float)Math.Clamp(elapsedMilliseconds / LoadingFadeOutMilliseconds, 0d, 1d);
+    private float LoadingAlpha => 1f - (float)Math.Clamp(_elapsedMilliseconds / LoadingFadeOutMilliseconds, 0d, 1d);
 }

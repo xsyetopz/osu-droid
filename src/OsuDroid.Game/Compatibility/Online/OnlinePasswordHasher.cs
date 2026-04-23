@@ -5,12 +5,12 @@ namespace OsuDroid.Game.Compatibility.Online;
 
 public static class OnlinePasswordHasher
 {
-    private const string salt = "taikotaiko";
+    private const string Salt = "taikotaiko";
 
     public static string HashPassword(string? password)
     {
-        var escaped = EscapeHtmlSpecialCharacters(AddSlashes((password ?? string.Empty).Trim()));
-        var bytes = MD5.HashData(Encoding.UTF8.GetBytes(escaped + salt));
+        string escaped = EscapeHtmlSpecialCharacters(AddSlashes((password ?? string.Empty).Trim()));
+        byte[] bytes = MD5.HashData(Encoding.UTF8.GetBytes(escaped + Salt));
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 

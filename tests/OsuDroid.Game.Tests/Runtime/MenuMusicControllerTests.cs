@@ -8,7 +8,7 @@ public sealed class MenuMusicControllerTests
     [Test]
     public void QueueKeepsMetadataButNotPlayingWhenPlaybackDoesNotStart()
     {
-        var audioPath = CreateAudioFile();
+        string audioPath = CreateAudioFile();
         var controller = new PreviewMenuMusicController(new NoOpBeatmapPreviewPlayer());
 
         controller.Queue(CreateTrack(audioPath), true);
@@ -22,7 +22,7 @@ public sealed class MenuMusicControllerTests
     [Test]
     public void QueueMarksPlayingAfterPlatformConfirmsPlayback()
     {
-        var audioPath = CreateAudioFile();
+        string audioPath = CreateAudioFile();
         var player = new ConfirmingPreviewPlayer();
         var controller = new PreviewMenuMusicController(player);
 
@@ -35,7 +35,7 @@ public sealed class MenuMusicControllerTests
     [Test]
     public void PauseKeepsMetadataAndStopsPlayingUntilConfirmedResume()
     {
-        var audioPath = CreateAudioFile();
+        string audioPath = CreateAudioFile();
         var player = new ConfirmingPreviewPlayer();
         var controller = new PreviewMenuMusicController(player);
         controller.Queue(CreateTrack(audioPath), true);
@@ -53,8 +53,8 @@ public sealed class MenuMusicControllerTests
     {
         var player = new ConfirmingPreviewPlayer();
         var controller = new PreviewMenuMusicController(player);
-        var first = CreateTrack(CreateAudioFile(), "First.osu", "Artist - First", 1000);
-        var second = CreateTrack(CreateAudioFile(), "Second.osu", "Artist - Second", 1000);
+        MenuTrack first = CreateTrack(CreateAudioFile(), "First.osu", "Artist - First", 1000);
+        MenuTrack second = CreateTrack(CreateAudioFile(), "Second.osu", "Artist - Second", 1000);
         controller.SetPlaylist([first, second], 0, true);
 
         player.PositionMilliseconds = 1000;
@@ -69,8 +69,8 @@ public sealed class MenuMusicControllerTests
     {
         var player = new ConfirmingPreviewPlayer();
         var controller = new PreviewMenuMusicController(player);
-        var first = CreateTrack(CreateAudioFile(), "First.osu", "Artist - First", 1000);
-        var second = CreateTrack(CreateAudioFile(), "Second.osu", "Artist - Second", 1000);
+        MenuTrack first = CreateTrack(CreateAudioFile(), "First.osu", "Artist - First", 1000);
+        MenuTrack second = CreateTrack(CreateAudioFile(), "Second.osu", "Artist - Second", 1000);
         controller.Queue(first, true);
         player.AcceptPlayRequests = false;
 
@@ -87,8 +87,8 @@ public sealed class MenuMusicControllerTests
     {
         var player = new ConfirmingPreviewPlayer { DurationMilliseconds = 1000 };
         var controller = new PreviewMenuMusicController(player);
-        var first = CreateTrack(CreateAudioFile(), "First.osu", "Artist - First", 5000);
-        var second = CreateTrack(CreateAudioFile(), "Second.osu", "Artist - Second", 5000);
+        MenuTrack first = CreateTrack(CreateAudioFile(), "First.osu", "Artist - First", 5000);
+        MenuTrack second = CreateTrack(CreateAudioFile(), "Second.osu", "Artist - Second", 5000);
         controller.SetPlaylist([first, second], 0, true);
 
         Assert.That(controller.State.LengthMilliseconds, Is.EqualTo(1000));
@@ -104,8 +104,8 @@ public sealed class MenuMusicControllerTests
     {
         var player = new ConfirmingPreviewPlayer();
         var controller = new PreviewMenuMusicController(player);
-        var missing = CreateTrack(Path.Combine(TestContext.CurrentContext.WorkDirectory, $"{Guid.NewGuid():N}.mp3"), "Missing.osu", "Artist - Missing", 1000);
-        var playable = CreateTrack(CreateAudioFile(), "Playable.osu", "Artist - Playable", 1000);
+        MenuTrack missing = CreateTrack(Path.Combine(TestContext.CurrentContext.WorkDirectory, $"{Guid.NewGuid():N}.mp3"), "Missing.osu", "Artist - Missing", 1000);
+        MenuTrack playable = CreateTrack(CreateAudioFile(), "Playable.osu", "Artist - Playable", 1000);
 
         controller.SetPlaylist([missing, playable], 0, true);
 
@@ -135,7 +135,7 @@ public sealed class MenuMusicControllerTests
 
     private static string CreateAudioFile()
     {
-        var path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"{Guid.NewGuid():N}.mp3");
+        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"{Guid.NewGuid():N}.mp3");
         File.WriteAllBytes(path, [1]);
         return path;
     }
@@ -157,7 +157,9 @@ public sealed class MenuMusicControllerTests
         public void Play(string audioPath, int previewTimeMilliseconds)
         {
             if (!AcceptPlayRequests)
+            {
                 return;
+            }
 
             IsPlaying = true;
             Source = audioPath;
@@ -167,7 +169,9 @@ public sealed class MenuMusicControllerTests
         public void Play(Uri previewUri)
         {
             if (!AcceptPlayRequests)
+            {
                 return;
+            }
 
             IsPlaying = true;
             Source = previewUri.ToString();

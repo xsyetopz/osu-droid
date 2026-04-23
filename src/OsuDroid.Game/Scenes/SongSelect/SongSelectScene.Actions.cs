@@ -1,25 +1,29 @@
-using OsuDroid.Game.Beatmaps;
-using OsuDroid.Game.Beatmaps.Difficulty;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.UI;
 using System.Globalization;
+using OsuDroid.Game.Beatmaps;
+using OsuDroid.Game.Runtime;
 
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.SongSelect;
 
 public sealed partial class SongSelectScene
 {
     public void SelectSet(int visibleSlot)
     {
-        var start = PerfDiagnostics.Start();
-        if (propertiesOpen || beatmapOptionsOpen || collectionsOpen)
+        long start = PerfDiagnostics.Start();
+        if (_propertiesOpen || _beatmapOptionsOpen || _collectionsOpen)
+        {
             return;
+        }
 
-        if (visibleSlot < 0 || visibleSlot >= visibleSetIndices.Length)
+        if (visibleSlot < 0 || visibleSlot >= _visibleSetIndices.Length)
+        {
             return;
+        }
 
-        var index = visibleSetIndices[visibleSlot] >= 0 ? visibleSetIndices[visibleSlot] : visibleSlot;
-        if (index < 0 || index >= visibleSnapshot.Sets.Count)
+        int index = _visibleSetIndices[visibleSlot] >= 0 ? _visibleSetIndices[visibleSlot] : visibleSlot;
+        if (index < 0 || index >= _visibleSnapshot.Sets.Count)
+        {
             return;
+        }
 
         SelectSetIndex(index);
         PerfDiagnostics.Log("songSelect.selectSet", start, $"slot={visibleSlot} index={index}");
@@ -29,21 +33,27 @@ public sealed partial class SongSelectScene
 
     public void SelectRandomSet()
     {
-        var start = PerfDiagnostics.Start();
-        if (propertiesOpen || beatmapOptionsOpen || collectionsOpen)
+        long start = PerfDiagnostics.Start();
+        if (_propertiesOpen || _beatmapOptionsOpen || _collectionsOpen)
+        {
             return;
+        }
 
-        var count = visibleSnapshot.Sets.Count;
+        int count = _visibleSnapshot.Sets.Count;
         if (count <= 0)
+        {
             return;
+        }
 
-        var index = 0;
+        int index = 0;
         if (count > 1)
         {
-            var roll = randomIndexProvider(count - 1);
+            int roll = _randomIndexProvider(count - 1);
             index = ((roll % (count - 1)) + count - 1) % (count - 1);
             if (index >= selectedSetIndex)
+            {
                 index++;
+            }
         }
 
         SelectSetIndex(index);
@@ -52,17 +62,23 @@ public sealed partial class SongSelectScene
 
     public void SelectDifficulty(int index)
     {
-        var start = PerfDiagnostics.Start();
-        if (propertiesOpen || beatmapOptionsOpen || collectionsOpen)
+        long start = PerfDiagnostics.Start();
+        if (_propertiesOpen || _beatmapOptionsOpen || _collectionsOpen)
+        {
             return;
+        }
 
-        if (index < 0 || index >= visibleDifficultyIndices.Length)
+        if (index < 0 || index >= _visibleDifficultyIndices.Length)
+        {
             return;
+        }
 
-        var set = SelectedSet;
-        var difficultyIndex = visibleDifficultyIndices[index] >= 0 ? visibleDifficultyIndices[index] : index;
+        BeatmapSetInfo? set = SelectedSet;
+        int difficultyIndex = _visibleDifficultyIndices[index] >= 0 ? _visibleDifficultyIndices[index] : index;
         if (set is null || difficultyIndex < 0 || difficultyIndex >= set.Beatmaps.Count)
+        {
             return;
+        }
 
         selectedDifficultyIndex = difficultyIndex;
         RefreshSelectedBackgroundPath();
@@ -85,38 +101,46 @@ public sealed partial class SongSelectScene
     public void OpenProperties()
     {
         if (SelectedSet is null)
+        {
             return;
+        }
 
-        propertiesOpen = true;
-        beatmapOptionsOpen = false;
-        collectionsOpen = false;
-        collectionsFilterMode = false;
-        deleteBeatmapConfirmOpen = false;
-        collectionPendingDelete = null;
+        _propertiesOpen = true;
+        _beatmapOptionsOpen = false;
+        _collectionsOpen = false;
+        _collectionsFilterMode = false;
+        _deleteBeatmapConfirmOpen = false;
+        _collectionPendingDelete = null;
     }
 
     public void OpenBeatmapOptions()
     {
-        if (visibleSnapshot.Sets.Count == 0)
+        if (_visibleSnapshot.Sets.Count == 0)
+        {
             return;
+        }
 
-        beatmapOptionsOpen = true;
-        propertiesOpen = false;
-        collectionsOpen = false;
-        collectionsFilterMode = false;
-        deleteBeatmapConfirmOpen = false;
-        collectionPendingDelete = null;
+        _beatmapOptionsOpen = true;
+        _propertiesOpen = false;
+        _collectionsOpen = false;
+        _collectionsFilterMode = false;
+        _deleteBeatmapConfirmOpen = false;
+        _collectionPendingDelete = null;
     }
 
     public void OpenPropertiesForDifficulty(int visibleSlot)
     {
-        if (visibleSlot < 0 || visibleSlot >= visibleDifficultyIndices.Length)
+        if (visibleSlot < 0 || visibleSlot >= _visibleDifficultyIndices.Length)
+        {
             return;
+        }
 
-        var set = SelectedSet;
-        var difficultyIndex = visibleDifficultyIndices[visibleSlot] >= 0 ? visibleDifficultyIndices[visibleSlot] : visibleSlot;
+        BeatmapSetInfo? set = SelectedSet;
+        int difficultyIndex = _visibleDifficultyIndices[visibleSlot] >= 0 ? _visibleDifficultyIndices[visibleSlot] : visibleSlot;
         if (set is null || difficultyIndex < 0 || difficultyIndex >= set.Beatmaps.Count)
+        {
             return;
+        }
 
         selectedDifficultyIndex = difficultyIndex;
         OpenProperties();
@@ -124,45 +148,49 @@ public sealed partial class SongSelectScene
 
     public void ClosePopups()
     {
-        propertiesOpen = false;
-        beatmapOptionsOpen = false;
-        collectionsOpen = false;
-        collectionsFilterMode = false;
-        deleteBeatmapConfirmOpen = false;
-        collectionPendingDelete = null;
-        textInputService.HideTextInput();
+        _propertiesOpen = false;
+        _beatmapOptionsOpen = false;
+        _collectionsOpen = false;
+        _collectionsFilterMode = false;
+        _deleteBeatmapConfirmOpen = false;
+        _collectionPendingDelete = null;
+        _textInputService.HideTextInput();
     }
 
     public void CloseCollections()
     {
-        collectionsOpen = false;
-        collectionsFilterMode = false;
-        collectionPendingDelete = null;
+        _collectionsOpen = false;
+        _collectionsFilterMode = false;
+        _collectionPendingDelete = null;
     }
 
     public void ToggleFavorite()
     {
-        var options = CurrentOptions();
+        BeatmapOptions? options = CurrentOptions();
         if (options is null)
+        {
             return;
+        }
 
         library.SaveOptions(options with { IsFavorite = !options.IsFavorite });
     }
 
     public void AdjustOffset(int delta)
     {
-        var options = CurrentOptions();
+        BeatmapOptions? options = CurrentOptions();
         if (options is null)
+        {
             return;
+        }
 
         library.SaveOptions(options with { Offset = Math.Clamp(options.Offset + delta, -250, 250) });
     }
 
     public void FocusOffsetInput(VirtualViewport viewport)
     {
-        var options = CurrentOptions();
-        var bounds = PropertiesOffsetInputBounds(viewport);
-        textInputService.RequestTextInput(new TextInputRequest(
+        BeatmapOptions? options = CurrentOptions();
+        UiRect bounds = PropertiesOffsetInputBounds(viewport);
+        _textInputService.RequestTextInput(new TextInputRequest(
             (options?.Offset ?? 0).ToString(CultureInfo.InvariantCulture),
             SaveOffsetText,
             SaveOffsetText,
@@ -174,21 +202,25 @@ public sealed partial class SongSelectScene
     public void RequestDeleteBeatmap()
     {
         if (SelectedSet is not null)
-            deleteBeatmapConfirmOpen = true;
+        {
+            _deleteBeatmapConfirmOpen = true;
+        }
     }
 
-    public void CancelDeleteBeatmap() => deleteBeatmapConfirmOpen = false;
+    public void CancelDeleteBeatmap() => _deleteBeatmapConfirmOpen = false;
 
     public void ConfirmDeleteBeatmap()
     {
-        var set = SelectedSet;
+        BeatmapSetInfo? set = SelectedSet;
         if (set is null)
+        {
             return;
+        }
 
         library.DeleteBeatmapSet(set.Directory);
-        snapshot = library.Load();
+        _snapshot = library.Load();
         ApplyBeatmapOptions();
-        selectedSetIndex = visibleSnapshot.Sets.Count == 0 ? -1 : Math.Clamp(selectedSetIndex, 0, visibleSnapshot.Sets.Count - 1);
+        selectedSetIndex = _visibleSnapshot.Sets.Count == 0 ? -1 : Math.Clamp(selectedSetIndex, 0, _visibleSnapshot.Sets.Count - 1);
         selectedDifficultyIndex = 0;
         scrollY = ClampScroll(CalculateSelectedSetScroll(selectedSetIndex));
         RefreshSelectedBackgroundPath();

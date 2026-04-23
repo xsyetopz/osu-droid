@@ -1,10 +1,8 @@
-using OsuDroid.Game.UI;
-
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.Options;
 
 public sealed partial class OptionsScene
 {
-    private static readonly SettingsCategory[] generalCategories =
+    private static readonly SettingsCategory[] s_generalCategories =
     [
         new("Options_CategoryOnline", [
             new("stayOnline", "Options_ServerConnectionTitle", "Options_ServerConnectionSummary", SettingsRowKind.Checkbox, true, Action: UiAction.OptionsToggleServerConnection, Availability: SettingsRowAvailability.Locked),
@@ -31,9 +29,9 @@ public sealed partial class OptionsScene
         ]),
     ];
 
-    private static readonly SettingsSection[] sections =
+    private static readonly SettingsSection[] s_sections =
     [
-        new(OptionsSection.General, "Options_General", UiMaterialIcon.ViewGridOutline, UiAction.OptionsSectionGeneral, generalCategories),
+        new(OptionsSection.General, "Options_General", UiMaterialIcon.ViewGridOutline, UiAction.OptionsSectionGeneral, s_generalCategories),
         new(OptionsSection.Gameplay, "Options_Gameplay", UiMaterialIcon.GamepadVariantOutline, UiAction.OptionsSectionGameplay, [
             new("Options_CategoryHitObjects", [
                 new("showfirstapproachcircle", "Options_ShowFirstApproachCircleTitle", "Options_ShowFirstApproachCircleSummary", SettingsRowKind.Checkbox, true, Availability: SettingsRowAvailability.Locked),

@@ -1,8 +1,4 @@
 using OsuDroid.Game.Beatmaps;
-using OsuDroid.Game.Beatmaps.Difficulty;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Tests;
 
@@ -10,8 +6,8 @@ public sealed partial class SongSelectSceneTests
 {
     private static BeatmapLibrarySnapshot CreateSnapshot(string? background = null)
     {
-        var easy = CreateBeatmap("Easy", background, 2.4f);
-        var insane = CreateBeatmap("Insane", background, 4.8f);
+        BeatmapInfo easy = CreateBeatmap("Easy", background, 2.4f);
+        BeatmapInfo insane = CreateBeatmap("Insane", background, 4.8f);
         return new BeatmapLibrarySnapshot([new BeatmapSetInfo(1, "1 Artist - Title", [easy, insane])]);
     }
 
@@ -52,21 +48,26 @@ public sealed partial class SongSelectSceneTests
 
     private static string CreateSongsRoot(params string[] files)
     {
-        var root = Path.Combine(TestContext.CurrentContext.WorkDirectory, Guid.NewGuid().ToString("N"));
-        var set = Path.Combine(root, "1 Artist - Title");
+        string root = Path.Combine(TestContext.CurrentContext.WorkDirectory, Guid.NewGuid().ToString("N"));
+        string set = Path.Combine(root, "1 Artist - Title");
         Directory.CreateDirectory(set);
-        foreach (var file in files)
+        foreach (string file in files)
+        {
             File.WriteAllBytes(Path.Combine(set, file), [1]);
+        }
+
         return root;
     }
 
     private static void SpinUntil(Func<bool> condition)
     {
-        var deadline = DateTime.UtcNow.AddSeconds(2);
+        DateTime deadline = DateTime.UtcNow.AddSeconds(2);
         while (DateTime.UtcNow < deadline)
         {
             if (condition())
+            {
                 return;
+            }
 
             Thread.Sleep(10);
         }

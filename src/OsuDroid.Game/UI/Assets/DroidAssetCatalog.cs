@@ -1,10 +1,10 @@
-namespace OsuDroid.Game.UI;
+namespace OsuDroid.Game.UI.Assets;
 
 public static partial class DroidAssets
 {
-    public static IReadOnlyList<UiAssetEntry> Catalog => AssetCatalog;
+    public static IReadOnlyList<UiAssetEntry> Catalog => s_assetCatalog;
 
-    private static readonly UiAssetEntry[] AssetCatalog =
+    private static readonly UiAssetEntry[] s_assetCatalog =
     [
         Texture(MenuBackground, "assets/droid/main-menu/background.png", 1500, 768),
         Texture(EmptyAvatar, "assets/droid/common/empty-avatar.png", 90, 90),

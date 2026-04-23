@@ -1,10 +1,4 @@
 using System.Net;
-using System.Reflection;
-using OsuDroid.Game.Beatmaps.Import;
-using OsuDroid.Game.Beatmaps.Online;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Tests;
 

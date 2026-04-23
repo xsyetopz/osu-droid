@@ -1,4 +1,4 @@
-namespace OsuDroid.Game.UI;
+namespace OsuDroid.Game.UI.Elements;
 
 public sealed record UiElementSnapshot(
     string Id,

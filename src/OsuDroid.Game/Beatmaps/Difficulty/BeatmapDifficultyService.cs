@@ -25,7 +25,7 @@ public sealed class BeatmapDifficultyService(
     public const long StandardCalculatorVersion = BeatmapDifficultyCalculator.StandardLegacyVersion + 2;
     private const string DroidVersionKey = "droidStarRatingVersion";
     private const string StandardVersionKey = "standardStarRatingVersion";
-    private readonly IBeatmapDifficultyCalculator calculator = calculator ?? new BeatmapDifficultyCalculator();
+    private readonly IBeatmapDifficultyCalculator _calculator = calculator ?? new BeatmapDifficultyCalculator();
 
     public DifficultyAlgorithm Algorithm { get; } = algorithm;
 
@@ -33,26 +33,32 @@ public sealed class BeatmapDifficultyService(
     {
         EnsureCalculatorVersions();
         if (beatmap.DroidStarRating is not null && beatmap.StandardStarRating is not null)
+        {
             return beatmap;
+        }
 
         if (string.IsNullOrWhiteSpace(songsPath))
+        {
             return beatmap;
+        }
 
-        var osuFilePath = Path.Combine(songsPath, beatmap.SetDirectory, beatmap.Filename);
+        string osuFilePath = Path.Combine(songsPath, beatmap.SetDirectory, beatmap.Filename);
         if (!File.Exists(osuFilePath))
+        {
             return beatmap;
+        }
 
         BeatmapStarRatings ratings;
         try
         {
-            ratings = calculator.Calculate(osuFilePath);
+            ratings = _calculator.Calculate(osuFilePath);
         }
         catch (Exception)
         {
             ratings = new BeatmapStarRatings(null, null);
         }
 
-        var updated = beatmap with
+        BeatmapInfo updated = beatmap with
         {
             DroidStarRating = beatmap.DroidStarRating ?? ratings.Droid,
             StandardStarRating = beatmap.StandardStarRating ?? ratings.Standard,

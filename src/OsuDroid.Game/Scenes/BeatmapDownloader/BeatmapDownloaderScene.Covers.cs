@@ -1,20 +1,17 @@
-using System.Globalization;
 using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Beatmaps.Online;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.UI;
 
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.BeatmapDownloader;
 
 public sealed partial class BeatmapDownloaderScene
 {
     private void AddCover(List<UiElementSnapshot> elements, string id, BeatmapMirrorSet set, UiRect bounds, UiAction action)
     {
-        elements.Add(Fill(id + "-fallback", bounds, CoverFallback, 0.55f, action, Radius));
-        var path = GetCoverPath(set);
+        elements.Add(Fill(id + "-fallback", bounds, s_coverFallback, 0.55f, action, Radius));
+        string? path = GetCoverPath(set);
         if (path is not null && File.Exists(path))
         {
-            elements.Add(new UiElementSnapshot(id, UiElementKind.Sprite, bounds, White, 0.55f, Action: action, ExternalAssetPath: path, SpriteFit: UiSpriteFit.Cover));
+            elements.Add(new UiElementSnapshot(id, UiElementKind.Sprite, bounds, s_white, 0.55f, Action: action, ExternalAssetPath: path, SpriteFit: UiSpriteFit.Cover));
             return;
         }
 
@@ -24,20 +21,24 @@ public sealed partial class BeatmapDownloaderScene
     private void StartCoverDownload(BeatmapMirrorSet set)
     {
         if (string.IsNullOrWhiteSpace(set.CoverUrl))
+        {
             return;
+        }
 
-        var path = GetCoverPath(set);
-        if (path is null || File.Exists(path) || !coverDownloads.Add(path))
+        string? path = GetCoverPath(set);
+        if (path is null || File.Exists(path) || !_coverDownloads.Add(path))
+        {
             return;
+        }
 
         _ = Task.Run(async () =>
         {
             try
             {
-                using var response = await CoverClient.GetAsync(set.CoverUrl).ConfigureAwait(false);
+                using HttpResponseMessage response = await s_coverClient.GetAsync(set.CoverUrl).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
-                using var source = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                using var destination = File.Create(path);
+                using Stream source = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                using FileStream destination = File.Create(path);
                 await source.CopyToAsync(destination).ConfigureAwait(false);
             }
             catch (Exception)
@@ -46,7 +47,7 @@ public sealed partial class BeatmapDownloaderScene
             }
             finally
             {
-                coverDownloads.Remove(path);
+                _coverDownloads.Remove(path);
             }
         });
     }
@@ -54,11 +55,16 @@ public sealed partial class BeatmapDownloaderScene
     private string? GetCoverPath(BeatmapMirrorSet set)
     {
         if (string.IsNullOrWhiteSpace(set.CoverUrl))
+        {
             return null;
+        }
 
-        var extension = Path.GetExtension(new Uri(set.CoverUrl).AbsolutePath);
+        string extension = Path.GetExtension(new Uri(set.CoverUrl).AbsolutePath);
         if (string.IsNullOrWhiteSpace(extension))
+        {
             extension = ".jpg";
-        return Path.Combine(coverCacheDirectory, BeatmapImportService.SanitizeArchiveName($"{set.Mirror}-{set.Id}") + extension);
+        }
+
+        return Path.Combine(_coverCacheDirectory, BeatmapImportService.SanitizeArchiveName($"{set.Mirror}-{set.Id}") + extension);
     }
 }

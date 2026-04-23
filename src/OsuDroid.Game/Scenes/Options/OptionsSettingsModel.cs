@@ -1,7 +1,6 @@
-using OsuDroid.Game.UI;
 using OsuDroid.Game.Runtime.Paths;
 
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.Options;
 
 internal enum SettingsRowKind
 {

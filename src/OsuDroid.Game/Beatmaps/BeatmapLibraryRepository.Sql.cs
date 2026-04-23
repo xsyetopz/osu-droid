@@ -6,7 +6,7 @@ public sealed partial class BeatmapLibraryRepository
 {
     private static void UpsertBeatmap(SqliteConnection connection, SqliteTransaction transaction, BeatmapInfo beatmap)
     {
-        using var command = connection.CreateCommand();
+        using SqliteCommand command = connection.CreateCommand();
         command.Transaction = transaction;
         command.CommandText = """
             INSERT OR REPLACE INTO BeatmapInfo (
@@ -62,7 +62,7 @@ public sealed partial class BeatmapLibraryRepository
 
     private static void ExecuteSetDirectoryDelete(SqliteConnection connection, SqliteTransaction transaction, string text, string setDirectory)
     {
-        using var command = connection.CreateCommand();
+        using SqliteCommand command = connection.CreateCommand();
         command.Transaction = transaction;
         command.CommandText = text;
         command.Parameters.AddWithValue("$setDirectory", setDirectory);
@@ -71,7 +71,7 @@ public sealed partial class BeatmapLibraryRepository
 
     private static void ExecuteCollectionDelete(SqliteConnection connection, SqliteTransaction transaction, string text, string name)
     {
-        using var command = connection.CreateCommand();
+        using SqliteCommand command = connection.CreateCommand();
         command.Transaction = transaction;
         command.CommandText = text;
         command.Parameters.AddWithValue("$name", name);
@@ -80,7 +80,7 @@ public sealed partial class BeatmapLibraryRepository
 
     private static void EnsureDifficultyMetadataTable(SqliteConnection connection)
     {
-        using var command = connection.CreateCommand();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = """
             CREATE TABLE IF NOT EXISTS BeatmapDifficultyMetadata (
                 key TEXT NOT NULL PRIMARY KEY,
@@ -127,25 +127,25 @@ public sealed partial class BeatmapLibraryRepository
 
     private static string? ReadNullableString(SqliteDataReader reader, string name)
     {
-        var ordinal = reader.GetOrdinal(name);
+        int ordinal = reader.GetOrdinal(name);
         return reader.IsDBNull(ordinal) ? null : reader.GetString(ordinal);
     }
 
     private static int? ReadNullableInt(SqliteDataReader reader, string name)
     {
-        var ordinal = reader.GetOrdinal(name);
+        int ordinal = reader.GetOrdinal(name);
         return reader.IsDBNull(ordinal) ? null : reader.GetInt32(ordinal);
     }
 
     private static long? ReadNullableLong(SqliteDataReader reader, string name)
     {
-        var ordinal = reader.GetOrdinal(name);
+        int ordinal = reader.GetOrdinal(name);
         return reader.IsDBNull(ordinal) ? null : reader.GetInt64(ordinal);
     }
 
     private static float? ReadNullableFloat(SqliteDataReader reader, string name)
     {
-        var ordinal = reader.GetOrdinal(name);
+        int ordinal = reader.GetOrdinal(name);
         return reader.IsDBNull(ordinal) ? null : reader.GetFloat(ordinal);
     }
 }

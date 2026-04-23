@@ -1,13 +1,13 @@
-using OsuDroid.Game.UI;
-
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.MainMenu;
 
 public sealed partial class MainMenuScene
 {
     private void AddMenuButtons(List<UiElementSnapshot> elements)
     {
         if (!IsMenuShown)
+        {
             return;
+        }
 
         AddMenuButton(elements, 0, GetAndroidMainMenuButtonBounds(0), UiAction.MainMenuFirst);
         AddMenuButton(elements, 1, GetAndroidMainMenuButtonBounds(1), UiAction.MainMenuSecond);
@@ -16,8 +16,8 @@ public sealed partial class MainMenuScene
 
     private void AddMenuButton(List<UiElementSnapshot> elements, int index, UiRect finalBounds, UiAction action)
     {
-        var assetName = CurrentButtonAsset(index);
-        var animatedBounds = finalBounds with { X = GetAnimatedMenuButtonX(finalBounds.X) };
+        string assetName = CurrentButtonAsset(index);
+        UiRect animatedBounds = finalBounds with { X = GetAnimatedMenuButtonX(finalBounds.X) };
         elements.Add(new UiElementSnapshot(
             $"menu-{index}",
             UiElementKind.Sprite,
@@ -30,29 +30,26 @@ public sealed partial class MainMenuScene
 
     private string CurrentButtonAsset(int index)
     {
-        if (!IsSecondMenu)
-        {
-            return index switch
+        return !IsSecondMenu
+            ? index switch
             {
                 0 => DroidAssets.Play,
                 1 => DroidAssets.Options,
                 2 => DroidAssets.Exit,
                 _ => throw new ArgumentOutOfRangeException(nameof(index), index, null),
+            }
+            : index switch
+            {
+                0 => DroidAssets.Solo,
+                1 => DroidAssets.Multi,
+                2 => DroidAssets.Back,
+                _ => throw new ArgumentOutOfRangeException(nameof(index), index, null),
             };
-        }
-
-        return index switch
-        {
-            0 => DroidAssets.Solo,
-            1 => DroidAssets.Multi,
-            2 => DroidAssets.Back,
-            _ => throw new ArgumentOutOfRangeException(nameof(index), index, null),
-        };
     }
 
     private void AddDownloaderTab(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        var tab = DroidAssets.MainMenuManifest.Get(DroidAssets.BeatmapDownloader);
+        UiAssetEntry tab = DroidAssets.MainMenuManifest.Get(DroidAssets.BeatmapDownloader);
         elements.Add(new UiElementSnapshot(
             "beatmap-downloader",
             UiElementKind.Sprite,
@@ -65,23 +62,25 @@ public sealed partial class MainMenuScene
 
     private void AddReturnTransitionBackground(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        if (!isReturnTransitionActive)
+        if (!_isReturnTransitionActive)
+        {
             return;
+        }
 
-        var background = DroidAssets.MainMenuManifest.Get(DroidAssets.MenuBackground);
-        var scale = viewport.VirtualWidth / background.NativeSize.Width;
-        var width = background.NativeSize.Width * scale;
-        var height = background.NativeSize.Height * scale;
+        UiAssetEntry background = DroidAssets.MainMenuManifest.Get(DroidAssets.MenuBackground);
+        float scale = viewport.VirtualWidth / background.NativeSize.Width;
+        float width = background.NativeSize.Width * scale;
+        float height = background.NativeSize.Height * scale;
         var bounds = new UiRect((viewport.VirtualWidth - width) / 2f, (viewport.VirtualHeight - height) / 2f, width, height);
-        if (returnTransitionBackgroundPath is not null)
+        if (_returnTransitionBackgroundPath is not null)
         {
             elements.Add(new UiElementSnapshot(
                 "return-background-fade",
                 UiElementKind.Sprite,
                 new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight),
-                white,
-                1f - (float)Math.Clamp(returnTransitionMilliseconds / ReturnBackgroundFadeDurationMilliseconds, 0d, 1d),
-                ExternalAssetPath: returnTransitionBackgroundPath,
+                s_white,
+                1f - (float)Math.Clamp(_returnTransitionMilliseconds / ReturnBackgroundFadeDurationMilliseconds, 0d, 1d),
+                ExternalAssetPath: _returnTransitionBackgroundPath,
                 SpriteFit: UiSpriteFit.Cover));
             return;
         }
@@ -90,23 +89,23 @@ public sealed partial class MainMenuScene
             "return-background-fade",
             UiElementKind.Sprite,
             bounds,
-            white,
-            1f - (float)Math.Clamp(returnTransitionMilliseconds / ReturnBackgroundFadeDurationMilliseconds, 0d, 1d),
+            s_white,
+            1f - (float)Math.Clamp(_returnTransitionMilliseconds / ReturnBackgroundFadeDurationMilliseconds, 0d, 1d),
             DroidAssets.MenuBackground));
     }
 
-    private void AddMusicControls(List<UiElementSnapshot> elements, VirtualViewport viewport)
+    private void AddMusicControls(List<UiElementSnapshot> elements)
     {
-        var nowPlayingBounds = GetAndroidMusicNowPlayingBounds();
+        UiRect nowPlayingBounds = GetAndroidMusicNowPlayingBounds();
         var titleBounds = new UiRect(0f, nowPlayingBounds.Y, MusicNowPlayingTextRight, 35f);
         var titleStyle = new UiTextStyle(28f, false, UiTextAlignment.Right);
-        var title = nowPlaying.ArtistTitle;
+        string title = TruncateNowPlayingTitle(_nowPlaying.ArtistTitle ?? string.Empty);
 
         elements.Add(new UiElementSnapshot(
             "music-now-playing",
             UiElementKind.Sprite,
             nowPlayingBounds,
-            white,
+            s_white,
             1f,
             DroidAssets.MusicNowPlaying,
             MeasuredTextAnchor: string.IsNullOrWhiteSpace(title)
@@ -119,7 +118,7 @@ public sealed partial class MainMenuScene
                 "music-title",
                 UiElementKind.Text,
                 titleBounds,
-                white,
+                s_white,
                 1f,
                 Text: title,
                 TextStyle: titleStyle));
@@ -132,6 +131,14 @@ public sealed partial class MainMenuScene
         AddMusicControl(elements, DroidAssets.MusicNext, UiAction.MainMenuMusicNext, 2f);
 
         AddSongProgress(elements);
+    }
+
+    public static string TruncateNowPlayingTitle(string title)
+    {
+        const string ellipsis = "...";
+        return title.Length > MusicNowPlayingCharactersMaximum
+            ? string.Concat(title.AsSpan(0, MusicNowPlayingCharactersMaximum - ellipsis.Length), ellipsis)
+            : title;
     }
 
     private void AddMusicControl(List<UiElementSnapshot> elements, string assetName, UiAction action, float legacyIndex)
@@ -157,9 +164,11 @@ public sealed partial class MainMenuScene
             0.3f,
             CornerRadius: 3f));
 
-        var ratio = GetMusicProgressRatio();
+        float ratio = GetMusicProgressRatio();
         if (ratio <= 0f)
+        {
             return;
+        }
 
         elements.Add(new UiElementSnapshot(
             "music-progress-fg",
@@ -172,18 +181,19 @@ public sealed partial class MainMenuScene
 
     private float GetMusicProgressRatio()
     {
-        if (nowPlaying.LengthMilliseconds <= 0)
-            return 0f;
-
-        return Math.Clamp(nowPlaying.PositionMilliseconds / (float)nowPlaying.LengthMilliseconds, 0f, 1f);
+        return _nowPlaying.LengthMilliseconds <= 0
+            ? 0f
+            : Math.Clamp(_nowPlaying.PositionMilliseconds / (float)_nowPlaying.LengthMilliseconds, 0f, 1f);
     }
 
 
     private void AddExitOverlay(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        var progress = GetExitProgress();
+        float progress = GetExitProgress();
         if (progress <= 0f)
+        {
             return;
+        }
 
         elements.Add(new UiElementSnapshot(
             "exit-blackout",
@@ -193,31 +203,35 @@ public sealed partial class MainMenuScene
             progress));
 
         if (progress < 1f)
+        {
             return;
+        }
 
         elements.Add(new UiElementSnapshot(
             "exit-instruction",
             UiElementKind.Text,
             new UiRect(0f, viewport.VirtualHeight * 0.5f - 18f, viewport.VirtualWidth, 40f),
-            white,
+            s_white,
             1f,
-            Text: "Done playing? Swipe this app away to close it.",
+            Text: _localizer["MainMenu_ExitInstruction"],
             TextStyle: new UiTextStyle(ExitInstructionTextSize, Alignment: UiTextAlignment.Center)));
     }
 
     private void AddDevelopmentBuildOverlay(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        if (!isDevelopmentBuild)
+        if (!_isDevelopmentBuild)
+        {
             return;
+        }
 
-        var asset = DroidAssets.MainMenuManifest.Get(DroidAssets.DevBuildOverlay);
-        var scale = viewport.VirtualWidth / asset.NativeSize.Width;
-        var height = Math.Max(1f, asset.NativeSize.Height * scale);
+        UiAssetEntry asset = DroidAssets.MainMenuManifest.Get(DroidAssets.DevBuildOverlay);
+        float scale = viewport.VirtualWidth / asset.NativeSize.Width;
+        float height = Math.Max(1f, asset.NativeSize.Height * scale);
         elements.Add(new UiElementSnapshot(
             "dev-build-overlay",
             UiElementKind.Sprite,
             new UiRect(0f, viewport.VirtualHeight - height, viewport.VirtualWidth, height),
-            white,
+            s_white,
             1f,
             DroidAssets.DevBuildOverlay));
         var textBounds = new UiRect(0f, viewport.VirtualHeight - height - 24f, viewport.VirtualWidth, 22f);
@@ -227,7 +241,7 @@ public sealed partial class MainMenuScene
             new UiRect(textBounds.X + 2f, textBounds.Y + 2f, textBounds.Width, textBounds.Height),
             UiColor.Opaque(0, 0, 0),
             0.5f,
-            Text: "DEVELOPMENT BUILD",
+            Text: _localizer["MainMenu_DevelopmentBuild"],
             TextStyle: new UiTextStyle(16f, Alignment: UiTextAlignment.Center)));
         elements.Add(new UiElementSnapshot(
             "dev-build-text",
@@ -235,7 +249,7 @@ public sealed partial class MainMenuScene
             textBounds,
             UiColor.Opaque(255, 237, 0),
             1f,
-            Text: "DEVELOPMENT BUILD",
+            Text: _localizer["MainMenu_DevelopmentBuild"],
             TextStyle: new UiTextStyle(16f, Alignment: UiTextAlignment.Center)));
     }
 

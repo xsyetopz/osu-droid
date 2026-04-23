@@ -9,8 +9,8 @@ public sealed class DroidGamePathLayoutTests
     [Test]
     public void LayoutUsesOsuDroidDirectoryNames()
     {
-        var root = Path.Combine(TestContext.CurrentContext.WorkDirectory, "layout-root");
-        var cache = Path.Combine(TestContext.CurrentContext.WorkDirectory, "layout-cache");
+        string root = Path.Combine(TestContext.CurrentContext.WorkDirectory, "layout-root");
+        string cache = Path.Combine(TestContext.CurrentContext.WorkDirectory, "layout-cache");
         var layout = new DroidGamePathLayout(new DroidPathRoots(root, cache));
 
         Assert.That(layout.CoreRoot, Is.EqualTo(Path.GetFullPath(root)));
@@ -27,8 +27,8 @@ public sealed class DroidGamePathLayoutTests
     [Test]
     public void DatabaseConstantsDelegateToPathLayout()
     {
-        var root = Path.Combine(TestContext.CurrentContext.WorkDirectory, "database-layout");
-        var expected = Path.Combine(Path.GetFullPath(root), "databases", "room-debug.db");
+        string root = Path.Combine(TestContext.CurrentContext.WorkDirectory, "database-layout");
+        string expected = Path.Combine(Path.GetFullPath(root), "databases", "room-debug.db");
 
         Assert.That(DroidDatabaseConstants.GetDatabasePath(root, "debug"), Is.EqualTo(expected));
     }
@@ -36,8 +36,8 @@ public sealed class DroidGamePathLayoutTests
     [Test]
     public void EnsureDirectoriesCreatesAndroidCompatibleRoots()
     {
-        var root = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"layout-create-{Guid.NewGuid():N}");
-        var cache = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"layout-cache-{Guid.NewGuid():N}");
+        string root = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"layout-create-{Guid.NewGuid():N}");
+        string cache = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"layout-cache-{Guid.NewGuid():N}");
         var layout = new DroidGamePathLayout(new DroidPathRoots(root, cache));
 
         layout.EnsureDirectories();

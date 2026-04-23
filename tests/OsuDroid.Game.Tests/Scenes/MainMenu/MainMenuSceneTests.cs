@@ -1,6 +1,4 @@
 using OsuDroid.Game.Compatibility.Database;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Scenes;
 
 namespace OsuDroid.Game.Tests;
 
@@ -13,7 +11,7 @@ public sealed class MainMenuSceneTests
         var scene = new MainMenuScene();
         scene.ToggleCookie();
         scene.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
-        var route = scene.Handle(MainMenuAction.Activate);
+        MainMenuRoute route = scene.Handle(MainMenuAction.Activate);
 
         Assert.That(route, Is.EqualTo(MainMenuRoute.None));
         Assert.That(scene.Snapshot.IsSecondMenu, Is.True);
@@ -34,7 +32,7 @@ public sealed class MainMenuSceneTests
     [Test]
     public void CoreCreatesDatabaseBackedShell()
     {
-        var path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"core-{Guid.NewGuid():N}");
+        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"core-{Guid.NewGuid():N}");
         try
         {
             var core = OsuDroidGameCore.Create(path, "debug");
@@ -44,7 +42,9 @@ public sealed class MainMenuSceneTests
         finally
         {
             if (Directory.Exists(path))
+            {
                 Directory.Delete(path, true);
+            }
         }
     }
 }

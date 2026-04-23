@@ -1,10 +1,6 @@
-using System.Net;
 using System.Reflection;
-using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Beatmaps.Online;
 using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Tests;
 
@@ -17,17 +13,16 @@ public sealed partial class BeatmapDownloaderTests
         new NoOpBeatmapPreviewPlayer(),
         Path.Combine(Path.GetTempPath(), "osudroid-tests", Guid.NewGuid().ToString("N")));
 
-    private static void SetSets(BeatmapDownloaderScene scene, IReadOnlyList<BeatmapMirrorSet> sets)
-    {
-        typeof(BeatmapDownloaderScene).GetField("sets", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(scene, sets);
-    }
+    private static void SetSets(BeatmapDownloaderScene scene, IReadOnlyList<BeatmapMirrorSet> sets) => typeof(BeatmapDownloaderScene).GetField("_sets", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(scene, sets);
 
     private static int ElementIndex(UiFrameSnapshot frame, string id)
     {
-        for (var index = 0; index < frame.Elements.Count; index++)
+        for (int index = 0; index < frame.Elements.Count; index++)
         {
             if (frame.Elements[index].Id == id)
+            {
                 return index;
+            }
         }
 
         Assert.Fail($"Missing element {id}");

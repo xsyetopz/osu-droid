@@ -1,8 +1,4 @@
 using OsuDroid.Game.Beatmaps;
-using OsuDroid.Game.Beatmaps.Difficulty;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Tests;
 
@@ -10,11 +6,11 @@ public sealed partial class SongSelectSceneTests
 {
     private sealed class FakeLibrary(BeatmapLibrarySnapshot snapshot) : IBeatmapLibrary
     {
-        private readonly Dictionary<string, BeatmapOptions> options = new(StringComparer.Ordinal);
-        private readonly Dictionary<string, HashSet<string>> collections = new(StringComparer.Ordinal);
-        private BeatmapLibrarySnapshot snapshot = snapshot;
+        private readonly Dictionary<string, BeatmapOptions> _options = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, HashSet<string>> _collections = new(StringComparer.Ordinal);
+        private BeatmapLibrarySnapshot _snapshot = snapshot;
 
-        public BeatmapLibrarySnapshot Snapshot => snapshot;
+        public BeatmapLibrarySnapshot Snapshot => _snapshot;
 
         public int ScanCallCount { get; private set; }
 
@@ -22,58 +18,69 @@ public sealed partial class SongSelectSceneTests
 
         public bool NeedsRefresh { get; set; }
 
-        public BeatmapLibrarySnapshot Load() => snapshot;
+        public BeatmapLibrarySnapshot Load() => _snapshot;
 
         public BeatmapLibrarySnapshot Scan(IReadOnlySet<string>? forceUpdateDirectories = null)
         {
             ScanCallCount++;
             NeedsRefresh = false;
             if (ScanDelay > TimeSpan.Zero)
+            {
                 Thread.Sleep(ScanDelay);
-            return snapshot;
+            }
+
+            return _snapshot;
         }
 
         public bool NeedsScanRefresh() => NeedsRefresh;
 
-        public BeatmapOptions GetOptions(string setDirectory) => options.TryGetValue(setDirectory, out var value) ? value : new BeatmapOptions(setDirectory);
+        public BeatmapOptions GetOptions(string setDirectory) => _options.TryGetValue(setDirectory, out BeatmapOptions? value) ? value : new BeatmapOptions(setDirectory);
 
-        public void SaveOptions(BeatmapOptions nextOptions) => options[nextOptions.SetDirectory] = nextOptions;
+        public void SaveOptions(BeatmapOptions nextOptions) => _options[nextOptions.SetDirectory] = nextOptions;
 
-        public IReadOnlyList<BeatmapCollection> GetCollections(string? selectedSetDirectory = null) => collections
+        public IReadOnlyList<BeatmapCollection> GetCollections(string? selectedSetDirectory = null) => _collections
             .OrderBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase)
             .Select(pair => new BeatmapCollection(pair.Key, pair.Value.Count, selectedSetDirectory is not null && pair.Value.Contains(selectedSetDirectory)))
             .ToArray();
 
-        public IReadOnlySet<string> GetCollectionSetDirectories(string name) => collections.TryGetValue(name, out var sets)
+        public IReadOnlySet<string> GetCollectionSetDirectories(string name) => _collections.TryGetValue(name, out HashSet<string>? sets)
             ? new HashSet<string>(sets, StringComparer.Ordinal)
             : new HashSet<string>(StringComparer.Ordinal);
 
         public bool CreateCollection(string name)
         {
-            if (collections.ContainsKey(name))
+            if (_collections.ContainsKey(name))
+            {
                 return false;
+            }
 
-            collections[name] = new HashSet<string>(StringComparer.Ordinal);
+            _collections[name] = new HashSet<string>(StringComparer.Ordinal);
             return true;
         }
 
-        public void DeleteCollection(string name) => collections.Remove(name);
+        public void DeleteCollection(string name) => _collections.Remove(name);
 
         public void ToggleCollectionMembership(string name, string setDirectory)
         {
-            if (!collections.TryGetValue(name, out var sets))
-                collections[name] = sets = new HashSet<string>(StringComparer.Ordinal);
+            if (!_collections.TryGetValue(name, out HashSet<string>? sets))
+            {
+                _collections[name] = sets = new HashSet<string>(StringComparer.Ordinal);
+            }
 
             if (!sets.Add(setDirectory))
+            {
                 sets.Remove(setDirectory);
+            }
         }
 
         public void DeleteBeatmapSet(string directory)
         {
-            snapshot = new BeatmapLibrarySnapshot(snapshot.Sets.Where(set => !string.Equals(set.Directory, directory, StringComparison.Ordinal)).ToArray());
-            options.Remove(directory);
-            foreach (var sets in collections.Values)
+            _snapshot = new BeatmapLibrarySnapshot(_snapshot.Sets.Where(set => !string.Equals(set.Directory, directory, StringComparison.Ordinal)).ToArray());
+            _options.Remove(directory);
+            foreach (HashSet<string> sets in _collections.Values)
+            {
                 sets.Remove(directory);
+            }
         }
     }
 }

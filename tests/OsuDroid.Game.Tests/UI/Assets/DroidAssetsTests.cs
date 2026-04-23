@@ -1,9 +1,3 @@
-using OsuDroid.Game.Compatibility.Database;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Runtime.Paths;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
-
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
@@ -12,7 +6,7 @@ public sealed partial class UiCompatibilityTests
     [Test]
     public void MainMenuUsesDroidAssetProvenance()
     {
-        var manifest = DroidAssets.MainMenuManifest;
+        UiAssetManifest manifest = DroidAssets.MainMenuManifest;
 
         Assert.That(manifest.Get(DroidAssets.Play).ContentName, Is.EqualTo("droid/main-menu/play-button"));
         Assert.That(manifest.Get(DroidAssets.Play).Provenance, Is.EqualTo(UiAssetProvenance.OsuDroid));
@@ -26,21 +20,21 @@ public sealed partial class UiCompatibilityTests
     [Test]
     public void MainMenuContentPipelineSourcesExistOnDisk()
     {
-        var repositoryRoot = FindRepositoryRoot();
+        string repositoryRoot = FindRepositoryRoot();
 
-        foreach (var asset in DroidAssets.MainMenuManifest.Entries.Where(entry => entry.Kind == UiAssetKind.Texture))
+        foreach (UiAssetEntry? asset in DroidAssets.MainMenuManifest.Entries.Where(entry => entry.Kind == UiAssetKind.Texture))
         {
             Assert.That(asset.ContentName, Does.StartWith("droid/"));
             Assert.That(asset.ContentName, Does.Not.Contain(".png"));
             Assert.That(asset.ContentName, Does.Not.Contain(".jpg"));
-            var sourcePath = ResolveContentSourcePath(repositoryRoot, asset.ContentName);
+            string sourcePath = ResolveContentSourcePath(repositoryRoot, asset.ContentName);
             Assert.That(File.Exists(sourcePath), Is.True, asset.ContentName);
         }
     }
     [Test]
     public void StartupManifestIsSmallPreCoreLoadingSet()
     {
-        var assetNames = DroidAssets.StartupManifest.Entries.Select(entry => entry.LogicalName).ToArray();
+        string[] assetNames = DroidAssets.StartupManifest.Entries.Select(entry => entry.LogicalName).ToArray();
 
         Assert.That(assetNames, Is.EquivalentTo(new[] { DroidAssets.Loading, DroidAssets.LoadingTitle, DroidAssets.Welcome }));
     }
@@ -51,10 +45,10 @@ public sealed partial class UiCompatibilityTests
         Assert.That(DroidAssets.MainMenuManifest.Entries, Is.EquivalentTo(DroidAssets.Catalog));
         Assert.That(DroidAssets.StartupManifest.Entries, Is.SubsetOf(DroidAssets.Catalog));
 
-        var repositoryRoot = FindRepositoryRoot();
-        var droidAssetToken = "assets/" + "droid/";
-        var allowedCatalogPath = Path.Combine(repositoryRoot, "src", "OsuDroid.Game", "UI", "Assets", "DroidAssetCatalog.cs");
-        var offenders = Directory
+        string repositoryRoot = FindRepositoryRoot();
+        string droidAssetToken = "assets/" + "droid/";
+        string allowedCatalogPath = Path.Combine(repositoryRoot, "src", "OsuDroid.Game", "UI", "Assets", "DroidAssetCatalog.cs");
+        string[] offenders = Directory
             .EnumerateFiles(Path.Combine(repositoryRoot, "src"), "*.cs", SearchOption.AllDirectories)
             .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
             .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))

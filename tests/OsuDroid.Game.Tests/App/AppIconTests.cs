@@ -1,9 +1,3 @@
-using OsuDroid.Game.Compatibility.Database;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Runtime.Paths;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
-
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
@@ -12,9 +6,9 @@ public sealed partial class UiCompatibilityTests
     [Test]
     public void MobileProjectUsesContentPipelineForStaticDroidImages()
     {
-        var repositoryRoot = FindRepositoryRoot();
-        var project = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "OsuDroid.App.csproj"));
-        var content = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Content", "DroidAssets.mgcb"));
+        string repositoryRoot = FindRepositoryRoot();
+        string project = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "OsuDroid.App.csproj"));
+        string content = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Content", "DroidAssets.mgcb"));
 
         Assert.That(project, Does.Contain("<MonoGameContentReference Include=\"Content\\DroidAssets.mgcb\" />"));
         Assert.That(project, Does.Not.Contain("Resources\\Raw\\assets\\droid\\**\\*.png"));
@@ -25,26 +19,26 @@ public sealed partial class UiCompatibilityTests
     [Test]
     public void AppIconUsesOriginalOsuDroidLauncherArtwork()
     {
-        var repositoryRoot = FindRepositoryRoot();
-        var appIcon = File.ReadAllBytes(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Resources", "AppIcon", "appicon.png"));
-        var legacyIcon = File.ReadAllBytes(Path.Combine(repositoryRoot, "third_party", "osu-droid-legacy", "res", "drawable-xxxhdpi", "ic_launcher.png"));
+        string repositoryRoot = FindRepositoryRoot();
+        byte[] appIcon = File.ReadAllBytes(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Resources", "AppIcon", "appicon.png"));
+        byte[] legacyIcon = File.ReadAllBytes(Path.Combine(repositoryRoot, "third_party", "osu-droid-legacy", "res", "drawable-xxxhdpi", "ic_launcher.png"));
 
         Assert.That(appIcon, Is.EqualTo(legacyIcon));
     }
     [Test]
     public void AndroidPlatformDeclaresLegacyLauncherIcon()
     {
-        var repositoryRoot = FindRepositoryRoot();
-        var mainActivity = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "Android", "MainActivity.cs"));
-        var mainApplication = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "Android", "MainApplication.cs"));
-        var densities = new[] { "ldpi", "mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi" };
+        string repositoryRoot = FindRepositoryRoot();
+        string mainActivity = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "Android", "MainActivity.cs"));
+        string mainApplication = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "Android", "MainApplication.cs"));
+        string[] densities = new[] { "ldpi", "mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi" };
 
         Assert.That(mainActivity, Does.Contain("Icon = \"@drawable/ic_launcher\""));
         Assert.That(mainApplication, Does.Contain("[Application(Icon = \"@drawable/ic_launcher\")]"));
-        foreach (var density in densities)
+        foreach (string? density in densities)
         {
-            var androidIcon = Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "Android", "Resources", $"drawable-{density}", "ic_launcher.png");
-            var legacyIcon = Path.Combine(repositoryRoot, "third_party", "osu-droid-legacy", "res", $"drawable-{density}", "ic_launcher.png");
+            string androidIcon = Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "Android", "Resources", $"drawable-{density}", "ic_launcher.png");
+            string legacyIcon = Path.Combine(repositoryRoot, "third_party", "osu-droid-legacy", "res", $"drawable-{density}", "ic_launcher.png");
 
             Assert.That(File.Exists(androidIcon), Is.True, density);
             Assert.That(File.ReadAllBytes(androidIcon), Is.EqualTo(File.ReadAllBytes(legacyIcon)), density);
@@ -53,9 +47,9 @@ public sealed partial class UiCompatibilityTests
     [Test]
     public void MobileProjectDeclaresIconSources()
     {
-        var repositoryRoot = FindRepositoryRoot();
-        var project = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "OsuDroid.App.csproj"));
-        var infoPlist = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "iOS", "Info.plist"));
+        string repositoryRoot = FindRepositoryRoot();
+        string project = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "OsuDroid.App.csproj"));
+        string infoPlist = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "iOS", "Info.plist"));
 
         Assert.That(project, Does.Contain("<MauiIcon Include=\"Resources\\AppIcon\\appicon.png\" BaseSize=\"192,192\" />"));
         Assert.That(project, Does.Not.Contain("<AppIcon"));
@@ -67,9 +61,9 @@ public sealed partial class UiCompatibilityTests
     [Test]
     public void IosAppIconBundleResourcesContainRequiredImages()
     {
-        var repositoryRoot = FindRepositoryRoot();
-        var icons = Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "iOS", "Icons");
-        var expectedFiles = new[]
+        string repositoryRoot = FindRepositoryRoot();
+        string icons = Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "iOS", "Icons");
+        string[] expectedFiles = new[]
         {
             "Icon-60@2x.png",
             "Icon-60@3x.png",
@@ -77,18 +71,18 @@ public sealed partial class UiCompatibilityTests
             "Icon-83.5@2x.png",
         };
 
-        foreach (var file in expectedFiles)
+        foreach (string? file in expectedFiles)
         {
-            var path = Path.Combine(icons, file);
+            string path = Path.Combine(icons, file);
             Assert.That(new FileInfo(path).Length, Is.GreaterThan(0), file);
         }
     }
     [Test]
     public void IosBundleVerifierRequiresDirectAppIcons()
     {
-        var repositoryRoot = FindRepositoryRoot();
-        var script = File.ReadAllText(Path.Combine(repositoryRoot, "scripts", "verify-ios-bundle.sh"));
-        var infoPlist = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "iOS", "Info.plist"));
+        string repositoryRoot = FindRepositoryRoot();
+        string script = File.ReadAllText(Path.Combine(repositoryRoot, "scripts", "verify-ios-bundle.sh"));
+        string infoPlist = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "iOS", "Info.plist"));
 
         Assert.That(infoPlist, Does.Contain("<key>CFBundleIcons</key>"));
         Assert.That(infoPlist, Does.Contain("<string>Icon-60</string>"));

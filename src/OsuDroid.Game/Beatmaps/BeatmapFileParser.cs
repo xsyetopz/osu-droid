@@ -9,20 +9,22 @@ public sealed class BeatmapFileParser
 {
     public static BeatmapInfo Parse(string osuFilePath, string songsPath)
     {
-        var sections = ReadSections(osuFilePath);
-        var general = sections.GetValueOrDefault("General") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var metadata = sections.GetValueOrDefault("Metadata") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var difficulty = sections.GetValueOrDefault("Difficulty") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var events = sections.GetValueOrDefault("Events") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var timingPoints = sections.GetValueOrDefault("TimingPoints") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var hitObjects = sections.GetValueOrDefault("HitObjects") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, Dictionary<string, string>> sections = ReadSections(osuFilePath);
+        Dictionary<string, string> general = sections.GetValueOrDefault("General") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string> metadata = sections.GetValueOrDefault("Metadata") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string> difficulty = sections.GetValueOrDefault("Difficulty") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string> events = sections.GetValueOrDefault("Events") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string> timingPoints = sections.GetValueOrDefault("TimingPoints") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string> hitObjects = sections.GetValueOrDefault("HitObjects") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         if (GetRulesetMode(general) != 0)
+        {
             throw new NotSupportedException("Only osu!standard beatmaps are supported.");
+        }
 
-        var beatmapTimes = ParseHitObjects(hitObjects.Values);
-        var bpm = ParseBpm(timingPoints.Values, beatmapTimes.LastTime);
-        var setDirectory = Path.GetRelativePath(songsPath, Path.GetDirectoryName(osuFilePath) ?? songsPath);
-        var ratings = CalculateStarRatings(osuFilePath);
+        HitObjectSummary beatmapTimes = ParseHitObjects(hitObjects.Values);
+        BpmSummary bpm = ParseBpm(timingPoints.Values, beatmapTimes.LastTime);
+        string setDirectory = Path.GetRelativePath(songsPath, Path.GetDirectoryName(osuFilePath) ?? songsPath);
+        BeatmapStarRatings ratings = CalculateStarRatings(osuFilePath);
 
         return new BeatmapInfo(
             Filename: Path.GetFileName(osuFilePath),
@@ -74,28 +76,36 @@ public sealed class BeatmapFileParser
 
     private static int ReadRulesetMode(string path)
     {
-        var inGeneral = false;
-        foreach (var rawLine in File.ReadLines(path, Encoding.UTF8))
+        bool inGeneral = false;
+        foreach (string rawLine in File.ReadLines(path, Encoding.UTF8))
         {
-            var line = rawLine.Trim();
+            string line = rawLine.Trim();
             if (line.Length == 0 || line.StartsWith("//", StringComparison.Ordinal))
+            {
                 continue;
+            }
 
             if (line[0] == '[' && line[^1] == ']')
             {
                 if (inGeneral)
+                {
                     return 0;
+                }
 
                 inGeneral = string.Equals(line[1..^1], "General", StringComparison.OrdinalIgnoreCase);
                 continue;
             }
 
             if (!inGeneral)
+            {
                 continue;
+            }
 
-            var separator = line.IndexOf(':', StringComparison.Ordinal);
+            int separator = line.IndexOf(':', StringComparison.Ordinal);
             if (separator <= 0 || !string.Equals(line[..separator].Trim(), "Mode", StringComparison.OrdinalIgnoreCase))
+            {
                 continue;
+            }
 
             return ParseInt(line[(separator + 1)..].Trim()) ?? 0;
         }
@@ -107,15 +117,17 @@ public sealed class BeatmapFileParser
     {
         var sections = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
         Dictionary<string, string>? current = null;
-        var currentSection = string.Empty;
-        var lineNumber = 0;
+        string currentSection = string.Empty;
+        int lineNumber = 0;
 
-        foreach (var rawLine in File.ReadLines(path, Encoding.UTF8))
+        foreach (string rawLine in File.ReadLines(path, Encoding.UTF8))
         {
             lineNumber++;
-            var line = rawLine.Trim();
+            string line = rawLine.Trim();
             if (line.Length == 0 || line.StartsWith("//", StringComparison.Ordinal))
+            {
                 continue;
+            }
 
             if (line[0] == '[' && line[^1] == ']')
             {
@@ -126,7 +138,9 @@ public sealed class BeatmapFileParser
             }
 
             if (current is null)
+            {
                 continue;
+            }
 
             if (currentSection is "Events" or "TimingPoints" or "HitObjects")
             {
@@ -134,9 +148,11 @@ public sealed class BeatmapFileParser
                 continue;
             }
 
-            var separator = line.IndexOf(':', StringComparison.Ordinal);
+            int separator = line.IndexOf(':', StringComparison.Ordinal);
             if (separator <= 0)
+            {
                 continue;
+            }
 
             current[line[..separator].Trim()] = line[(separator + 1)..].Trim();
         }
@@ -148,14 +164,18 @@ public sealed class BeatmapFileParser
 
     private static string? ParseBackgroundFilename(IEnumerable<string> eventLines)
     {
-        foreach (var line in eventLines)
+        foreach (string line in eventLines)
         {
             if (!line.StartsWith("0,", StringComparison.Ordinal) && !line.StartsWith("Background,", StringComparison.OrdinalIgnoreCase))
+            {
                 continue;
+            }
 
-            var fields = line.Split(',');
+            string[] fields = line.Split(',');
             if (fields.Length < 3)
+            {
                 continue;
+            }
 
             return fields[2].Trim().Trim('"');
         }
@@ -166,25 +186,31 @@ public sealed class BeatmapFileParser
     private static BpmSummary ParseBpm(IEnumerable<string> timingLines, long lastObjectTime)
     {
         var bpms = new List<(long Time, float Bpm)>();
-        foreach (var line in timingLines)
+        foreach (string line in timingLines)
         {
-            var fields = line.Split(',');
+            string[] fields = line.Split(',');
             if (fields.Length < 2)
+            {
                 continue;
+            }
 
-            var beatLength = ParseFloat(fields[1]);
+            float beatLength = ParseFloat(fields[1]);
             if (beatLength <= 0f)
+            {
                 continue;
+            }
 
             bpms.Add((ParseLong(fields[0]) ?? 0, 60000f / beatLength));
         }
 
         if (bpms.Count == 0)
+        {
             return new BpmSummary(0f, 0f, 0f);
+        }
 
-        var min = bpms.Min(point => point.Bpm);
-        var max = bpms.Max(point => point.Bpm);
-        var common = bpms
+        float min = bpms.Min(point => point.Bpm);
+        float max = bpms.Max(point => point.Bpm);
+        float common = bpms
             .Select((point, index) => new
             {
                 point.Bpm,
@@ -198,26 +224,34 @@ public sealed class BeatmapFileParser
 
     private static HitObjectSummary ParseHitObjects(IEnumerable<string> objectLines)
     {
-        var circles = 0;
-        var sliders = 0;
-        var spinners = 0;
-        var lastTime = 0L;
+        int circles = 0;
+        int sliders = 0;
+        int spinners = 0;
+        long lastTime = 0L;
 
-        foreach (var line in objectLines)
+        foreach (string line in objectLines)
         {
-            var fields = line.Split(',');
+            string[] fields = line.Split(',');
             if (fields.Length < 4)
+            {
                 continue;
+            }
 
-            var time = ParseLong(fields[2]) ?? 0L;
+            long time = ParseLong(fields[2]) ?? 0L;
             lastTime = Math.Max(lastTime, time);
-            var type = ParseInt(fields[3]) ?? 0;
+            int type = ParseInt(fields[3]) ?? 0;
             if ((type & 1) != 0)
+            {
                 circles++;
+            }
             else if ((type & 2) != 0)
+            {
                 sliders++;
+            }
             else if ((type & 8) != 0)
+            {
                 spinners++;
+            }
         }
 
         return new HitObjectSummary(circles, sliders, spinners, lastTime);
@@ -225,8 +259,8 @@ public sealed class BeatmapFileParser
 
     private static string CalculateMd5(string path)
     {
-        using var stream = File.OpenRead(path);
-        var hash = MD5.HashData(stream);
+        using FileStream stream = File.OpenRead(path);
+        byte[] hash = MD5.HashData(stream);
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
 
@@ -244,11 +278,11 @@ public sealed class BeatmapFileParser
         }
     }
 
-    private static int? ParseInt(string? text) => int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) ? parsed : null;
+    private static int? ParseInt(string? text) => int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed) ? parsed : null;
 
-    private static long? ParseLong(string? text) => long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) ? parsed : null;
+    private static long? ParseLong(string? text) => long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out long parsed) ? parsed : null;
 
-    private static float ParseFloat(string? text) => float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) ? parsed : 0f;
+    private static float ParseFloat(string? text) => float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed) ? parsed : 0f;
 
     private readonly record struct BpmSummary(float Min, float Max, float Common);
 

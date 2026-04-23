@@ -1,12 +1,4 @@
-using System.Net;
-using System.Reflection;
-using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Beatmaps.Online;
-using OsuDroid.Game.Compatibility.Database;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Runtime.Paths;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Tests;
 
@@ -17,7 +9,7 @@ public sealed partial class BeatmapDownloaderTests
     public void OsuDirectSearchUrlMatchesLegacyEndpoint()
     {
         var client = new OsuDirectMirrorClient(new HttpClient(new EmptyHandler()));
-        var uri = client.CreateSearchUri(new BeatmapMirrorSearchRequest("camellia", Offset: 50, Limit: 25));
+        Uri uri = client.CreateSearchUri(new BeatmapMirrorSearchRequest("camellia", Offset: 50, Limit: 25));
 
         Assert.That(uri.GetLeftPart(UriPartial.Path), Is.EqualTo("https://osu.direct/api/v2/search"));
         Assert.That(uri.Query, Does.Contain("sort=ranked_date%3Adesc"));
@@ -39,7 +31,7 @@ public sealed partial class BeatmapDownloaderTests
     public void CatboyUrlsMatchLegacyEndpoints()
     {
         var client = new OsuDirectMirrorClient(new HttpClient(new EmptyHandler()));
-        var uri = client.CreateSearchUri(new BeatmapMirrorSearchRequest("camellia", Offset: 50, Limit: 25, Mirror: BeatmapMirrorKind.Catboy, Status: BeatmapRankedStatus.Ranked));
+        Uri uri = client.CreateSearchUri(new BeatmapMirrorSearchRequest("camellia", Offset: 50, Limit: 25, Mirror: BeatmapMirrorKind.Catboy, Status: BeatmapRankedStatus.Ranked));
 
         Assert.That(uri.GetLeftPart(UriPartial.Path), Is.EqualTo("https://catboy.best/api/v2/search"));
         Assert.That(uri.Query, Does.Contain("sort=ranked_date%3Adesc"));
@@ -73,7 +65,7 @@ public sealed partial class BeatmapDownloaderTests
             ]
             """)));
 
-        var sets = await client.SearchAsync(new BeatmapMirrorSearchRequest("title"), CancellationToken.None).ConfigureAwait(false);
+        IReadOnlyList<BeatmapMirrorSet> sets = await client.SearchAsync(new BeatmapMirrorSearchRequest("title"), CancellationToken.None).ConfigureAwait(false);
 
         Assert.That(sets, Has.Count.EqualTo(1));
         Assert.That(sets[0].Status, Is.EqualTo(BeatmapRankedStatus.Loved));
@@ -113,7 +105,7 @@ public sealed partial class BeatmapDownloaderTests
             ]
             """)));
 
-        var sets = await client.SearchAsync(new BeatmapMirrorSearchRequest("mixed"), CancellationToken.None).ConfigureAwait(false);
+        IReadOnlyList<BeatmapMirrorSet> sets = await client.SearchAsync(new BeatmapMirrorSearchRequest("mixed"), CancellationToken.None).ConfigureAwait(false);
 
         Assert.That(sets, Has.Count.EqualTo(1));
         Assert.That(sets[0].Beatmaps, Has.Count.EqualTo(1));

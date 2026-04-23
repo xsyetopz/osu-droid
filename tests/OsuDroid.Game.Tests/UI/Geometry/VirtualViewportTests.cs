@@ -1,9 +1,3 @@
-using OsuDroid.Game.Compatibility.Database;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Runtime.Paths;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
-
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests

@@ -1,8 +1,5 @@
 using OsuDroid.Game.Beatmaps;
-using OsuDroid.Game.Beatmaps.Difficulty;
 using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Tests;
 

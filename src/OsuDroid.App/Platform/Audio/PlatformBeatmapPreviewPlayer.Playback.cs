@@ -13,7 +13,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer
 {
     private void PlayLatestRequest(PreviewRequest request)
     {
-        var start = OsuDroid.Game.Runtime.PerfDiagnostics.Start();
+        var start = PerfDiagnostics.Start();
         if (!BassAudioEngine.EnsureReady())
         {
             lock (playbackGate)
@@ -21,7 +21,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer
                 if (!disposed && request.Generation == playGeneration)
                     PlayFallbackLocked(request.AudioPath, request.PreviewTimeMilliseconds);
             }
-            OsuDroid.Game.Runtime.PerfDiagnostics.Log("audio.previewPlay", start, $"backend=fallback path=\"{Path.GetFileName(request.AudioPath)}\"");
+            PerfDiagnostics.Log("audio.previewPlay", start, $"backend=fallback path=\"{Path.GetFileName(request.AudioPath)}\"");
             return;
         }
 
@@ -33,7 +33,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer
                 if (!disposed && request.Generation == playGeneration)
                     PlayFallbackLocked(request.AudioPath, request.PreviewTimeMilliseconds);
             }
-            OsuDroid.Game.Runtime.PerfDiagnostics.Log("audio.previewPlay", start, $"backend=fallback streamFailed=true path=\"{Path.GetFileName(request.AudioPath)}\"");
+            PerfDiagnostics.Log("audio.previewPlay", start, $"backend=fallback streamFailed=true path=\"{Path.GetFileName(request.AudioPath)}\"");
             return;
         }
 
@@ -49,7 +49,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer
                 if (!disposed && request.Generation == playGeneration)
                     PlayFallbackLocked(request.AudioPath, request.PreviewTimeMilliseconds);
             }
-            OsuDroid.Game.Runtime.PerfDiagnostics.Log("audio.previewPlay", start, $"backend=fallback playFailed=true path=\"{Path.GetFileName(request.AudioPath)}\"");
+            PerfDiagnostics.Log("audio.previewPlay", start, $"backend=fallback playFailed=true path=\"{Path.GetFileName(request.AudioPath)}\"");
             return;
         }
 
@@ -67,7 +67,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer
             playbackSnapshot = new BeatmapPreviewPlaybackSnapshot(request.AudioPath, true, PositionMillisecondsLocked(), DurationMillisecondsLocked());
         }
 
-        OsuDroid.Game.Runtime.PerfDiagnostics.Log("audio.previewPlay", start, $"backend=bass path=\"{Path.GetFileName(request.AudioPath)}\"");
+        PerfDiagnostics.Log("audio.previewPlay", start, $"backend=bass path=\"{Path.GetFileName(request.AudioPath)}\"");
     }
 
     private static int CreateLocalPlaybackStream(string audioPath)

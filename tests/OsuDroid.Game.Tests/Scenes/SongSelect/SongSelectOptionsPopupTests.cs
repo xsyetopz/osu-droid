@@ -1,8 +1,5 @@
 using OsuDroid.Game.Beatmaps;
-using OsuDroid.Game.Beatmaps.Difficulty;
 using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Tests;
 
@@ -19,12 +16,12 @@ public sealed partial class SongSelectSceneTests
         scene.Enter();
         scene.OpenBeatmapOptions();
 
-        var frame = scene.CreateSnapshot(viewport).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
 
         Assert.That(frame.Elements.Any(element => element.Id == "songselect-properties-panel"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "songselect-beatmap-options-search"), Is.True);
         Assert.That(frame.Elements.Single(element => element.Id == "songselect-beatmap-options-search-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.Search));
-        var favoriteIcon = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-favorite-icon");
+        UiElementSnapshot favoriteIcon = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-favorite-icon");
         Assert.That(favoriteIcon.MaterialIcon, Is.EqualTo(UiMaterialIcon.HeartOutline));
         Assert.That(favoriteIcon.Color, Is.EqualTo(UiColor.Opaque(54, 54, 83)));
         Assert.That(frame.Elements.Single(element => element.Id == "songselect-beatmap-options-algorithm-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.StarOutline));
@@ -37,15 +34,15 @@ public sealed partial class SongSelectSceneTests
     public void BeatmapOptionsUsesLegacyRoundedContainerGraphics()
     {
         var scene = new SongSelectScene(new FakeLibrary(CreateSnapshot()), new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"));
-        var radius = 14f * DroidUiMetrics.DpScale;
+        float radius = 14f * DroidUiMetrics.DpScale;
 
         scene.Enter();
         scene.OpenBeatmapOptions();
 
-        var frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
-        var search = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-search");
-        var strip = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-strip");
-        var hitFills = frame.Elements.Where(element => element.Id.StartsWith("songselect-beatmap-options-", StringComparison.Ordinal) && element.Id.EndsWith("-hit", StringComparison.Ordinal)).ToArray();
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiElementSnapshot search = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-search");
+        UiElementSnapshot strip = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-strip");
+        UiElementSnapshot[] hitFills = frame.Elements.Where(element => element.Id.StartsWith("songselect-beatmap-options-", StringComparison.Ordinal) && element.Id.EndsWith("-hit", StringComparison.Ordinal)).ToArray();
 
         Assert.That(search.CornerRadius, Is.EqualTo(radius));
         Assert.That(search.Color, Is.EqualTo(UiColor.Opaque(54, 54, 83)));
@@ -59,17 +56,17 @@ public sealed partial class SongSelectSceneTests
     public void BeatmapOptionsTabStripUsesAndroidWrapContentSizing()
     {
         var scene = new SongSelectScene(new FakeLibrary(CreateSnapshot()), new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"));
-        var dp = DroidUiMetrics.DpScale;
+        float dp = DroidUiMetrics.DpScale;
 
         scene.Enter();
         scene.OpenBeatmapOptions();
 
-        var frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
-        var favorite = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-favorite-hit");
-        var algorithm = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-algorithm-hit");
-        var sort = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-sort-hit");
-        var folder = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-folder-hit");
-        var strip = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-strip");
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiElementSnapshot favorite = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-favorite-hit");
+        UiElementSnapshot algorithm = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-algorithm-hit");
+        UiElementSnapshot sort = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-sort-hit");
+        UiElementSnapshot folder = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-folder-hit");
+        UiElementSnapshot strip = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-strip");
 
         Assert.That(favorite.Bounds.Width, Is.EqualTo(56f * dp).Within(0.001f));
         Assert.That(algorithm.Bounds.Width, Is.EqualTo(ExpectedOptionsWidth("osu!droid", 16f)).Within(0.001f));
@@ -92,11 +89,11 @@ public sealed partial class SongSelectSceneTests
         scene.SetBeatmapOptionsSearchQuery("Other");
         scene.ToggleBeatmapOptionsFavoriteOnly();
 
-        var frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
 
         Assert.That(frame.Elements.Any(element => element.Text?.Contains("Artist - Title", StringComparison.Ordinal) == true), Is.False);
         Assert.That(frame.Elements.Any(element => element.Text?.Contains("Other - Song", StringComparison.Ordinal) == true), Is.True);
-        var favoriteIcon = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-favorite-icon");
+        UiElementSnapshot favoriteIcon = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-favorite-icon");
         Assert.That(favoriteIcon.MaterialIcon, Is.EqualTo(UiMaterialIcon.Heart));
         Assert.That(favoriteIcon.Color, Is.EqualTo(UiColor.Opaque(243, 115, 115)));
     }
@@ -106,15 +103,15 @@ public sealed partial class SongSelectSceneTests
         var library = new FakeLibrary(CreateSnapshot());
         var scene = new SongSelectScene(library, new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"));
         var viewport = VirtualViewport.FromSurface(1280, 720);
-        var dp = DroidUiMetrics.DpScale;
+        float dp = DroidUiMetrics.DpScale;
 
         library.CreateCollection("Folder");
         scene.Enter();
         scene.OpenBeatmapOptions();
         scene.OpenCollectionFilter();
 
-        var frame = scene.CreateSnapshot(viewport).UiFrame;
-        var panel = frame.Elements.Single(element => element.Id == "songselect-collections-panel");
+        UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
+        UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "songselect-collections-panel");
 
         Assert.That(panel.Bounds.Width, Is.EqualTo(500f * dp));
         Assert.That(panel.Bounds.Y, Is.EqualTo(20f * dp).Within(0.001f));
@@ -138,7 +135,7 @@ public sealed partial class SongSelectSceneTests
         scene.OpenBeatmapOptions();
         scene.OpenCollectionFilter();
 
-        var frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
 
         Assert.That(frame.Elements.Single(element => element.Id == "songselect-collection-0-name").Text, Is.EqualTo("Default"));
         Assert.That(frame.Elements.Any(element => element.Id == "songselect-collection-1-name"), Is.False);
@@ -158,20 +155,20 @@ public sealed partial class SongSelectSceneTests
         scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720));
         scene.HandleCollectionPrimaryAction(1);
 
-        var filteredFrame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot filteredFrame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
         Assert.That(filteredFrame.Elements.Single(element => element.Id == "songselect-beatmap-options-folder").Text, Is.EqualTo("Folder"));
 
         scene.OpenCollectionFilter();
         scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720));
         scene.HandleCollectionPrimaryAction(0);
 
-        var defaultFrame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot defaultFrame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
         Assert.That(defaultFrame.Elements.Single(element => element.Id == "songselect-beatmap-options-folder").Text, Is.EqualTo("Default"));
     }
 
     private static float ExpectedOptionsWidth(string text, float endPaddingDp)
     {
-        var dp = DroidUiMetrics.DpScale;
+        float dp = DroidUiMetrics.DpScale;
         return 16f * dp + 24f * dp + 12f * dp + text.Length * 14f * dp * 0.62f + endPaddingDp * dp;
     }
 }

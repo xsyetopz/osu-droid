@@ -1,0 +1,12 @@
+global using OsuDroid.Game.Runtime.Diagnostics;
+global using OsuDroid.Game.Scenes.BeatmapDownloader;
+global using OsuDroid.Game.Scenes.MainMenu;
+global using OsuDroid.Game.Scenes.Options;
+global using OsuDroid.Game.Scenes.SongSelect;
+global using OsuDroid.Game.Scenes.Startup;
+global using OsuDroid.Game.UI.Actions;
+global using OsuDroid.Game.UI.Assets;
+global using OsuDroid.Game.UI.Elements;
+global using OsuDroid.Game.UI.Geometry;
+global using OsuDroid.Game.UI.Style;
+global using static OsuDroid.Game.UI.Style.DroidUiMetrics;

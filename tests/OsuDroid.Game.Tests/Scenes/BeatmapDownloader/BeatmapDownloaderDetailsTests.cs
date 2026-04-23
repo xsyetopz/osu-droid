@@ -1,13 +1,3 @@
-using System.Net;
-using System.Reflection;
-using OsuDroid.Game.Beatmaps.Import;
-using OsuDroid.Game.Beatmaps.Online;
-using OsuDroid.Game.Compatibility.Database;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Runtime.Paths;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
-
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class BeatmapDownloaderTests
@@ -16,14 +6,14 @@ public sealed partial class BeatmapDownloaderTests
     [Test]
     public void DetailsPanelBlocksShadeCloseAndDifficultyDotsStayInteractive()
     {
-        var scene = CreateScene();
+        BeatmapDownloaderScene scene = CreateScene();
         SetSets(scene, [CreateSet()]);
         scene.SelectCard(0);
 
-        var frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
-        var panel = frame.Elements.Single(element => element.Id == "downloader-details-panel");
-        var selectedDifficulty = frame.Elements.Single(element => element.Id == "downloader-details-diff-0-selected");
-        var selectedGlyph = frame.Elements.Single(element => element.Id == "downloader-details-diff-0");
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "downloader-details-panel");
+        UiElementSnapshot selectedDifficulty = frame.Elements.Single(element => element.Id == "downloader-details-diff-0-selected");
+        UiElementSnapshot selectedGlyph = frame.Elements.Single(element => element.Id == "downloader-details-diff-0");
 
         Assert.That(frame.HitTest(new UiPoint(panel.Bounds.X + 24, panel.Bounds.Y + 24))!.Action, Is.EqualTo(UiAction.DownloaderDetailsPanel));
         Assert.That(selectedDifficulty.Bounds.Width, Is.EqualTo(56f * DroidUiMetrics.DpScale).Within(0.001f));
@@ -35,16 +25,16 @@ public sealed partial class BeatmapDownloaderTests
     [Test]
     public void DetailsDifficultyRowIsCenteredAndUsesAndroidPaddedSelectionCell()
     {
-        var scene = CreateScene();
+        BeatmapDownloaderScene scene = CreateScene();
         SetSets(scene, [CreateSet()]);
         scene.SelectCard(0);
 
-        var frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
-        var panel = frame.Elements.Single(element => element.Id == "downloader-details-panel");
-        var dots = frame.Elements.Where(element => element.Id.StartsWith("downloader-details-diff-", StringComparison.Ordinal) && !element.Id.EndsWith("-selected", StringComparison.Ordinal)).ToArray();
-        var selected = frame.Elements.Single(element => element.Id == "downloader-details-diff-0-selected");
-        var left = dots.Min(element => element.Bounds.X);
-        var right = dots.Max(element => element.Bounds.Right);
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "downloader-details-panel");
+        UiElementSnapshot[] dots = frame.Elements.Where(element => element.Id.StartsWith("downloader-details-diff-", StringComparison.Ordinal) && !element.Id.EndsWith("-selected", StringComparison.Ordinal)).ToArray();
+        UiElementSnapshot selected = frame.Elements.Single(element => element.Id == "downloader-details-diff-0-selected");
+        float left = dots.Min(element => element.Bounds.X);
+        float right = dots.Max(element => element.Bounds.Right);
 
         Assert.That(selected.Bounds.Width, Is.EqualTo(56f * DroidUiMetrics.DpScale).Within(0.001f));
         Assert.That(left + (right - left) / 2f, Is.EqualTo(panel.Bounds.X + panel.Bounds.Width / 2f).Within(1f));

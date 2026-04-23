@@ -7,33 +7,34 @@ namespace OsuDroid.Game.Tests;
 public sealed class DatabaseCompatibilityTests
 {
     [Test]
-    public void DatabasePathMatchesLegacyRoomName()
-    {
-        Assert.That(DroidDatabaseConstants.GetDatabasePath("/core", "debug"), Is.EqualTo(Path.Combine("/core", "databases", "room-debug.db")));
-    }
+    public void DatabasePathMatchesLegacyRoomName() => Assert.That(DroidDatabaseConstants.GetDatabasePath("/core", "debug"), Is.EqualTo(Path.Combine("/core", "databases", "room-debug.db")));
 
     [Test]
     public void SchemaCreatesRequiredTablesAtCurrentVersion()
     {
-        var path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"schema-{Guid.NewGuid():N}.db");
+        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"schema-{Guid.NewGuid():N}.db");
         try
         {
             var database = new DroidDatabase(path);
             database.EnsureCreated();
 
-            using var connection = database.OpenConnection();
-            using var command = connection.CreateCommand();
+            using SqliteConnection connection = database.OpenConnection();
+            using SqliteCommand command = connection.CreateCommand();
             command.CommandText = "SELECT name FROM sqlite_master WHERE type = 'table'";
-            using var reader = command.ExecuteReader();
+            using SqliteDataReader reader = command.ExecuteReader();
             var tables = new HashSet<string>(StringComparer.Ordinal);
 
             while (reader.Read())
+            {
                 tables.Add(reader.GetString(0));
+            }
 
-            foreach (var table in DroidDatabaseSchema.RequiredTables)
+            foreach (string table in DroidDatabaseSchema.RequiredTables)
+            {
                 Assert.That(tables, Does.Contain(table));
+            }
 
-            using var version = connection.CreateCommand();
+            using SqliteCommand version = connection.CreateCommand();
             version.CommandText = "PRAGMA user_version";
             Assert.That(Convert.ToInt32(version.ExecuteScalar(), System.Globalization.CultureInfo.InvariantCulture), Is.EqualTo(DroidDatabaseConstants.CurrentVersion));
         }

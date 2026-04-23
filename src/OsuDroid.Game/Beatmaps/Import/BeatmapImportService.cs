@@ -21,21 +21,28 @@ public sealed partial class BeatmapImportService(DroidGamePathLayout paths, IBea
     public BeatmapImportResult ImportOsz(string oszPath, bool deleteArchiveAfterImport = true)
     {
         if (!File.Exists(oszPath))
+        {
             return BeatmapImportResult.Failed("Beatmap archive not found.");
+        }
 
         Directory.CreateDirectory(paths.Songs);
-        var setDirectory = Path.GetFileNameWithoutExtension(oszPath);
-        var targetDirectory = Path.Combine(paths.Songs, setDirectory);
+        string setDirectory = Path.GetFileNameWithoutExtension(oszPath);
+        string targetDirectory = Path.Combine(paths.Songs, setDirectory);
 
         try
         {
             if (Directory.Exists(targetDirectory))
+            {
                 Directory.Delete(targetDirectory, true);
+            }
 
             Directory.CreateDirectory(targetDirectory);
             ExtractZipSafely(oszPath, targetDirectory);
             if (deleteArchiveAfterImport)
+            {
                 File.Delete(oszPath);
+            }
+
             library.Scan(new HashSet<string>(StringComparer.Ordinal) { setDirectory });
             return BeatmapImportResult.Success(setDirectory);
         }
@@ -54,20 +61,22 @@ public sealed partial class BeatmapImportService(DroidGamePathLayout paths, IBea
 
     public static string SanitizeArchiveName(string name)
     {
-        var sanitized = InvalidArchiveNameCharacters().Replace(name, "_").Trim();
+        string sanitized = InvalidArchiveNameCharacters().Replace(name, "_").Trim();
         return string.IsNullOrWhiteSpace(sanitized) ? "beatmap" : sanitized;
     }
 
     private static void ExtractZipSafely(string sourcePath, string targetDirectory)
     {
-        using var archive = ZipFile.OpenRead(sourcePath);
-        var targetRoot = Path.GetFullPath(targetDirectory) + Path.DirectorySeparatorChar;
+        using ZipArchive archive = ZipFile.OpenRead(sourcePath);
+        string targetRoot = Path.GetFullPath(targetDirectory) + Path.DirectorySeparatorChar;
 
-        foreach (var entry in archive.Entries)
+        foreach (ZipArchiveEntry entry in archive.Entries)
         {
-            var destination = Path.GetFullPath(Path.Combine(targetDirectory, entry.FullName));
+            string destination = Path.GetFullPath(Path.Combine(targetDirectory, entry.FullName));
             if (!destination.StartsWith(targetRoot, StringComparison.Ordinal))
+            {
                 throw new InvalidDataException("Archive entry escapes target directory.");
+            }
 
             if (string.IsNullOrEmpty(entry.Name))
             {
@@ -75,9 +84,11 @@ public sealed partial class BeatmapImportService(DroidGamePathLayout paths, IBea
                 continue;
             }
 
-            var directory = Path.GetDirectoryName(destination);
+            string? directory = Path.GetDirectoryName(destination);
             if (!string.IsNullOrEmpty(directory))
+            {
                 Directory.CreateDirectory(directory);
+            }
 
             entry.ExtractToFile(destination, true);
         }
@@ -87,9 +98,12 @@ public sealed partial class BeatmapImportService(DroidGamePathLayout paths, IBea
     {
         try
         {
-            var badZipPath = Path.ChangeExtension(path, ".badzip");
+            string badZipPath = Path.ChangeExtension(path, ".badzip");
             if (File.Exists(badZipPath))
+            {
                 File.Delete(badZipPath);
+            }
+
             File.Move(path, badZipPath);
         }
         catch (Exception)
@@ -102,7 +116,9 @@ public sealed partial class BeatmapImportService(DroidGamePathLayout paths, IBea
         try
         {
             if (Directory.Exists(directory))
+            {
                 Directory.Delete(directory, true);
+            }
         }
         catch (Exception)
         {

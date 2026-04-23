@@ -1,10 +1,8 @@
-using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Beatmaps;
 using OsuDroid.Game.Beatmaps.Import;
+using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Runtime;
 using OsuDroid.Game.Runtime.Paths;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Tests;
 
@@ -49,15 +47,15 @@ public sealed partial class UiCompatibilityTests
         var viewport = VirtualViewport.FromSurface(1280, 720);
 
         scene.StartReturnTransition();
-        var start = scene.CreateSnapshot(viewport).UiFrame;
-        var startFade = start.Elements.Single(element => element.Id == "return-background-fade");
+        UiFrameSnapshot start = scene.CreateSnapshot(viewport).UiFrame;
+        UiElementSnapshot startFade = start.Elements.Single(element => element.Id == "return-background-fade");
 
         scene.Update(TimeSpan.FromMilliseconds(MainMenuScene.ReturnBackgroundFadeDurationMilliseconds / 2d));
-        var midway = scene.CreateSnapshot(viewport).UiFrame;
-        var midwayFade = midway.Elements.Single(element => element.Id == "return-background-fade");
+        UiFrameSnapshot midway = scene.CreateSnapshot(viewport).UiFrame;
+        UiElementSnapshot midwayFade = midway.Elements.Single(element => element.Id == "return-background-fade");
 
         scene.Update(TimeSpan.FromMilliseconds(MainMenuScene.ReturnBackgroundFadeDurationMilliseconds / 2d));
-        var finished = scene.CreateSnapshot(viewport).UiFrame;
+        UiFrameSnapshot finished = scene.CreateSnapshot(viewport).UiFrame;
 
         Assert.That(startFade.Alpha, Is.EqualTo(1f));
         Assert.That(midwayFade.Alpha, Is.EqualTo(0.5f).Within(0.001f));
@@ -71,10 +69,10 @@ public sealed partial class UiCompatibilityTests
         scene.StartReturnTransition();
         var elements = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame.Elements.ToList();
 
-        var backgroundIndex = elements.FindIndex(element => element.Id == "menu-background");
-        var fadeIndex = elements.FindIndex(element => element.Id == "return-background-fade");
-        var logoIndex = elements.FindIndex(element => element.Id == "logo");
-        var profileIndex = elements.FindIndex(element => element.Id == "profile-panel");
+        int backgroundIndex = elements.FindIndex(element => element.Id == "menu-background");
+        int fadeIndex = elements.FindIndex(element => element.Id == "return-background-fade");
+        int logoIndex = elements.FindIndex(element => element.Id == "logo");
+        int profileIndex = elements.FindIndex(element => element.Id == "profile-panel");
 
         Assert.That(fadeIndex, Is.GreaterThan(backgroundIndex));
         Assert.That(fadeIndex, Is.LessThan(logoIndex));
@@ -99,22 +97,22 @@ public sealed partial class UiCompatibilityTests
     {
         var scene = new MainMenuScene("9.9");
         var viewport = VirtualViewport.FromSurface(1280, 720);
-        var frame = scene.CreateSnapshot(viewport).UiFrame;
-        var versionPill = frame.Elements.Single(element => element.Id == "version-pill");
-        var versionText = frame.Elements.Single(element => element.Id == "version-pill-text");
+        UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
+        UiElementSnapshot versionPill = frame.Elements.Single(element => element.Id == "version-pill");
+        UiElementSnapshot versionText = frame.Elements.Single(element => element.Id == "version-pill-text");
 
         Assert.That(versionPill.Action, Is.EqualTo(UiAction.MainMenuVersionPill));
         Assert.That(versionText.Text, Is.EqualTo("osu!droid 9.9"));
         Assert.That(versionPill.Bounds, Is.EqualTo(scene.GetVersionPillBounds(viewport)));
 
         scene.OpenAboutDialog();
-        var about = scene.CreateSnapshot(viewport).UiFrame;
+        UiFrameSnapshot about = scene.CreateSnapshot(viewport).UiFrame;
 
-        var panel = about.Elements.Single(element => element.Id == "about-panel");
-        var title = about.Elements.Single(element => element.Id == "about-title");
-        var osuLink = about.Elements.Single(element => element.Id == "about-osu-link");
-        var droidLink = about.Elements.Single(element => element.Id == "about-droid-link");
-        var discordLink = about.Elements.Single(element => element.Id == "about-discord-link");
+        UiElementSnapshot panel = about.Elements.Single(element => element.Id == "about-panel");
+        UiElementSnapshot title = about.Elements.Single(element => element.Id == "about-title");
+        UiElementSnapshot osuLink = about.Elements.Single(element => element.Id == "about-osu-link");
+        UiElementSnapshot droidLink = about.Elements.Single(element => element.Id == "about-droid-link");
+        UiElementSnapshot discordLink = about.Elements.Single(element => element.Id == "about-discord-link");
 
         Assert.That(scene.IsAboutDialogOpen, Is.True);
         Assert.That(panel.Bounds.Width, Is.EqualTo(500f));
@@ -172,7 +170,7 @@ public sealed partial class UiCompatibilityTests
     [Test]
     public void StartupDefersBeatmapPreviewUntilWelcomeCompletes()
     {
-        var root = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"startup-music-{Guid.NewGuid():N}");
+        string root = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"startup-music-{Guid.NewGuid():N}");
         var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(root));
         paths.EnsureDirectories();
         Directory.CreateDirectory(Path.Combine(paths.Songs, "1 Artist - Title"));
@@ -196,7 +194,7 @@ public sealed partial class UiCompatibilityTests
     [Test]
     public void SoloRouteShowsBeatmapProcessingBootstrapOnlyWhenBeatmapsNeedProcessing()
     {
-        var root = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"beatmap-processing-route-{Guid.NewGuid():N}");
+        string root = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"beatmap-processing-route-{Guid.NewGuid():N}");
         var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(root));
         paths.EnsureDirectories();
         var database = new DroidDatabase(Path.Combine(root, "test.db"));
@@ -209,7 +207,7 @@ public sealed partial class UiCompatibilityTests
         core.HandleUiAction(UiAction.MainMenuFirst);
         core.HandleUiAction(UiAction.MainMenuFirst);
 
-        var processingFrame = core.CreateFrame(VirtualViewport.FromSurface(1280, 720));
+        GameFrameSnapshot processingFrame = core.CreateFrame(VirtualViewport.FromSurface(1280, 720));
         Assert.That(processingFrame.Scene, Is.EqualTo("Bootstrap"));
         Assert.That(processing.StartCalls, Is.EqualTo(1));
         Assert.That(processingFrame.UiFrame.Elements.Any(element => element.Id == "bootstrap-loading-title"), Is.True);
@@ -263,9 +261,9 @@ public sealed partial class UiCompatibilityTests
 
         public int StartCalls { get; private set; }
 
-        private BeatmapLibrarySnapshot? completedSnapshot;
+        private BeatmapLibrarySnapshot? _completedSnapshot;
 
-        public bool HasPendingWork() => completedSnapshot is null;
+        public bool HasPendingWork() => _completedSnapshot is null;
 
         public void EnqueueArchive(string archivePath)
         {
@@ -273,23 +271,23 @@ public sealed partial class UiCompatibilityTests
 
         public void Start() => StartCalls++;
 
-        public bool TryConsumeCompletedSnapshot(out BeatmapLibrarySnapshot snapshot)
+        public bool TryConsumeCompletedSnapshot(out BeatmapLibrarySnapshot _snapshot)
         {
-            if (completedSnapshot is null)
+            if (_completedSnapshot is null)
             {
-                snapshot = BeatmapLibrarySnapshot.Empty;
+                _snapshot = BeatmapLibrarySnapshot.Empty;
                 return false;
             }
 
-            snapshot = completedSnapshot;
-            completedSnapshot = null;
+            _snapshot = _completedSnapshot;
+            _completedSnapshot = null;
             State = new BeatmapProcessingState();
             return true;
         }
 
         public void Complete()
         {
-            completedSnapshot = BeatmapLibrarySnapshot.Empty;
+            _completedSnapshot = BeatmapLibrarySnapshot.Empty;
             State = new BeatmapProcessingState(false, 100, "Processing beatmaps...");
         }
     }
@@ -314,14 +312,18 @@ public sealed partial class UiCompatibilityTests
         {
             SetPlaylistPlayFlags.Add(play);
             if (tracks.Count > 0)
+            {
                 State = new MenuNowPlayingState(tracks[Math.Clamp(startIndex, 0, tracks.Count - 1)].DisplayTitle, play);
+            }
         }
 
         public void Execute(MenuMusicCommand command)
         {
             LastCommand = command;
             if (command == MenuMusicCommand.Play)
+            {
                 PlayCommands++;
+            }
         }
 
         public void Update(TimeSpan elapsed)
@@ -333,7 +335,7 @@ public sealed partial class UiCompatibilityTests
 
     private sealed class StartupMusicLibrary : IBeatmapLibrary
     {
-        private readonly BeatmapLibrarySnapshot snapshot = new([
+        private readonly BeatmapLibrarySnapshot _snapshot = new([
             new BeatmapSetInfo(1, "1 Artist - Title", [
                 new BeatmapInfo(
                     "Easy.osu",
@@ -372,11 +374,11 @@ public sealed partial class UiCompatibilityTests
             ])
         ]);
 
-        public BeatmapLibrarySnapshot Snapshot => snapshot;
+        public BeatmapLibrarySnapshot Snapshot => _snapshot;
 
-        public BeatmapLibrarySnapshot Load() => snapshot;
+        public BeatmapLibrarySnapshot Load() => _snapshot;
 
-        public BeatmapLibrarySnapshot Scan(IReadOnlySet<string>? forceUpdateDirectories = null) => snapshot;
+        public BeatmapLibrarySnapshot Scan(IReadOnlySet<string>? forceUpdateDirectories = null) => _snapshot;
 
         public bool NeedsScanRefresh() => false;
 

@@ -47,14 +47,10 @@ public sealed record DroidGamePathLayout
         Directory.CreateDirectory(Downloads);
 
         if (!File.Exists(NoMedia))
+        {
             File.WriteAllText(NoMedia, string.Empty);
+        }
     }
 
-    private static string NormalizeDirectory(string path)
-    {
-        if (string.IsNullOrWhiteSpace(path))
-            throw new ArgumentException("Path cannot be empty.", nameof(path));
-
-        return Path.GetFullPath(path);
-    }
+    private static string NormalizeDirectory(string path) => string.IsNullOrWhiteSpace(path) ? throw new ArgumentException("Path cannot be empty.", nameof(path)) : Path.GetFullPath(path);
 }

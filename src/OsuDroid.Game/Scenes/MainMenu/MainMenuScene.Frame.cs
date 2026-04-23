@@ -1,7 +1,6 @@
 using OsuDroid.Game.Runtime;
-using OsuDroid.Game.UI;
 
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.MainMenu;
 
 public sealed partial class MainMenuScene
 {
@@ -12,7 +11,7 @@ public sealed partial class MainMenuScene
         "osu!droid",
         IsSecondMenu ? "legacy second menu" : "legacy first menu",
         CurrentEntries,
-        selectedIndex,
+        _selectedIndex,
         IsSecondMenu,
         CreateUiFrame(viewport));
 
@@ -21,15 +20,17 @@ public sealed partial class MainMenuScene
         "osu!droid",
         IsSecondMenu ? "legacy second menu" : "legacy first menu",
         CurrentEntries,
-        selectedIndex,
+        _selectedIndex,
         IsSecondMenu,
         CreateUiFrame(viewport, true));
 
-    private string[] CurrentEntries => IsSecondMenu ? secondMenu : firstMenu;
+    private string[] CurrentEntries => IsSecondMenu
+        ? [_localizer["MainMenu_Solo"], _localizer["MainMenu_Multiplayer"], _localizer["MainMenu_Back"]]
+        : [_localizer["MainMenu_Play"], _localizer["MainMenu_Options"], _localizer["MainMenu_Exit"]];
 
     public static UiRect GetAndroidCollapsedLogoBounds(VirtualViewport viewport) => GetCenteredLogoBounds(viewport);
 
-    public static UiRect GetAndroidExpandedLogoBounds(VirtualViewport viewport) => GetExpandedLogoBounds(viewport);
+    public static UiRect GetAndroidExpandedLogoBounds(VirtualViewport _) => GetExpandedLogoBounds();
 
     public static UiRect GetAndroidMainMenuButtonBounds(int index) => index switch
     {
@@ -47,8 +48,8 @@ public sealed partial class MainMenuScene
 
     public static UiRect GetAndroidMusicNowPlayingBounds()
     {
-        var nowPlayingAsset = DroidAssets.MainMenuManifest.Get(DroidAssets.MusicNowPlaying);
-        var width = MusicNowPlayingHeight * nowPlayingAsset.NativeSize.Width / nowPlayingAsset.NativeSize.Height;
+        UiAssetEntry nowPlayingAsset = DroidAssets.MainMenuManifest.Get(DroidAssets.MusicNowPlaying);
+        float width = MusicNowPlayingHeight * nowPlayingAsset.NativeSize.Width / nowPlayingAsset.NativeSize.Height;
         return new UiRect(VirtualViewport.LegacyWidth - MusicNowPlayingXOffset, 0f, width, MusicNowPlayingHeight);
     }
 
@@ -56,43 +57,40 @@ public sealed partial class MainMenuScene
 
     private MainMenuRoute ActivateSelected()
     {
-        if (!IsSecondMenu)
-        {
-            return selectedIndex switch
+        return !IsSecondMenu
+            ? _selectedIndex switch
             {
                 0 => ShowSecondMenu(),
                 1 => MainMenuRoute.Settings,
                 2 => BeginExitAnimation(),
                 _ => MainMenuRoute.None,
+            }
+            : _selectedIndex switch
+            {
+                0 => MainMenuRoute.Solo,
+                1 => MainMenuRoute.Multiplayer,
+                2 => BackToFirstMenu(),
+                _ => MainMenuRoute.None,
             };
-        }
-
-        return selectedIndex switch
-        {
-            0 => MainMenuRoute.Solo,
-            1 => MainMenuRoute.Multiplayer,
-            2 => BackToFirstMenu(),
-            _ => MainMenuRoute.None,
-        };
     }
 
     private MainMenuRoute BeginExitAnimation()
     {
         ShowFirstMenu();
-        menuVisibility = MenuVisibility.Exiting;
-        transitionMilliseconds = 0d;
-        shownMilliseconds = 0d;
-        exitMilliseconds = 0d;
-        hasPendingExitRoute = false;
-        exitRoutePublished = false;
-        pressedAction = UiAction.None;
+        _menuVisibility = MenuVisibility.Exiting;
+        _transitionMilliseconds = 0d;
+        _shownMilliseconds = 0d;
+        _exitMilliseconds = 0d;
+        _hasPendingExitRoute = false;
+        _exitRoutePublished = false;
+        _pressedAction = UiAction.None;
         return MainMenuRoute.None;
     }
 
     private MainMenuRoute ShowSecondMenu()
     {
         IsSecondMenu = true;
-        selectedIndex = 0;
+        _selectedIndex = 0;
         return MainMenuRoute.None;
     }
 
@@ -105,24 +103,24 @@ public sealed partial class MainMenuScene
     private void ShowFirstMenu()
     {
         IsSecondMenu = false;
-        selectedIndex = 0;
+        _selectedIndex = 0;
     }
 
     private void BeginExpand()
     {
         ShowFirstMenu();
-        menuVisibility = MenuVisibility.Expanding;
-        pressedAction = UiAction.None;
-        transitionMilliseconds = 0d;
-        shownMilliseconds = 0d;
+        _menuVisibility = MenuVisibility.Expanding;
+        _pressedAction = UiAction.None;
+        _transitionMilliseconds = 0d;
+        _shownMilliseconds = 0d;
     }
 
     private void BeginCollapse()
     {
         ShowFirstMenu();
-        menuVisibility = MenuVisibility.Collapsing;
-        pressedAction = UiAction.None;
-        transitionMilliseconds = 0d;
+        _menuVisibility = MenuVisibility.Collapsing;
+        _pressedAction = UiAction.None;
+        _transitionMilliseconds = 0d;
     }
 
     private UiFrameSnapshot CreateUiFrame(VirtualViewport viewport, bool forceAboutDialog = false)
@@ -133,7 +131,7 @@ public sealed partial class MainMenuScene
                 "background-color",
                 UiElementKind.Fill,
                 new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight),
-                backgroundColor,
+                s_backgroundColor,
                 1f),
         };
 
@@ -144,27 +142,29 @@ public sealed partial class MainMenuScene
         AddProfileShell(elements);
         AddVersionPill(elements, viewport);
         AddDownloaderTab(elements, viewport);
-        AddMusicControls(elements, viewport);
+        AddMusicControls(elements);
         AddDevelopmentBuildOverlay(elements, viewport);
         AddExitOverlay(elements, viewport);
 
-        if (isAboutDialogOpen || forceAboutDialog)
-            AddAboutDialog(elements, viewport, displayVersion);
+        if (_isAboutDialogOpen || forceAboutDialog)
+        {
+            AddAboutDialog(elements, viewport, _displayVersion);
+        }
 
         return new UiFrameSnapshot(viewport, elements, DroidAssets.MainMenuManifest);
     }
 
     private static void AddBackground(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        var background = DroidAssets.MainMenuManifest.Get(DroidAssets.MenuBackground);
-        var scale = viewport.VirtualWidth / background.NativeSize.Width;
-        var width = background.NativeSize.Width * scale;
-        var height = background.NativeSize.Height * scale;
+        UiAssetEntry background = DroidAssets.MainMenuManifest.Get(DroidAssets.MenuBackground);
+        float scale = viewport.VirtualWidth / background.NativeSize.Width;
+        float width = background.NativeSize.Width * scale;
+        float height = background.NativeSize.Height * scale;
         elements.Add(new UiElementSnapshot(
             "menu-background",
             UiElementKind.Sprite,
             new UiRect((viewport.VirtualWidth - width) / 2f, (viewport.VirtualHeight - height) / 2f, width, height),
-            white,
+            s_white,
             1f,
             DroidAssets.MenuBackground));
     }
@@ -176,18 +176,18 @@ public sealed partial class MainMenuScene
             "profile",
             new UiRect(OnlinePanelX, OnlinePanelY, OnlinePanelWidth, OnlinePanelHeight),
             OnlinePanelAvatarFooterSize,
-            profile);
+            _profile);
     }
 
     private void AddVersionPill(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        var text = GetVersionText();
-        var bounds = CreateVersionPillBounds(viewport, text);
+        string text = GetVersionText();
+        UiRect bounds = CreateVersionPillBounds(viewport, text);
         elements.Add(new UiElementSnapshot(
             "version-pill",
             UiElementKind.Fill,
             bounds,
-            translucentBlack,
+            s_translucentBlack,
             1f,
             Action: UiAction.MainMenuVersionPill,
             CornerRadius: VersionPillCornerRadius));
@@ -196,7 +196,7 @@ public sealed partial class MainMenuScene
             "version-pill-text",
             UiElementKind.Text,
             new UiRect(bounds.X + VersionPillTextXInset, bounds.Y + VersionPillTextYInset, bounds.Width - VersionPillTextXInset * 2f, bounds.Height - VersionPillTextYInset * 2f),
-            white,
+            s_white,
             1f,
             Text: text,
             TextStyle: new UiTextStyle(VersionPillTextSize)));
@@ -204,17 +204,17 @@ public sealed partial class MainMenuScene
 
     private void AddLogo(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        var baseLogoBounds = GetLogoBounds(viewport);
-        var logoBounds = ScaleFromCenter(baseLogoBounds, GetLogoHeartbeatScale());
-        var overlayBounds = ScaleFromCenter(baseLogoBounds, LogoBeatScale);
-        var exitProgress = GetExitProgress();
+        UiRect baseLogoBounds = GetLogoBounds(viewport);
+        UiRect logoBounds = ScaleFromCenter(baseLogoBounds, GetLogoHeartbeatScale());
+        UiRect overlayBounds = ScaleFromCenter(baseLogoBounds, LogoBeatScale);
+        float exitProgress = GetExitProgress();
         if (exitProgress > 0f)
         {
             logoBounds = ScaleFromCenter(logoBounds, Lerp(1f, ExitLogoScale, exitProgress));
             overlayBounds = ScaleFromCenter(overlayBounds, Lerp(1f, ExitLogoScale, exitProgress));
         }
 
-        var rotation = Lerp(0f, ExitLogoRotationDegrees, exitProgress);
+        float rotation = Lerp(0f, ExitLogoRotationDegrees, exitProgress);
 
         AddLogoSpectrumBars(elements, baseLogoBounds);
 
@@ -222,7 +222,7 @@ public sealed partial class MainMenuScene
             "logo",
             UiElementKind.Sprite,
             logoBounds,
-            white,
+            s_white,
             1f,
             DroidAssets.Logo,
             UiAction.MainMenuCookie,
@@ -232,7 +232,7 @@ public sealed partial class MainMenuScene
             "logo-glow",
             UiElementKind.Sprite,
             overlayBounds,
-            white,
+            s_white,
             0.2f,
             DroidAssets.Logo,
             RotationDegrees: rotation));
@@ -240,28 +240,32 @@ public sealed partial class MainMenuScene
 
     private void AddLogoSpectrumBars(List<UiElementSnapshot> elements, UiRect baseLogoBounds)
     {
-        if (!nowPlaying.IsPlaying || !hasRawSpectrum)
+        if (!_nowPlaying.IsPlaying || !_hasRawSpectrum)
+        {
             return;
+        }
 
-        var centerX = baseLogoBounds.X + baseLogoBounds.Width * 0.5f;
-        var centerY = baseLogoBounds.Y + baseLogoBounds.Height * 0.5f;
+        float centerX = baseLogoBounds.X + baseLogoBounds.Width * 0.5f;
+        float centerY = baseLogoBounds.Y + baseLogoBounds.Height * 0.5f;
 
         const float barHeight = 10f;
         const float baselineWidth = 250f;
-        for (var i = 0; i < SpectrumBarCount; i++)
+        for (int i = 0; i < SpectrumBarCount; i++)
         {
-            var width = baselineWidth + spectrumPeakLevel[i];
-            if (width <= 0.1f || spectrumPeakAlpha[i] <= 0.001f)
+            float width = baselineWidth + _spectrumPeakLevel[i];
+            if (width <= 0.1f || _spectrumPeakAlpha[i] <= 0.001f)
+            {
                 continue;
+            }
 
-            var angle = -220f + i * 3f;
-            var alpha = Math.Clamp(spectrumPeakAlpha[i], 0f, 0.4f);
+            float angle = -220f + i * 3f;
+            float alpha = Math.Clamp(_spectrumPeakAlpha[i], 0f, 0.4f);
 
             elements.Add(new UiElementSnapshot(
                 $"logo-spectrum-{i}",
                 UiElementKind.Fill,
                 new UiRect(centerX, centerY - barHeight * 0.5f, width, barHeight),
-                white,
+                s_white,
                 alpha,
                 CornerRadius: 0f,
                 RotationDegrees: angle,

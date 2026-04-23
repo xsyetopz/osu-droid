@@ -1,4 +1,4 @@
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.Options;
 
 internal static class OptionsPathDisplayFormatter
 {
@@ -11,23 +11,26 @@ internal static class OptionsPathDisplayFormatter
     public static string Format(string path)
     {
         if (path.Length <= MaxDisplayCharacters)
+        {
             return path;
+        }
 
-        var normalized = path.Replace('\\', '/');
-        var osuDroidSegmentIndex = normalized.IndexOf(OsuDroidLibrarySegment, StringComparison.Ordinal);
-        if (osuDroidSegmentIndex >= 0 && normalized.StartsWith(MobileContainerPrefix, StringComparison.Ordinal))
-            return MobileContainerDisplayPrefix + normalized[osuDroidSegmentIndex..];
-
-        return MiddleEllipsize(normalized);
+        string normalized = path.Replace('\\', '/');
+        int osuDroidSegmentIndex = normalized.IndexOf(OsuDroidLibrarySegment, StringComparison.Ordinal);
+        return osuDroidSegmentIndex >= 0 && normalized.StartsWith(MobileContainerPrefix, StringComparison.Ordinal)
+            ? MobileContainerDisplayPrefix + normalized[osuDroidSegmentIndex..]
+            : MiddleEllipsize(normalized);
     }
 
     private static string MiddleEllipsize(string path)
     {
         if (path.Length <= MaxDisplayCharacters)
+        {
             return path;
+        }
 
-        var tailLength = Math.Min(48, MaxDisplayCharacters - 8);
-        var headLength = MaxDisplayCharacters - tailLength - Ellipsis.Length;
+        int tailLength = Math.Min(48, MaxDisplayCharacters - 8);
+        int headLength = MaxDisplayCharacters - tailLength - Ellipsis.Length;
         return path[..headLength] + Ellipsis + path[^tailLength..];
     }
 }

@@ -1,17 +1,21 @@
-namespace OsuDroid.Game.UI;
+namespace OsuDroid.Game.UI.Style;
 
 public static class OsuDroidColors
 {
     public static UiColor StarRating(float? starRating)
     {
         if (starRating is null)
+        {
             return UiColor.Opaque(170, 170, 170);
+        }
 
-        var rounded = MathF.Ceiling(starRating.Value * 100f) / 100f;
+        float rounded = MathF.Ceiling(starRating.Value * 100f) / 100f;
         if (rounded < 0.1f)
+        {
             return UiColor.Opaque(170, 170, 170);
+        }
 
-        var points = new[]
+        (float, UiColor)[] points = new[]
         {
             (0.1f, UiColor.Opaque(66, 144, 251)),
             (1.25f, UiColor.Opaque(79, 192, 255)),
@@ -26,14 +30,16 @@ public static class OsuDroidColors
             (9.0f, UiColor.Opaque(0, 0, 0)),
         };
 
-        for (var i = 0; i < points.Length - 1; i++)
+        for (int i = 0; i < points.Length - 1; i++)
         {
-            var current = points[i];
-            var next = points[i + 1];
+            (float, UiColor) current = points[i];
+            (float, UiColor) next = points[i + 1];
             if (rounded > next.Item1)
+            {
                 continue;
+            }
 
-            var amount = Math.Clamp((rounded - current.Item1) / Math.Max(0.001f, next.Item1 - current.Item1), 0f, 1f);
+            float amount = Math.Clamp((rounded - current.Item1) / Math.Max(0.001f, next.Item1 - current.Item1), 0f, 1f);
             return new UiColor(
                 (byte)MathF.Round(current.Item2.Red + (next.Item2.Red - current.Item2.Red) * amount),
                 (byte)MathF.Round(current.Item2.Green + (next.Item2.Green - current.Item2.Green) * amount),

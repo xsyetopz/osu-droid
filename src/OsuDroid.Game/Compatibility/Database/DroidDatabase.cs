@@ -2,27 +2,24 @@ using Microsoft.Data.Sqlite;
 
 namespace OsuDroid.Game.Compatibility.Database;
 
-public sealed class DroidDatabase
+public sealed class DroidDatabase(string path)
 {
-    public DroidDatabase(string path)
-    {
-        Path = path;
-    }
-
-    public string Path { get; }
+    public string Path { get; } = path;
 
     public void EnsureCreated()
     {
-        var directory = System.IO.Path.GetDirectoryName(Path);
+        string? directory = System.IO.Path.GetDirectoryName(Path);
 
         if (!string.IsNullOrEmpty(directory))
-            Directory.CreateDirectory(directory);
-
-        using var connection = OpenConnection();
-
-        foreach (var statement in DroidDatabaseSchema.CreateStatements)
         {
-            using var command = connection.CreateCommand();
+            Directory.CreateDirectory(directory);
+        }
+
+        using SqliteConnection connection = OpenConnection();
+
+        foreach (string statement in DroidDatabaseSchema.CreateStatements)
+        {
+            using SqliteCommand command = connection.CreateCommand();
             command.CommandText = statement;
             command.ExecuteNonQuery();
         }
@@ -40,22 +37,26 @@ public sealed class DroidDatabase
 
     private static void EnsureBeatmapInfoColumns(SqliteConnection connection)
     {
-        using var readCommand = connection.CreateCommand();
+        using SqliteCommand readCommand = connection.CreateCommand();
         readCommand.CommandText = "PRAGMA table_info(BeatmapInfo)";
-        using var reader = readCommand.ExecuteReader();
+        using SqliteDataReader reader = readCommand.ExecuteReader();
         var existingColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         while (reader.Read())
+        {
             existingColumns.Add(reader.GetString(1));
+        }
 
         reader.Close();
 
-        foreach (var column in DroidDatabaseSchema.BeatmapInfoColumns)
+        foreach (DatabaseColumn column in DroidDatabaseSchema.BeatmapInfoColumns)
         {
             if (existingColumns.Contains(column.Name))
+            {
                 continue;
+            }
 
-            using var alterCommand = connection.CreateCommand();
+            using SqliteCommand alterCommand = connection.CreateCommand();
             alterCommand.CommandText = $"ALTER TABLE BeatmapInfo ADD COLUMN {column.Name} {column.Definition}";
             alterCommand.ExecuteNonQuery();
         }

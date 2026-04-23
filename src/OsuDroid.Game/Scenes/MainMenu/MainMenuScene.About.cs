@@ -1,17 +1,15 @@
-using OsuDroid.Game.UI;
-
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.MainMenu;
 
 public sealed partial class MainMenuScene
 {
-    private static void AddAboutDialog(List<UiElementSnapshot> elements, VirtualViewport viewport, string displayVersion)
+    private void AddAboutDialog(List<UiElementSnapshot> elements, VirtualViewport viewport, string _displayVersion)
     {
-        var panel = CreateAboutPanelBounds(viewport);
+        UiRect panel = CreateAboutPanelBounds(viewport);
         elements.Add(new UiElementSnapshot(
             "about-scrim",
             UiElementKind.Fill,
             new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight),
-            modalScrim,
+            s_modalScrim,
             1f,
             Action: UiAction.MainMenuAboutClose));
 
@@ -19,34 +17,34 @@ public sealed partial class MainMenuScene
             "about-panel",
             UiElementKind.Fill,
             panel,
-            modalPanel,
+            s_modalPanel,
             1f,
             CornerRadius: AboutPanelRadius));
 
-        var contentWidth = panel.Width;
-        AddAboutText(elements, panel.X, panel.Y + 19f, "about-dialog-title", "About", contentWidth, 25f, false, white, UiTextAlignment.Center);
+        float contentWidth = panel.Width;
+        AddAboutText(elements, panel.X, panel.Y + 19f, "about-dialog-title", _localizer["MainMenu_AboutTitle"], contentWidth, 25f, false, s_white, UiTextAlignment.Center);
         AddAboutDivider(elements, panel.X, panel.Y + AboutTitleBarHeight, panel.Width, 1f, "about-title-divider");
 
-        AddAboutText(elements, panel.X, panel.Y + AboutContentTop, "about-title", "osu!droid", contentWidth, 36f, true, white, UiTextAlignment.Center);
-        AddAboutText(elements, panel.X, panel.Y + AboutContentTop + 68f, "about-version", $"Version {displayVersion}", contentWidth, 30f, true, white, UiTextAlignment.Center);
-        AddAboutText(elements, panel.X, panel.Y + AboutContentTop + 138f, "about-made-by", "Made by osu!droid team", contentWidth, 26f, false, white, UiTextAlignment.Center);
-        AddAboutText(elements, panel.X, panel.Y + AboutContentTop + 174f, "about-copyright", "osu! is © peppy 2007-2026", contentWidth, 26f, false, white, UiTextAlignment.Center);
+        AddAboutText(elements, panel.X, panel.Y + AboutContentTop, "about-title", "osu!droid", contentWidth, 36f, true, s_white, UiTextAlignment.Center);
+        AddAboutText(elements, panel.X, panel.Y + AboutContentTop + 68f, "about-version", _localizer.Format("MainMenu_AboutVersion", _displayVersion), contentWidth, 30f, true, s_white, UiTextAlignment.Center);
+        AddAboutText(elements, panel.X, panel.Y + AboutContentTop + 138f, "about-made-by", _localizer["MainMenu_AboutMadeBy"], contentWidth, 26f, false, s_white, UiTextAlignment.Center);
+        AddAboutText(elements, panel.X, panel.Y + AboutContentTop + 174f, "about-copyright", _localizer["MainMenu_AboutCopyright"], contentWidth, 26f, false, s_white, UiTextAlignment.Center);
 
-        var firstLinkY = panel.Y + 335f;
-        AddAboutText(elements, panel.X, firstLinkY, "about-osu-link", "Visit official osu! website ↗", contentWidth, 26f, false, modalLink, UiTextAlignment.Center, true, UiAction.MainMenuAboutOsuWebsite);
-        AddAboutText(elements, panel.X, firstLinkY + AboutLinkGap, "about-droid-link", "Visit official osu!droid website ↗", contentWidth, 26f, false, modalLink, UiTextAlignment.Center, true, UiAction.MainMenuAboutOsuDroidWebsite);
-        AddAboutText(elements, panel.X, firstLinkY + AboutLinkGap * 2f, "about-discord-link", "Join the official Discord server ↗", contentWidth, 26f, false, modalLink, UiTextAlignment.Center, true, UiAction.MainMenuAboutDiscord);
+        float firstLinkY = panel.Y + 335f;
+        AddAboutText(elements, panel.X, firstLinkY, "about-osu-link", _localizer["MainMenu_AboutOsuWebsite"], contentWidth, 26f, false, s_modalLink, UiTextAlignment.Center, true, UiAction.MainMenuAboutOsuWebsite);
+        AddAboutText(elements, panel.X, firstLinkY + AboutLinkGap, "about-droid-link", _localizer["MainMenu_AboutOsuDroidWebsite"], contentWidth, 26f, false, s_modalLink, UiTextAlignment.Center, true, UiAction.MainMenuAboutOsuDroidWebsite);
+        AddAboutText(elements, panel.X, firstLinkY + AboutLinkGap * 2f, "about-discord-link", _localizer["MainMenu_AboutDiscord"], contentWidth, 26f, false, s_modalLink, UiTextAlignment.Center, true, UiAction.MainMenuAboutDiscord);
 
-        var buttonY = panel.Bottom - AboutButtonRowHeight;
+        float buttonY = panel.Bottom - AboutButtonRowHeight;
         AddAboutDivider(elements, panel.X, buttonY, panel.Width, 1f, "about-button-row-divider");
         AddAboutDivider(elements, panel.X + panel.Width / 2f, buttonY, 1f, AboutButtonRowHeight, "about-button-divider");
-        AddAboutButton(elements, "about-changelog", new UiRect(panel.X, buttonY, panel.Width / 2f, AboutButtonRowHeight), "Changelog", UiAction.MainMenuAboutChangelog);
-        AddAboutButton(elements, "about-close", new UiRect(panel.X + panel.Width / 2f, buttonY, panel.Width / 2f, AboutButtonRowHeight), "Close", UiAction.MainMenuAboutClose);
+        AddAboutButton(elements, "about-changelog", new UiRect(panel.X, buttonY, panel.Width / 2f, AboutButtonRowHeight), _localizer["MainMenu_AboutChangelog"], UiAction.MainMenuAboutChangelog);
+        AddAboutButton(elements, "about-close", new UiRect(panel.X + panel.Width / 2f, buttonY, panel.Width / 2f, AboutButtonRowHeight), _localizer["MainMenu_AboutClose"], UiAction.MainMenuAboutClose);
     }
 
     private static UiRect CreateAboutPanelBounds(VirtualViewport viewport)
     {
-        var height = Math.Min(AboutPanelHeight, viewport.VirtualHeight - 64f);
+        float height = Math.Min(AboutPanelHeight, viewport.VirtualHeight - 64f);
         return new UiRect(
             (viewport.VirtualWidth - AboutPanelWidth) / 2f,
             (viewport.VirtualHeight - height) / 2f,
@@ -60,7 +58,7 @@ public sealed partial class MainMenuScene
             id,
             UiElementKind.Fill,
             new UiRect(x, y, width, height),
-            modalDivider,
+            s_modalDivider,
             1f));
     }
 
@@ -95,7 +93,7 @@ public sealed partial class MainMenuScene
             id,
             UiElementKind.Fill,
             bounds,
-            modalPanel,
+            s_modalPanel,
             1f,
             Action: action,
             CornerMode: UiCornerMode.None));
@@ -103,7 +101,7 @@ public sealed partial class MainMenuScene
             $"{id}-text",
             UiElementKind.Text,
             new UiRect(bounds.X, bounds.Y + 34f, bounds.Width, bounds.Height - 34f),
-            white,
+            s_white,
             1f,
             Text: text,
             TextStyle: new UiTextStyle(28f, true, UiTextAlignment.Center)));

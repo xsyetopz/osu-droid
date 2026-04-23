@@ -1,13 +1,12 @@
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
 using OsuDroid.Game.Beatmaps.Difficulty;
 using OsuDroid.Game.Compatibility.Online;
+using OsuDroid.Game.Runtime;
 
 namespace OsuDroid.Game;
 
 public sealed partial class OsuDroidGameCore
 {
+#pragma warning disable IDE0072 // Main menu routing keeps unknown routes on the current scene.
     private bool HandleOptionsUiAction(UiAction action, VirtualViewport viewport)
     {
         if (action == UiAction.OptionsBack)
@@ -16,11 +15,13 @@ public sealed partial class OsuDroidGameCore
             return true;
         }
 
-        if (activeScene != ActiveScene.Options || !IsOptionsAction(action))
+        if (_activeScene != ActiveScene.Options || !IsOptionsAction(action))
+        {
             return false;
+        }
 
-        options.HandleAction(action, viewport);
-        ApplyChangedOptionsSetting(options.ConsumeChangedSettingKey());
+        _options.HandleAction(action, viewport);
+        ApplyChangedOptionsSetting(_options.ConsumeChangedSettingKey());
         PlayPendingOptionsSfx();
         return true;
     }
@@ -53,6 +54,8 @@ public sealed partial class OsuDroidGameCore
             case "forceromanized":
                 ApplyRomanizedPreferenceSetting();
                 break;
+            default:
+                break;
         }
     }
 
@@ -62,58 +65,58 @@ public sealed partial class OsuDroidGameCore
         ApplyEffectVolumeSetting();
     }
 
-    private void ApplyMusicVolumeSetting() => previewPlayer.SetVolume(options.GetIntValue("bgmvolume") / 100f);
+    private void ApplyMusicVolumeSetting() => _previewPlayer.SetVolume(_options.GetIntValue("bgmvolume") / 100f);
 
-    private void ApplyEffectVolumeSetting() => activeMenuSfxPlayer.SetVolume(options.GetIntValue("soundvolume") / 100f);
+    private void ApplyEffectVolumeSetting() => _activeMenuSfxPlayer.SetVolume(_options.GetIntValue("soundvolume") / 100f);
 
     private void ApplyDifficultyAlgorithmSetting()
     {
-        var algorithm = options.GetIntValue("difficultyAlgorithm") == 1 ? DifficultyAlgorithm.Standard : DifficultyAlgorithm.Droid;
-        songSelect.SetDisplayAlgorithm(algorithm);
+        DifficultyAlgorithm algorithm = _options.GetIntValue("difficultyAlgorithm") == 1 ? DifficultyAlgorithm.Standard : DifficultyAlgorithm.Droid;
+        _songSelect.SetDisplayAlgorithm(algorithm);
     }
 
     private void ApplyRomanizedPreferenceSetting()
     {
-        var forceRomanized = options.GetBoolValue("forceromanized");
-        songSelect.SetForceRomanized(forceRomanized);
-        beatmapDownloader.SetForceRomanized(forceRomanized);
+        bool forceRomanized = _options.GetBoolValue("forceromanized");
+        _songSelect.SetForceRomanized(forceRomanized);
+        _beatmapDownloader.SetForceRomanized(forceRomanized);
     }
 
-    private void ApplyDownloadPreferenceSetting() => beatmapDownloader.SetPreferNoVideoDownloads(options.GetBoolValue("preferNoVideoDownloads"));
+    private void ApplyDownloadPreferenceSetting() => _beatmapDownloader.SetPreferNoVideoDownloads(_options.GetBoolValue("preferNoVideoDownloads"));
 
     private void ApplyRoute(MainMenuRoute route)
     {
-        var start = PerfDiagnostics.Start();
+        long start = PerfDiagnostics.Start();
         if (route == MainMenuRoute.Exit)
         {
-            musicController.Execute(MenuMusicCommand.Stop);
-            mainMenu.SetNowPlaying(musicController.State);
+            _musicController.Execute(MenuMusicCommand.Stop);
+            _mainMenu.SetNowPlaying(_musicController.State);
         }
 
-        activeScene = route switch
+        _activeScene = route switch
         {
             MainMenuRoute.Settings => ActiveScene.Options,
             MainMenuRoute.Solo => EnterSongSelectScene(),
-            _ => activeScene,
+            _ => _activeScene,
         };
 
-        PerfDiagnostics.Log("core.applyRoute", start, $"route={route} active={activeScene}");
+        PerfDiagnostics.Log("core.applyRoute", start, $"route={route} active={_activeScene}");
     }
 
     private ActiveScene EnterSongSelectScene()
     {
-        pendingSongSelectBeatmapSetDirectory = musicController.State.BeatmapSetDirectory;
-        pendingSongSelectBeatmapFilename = musicController.State.BeatmapFilename;
+        _pendingSongSelectBeatmapSetDirectory = _musicController.State.BeatmapSetDirectory;
+        _pendingSongSelectBeatmapFilename = _musicController.State.BeatmapFilename;
 
-        if (beatmapProcessingService.HasPendingWork())
+        if (_beatmapProcessingService.HasPendingWork())
         {
-            beatmapProcessingService.Start();
+            _beatmapProcessingService.Start();
             return ActiveScene.BeatmapProcessing;
         }
 
-        songSelect.Enter(pendingSongSelectBeatmapSetDirectory, pendingSongSelectBeatmapFilename);
-        pendingSongSelectBeatmapSetDirectory = null;
-        pendingSongSelectBeatmapFilename = null;
+        _songSelect.Enter(_pendingSongSelectBeatmapSetDirectory, _pendingSongSelectBeatmapFilename);
+        _pendingSongSelectBeatmapSetDirectory = null;
+        _pendingSongSelectBeatmapFilename = null;
         return ActiveScene.SongSelect;
     }
 }

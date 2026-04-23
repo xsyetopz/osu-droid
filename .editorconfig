@@ -153,3 +153,6 @@ end_of_line = lf
 
 [*.md]
 trim_trailing_whitespace = false
+
+[tests/OsuDroid.Game.Tests/**/*.cs]
+dotnet_diagnostic.IDE0130.severity = none

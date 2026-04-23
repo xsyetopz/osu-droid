@@ -1,17 +1,17 @@
-namespace OsuDroid.Game.UI;
+namespace OsuDroid.Game.UI.Assets;
 
 public static partial class DroidAssets
 {
-    private static readonly HashSet<string> StartupAssetNames = new(StringComparer.Ordinal)
+    private static readonly HashSet<string> s_startupAssetNames = new(StringComparer.Ordinal)
     {
         Loading,
         LoadingTitle,
         Welcome,
     };
 
-    public static UiAssetManifest StartupManifest { get; } = new(AssetCatalog.Where(entry => StartupAssetNames.Contains(entry.LogicalName)));
+    public static UiAssetManifest StartupManifest { get; } = new(s_assetCatalog.Where(entry => s_startupAssetNames.Contains(entry.LogicalName)));
 
-    public static UiAssetManifest MainMenuManifest { get; } = new(AssetCatalog);
+    public static UiAssetManifest MainMenuManifest { get; } = new(s_assetCatalog);
 
     private static UiAssetEntry Texture(string logicalName, string packagePath, float width, float height) =>
         new(logicalName, ToContentName(packagePath), UiAssetKind.Texture, UiAssetProvenance.OsuDroid, new UiSize(width, height));
@@ -19,10 +19,10 @@ public static partial class DroidAssets
     private static string ToContentName(string packagePath)
     {
         const string prefix = "assets/";
-        var contentName = packagePath.StartsWith(prefix, StringComparison.Ordinal)
+        string contentName = packagePath.StartsWith(prefix, StringComparison.Ordinal)
             ? packagePath[prefix.Length..]
             : packagePath;
-        var extension = Path.GetExtension(contentName);
+        string extension = Path.GetExtension(contentName);
         return extension.Length == 0 ? contentName : contentName[..^extension.Length];
     }
 }

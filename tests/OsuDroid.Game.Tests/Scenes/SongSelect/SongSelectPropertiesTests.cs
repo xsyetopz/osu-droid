@@ -1,8 +1,5 @@
 using OsuDroid.Game.Beatmaps;
-using OsuDroid.Game.Beatmaps.Difficulty;
 using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Tests;
 
@@ -17,7 +14,7 @@ public sealed partial class SongSelectSceneTests
         scene.Enter();
         scene.OpenPropertiesForDifficulty(1);
 
-        var frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
 
         Assert.That(scene.SelectedBeatmap?.Version, Is.EqualTo("Insane"));
         Assert.That(frame.Elements.Any(element => element.Id == "songselect-properties-panel"), Is.True);
@@ -30,7 +27,7 @@ public sealed partial class SongSelectSceneTests
         scene.Enter();
         scene.OpenProperties();
 
-        var frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
 
         Assert.That(frame.Elements.Single(element => element.Id == "songselect-properties-favorite-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.HeartOutline));
         Assert.That(frame.Elements.Single(element => element.Id == "songselect-properties-manage-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.Folder));
@@ -51,7 +48,7 @@ public sealed partial class SongSelectSceneTests
         scene.AdjustOffset(300);
         scene.ToggleFavorite();
 
-        var options = library.GetOptions("1 Artist - Title");
+        BeatmapOptions options = library.GetOptions("1 Artist - Title");
 
         Assert.That(options.Offset, Is.EqualTo(250));
         Assert.That(options.IsFavorite, Is.True);
@@ -66,7 +63,7 @@ public sealed partial class SongSelectSceneTests
         scene.OpenProperties();
         scene.OpenCollections();
         Assert.That(library.CreateCollection("Folder"), Is.True);
-        var frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
         Assert.That(frame.Elements.Any(element => element.Id == "songselect-collection-0-toggle"), Is.True);
 
         scene.ToggleCollection(0);

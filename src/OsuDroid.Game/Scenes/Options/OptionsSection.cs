@@ -1,4 +1,4 @@
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.Options;
 
 public enum OptionsSection
 {

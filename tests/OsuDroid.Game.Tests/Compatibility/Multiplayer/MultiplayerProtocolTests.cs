@@ -9,7 +9,7 @@ public sealed class MultiplayerProtocolTests
     [Test]
     public void RoomListUriMatchesLegacyHostAndQueryKeys()
     {
-        var uri = MultiplayerProtocol.BuildRoomListUri(new RoomListQuery("abc", 12, "ssid", "sig"));
+        Uri uri = MultiplayerProtocol.BuildRoomListUri(new RoomListQuery("abc", 12, "ssid", "sig"));
 
         Assert.That(uri.GetLeftPart(UriPartial.Path), Is.EqualTo("https://multi.osudroid.moe/getrooms"));
         Assert.That(uri.Query, Does.Contain("sign=sig"));
@@ -21,7 +21,7 @@ public sealed class MultiplayerProtocolTests
     [Test]
     public void CreateRoomPayloadUsesLegacyKeysAndApiVersion()
     {
-        var request = MultiplayerProtocol.CreateRoomRequest(
+        CreateRoomRequestDto request = MultiplayerProtocol.CreateRoomRequest(
             "room",
             new RoomBeatmapDto("md5", "title", "artist", "creator", "hard"),
             99,
@@ -31,7 +31,7 @@ public sealed class MultiplayerProtocolTests
             6);
 
         using var json = JsonDocument.Parse(MultiplayerProtocol.SerializeCreateRoomRequest(request));
-        var root = json.RootElement;
+        JsonElement root = json.RootElement;
         Assert.That(root.GetProperty("hostUid").GetInt64(), Is.EqualTo(99));
         Assert.That(root.GetProperty("name").GetString(), Is.EqualTo("room"));
         Assert.That(root.GetProperty("maxPlayers").GetInt32(), Is.EqualTo(6));

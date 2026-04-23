@@ -5,7 +5,7 @@ namespace OsuDroid.Game.Compatibility.Multiplayer;
 
 public static class MultiplayerProtocol
 {
-    private static readonly JsonSerializerOptions jsonOptions = new(JsonSerializerDefaults.Web)
+    private static readonly JsonSerializerOptions s_jsonOptions = new(JsonSerializerDefaults.Web)
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
@@ -18,7 +18,9 @@ public static class MultiplayerProtocol
         };
 
         if (query.Sign is null && query.Query is null)
+        {
             return builder.Uri;
+        }
 
         var parameters = new Dictionary<string, string?>
         {
@@ -54,5 +56,5 @@ public static class MultiplayerProtocol
             sessionId,
             sign);
 
-    public static string SerializeCreateRoomRequest(CreateRoomRequestDto request) => JsonSerializer.Serialize(request, jsonOptions);
+    public static string SerializeCreateRoomRequest(CreateRoomRequestDto request) => JsonSerializer.Serialize(request, s_jsonOptions);
 }

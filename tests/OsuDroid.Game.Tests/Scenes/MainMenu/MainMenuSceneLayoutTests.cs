@@ -1,9 +1,3 @@
-using OsuDroid.Game.Compatibility.Database;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Runtime.Paths;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
-
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
@@ -13,11 +7,11 @@ public sealed partial class UiCompatibilityTests
     public void MainMenuFramePlacesDroidButtonsAsTouchableSprites()
     {
         var scene = new MainMenuScene();
-        var frame = ExpandedFrame(scene, VirtualViewport.FromSurface(1280, 720));
+        UiFrameSnapshot frame = ExpandedFrame(scene, VirtualViewport.FromSurface(1280, 720));
 
-        var play = frame.Elements.Single(element => element.Id == "menu-0");
-        var options = frame.Elements.Single(element => element.Id == "menu-1");
-        var exit = frame.Elements.Single(element => element.Id == "menu-2");
+        UiElementSnapshot play = frame.Elements.Single(element => element.Id == "menu-0");
+        UiElementSnapshot options = frame.Elements.Single(element => element.Id == "menu-1");
+        UiElementSnapshot exit = frame.Elements.Single(element => element.Id == "menu-2");
 
         Assert.That(play.AssetName, Is.EqualTo(DroidAssets.Play));
         Assert.That(options.AssetName, Is.EqualTo(DroidAssets.Options));
@@ -28,7 +22,7 @@ public sealed partial class UiCompatibilityTests
     public void MainMenuFrameIncludesReferenceShellElements()
     {
         var scene = new MainMenuScene();
-        var frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
 
         Assert.That(frame.Elements.Any(element => element.Id == "menu-background" && element.AssetName == DroidAssets.MenuBackground), Is.True);
         Assert.That(frame.Elements.Any(element => element.Id == "profile-avatar-footer"), Is.True);
@@ -41,7 +35,7 @@ public sealed partial class UiCompatibilityTests
     public void DebugMainMenuShowsLegacyDevelopmentBuildOverlay()
     {
         var scene = new MainMenuScene(isDevelopmentBuild: true);
-        var frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
 
         Assert.That(frame.Elements.Any(element => element.Id == "dev-build-overlay" && element.AssetName == DroidAssets.DevBuildOverlay), Is.True);
         Assert.That(frame.Elements.Any(element => element.Id == "dev-build-text" && element.Text == "DEVELOPMENT BUILD"), Is.True);
@@ -51,8 +45,8 @@ public sealed partial class UiCompatibilityTests
     {
         var scene = new MainMenuScene();
         var viewport = VirtualViewport.FromSurface(1280, 720);
-        var frame = scene.CreateSnapshot(viewport).UiFrame;
-        var logo = frame.Elements.Single(element => element.Id == "logo");
+        UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
+        UiElementSnapshot logo = frame.Elements.Single(element => element.Id == "logo");
 
         Assert.That(scene.IsMenuShown, Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "menu-0"), Is.False);
@@ -65,9 +59,9 @@ public sealed partial class UiCompatibilityTests
         var scene = new MainMenuScene();
         var elements = ExpandedFrame(scene, VirtualViewport.FromSurface(1280, 720)).Elements.ToList();
 
-        var menuIndex = elements.FindIndex(element => element.Id == "menu-1");
-        var logoIndex = elements.FindIndex(element => element.Id == "logo");
-        var overlayIndex = elements.FindIndex(element => element.Id == "logo-glow");
+        int menuIndex = elements.FindIndex(element => element.Id == "menu-1");
+        int logoIndex = elements.FindIndex(element => element.Id == "logo");
+        int overlayIndex = elements.FindIndex(element => element.Id == "logo-glow");
 
         Assert.That(menuIndex, Is.LessThan(logoIndex));
         Assert.That(logoIndex, Is.LessThan(overlayIndex));
@@ -77,10 +71,10 @@ public sealed partial class UiCompatibilityTests
     {
         var scene = new MainMenuScene();
         var viewport = VirtualViewport.FromSurface(1280, 720);
-        var frame = scene.CreateSnapshot(viewport).UiFrame;
-        var background = frame.Elements.Single(element => element.Id == "menu-background");
-        var backgroundAsset = DroidAssets.MainMenuManifest.Get(DroidAssets.MenuBackground);
-        var expectedHeight = viewport.VirtualWidth * backgroundAsset.NativeSize.Height / backgroundAsset.NativeSize.Width;
+        UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
+        UiElementSnapshot background = frame.Elements.Single(element => element.Id == "menu-background");
+        UiAssetEntry backgroundAsset = DroidAssets.MainMenuManifest.Get(DroidAssets.MenuBackground);
+        float expectedHeight = viewport.VirtualWidth * backgroundAsset.NativeSize.Height / backgroundAsset.NativeSize.Width;
 
         Assert.That(background.Bounds.X, Is.Zero);
         Assert.That(background.Bounds.Width, Is.EqualTo(viewport.VirtualWidth).Within(0.001f));
@@ -92,10 +86,10 @@ public sealed partial class UiCompatibilityTests
     {
         var scene = new MainMenuScene();
         var viewport = VirtualViewport.FromSurface(1280, 720);
-        var frame = scene.CreateSnapshot(viewport).UiFrame;
-        var tabAsset = DroidAssets.MainMenuManifest.Get(DroidAssets.BeatmapDownloader);
+        UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
+        UiAssetEntry tabAsset = DroidAssets.MainMenuManifest.Get(DroidAssets.BeatmapDownloader);
 
-        var tab = frame.Elements.Single(element => element.Id == "beatmap-downloader");
+        UiElementSnapshot tab = frame.Elements.Single(element => element.Id == "beatmap-downloader");
 
         Assert.That(tab.Bounds, Is.EqualTo(new UiRect(viewport.VirtualWidth - tabAsset.NativeSize.Width, (viewport.VirtualHeight - tabAsset.NativeSize.Height) / 2f, tabAsset.NativeSize.Width, tabAsset.NativeSize.Height)));
     }
@@ -106,14 +100,14 @@ public sealed partial class UiCompatibilityTests
     {
         var scene = new MainMenuScene();
         var viewport = VirtualViewport.FromSurface(surfaceWidth, surfaceHeight);
-        var collapsedFrame = scene.CreateSnapshot(viewport).UiFrame;
-        var expandedFrame = ExpandedFrame(scene, viewport);
+        UiFrameSnapshot collapsedFrame = scene.CreateSnapshot(viewport).UiFrame;
+        UiFrameSnapshot expandedFrame = ExpandedFrame(scene, viewport);
 
-        var collapsedLogo = collapsedFrame.Elements.Single(element => element.Id == "logo");
-        var expandedLogo = expandedFrame.Elements.Single(element => element.Id == "logo");
-        var top = expandedFrame.Elements.Single(element => element.Id == "menu-0");
-        var middle = expandedFrame.Elements.Single(element => element.Id == "menu-1");
-        var bottom = expandedFrame.Elements.Single(element => element.Id == "menu-2");
+        UiElementSnapshot collapsedLogo = collapsedFrame.Elements.Single(element => element.Id == "logo");
+        UiElementSnapshot expandedLogo = expandedFrame.Elements.Single(element => element.Id == "logo");
+        UiElementSnapshot top = expandedFrame.Elements.Single(element => element.Id == "menu-0");
+        UiElementSnapshot middle = expandedFrame.Elements.Single(element => element.Id == "menu-1");
+        UiElementSnapshot bottom = expandedFrame.Elements.Single(element => element.Id == "menu-2");
 
         AssertRectClose(collapsedLogo.Bounds, MainMenuScene.GetAndroidCollapsedLogoBounds(viewport));
         AssertRectClose(expandedLogo.Bounds, MainMenuScene.GetAndroidExpandedLogoBounds(viewport));

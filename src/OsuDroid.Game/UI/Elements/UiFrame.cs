@@ -1,4 +1,4 @@
-namespace OsuDroid.Game.UI;
+namespace OsuDroid.Game.UI.Elements;
 
 public sealed record UiFrameSnapshot(
     VirtualViewport Viewport,
@@ -7,11 +7,13 @@ public sealed record UiFrameSnapshot(
 {
     public UiElementSnapshot? HitTest(UiPoint point)
     {
-        for (var index = Elements.Count - 1; index >= 0; index--)
+        for (int index = Elements.Count - 1; index >= 0; index--)
         {
-            var element = Elements[index];
+            UiElementSnapshot element = Elements[index];
             if (element.Action != UiAction.None && element.Bounds.Contains(point))
+            {
                 return element;
+            }
         }
 
         return null;

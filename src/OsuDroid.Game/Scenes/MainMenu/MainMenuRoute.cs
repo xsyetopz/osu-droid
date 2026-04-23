@@ -1,4 +1,4 @@
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.MainMenu;
 
 public enum MainMenuAction
 {

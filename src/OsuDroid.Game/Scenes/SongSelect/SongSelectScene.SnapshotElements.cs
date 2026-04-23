@@ -1,10 +1,4 @@
-using OsuDroid.Game.Beatmaps;
-using OsuDroid.Game.Beatmaps.Difficulty;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.UI;
-using System.Globalization;
-
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.SongSelect;
 
 public sealed partial class SongSelectScene
 {

@@ -1,0 +1,7 @@
+[submodule "third_party/osu-droid-legacy"]
+	path = third_party/osu-droid-legacy
+	url = https://github.com/osudroid/osu-droid.git
+	branch = master
+[submodule "third_party/osu-droid-language-pack"]
+	path = third_party/osu-droid-language-pack
+	url = https://github.com/osudroid/language-pack.git

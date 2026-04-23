@@ -46,8 +46,4 @@ dumping/
 nohup.out
 *.Backup.tmp
 
-third_party/osu-framework/
-third_party/ppy-osu/
-third_party/osu-droid-legacy/
-
 screenshots/ios-live.png

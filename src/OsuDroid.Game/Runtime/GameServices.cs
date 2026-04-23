@@ -4,7 +4,6 @@ using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Beatmaps.Online;
 using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Runtime.Paths;
-using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Runtime;
 

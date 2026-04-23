@@ -31,51 +31,55 @@ public sealed class BeatmapDownloadService(
     IBeatmapMirrorClient mirrorClient,
     IBeatmapProcessingService? beatmapProcessingService = null) : IBeatmapDownloadService
 {
-    private readonly SemaphoreSlim gate = new(1, 1);
-    private BeatmapDownloadState state = new();
-    private CancellationTokenSource? activeDownloadCancellation;
+    private readonly SemaphoreSlim _gate = new(1, 1);
+    private BeatmapDownloadState _state = new();
+    private CancellationTokenSource? _activeDownloadCancellation;
 
-    public BeatmapDownloadState State => state;
+    public BeatmapDownloadState State => _state;
 
-    public void CancelActiveDownload() => activeDownloadCancellation?.Cancel();
+    public void CancelActiveDownload() => _activeDownloadCancellation?.Cancel();
 
     public async Task<BeatmapDownloadResult> DownloadAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken)
     {
-        if (!await gate.WaitAsync(0, cancellationToken).ConfigureAwait(false))
+        if (!await _gate.WaitAsync(0, cancellationToken).ConfigureAwait(false))
+        {
             return BeatmapDownloadResult.Failed("Another beatmap is already downloading.");
+        }
 
         using var linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        activeDownloadCancellation = linkedCancellation;
+        _activeDownloadCancellation = linkedCancellation;
 
         try
         {
             Directory.CreateDirectory(paths.Downloads);
-            var archiveName = BeatmapImportService.SanitizeArchiveName($"{beatmapSet.Id} {beatmapSet.Artist} - {beatmapSet.Title}{(withVideo ? string.Empty : " [no video]")}");
-            var destination = Path.Combine(paths.Downloads, archiveName + ".osz");
+            string archiveName = BeatmapImportService.SanitizeArchiveName($"{beatmapSet.Id} {beatmapSet.Artist} - {beatmapSet.Title}{(withVideo ? string.Empty : " [no video]")}");
+            string destination = Path.Combine(paths.Downloads, archiveName + ".osz");
             if (File.Exists(destination))
+            {
                 File.Delete(destination);
+            }
 
-            state = new BeatmapDownloadState(beatmapSet.Id, archiveName, new BeatmapDownloadProgress(0, null, BeatmapDownloadPhase.Connecting), IsActive: true);
-            var progress = new Progress<BeatmapDownloadProgress>(downloadProgress => state = state with { Progress = downloadProgress, IsActive = true });
+            _state = new BeatmapDownloadState(beatmapSet.Id, archiveName, new BeatmapDownloadProgress(0, null, BeatmapDownloadPhase.Connecting), IsActive: true);
+            var progress = new Progress<BeatmapDownloadProgress>(downloadProgress => _state = _state with { Progress = downloadProgress, IsActive = true });
             await mirrorClient.DownloadAsync(mirrorClient.CreateDownloadUri(beatmapSet.Mirror, beatmapSet.Id, withVideo), destination, progress, linkedCancellation.Token).ConfigureAwait(false);
             beatmapProcessingService?.EnqueueArchive(destination);
-            state = new BeatmapDownloadState();
+            _state = new BeatmapDownloadState();
             return BeatmapDownloadResult.Success(destination);
         }
         catch (OperationCanceledException)
         {
-            state = new BeatmapDownloadState(ErrorMessage: "Download canceled.");
+            _state = new BeatmapDownloadState(ErrorMessage: "Download canceled.");
             return BeatmapDownloadResult.Failed("Download canceled.");
         }
         catch (Exception exception)
         {
-            state = state with { ErrorMessage = exception.Message, IsActive = false };
+            _state = _state with { ErrorMessage = exception.Message, IsActive = false };
             return BeatmapDownloadResult.Failed(exception.Message);
         }
         finally
         {
-            activeDownloadCancellation = null;
-            gate.Release();
+            _activeDownloadCancellation = null;
+            _gate.Release();
         }
     }
 }

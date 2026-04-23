@@ -1,4 +1,4 @@
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.SongSelect;
 
 public sealed partial class SongSelectScene
 {

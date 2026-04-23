@@ -116,7 +116,7 @@ public sealed partial class PlatformTextInputService
         Log("ios-search-fallback-open");
         try
         {
-            var result = await KeyboardInput.Show("Search beatmaps", string.Empty, request.Text, false).ConfigureAwait(false);
+            var result = await KeyboardInput.Show(request.Title ?? string.Empty, string.Empty, request.Text, false).ConfigureAwait(false);
             RunOnMainThread(() =>
             {
                 if (!ReferenceEquals(activeRequest, request))

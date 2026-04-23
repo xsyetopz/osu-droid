@@ -1,4 +1,4 @@
-namespace OsuDroid.Game.UI;
+namespace OsuDroid.Game.UI.Geometry;
 
 public readonly record struct UiPoint(float X, float Y);
 

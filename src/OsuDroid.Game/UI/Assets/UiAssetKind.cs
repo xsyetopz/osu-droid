@@ -1,4 +1,4 @@
-namespace OsuDroid.Game.UI;
+namespace OsuDroid.Game.UI.Assets;
 
 public enum UiAssetKind
 {

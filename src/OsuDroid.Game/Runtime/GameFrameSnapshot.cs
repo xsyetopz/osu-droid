@@ -1,5 +1,3 @@
-using OsuDroid.Game.UI;
-
 namespace OsuDroid.Game.Runtime;
 
 public sealed record GameFrameSnapshot(

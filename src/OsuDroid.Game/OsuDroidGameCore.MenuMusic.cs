@@ -7,39 +7,52 @@ public sealed partial class OsuDroidGameCore
 {
     private void ApplyMusicPreviewSetting()
     {
-        menuMusicPreviewEnabled = options.GetBoolValue("musicpreview");
-        if (!menuMusicPreviewEnabled)
+        _menuMusicPreviewEnabled = _options.GetBoolValue("musicpreview");
+        if (!_menuMusicPreviewEnabled)
         {
-            musicController.Execute(MenuMusicCommand.Stop);
-            mainMenu.SetNowPlaying(musicController.State);
+            _musicController.Execute(MenuMusicCommand.Stop);
+            _mainMenu.SetNowPlaying(_musicController.State);
             return;
         }
 
-        musicController.Execute(MenuMusicCommand.Play);
-        if (!musicController.State.IsPlaying)
-            QueueStartupPlaylist(beatmapLibrary);
+        _musicController.Execute(MenuMusicCommand.Play);
+        if (!_musicController.State.IsPlaying)
+        {
+            QueueStartupPlaylist(_beatmapLibrary);
+        }
 
-        mainMenu.SetNowPlaying(musicController.State);
+        _mainMenu.SetNowPlaying(_musicController.State);
     }
 
     private void QueueStartupPlaylist(IBeatmapLibrary library, bool play = true)
     {
-        if (!menuMusicPreviewEnabled)
+        if (!_menuMusicPreviewEnabled)
+        {
             return;
+        }
 
-        var snapshot = library.Snapshot;
+        BeatmapLibrarySnapshot snapshot = library.Snapshot;
         if (snapshot.Sets.Count == 0)
+        {
             snapshot = library.Load();
+        }
+
         if (snapshot.Sets.Count == 0)
+        {
             return;
+        }
 
-        var tracks = CreateMenuPlaylist(snapshot).ToArray();
+        MenuTrack[] tracks = CreateMenuPlaylist(snapshot).ToArray();
         if (tracks.Length == 0)
+        {
             return;
+        }
 
-        musicController.SetPlaylist(tracks, random.Next(tracks.Length), play);
+        _musicController.SetPlaylist(tracks, _random.Next(tracks.Length), play);
         if (!play)
-            startMenuMusicAfterStartup = true;
+        {
+            _startMenuMusicAfterStartup = true;
+        }
     }
 
     private IEnumerable<MenuTrack> CreateMenuPlaylist(BeatmapLibrarySnapshot snapshot) => snapshot.Sets
@@ -48,11 +61,11 @@ public sealed partial class OsuDroidGameCore
             .Select(beatmap => (Set: set, Beatmap: beatmap)))
         .Select(pair => CreateMenuTrack(pair.Set, pair.Beatmap))
         .Where(track => File.Exists(track.AudioPath))
-        .OrderBy(_ => random.Next());
+        .OrderBy(_ => _random.Next());
 
     private MenuTrack CreateMenuTrack(BeatmapSetInfo set, BeatmapInfo beatmap)
     {
-        var audioPath = beatmap.GetAudioPath(Services.Paths.Songs);
+        string audioPath = beatmap.GetAudioPath(Services.Paths.Songs);
         return new MenuTrack(
             $"beatmap:{set.Directory}/{beatmap.Filename}",
             $"{DisplayArtist(beatmap)} - {DisplayTitle(beatmap)}",
@@ -64,40 +77,49 @@ public sealed partial class OsuDroidGameCore
             beatmap.Filename);
     }
 
-    private void PreserveDownloaderMusic()
-    {
-        preservedDownloaderMusicState = musicController.State;
-    }
+    private void PreserveDownloaderMusic() => _preservedDownloaderMusicState = _musicController.State;
 
     private void RestoreDownloaderMusic()
     {
-        if (!menuMusicPreviewEnabled || preservedDownloaderMusicState is not { IsPlaying: true } state)
+        if (!_menuMusicPreviewEnabled || _preservedDownloaderMusicState is not { IsPlaying: true } state)
+        {
             return;
+        }
 
-        preservedDownloaderMusicState = null;
+        _preservedDownloaderMusicState = null;
         if (TryQueueBeatmapPreview(state.BeatmapSetDirectory, state.BeatmapFilename, true))
-            mainMenu.SetNowPlaying(musicController.State);
+        {
+            _mainMenu.SetNowPlaying(_musicController.State);
+        }
     }
 
     private bool TryQueueBeatmapPreview(string? setDirectory, string? beatmapFilename, bool play)
     {
         if (string.IsNullOrWhiteSpace(setDirectory) || string.IsNullOrWhiteSpace(beatmapFilename))
+        {
             return false;
+        }
 
-        var snapshot = beatmapLibrary.Snapshot;
+        BeatmapLibrarySnapshot snapshot = _beatmapLibrary.Snapshot;
         if (snapshot.Sets.Count == 0)
-            snapshot = beatmapLibrary.Load();
+        {
+            snapshot = _beatmapLibrary.Load();
+        }
 
-        var set = snapshot.Sets.FirstOrDefault(candidate => string.Equals(candidate.Directory, setDirectory, StringComparison.Ordinal));
-        var beatmap = set?.Beatmaps.FirstOrDefault(candidate => string.Equals(candidate.Filename, beatmapFilename, StringComparison.Ordinal));
+        BeatmapSetInfo? set = snapshot.Sets.FirstOrDefault(candidate => string.Equals(candidate.Directory, setDirectory, StringComparison.Ordinal));
+        BeatmapInfo? beatmap = set?.Beatmaps.FirstOrDefault(candidate => string.Equals(candidate.Filename, beatmapFilename, StringComparison.Ordinal));
         if (set is null || beatmap is null)
+        {
             return false;
+        }
 
-        var audioPath = beatmap.GetAudioPath(Services.Paths.Songs);
+        string audioPath = beatmap.GetAudioPath(Services.Paths.Songs);
         if (!File.Exists(audioPath))
+        {
             return false;
+        }
 
-        musicController.Queue(CreateMenuTrack(set, beatmap), play);
+        _musicController.Queue(CreateMenuTrack(set, beatmap), play);
         return true;
     }
 

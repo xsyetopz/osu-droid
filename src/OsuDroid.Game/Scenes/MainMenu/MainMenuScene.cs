@@ -1,9 +1,9 @@
+using OsuDroid.Game.Localization;
 using OsuDroid.Game.Runtime;
-using OsuDroid.Game.UI;
 
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.MainMenu;
 
-public sealed partial class MainMenuScene
+public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNowPlayingState? nowPlaying = null, OnlineProfileSnapshot? profile = null, bool isDevelopmentBuild = false, GameLocalizer? localizer = null)
 {
     private enum MenuVisibility
     {
@@ -14,14 +14,12 @@ public sealed partial class MainMenuScene
         Exiting,
     }
 
-    private static readonly string[] firstMenu = ["Play", "Options", "Exit"];
-    private static readonly string[] secondMenu = ["Solo", "Multiplayer", "Back"];
-    private static readonly UiColor backgroundColor = UiColor.Opaque(70, 129, 252);
-    private static readonly UiColor translucentBlack = new(0, 0, 0, 128);
-    private static readonly UiColor modalScrim = new(0, 0, 0, 172);
-    private static readonly UiColor modalPanel = new(24, 24, 38, 255);
-    private static readonly UiColor modalDivider = new(42, 42, 60, 255);
-    private static readonly UiColor modalLink = new(243, 115, 115, 255);
+    private static readonly UiColor s_backgroundColor = UiColor.Opaque(70, 129, 252);
+    private static readonly UiColor s_translucentBlack = new(0, 0, 0, 128);
+    private static readonly UiColor s_modalScrim = new(0, 0, 0, 172);
+    private static readonly UiColor s_modalPanel = new(24, 24, 38, 255);
+    private static readonly UiColor s_modalDivider = new(42, 42, 60, 255);
+    private static readonly UiColor s_modalLink = new(243, 115, 115, 255);
     public const float OnlinePanelX = 5f;
     public const float OnlinePanelY = 5f;
     public const float OnlinePanelWidth = 410f;
@@ -35,6 +33,7 @@ public sealed partial class MainMenuScene
     public const float MusicNowPlayingHeight = 40f;
     public const float MusicNowPlayingTextRight = VirtualViewport.LegacyWidth - 500f + 470f;
     public const float MusicNowPlayingSpriteLeftPadding = 130f;
+    public const int MusicNowPlayingCharactersMaximum = 35;
     public const float MusicProgressX = VirtualViewport.LegacyWidth - 320f;
     public const float MusicProgressY = 100f;
     public const float MusicProgressWidth = 300f;
@@ -79,76 +78,68 @@ public sealed partial class MainMenuScene
     private const float ThirdButtonReferenceY = 721f;
     private const int SpectrumBarCount = 120;
 
-    private static readonly UiColor white = UiColor.Opaque(255, 255, 255);
+    private static readonly UiColor s_white = UiColor.Opaque(255, 255, 255);
 
-    private readonly string displayVersion;
-    private readonly bool isDevelopmentBuild;
-    private readonly OnlineProfileSnapshot profile;
-    private MenuNowPlayingState nowPlaying;
-    private int selectedIndex;
-    private MenuVisibility menuVisibility;
-    private double transitionMilliseconds;
-    private double shownMilliseconds;
-    private double beatMilliseconds;
-    private double heartbeatMilliseconds = -1d;
-    private double currentBeatMilliseconds = LogoBeatMilliseconds;
-    private double exitMilliseconds;
-    private double returnTransitionMilliseconds;
-    private string? returnTransitionBackgroundPath;
-    private bool isReturnTransitionActive;
-    private bool hasPendingExitRoute;
-    private bool exitRoutePublished;
-    private bool isAboutDialogOpen;
-    private UiAction pressedAction;
-    private readonly float[] spectrumPeakLevel = new float[SpectrumBarCount];
-    private readonly float[] spectrumPeakDownRate = new float[SpectrumBarCount];
-    private readonly float[] spectrumPeakAlpha = new float[SpectrumBarCount];
-    private readonly float[] rawSpectrum = new float[512];
-    private bool hasRawSpectrum;
-
-    public MainMenuScene(string displayVersion = "1.0", MenuNowPlayingState? nowPlaying = null, OnlineProfileSnapshot? profile = null, bool isDevelopmentBuild = false)
-    {
-        this.displayVersion = string.IsNullOrWhiteSpace(displayVersion) ? "1.0" : displayVersion;
-        this.isDevelopmentBuild = isDevelopmentBuild;
-        this.nowPlaying = nowPlaying ?? new MenuNowPlayingState();
-        this.profile = profile ?? OnlineProfileSnapshot.Guest;
-    }
+    private readonly GameLocalizer _localizer = localizer ?? new GameLocalizer();
+    private readonly string _displayVersion = string.IsNullOrWhiteSpace(displayVersion) ? "1.0" : displayVersion;
+    private readonly bool _isDevelopmentBuild = isDevelopmentBuild;
+    private readonly OnlineProfileSnapshot _profile = profile ?? OnlineProfileSnapshot.Guest;
+    private MenuNowPlayingState _nowPlaying = nowPlaying ?? new MenuNowPlayingState();
+    private int _selectedIndex;
+    private MenuVisibility _menuVisibility;
+    private double _transitionMilliseconds;
+    private double _shownMilliseconds;
+    private double _beatMilliseconds;
+    private double _heartbeatMilliseconds = -1d;
+    private double _currentBeatMilliseconds = LogoBeatMilliseconds;
+    private double _exitMilliseconds;
+    private double _returnTransitionMilliseconds;
+    private string? _returnTransitionBackgroundPath;
+    private bool _isReturnTransitionActive;
+    private bool _hasPendingExitRoute;
+    private bool _exitRoutePublished;
+    private bool _isAboutDialogOpen;
+    private UiAction _pressedAction;
+    private readonly float[] _spectrumPeakLevel = new float[SpectrumBarCount];
+    private readonly float[] _spectrumPeakDownRate = new float[SpectrumBarCount];
+    private readonly float[] _spectrumPeakAlpha = new float[SpectrumBarCount];
+    private readonly float[] _rawSpectrum = new float[512];
+    private bool _hasRawSpectrum;
 
     public bool IsSecondMenu { get; private set; }
 
-    public bool IsMenuShown => menuVisibility is MenuVisibility.Expanding or MenuVisibility.Expanded or MenuVisibility.Collapsing;
+    public bool IsMenuShown => _menuVisibility is MenuVisibility.Expanding or MenuVisibility.Expanded or MenuVisibility.Collapsing;
 
-    public bool IsExitAnimating => menuVisibility == MenuVisibility.Exiting;
+    public bool IsExitAnimating => _menuVisibility == MenuVisibility.Exiting;
 
-    public bool IsReturnTransitionActive => isReturnTransitionActive;
+    public bool IsReturnTransitionActive => _isReturnTransitionActive;
 
-    public bool IsAboutDialogOpen => isAboutDialogOpen;
+    public bool IsAboutDialogOpen => _isAboutDialogOpen;
 
     public void SetNowPlaying(MenuNowPlayingState state)
     {
-        nowPlaying = state;
-        if (state.IsPlaying && state.Bpm > 0.01f)
-            currentBeatMilliseconds = Math.Clamp(60000d / state.Bpm, 260d, 2000d);
-        else
-            currentBeatMilliseconds = LogoBeatMilliseconds;
+        _nowPlaying = state;
+        _currentBeatMilliseconds = state.IsPlaying && state.Bpm > 0.01f ? Math.Clamp(60000d / state.Bpm, 260d, 2000d) : LogoBeatMilliseconds;
     }
 
     public void SetSpectrum(float[] spectrum1024, bool available)
     {
-        if (!available || spectrum1024.Length < rawSpectrum.Length)
+        if (!available || spectrum1024.Length < _rawSpectrum.Length)
         {
-            hasRawSpectrum = false;
+            _hasRawSpectrum = false;
             return;
         }
 
-        Array.Copy(spectrum1024, rawSpectrum, rawSpectrum.Length);
-        hasRawSpectrum = true;
+        Array.Copy(spectrum1024, _rawSpectrum, _rawSpectrum.Length);
+        _hasRawSpectrum = true;
     }
 
     public MainMenuRoute Handle(MainMenuAction action)
     {
-        if (isAboutDialogOpen || IsExitAnimating)
+        if (_isAboutDialogOpen || IsExitAnimating)
+        {
             return MainMenuRoute.None;
+        }
 
         if (!IsMenuShown && action == MainMenuAction.Activate)
         {
@@ -159,11 +150,11 @@ public sealed partial class MainMenuScene
         switch (action)
         {
             case MainMenuAction.MoveUp:
-                selectedIndex = (selectedIndex + CurrentEntries.Length - 1) % CurrentEntries.Length;
+                _selectedIndex = (_selectedIndex + CurrentEntries.Length - 1) % CurrentEntries.Length;
                 return MainMenuRoute.None;
 
             case MainMenuAction.MoveDown:
-                selectedIndex = (selectedIndex + 1) % CurrentEntries.Length;
+                _selectedIndex = (_selectedIndex + 1) % CurrentEntries.Length;
                 return MainMenuRoute.None;
 
             case MainMenuAction.Back:
@@ -180,11 +171,13 @@ public sealed partial class MainMenuScene
 
     public MainMenuRoute Tap(MainMenuButtonSlot slot)
     {
-        if (!IsMenuShown || isAboutDialogOpen || IsExitAnimating || menuVisibility == MenuVisibility.Collapsing)
+        if (!IsMenuShown || _isAboutDialogOpen || IsExitAnimating || _menuVisibility == MenuVisibility.Collapsing)
+        {
             return MainMenuRoute.None;
+        }
 
-        shownMilliseconds = 0d;
-        selectedIndex = slot switch
+        _shownMilliseconds = 0d;
+        _selectedIndex = slot switch
         {
             MainMenuButtonSlot.First => 0,
             MainMenuButtonSlot.Second => 1,
@@ -197,146 +190,170 @@ public sealed partial class MainMenuScene
 
     public void ToggleCookie()
     {
-        if (isAboutDialogOpen || IsExitAnimating)
+        if (_isAboutDialogOpen || IsExitAnimating)
+        {
             return;
+        }
 
-        if (menuVisibility is MenuVisibility.Collapsed or MenuVisibility.Collapsing)
+        if (_menuVisibility is MenuVisibility.Collapsed or MenuVisibility.Collapsing)
+        {
             BeginExpand();
+        }
         else
+        {
             BeginCollapse();
+        }
     }
 
     public void OpenAboutDialog()
     {
         if (!IsExitAnimating)
-            isAboutDialogOpen = true;
+        {
+            _isAboutDialogOpen = true;
+        }
     }
 
-    public void CloseAboutDialog() => isAboutDialogOpen = false;
+    public void CloseAboutDialog() => _isAboutDialogOpen = false;
 
     public void StartReturnTransition(string? backgroundPath = null)
     {
-        isReturnTransitionActive = true;
-        returnTransitionMilliseconds = 0d;
-        returnTransitionBackgroundPath = backgroundPath;
+        _isReturnTransitionActive = true;
+        _returnTransitionMilliseconds = 0d;
+        _returnTransitionBackgroundPath = backgroundPath;
     }
 
     public void Press(UiAction action)
     {
-        if (isAboutDialogOpen || IsExitAnimating)
+        if (_isAboutDialogOpen || IsExitAnimating)
+        {
             return;
+        }
 
-        pressedAction = action;
+        _pressedAction = action;
     }
 
-    public void ReleasePress() => pressedAction = UiAction.None;
+    public void ReleasePress() => _pressedAction = UiAction.None;
 
     public MainMenuRoute ConsumePendingRoute()
     {
-        if (!hasPendingExitRoute)
+        if (!_hasPendingExitRoute)
+        {
             return MainMenuRoute.None;
+        }
 
-        hasPendingExitRoute = false;
+        _hasPendingExitRoute = false;
         return MainMenuRoute.Exit;
     }
 
     public void Update(TimeSpan elapsed)
     {
-        var elapsedMilliseconds = Math.Max(0d, elapsed.TotalMilliseconds);
-        if (nowPlaying.IsPlaying)
+        double elapsedMilliseconds = Math.Max(0d, elapsed.TotalMilliseconds);
+        if (_nowPlaying.IsPlaying)
         {
-            beatMilliseconds += elapsedMilliseconds;
-            if (beatMilliseconds >= currentBeatMilliseconds)
+            _beatMilliseconds += elapsedMilliseconds;
+            if (_beatMilliseconds >= _currentBeatMilliseconds)
             {
-                beatMilliseconds %= currentBeatMilliseconds;
-                heartbeatMilliseconds = 0d;
+                _beatMilliseconds %= _currentBeatMilliseconds;
+                _heartbeatMilliseconds = 0d;
             }
 
-            if (heartbeatMilliseconds >= 0d)
+            if (_heartbeatMilliseconds >= 0d)
             {
-                heartbeatMilliseconds += elapsedMilliseconds;
-                if (heartbeatMilliseconds > currentBeatMilliseconds * 0.97d)
-                    heartbeatMilliseconds = -1d;
+                _heartbeatMilliseconds += elapsedMilliseconds;
+                if (_heartbeatMilliseconds > _currentBeatMilliseconds * 0.97d)
+                {
+                    _heartbeatMilliseconds = -1d;
+                }
             }
         }
         else
         {
-            beatMilliseconds += elapsedMilliseconds;
-            if (beatMilliseconds >= LogoBeatMilliseconds)
+            _beatMilliseconds += elapsedMilliseconds;
+            if (_beatMilliseconds >= LogoBeatMilliseconds)
             {
-                beatMilliseconds %= LogoBeatMilliseconds;
-                heartbeatMilliseconds = 0d;
+                _beatMilliseconds %= LogoBeatMilliseconds;
+                _heartbeatMilliseconds = 0d;
             }
 
-            if (heartbeatMilliseconds >= 0d)
+            if (_heartbeatMilliseconds >= 0d)
             {
-                heartbeatMilliseconds += elapsedMilliseconds;
-                if (heartbeatMilliseconds > LogoBeatMilliseconds * 0.97d)
-                    heartbeatMilliseconds = -1d;
+                _heartbeatMilliseconds += elapsedMilliseconds;
+                if (_heartbeatMilliseconds > LogoBeatMilliseconds * 0.97d)
+                {
+                    _heartbeatMilliseconds = -1d;
+                }
             }
         }
 
-        UpdateSpectrumState(elapsedMilliseconds);
+        UpdateSpectrumState();
 
-        if (isReturnTransitionActive)
+        if (_isReturnTransitionActive)
         {
-            returnTransitionMilliseconds += elapsedMilliseconds;
-            if (returnTransitionMilliseconds >= ReturnBackgroundFadeDurationMilliseconds)
+            _returnTransitionMilliseconds += elapsedMilliseconds;
+            if (_returnTransitionMilliseconds >= ReturnBackgroundFadeDurationMilliseconds)
             {
-                returnTransitionMilliseconds = ReturnBackgroundFadeDurationMilliseconds;
-                isReturnTransitionActive = false;
-                returnTransitionBackgroundPath = null;
+                _returnTransitionMilliseconds = ReturnBackgroundFadeDurationMilliseconds;
+                _isReturnTransitionActive = false;
+                _returnTransitionBackgroundPath = null;
             }
         }
 
-        if (isAboutDialogOpen)
+        if (_isAboutDialogOpen)
+        {
             return;
+        }
 
-        switch (menuVisibility)
+        switch (_menuVisibility)
         {
             case MenuVisibility.Expanding:
-                transitionMilliseconds += elapsedMilliseconds;
-                shownMilliseconds += elapsedMilliseconds;
-                if (transitionMilliseconds >= MenuExpandDurationMilliseconds)
+                _transitionMilliseconds += elapsedMilliseconds;
+                _shownMilliseconds += elapsedMilliseconds;
+                if (_transitionMilliseconds >= MenuExpandDurationMilliseconds)
                 {
-                    transitionMilliseconds = MenuExpandDurationMilliseconds;
-                    menuVisibility = MenuVisibility.Expanded;
+                    _transitionMilliseconds = MenuExpandDurationMilliseconds;
+                    _menuVisibility = MenuVisibility.Expanded;
                 }
 
                 break;
 
             case MenuVisibility.Expanded:
-                shownMilliseconds += elapsedMilliseconds;
+                _shownMilliseconds += elapsedMilliseconds;
                 break;
 
             case MenuVisibility.Collapsing:
-                transitionMilliseconds += elapsedMilliseconds;
-                if (transitionMilliseconds >= MenuCollapseDurationMilliseconds)
+                _transitionMilliseconds += elapsedMilliseconds;
+                if (_transitionMilliseconds >= MenuCollapseDurationMilliseconds)
                 {
-                    transitionMilliseconds = 0d;
-                    shownMilliseconds = 0d;
-                    menuVisibility = MenuVisibility.Collapsed;
+                    _transitionMilliseconds = 0d;
+                    _shownMilliseconds = 0d;
+                    _menuVisibility = MenuVisibility.Collapsed;
                 }
 
                 break;
 
             case MenuVisibility.Exiting:
-                exitMilliseconds += elapsedMilliseconds;
-                if (exitMilliseconds >= ExitAnimationMilliseconds)
+                _exitMilliseconds += elapsedMilliseconds;
+                if (_exitMilliseconds >= ExitAnimationMilliseconds)
                 {
-                    exitMilliseconds = ExitAnimationMilliseconds;
-                    if (!exitRoutePublished)
+                    _exitMilliseconds = ExitAnimationMilliseconds;
+                    if (!_exitRoutePublished)
                     {
-                        hasPendingExitRoute = true;
-                        exitRoutePublished = true;
+                        _hasPendingExitRoute = true;
+                        _exitRoutePublished = true;
                     }
                 }
 
                 break;
+            case MenuVisibility.Collapsed:
+                break;
+            default:
+                break;
         }
 
-        if ((menuVisibility is MenuVisibility.Expanding or MenuVisibility.Expanded) && shownMilliseconds > MenuIdleCollapseMilliseconds)
+        if ((_menuVisibility is MenuVisibility.Expanding or MenuVisibility.Expanded) && _shownMilliseconds > MenuIdleCollapseMilliseconds)
+        {
             BeginCollapse();
+        }
     }
 
 

@@ -1,8 +1,5 @@
 using OsuDroid.Game.Beatmaps;
-using OsuDroid.Game.Beatmaps.Difficulty;
 using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Tests;
 
@@ -12,7 +9,7 @@ public sealed partial class SongSelectSceneTests
     [Test]
     public void EnterQueuesSelectedBeatmapPreview()
     {
-        var songs = CreateSongsRoot("audio.mp3");
+        string songs = CreateSongsRoot("audio.mp3");
         var controller = new PreviewMenuMusicController(new NoOpBeatmapPreviewPlayer());
         var scene = new SongSelectScene(new FakeLibrary(CreateSnapshot()), controller, new FakeDifficultyService(), songs);
 
@@ -24,10 +21,12 @@ public sealed partial class SongSelectSceneTests
     [Test]
     public void EnterDoesNotSynchronouslyScanEmptyLibrary()
     {
-        var library = new FakeLibrary(BeatmapLibrarySnapshot.Empty);
-        library.ScanDelay = TimeSpan.FromMilliseconds(500);
+        var library = new FakeLibrary(BeatmapLibrarySnapshot.Empty)
+        {
+            ScanDelay = TimeSpan.FromMilliseconds(500)
+        };
         var scene = new SongSelectScene(library, new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"));
-        var start = DateTime.UtcNow;
+        DateTime start = DateTime.UtcNow;
 
         scene.Enter();
 
@@ -50,10 +49,10 @@ public sealed partial class SongSelectSceneTests
     [Test]
     public void PreviewUsesClampedEffectivePreviewTime()
     {
-        var songs = CreateSongsRoot("audio.mp3");
+        string songs = CreateSongsRoot("audio.mp3");
         var player = new ConfirmingPreviewPlayer();
         var controller = new PreviewMenuMusicController(player);
-        var beatmap = CreateBeatmap("Easy", null, 1.5f) with { PreviewTime = 999999, Length = 123000 };
+        BeatmapInfo beatmap = CreateBeatmap("Easy", null, 1.5f) with { PreviewTime = 999999, Length = 123000 };
         var scene = new SongSelectScene(new FakeLibrary(new BeatmapLibrarySnapshot([new BeatmapSetInfo(1, "1 Artist - Title", [beatmap])])), controller, new FakeDifficultyService(), songs);
 
         scene.Enter();
@@ -63,7 +62,7 @@ public sealed partial class SongSelectSceneTests
     [Test]
     public void EnterMarksPreviewPlayingOnlyAfterPlayerConfirmsPlayback()
     {
-        var songs = CreateSongsRoot("audio.mp3");
+        string songs = CreateSongsRoot("audio.mp3");
         var controller = new PreviewMenuMusicController(new ConfirmingPreviewPlayer());
         var scene = new SongSelectScene(new FakeLibrary(CreateSnapshot()), controller, new FakeDifficultyService(), songs);
 

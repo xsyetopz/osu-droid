@@ -39,14 +39,14 @@ public sealed class BeatmapLibrary(
     private const long StandardRulesetFilterVersion = 2;
     private const string BeatmapSetIndexMetadataPrefix = "library.beatmapSetIndex.";
 
-    private BeatmapLibrarySnapshot snapshot = BeatmapLibrarySnapshot.Empty;
+    private BeatmapLibrarySnapshot _snapshot = BeatmapLibrarySnapshot.Empty;
 
-    public BeatmapLibrarySnapshot Snapshot => snapshot;
+    public BeatmapLibrarySnapshot Snapshot => _snapshot;
 
     public BeatmapLibrarySnapshot Load()
     {
-        snapshot = FilterStandardRuleset(repository.LoadLibrary());
-        return snapshot;
+        _snapshot = FilterStandardRuleset(repository.LoadLibrary());
+        return _snapshot;
     }
 
     public bool NeedsScanRefresh() => repository.GetDifficultyMetadata(StandardRulesetFilterMetadataKey) < StandardRulesetFilterVersion;
@@ -59,23 +59,27 @@ public sealed class BeatmapLibrary(
         var existingDirectories = new HashSet<string>(StringComparer.Ordinal);
         var reindexedDirectories = new List<string>();
         var indexedStamps = new Dictionary<string, long>(StringComparer.Ordinal);
-        var forceStandardRulesetRefresh = forceUpdateDirectories is null
+        bool forceStandardRulesetRefresh = forceUpdateDirectories is null
             && repository.GetDifficultyMetadata(StandardRulesetFilterMetadataKey) < StandardRulesetFilterVersion;
 
-        foreach (var directory in Directory.EnumerateDirectories(paths.Songs))
+        foreach (string directory in Directory.EnumerateDirectories(paths.Songs))
         {
-            var directoryName = Path.GetFileName(directory);
+            string directoryName = Path.GetFileName(directory);
             existingDirectories.Add(directoryName);
-            var indexStamp = GetDirectoryIndexStamp(directory);
-            var forceDirectoryUpdate = forceUpdateDirectories?.Contains(directoryName) == true;
+            long indexStamp = GetDirectoryIndexStamp(directory);
+            bool forceDirectoryUpdate = forceUpdateDirectories?.Contains(directoryName) == true;
             if (!forceStandardRulesetRefresh && !forceDirectoryUpdate && IsDirectoryIndexCurrent(directoryName, indexStamp))
+            {
                 continue;
+            }
 
             if (!forceStandardRulesetRefresh
                 && forceUpdateDirectories is not null
                 && !forceDirectoryUpdate
                 && repository.IsBeatmapSetImported(directoryName))
+            {
                 continue;
+            }
 
             reindexedDirectories.Add(directoryName);
             indexedStamps[directoryName] = indexStamp;
@@ -83,20 +87,30 @@ public sealed class BeatmapLibrary(
         }
 
         if (reindexedDirectories.Count > 0)
+        {
             repository.DeleteBeatmapSets(reindexedDirectories);
+        }
 
         if (beatmaps.Count > 0)
+        {
             repository.UpsertBeatmaps(beatmaps);
+        }
 
-        foreach (var (directory, stamp) in indexedStamps)
+        foreach ((string? directory, long stamp) in indexedStamps)
+        {
             repository.SetDifficultyMetadata(GetDirectoryIndexMetadataKey(directory), stamp);
+        }
 
-        var missingDirectories = importedDirectories.Where(directory => !existingDirectories.Contains(directory)).ToArray();
+        string[] missingDirectories = importedDirectories.Where(directory => !existingDirectories.Contains(directory)).ToArray();
         if (missingDirectories.Length > 0)
+        {
             repository.DeleteBeatmapSets(missingDirectories);
+        }
 
         if (forceStandardRulesetRefresh)
+        {
             repository.SetDifficultyMetadata(StandardRulesetFilterMetadataKey, StandardRulesetFilterVersion);
+        }
 
         return Load();
     }
@@ -111,9 +125,11 @@ public sealed class BeatmapLibrary(
 
     public bool CreateCollection(string name)
     {
-        var trimmed = name.Trim();
+        string trimmed = name.Trim();
         if (trimmed.Length == 0 || repository.CollectionExists(trimmed))
+        {
             return false;
+        }
 
         repository.CreateCollection(trimmed);
         return true;
@@ -123,25 +139,32 @@ public sealed class BeatmapLibrary(
 
     public void ToggleCollectionMembership(string name, string setDirectory)
     {
-        var collection = repository.GetCollections(setDirectory).FirstOrDefault(candidate => string.Equals(candidate.Name, name, StringComparison.Ordinal));
+        BeatmapCollection? collection = repository.GetCollections(setDirectory).FirstOrDefault(candidate => string.Equals(candidate.Name, name, StringComparison.Ordinal));
         if (collection?.ContainsSelectedSet == true)
+        {
             repository.RemoveBeatmapFromCollection(name, setDirectory);
+        }
         else
+        {
             repository.AddBeatmapToCollection(name, setDirectory);
+        }
     }
 
     public void DeleteBeatmapSet(string directory)
     {
         repository.DeleteBeatmapSetData(directory);
-        var path = Path.Combine(paths.Songs, directory);
+        string path = Path.Combine(paths.Songs, directory);
         if (Directory.Exists(path))
+        {
             Directory.Delete(path, true);
-        snapshot = Load();
+        }
+
+        _snapshot = Load();
     }
 
     private IEnumerable<BeatmapInfo> ParseBeatmapSet(string directory)
     {
-        foreach (var osuFile in Directory.EnumerateFiles(directory, "*.osu", SearchOption.TopDirectoryOnly))
+        foreach (string osuFile in Directory.EnumerateFiles(directory, "*.osu", SearchOption.TopDirectoryOnly))
         {
             BeatmapInfo? beatmap = null;
             try
@@ -153,7 +176,9 @@ public sealed class BeatmapLibrary(
             }
 
             if (beatmap is not null)
+            {
                 yield return beatmap;
+            }
         }
     }
 
@@ -163,21 +188,27 @@ public sealed class BeatmapLibrary(
     private BeatmapLibrarySnapshot FilterStandardRuleset(BeatmapLibrarySnapshot source)
     {
         if (source.Sets.Count == 0)
-            return source;
-
-        var changed = false;
-        var sets = new List<BeatmapSetInfo>(source.Sets.Count);
-        foreach (var set in source.Sets)
         {
-            var beatmaps = set.Beatmaps
+            return source;
+        }
+
+        bool changed = false;
+        var sets = new List<BeatmapSetInfo>(source.Sets.Count);
+        foreach (BeatmapSetInfo set in source.Sets)
+        {
+            BeatmapInfo[] beatmaps = set.Beatmaps
                 .Where(beatmap => BeatmapFileParser.IsStandardRulesetFile(Path.Combine(paths.Songs, beatmap.SetDirectory, beatmap.Filename)))
                 .ToArray();
 
             if (beatmaps.Length != set.Beatmaps.Count)
+            {
                 changed = true;
+            }
 
             if (beatmaps.Length > 0)
+            {
                 sets.Add(set with { Beatmaps = beatmaps });
+            }
         }
 
         return changed ? new BeatmapLibrarySnapshot(sets) : source;
@@ -185,15 +216,17 @@ public sealed class BeatmapLibrary(
 
     private static string GetDirectoryIndexMetadataKey(string directoryName)
     {
-        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(directoryName));
+        byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(directoryName));
         return BeatmapSetIndexMetadataPrefix + Convert.ToHexString(hash);
     }
 
     private static long GetDirectoryIndexStamp(string directory)
     {
-        var latest = Directory.GetLastWriteTimeUtc(directory).Ticks;
-        foreach (var osuFile in Directory.EnumerateFiles(directory, "*.osu", SearchOption.TopDirectoryOnly))
+        long latest = Directory.GetLastWriteTimeUtc(directory).Ticks;
+        foreach (string osuFile in Directory.EnumerateFiles(directory, "*.osu", SearchOption.TopDirectoryOnly))
+        {
             latest = Math.Max(latest, File.GetLastWriteTimeUtc(osuFile).Ticks);
+        }
 
         return latest;
     }

@@ -15,7 +15,9 @@ public sealed class NoOpMenuMusicController : IMenuMusicController
     public void SetPlaylist(IReadOnlyList<MenuTrack> tracks, int startIndex, bool play)
     {
         if (tracks.Count > 0)
+        {
             State = MenuMusicStateFactory.Create(tracks[Math.Clamp(startIndex, 0, tracks.Count - 1)], false);
+        }
     }
 
     public void Execute(MenuMusicCommand command) => LastCommand = command;

@@ -8,7 +8,7 @@ public sealed class OnlineProtocolTests
     [Test]
     public void LoginRequestMatchesLegacyEndpointAndFields()
     {
-        var request = OnlineProtocol.CreateLoginRequest("player", "password");
+        OnlineRequest request = OnlineProtocol.CreateLoginRequest("player", "password");
 
         Assert.That(request.Url, Is.EqualTo("https://osudroid.moe/api/login.php"));
         Assert.That(request.Fields["username"], Is.EqualTo("player"));
@@ -20,14 +20,14 @@ public sealed class OnlineProtocolTests
     [Test]
     public void ResponseParserKeepsLegacySuccessContract()
     {
-        var response = OnlineResponseParser.ParseLines([
+        OnlineResponse response = OnlineResponseParser.ParseLines([
             "SUCCESS",
             "123 ssid 4 5000 12.5 0.987 player https://avatar",
         ]);
 
         Assert.That(response.IsSuccess, Is.True);
 
-        var profile = OnlineResponseParser.ParseLoginProfile(response.Lines);
+        LoginProfile profile = OnlineResponseParser.ParseLoginProfile(response.Lines);
         Assert.That(profile.UserId, Is.EqualTo(123));
         Assert.That(profile.SessionId, Is.EqualTo("ssid"));
         Assert.That(profile.Username, Is.EqualTo("player"));

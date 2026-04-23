@@ -1,4 +1,3 @@
-using System.Globalization;
 namespace OsuDroid.Game.Beatmaps.Difficulty;
 
 public interface IBeatmapDifficultyCalculator

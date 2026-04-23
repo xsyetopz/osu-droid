@@ -1,9 +1,3 @@
-using OsuDroid.Game.Compatibility.Database;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Runtime.Paths;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
-
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
@@ -15,9 +9,9 @@ public sealed partial class UiCompatibilityTests
         var scene = new MainMenuScene();
         var elements = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame.Elements.ToList();
 
-        var logoIndex = elements.FindIndex(element => element.Id == "logo");
-        var panelIndex = elements.FindIndex(element => element.Id == "profile-panel");
-        var footerIndex = elements.FindIndex(element => element.Id == "profile-avatar-footer");
+        int logoIndex = elements.FindIndex(element => element.Id == "logo");
+        int panelIndex = elements.FindIndex(element => element.Id == "profile-panel");
+        int footerIndex = elements.FindIndex(element => element.Id == "profile-avatar-footer");
 
         Assert.That(panelIndex, Is.GreaterThan(logoIndex));
         Assert.That(footerIndex, Is.GreaterThan(panelIndex));
@@ -26,16 +20,16 @@ public sealed partial class UiCompatibilityTests
     public void MainMenuProfileBadgeUsesAndroidOnlinePanelGeometry()
     {
         var scene = new MainMenuScene();
-        var frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
 
-        var panel = frame.Elements.Single(element => element.Id == "profile-panel");
-        var avatarFooter = frame.Elements.Single(element => element.Id == "profile-avatar-footer");
+        UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "profile-panel");
+        UiElementSnapshot avatarFooter = frame.Elements.Single(element => element.Id == "profile-avatar-footer");
 
         Assert.That(panel.Bounds, Is.EqualTo(new UiRect(MainMenuScene.OnlinePanelX, MainMenuScene.OnlinePanelY, MainMenuScene.OnlinePanelWidth, MainMenuScene.OnlinePanelHeight)));
         Assert.That(avatarFooter.Bounds, Is.EqualTo(new UiRect(MainMenuScene.OnlinePanelX, MainMenuScene.OnlinePanelY, MainMenuScene.OnlinePanelAvatarFooterSize, MainMenuScene.OnlinePanelAvatarFooterSize)));
         Assert.That(frame.Elements.Any(element => element.Id == "profile-name-placeholder"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "profile-status-placeholder"), Is.False);
-        var avatar = frame.Elements.Single(element => element.Id == "profile-avatar");
+        UiElementSnapshot avatar = frame.Elements.Single(element => element.Id == "profile-avatar");
 
         Assert.That(avatar.Bounds, Is.EqualTo(avatarFooter.Bounds));
         Assert.That(avatar.AssetName, Is.EqualTo(DroidAssets.EmptyAvatar));
@@ -47,7 +41,7 @@ public sealed partial class UiCompatibilityTests
     public void MainMenuLoggedInProfileBadgeShowsPerformanceAndAccuracy()
     {
         var scene = new MainMenuScene(profile: new OnlineProfileSnapshot("Player", DroidAssets.EmptyAvatar, PerformancePoints: 12345, Accuracy: 98.76f));
-        var frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
 
         Assert.That(frame.Elements.Single(element => element.Id == "profile-player").Text, Is.EqualTo("Player"));
         Assert.That(frame.Elements.Single(element => element.Id == "profile-pp").Text, Does.Contain("12,345pp"));
@@ -57,9 +51,9 @@ public sealed partial class UiCompatibilityTests
     public void MainMenuProfileBadgeStaysTopLeftOnWidePhoneViewport()
     {
         var scene = new MainMenuScene();
-        var frame = scene.CreateSnapshot(VirtualViewport.FromSurface(2532, 1170)).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(2532, 1170)).UiFrame;
 
-        var panel = frame.Elements.Single(element => element.Id == "profile-panel");
+        UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "profile-panel");
 
         Assert.That(panel.Bounds.X, Is.EqualTo(MainMenuScene.OnlinePanelX));
         Assert.That(panel.Bounds.Y, Is.EqualTo(MainMenuScene.OnlinePanelY));

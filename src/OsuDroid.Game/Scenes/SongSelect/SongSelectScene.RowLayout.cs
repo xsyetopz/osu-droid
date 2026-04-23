@@ -1,10 +1,6 @@
 using OsuDroid.Game.Beatmaps;
-using OsuDroid.Game.Beatmaps.Difficulty;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.UI;
-using System.Globalization;
 
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.SongSelect;
 
 public sealed partial class SongSelectScene
 {
@@ -12,30 +8,30 @@ public sealed partial class SongSelectScene
     {
         if (SelectedBackgroundPath is not { } backgroundPath)
         {
-            elements.Add(new UiElementSnapshot("songselect-fallback-background", UiElementKind.Sprite, new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), White, 1f, DroidAssets.MenuBackground, SpriteFit: UiSpriteFit.Cover));
+            elements.Add(new UiElementSnapshot("songselect-fallback-background", UiElementKind.Sprite, new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), s_white, 1f, DroidAssets.MenuBackground, SpriteFit: UiSpriteFit.Cover));
         }
         else
         {
-            var channel = (byte)Math.Clamp((int)MathF.Round(selectedBackgroundLuminance * 255f), 0, 255);
+            byte channel = (byte)Math.Clamp((int)MathF.Round(selectedBackgroundLuminance * 255f), 0, 255);
             elements.Add(new UiElementSnapshot("songselect-beatmap-background", UiElementKind.Sprite, new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), UiColor.Opaque(channel, channel, channel), 1f, ExternalAssetPath: backgroundPath, SpriteFit: UiSpriteFit.Cover));
         }
     }
 
-    private void AddTopPanel(List<UiElementSnapshot> elements, VirtualViewport viewport)
+    private void AddTopPanel(List<UiElementSnapshot> elements)
     {
         elements.Add(new UiElementSnapshot(
             "songselect-top-overlay",
             UiElementKind.Sprite,
             new UiRect(SongSelectTopX, 0f, SongSelectTopWidth, TopPanelHeight),
-            White,
+            s_white,
             0.6f,
             DroidAssets.SongSelectTop,
             SpriteFit: UiSpriteFit.Stretch));
 
-        var beatmap = SelectedBeatmap;
+        BeatmapInfo? beatmap = SelectedBeatmap;
         if (beatmap is null)
         {
-            elements.Add(Text("songselect-empty", "There are no songs in library, try using the beatmap downloader.", 70f, 2f, 850f, 36f, 24f, White));
+            elements.Add(Text("songselect-empty", "There are no songs in library, try using the beatmap downloader.", 70f, 2f, 850f, 36f, 24f, s_white));
             return;
         }
 
@@ -44,55 +40,61 @@ public sealed partial class SongSelectScene
 
     private void AddBeatmapRows(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        var start = PerfDiagnostics.Start();
-        if (visibleSnapshot.Sets.Count == 0)
-            return;
-
-        var visibleSlot = 0;
-        var y = -scrollY;
-        for (var setIndex = 0; setIndex < visibleSnapshot.Sets.Count; setIndex++)
+        long start = PerfDiagnostics.Start();
+        if (_visibleSnapshot.Sets.Count == 0)
         {
-            var set = visibleSnapshot.Sets[setIndex];
-            var firstBeatmap = set.Beatmaps.FirstOrDefault();
-            if (firstBeatmap is null)
-                continue;
+            return;
+        }
 
-            var height = setIndex == selectedSetIndex
+        int visibleSlot = 0;
+        float y = -scrollY;
+        for (int setIndex = 0; setIndex < _visibleSnapshot.Sets.Count; setIndex++)
+        {
+            BeatmapSetInfo set = _visibleSnapshot.Sets[setIndex];
+            BeatmapInfo? firstBeatmap = set.Beatmaps.FirstOrDefault();
+            if (firstBeatmap is null)
+            {
+                continue;
+            }
+
+            float height = setIndex == selectedSetIndex
                 ? CalculateSelectedSetHeight(set)
                 : CollapsedRowHeight;
-            var rowY = RowBaseY + y;
-            var x = CalculateRowX(rowY + viewport.VirtualHeight * 0.5f + height * 0.5f, viewport);
+            float rowY = RowBaseY + y;
+            float x = CalculateRowX(rowY + viewport.VirtualHeight * 0.5f + height * 0.5f, viewport);
             if (setIndex == selectedSetIndex)
             {
                 AddSelectedDifficultyRows(elements, set, rowY, x, viewport);
             }
             else if (rowY > -RowHeight && rowY < viewport.VirtualHeight && visibleSlot < VisibleSetSlots)
             {
-                var action = SetAction(visibleSlot);
-                visibleSetIndices[visibleSlot] = setIndex;
+                UiAction action = SetAction(visibleSlot);
+                _visibleSetIndices[visibleSlot] = setIndex;
                 AddSetRow(elements, $"songselect-set-{visibleSlot}", firstBeatmap, new UiRect(x, rowY, RowWidth, RowHeight), action);
                 visibleSlot++;
             }
 
             y += height;
             if (rowY > viewport.VirtualHeight && setIndex > selectedSetIndex && visibleSlot >= VisibleSetSlots)
+            {
                 break;
+            }
         }
-        PerfDiagnostics.Log("songSelect.addRows", start, $"visibleSlots={visibleSlot} sets={visibleSnapshot.Sets.Count}");
+        PerfDiagnostics.Log("songSelect.addRows", start, $"visibleSlots={visibleSlot} sets={_visibleSnapshot.Sets.Count}");
     }
 
     private void AddSelectedDifficultyRows(List<UiElementSnapshot> elements, BeatmapSetInfo set, float anchorY, float anchorX, VirtualViewport viewport)
     {
-        var beatmaps = set.Beatmaps.Take(VisibleDifficultySlots).ToArray();
-        var y = anchorY;
-        for (var index = 0; index < beatmaps.Length; index++)
+        BeatmapInfo[] beatmaps = set.Beatmaps.Take(VisibleDifficultySlots).ToArray();
+        float y = anchorY;
+        for (int index = 0; index < beatmaps.Length; index++)
         {
-            var beatmap = beatmaps[index];
-            var centerY = y + viewport.VirtualHeight * 0.5f + RowHeight * 0.5f;
-            var x = anchorX + 170f * MathF.Abs(MathF.Cos(centerY * MathF.PI / (viewport.VirtualHeight * 2f))) - 100f;
-            var isSelected = index == selectedDifficultyIndex;
-            var action = DifficultyAction(index);
-            visibleDifficultyIndices[index] = index;
+            BeatmapInfo beatmap = beatmaps[index];
+            float centerY = y + viewport.VirtualHeight * 0.5f + RowHeight * 0.5f;
+            float x = anchorX + 170f * MathF.Abs(MathF.Cos(centerY * MathF.PI / (viewport.VirtualHeight * 2f))) - 100f;
+            bool isSelected = index == selectedDifficultyIndex;
+            UiAction action = DifficultyAction(index);
+            _visibleDifficultyIndices[index] = index;
             AddDifficultyRow(elements, $"songselect-diff-row-{index}", beatmap, new UiRect(x, y, RowWidth, RowHeight), isSelected, action);
             y += ExpandedRowSpacing * selectedSetExpansion;
         }
@@ -100,34 +102,36 @@ public sealed partial class SongSelectScene
 
     private void AddSetRow(List<UiElementSnapshot> elements, string id, BeatmapInfo beatmap, UiRect bounds, UiAction action)
     {
-        elements.Add(Sprite(id, DroidAssets.SongSelectButtonBackground, bounds, SetRowTint, 0.8f, action));
-        elements.Add(Text($"{id}-title", $"{DisplayArtist(beatmap)} - {DisplayTitle(beatmap)}", bounds.X + 32f, bounds.Y + 25f, 620f, 34f, 24f, White, UiTextAlignment.Left, action));
-        elements.Add(Text($"{id}-creator", $"Creator: {beatmap.Creator}", bounds.X + 150f, bounds.Y + 60f, 500f, 28f, 20f, White, UiTextAlignment.Left, action));
+        elements.Add(Sprite(id, DroidAssets.SongSelectButtonBackground, bounds, s_setRowTint, 0.8f, action));
+        elements.Add(Text($"{id}-title", $"{DisplayArtist(beatmap)} - {DisplayTitle(beatmap)}", bounds.X + 32f, bounds.Y + 25f, 620f, 34f, 24f, s_white, UiTextAlignment.Left, action));
+        elements.Add(Text($"{id}-creator", _localizer.Format("SongSelect_Creator", beatmap.Creator), bounds.X + 150f, bounds.Y + 60f, 500f, 28f, 20f, s_white, UiTextAlignment.Left, action));
     }
 
     private void AddDifficultyRow(List<UiElementSnapshot> elements, string id, BeatmapInfo beatmap, UiRect bounds, bool isSelected, UiAction action)
     {
-        var tint = isSelected ? SelectedRowTint : DifficultyRowTint;
-        var textColor = isSelected ? Black : White;
+        UiColor tint = isSelected ? s_selectedRowTint : s_difficultyRowTint;
+        UiColor textColor = isSelected ? s_black : s_white;
         elements.Add(Sprite(id, DroidAssets.SongSelectButtonBackground, bounds, tint, 0.8f, action));
         elements.Add(Text($"{id}-title", $"{beatmap.Version} ({beatmap.Creator})", bounds.X + 32f, bounds.Y + 22f, 540f, 34f, 24f, textColor, UiTextAlignment.Left, action));
 
         // Legacy source: third_party/osu-droid-legacy/.../menu/BeatmapItem.java.
         // Fractional stars are scaled around AndEngine's default center, not cropped.
-        var stars = Math.Clamp(CurrentStarRating(beatmap) ?? 0f, 0f, 10f);
-        var fullStars = Math.Min(10, (int)MathF.Floor(stars));
-        var starY = bounds.Y + 50f;
-        for (var star = 0; star < fullStars; star++)
-            elements.Add(Sprite($"{id}-star-{star}", DroidAssets.SongSelectStar, new UiRect(bounds.X + 60f + star * 52f, starY, 46f, 47f), White, 1f, action));
+        float stars = Math.Clamp(CurrentStarRating(beatmap) ?? 0f, 0f, 10f);
+        int fullStars = Math.Min(10, (int)MathF.Floor(stars));
+        float starY = bounds.Y + 50f;
+        for (int star = 0; star < fullStars; star++)
+        {
+            elements.Add(Sprite($"{id}-star-{star}", DroidAssets.SongSelectStar, new UiRect(bounds.X + 60f + star * 52f, starY, 46f, 47f), s_white, 1f, action));
+        }
 
-        var fraction = stars - fullStars;
+        float fraction = stars - fullStars;
         if (fraction > 0f && fullStars < 10)
         {
             const float starWidth = 46f;
             const float starHeight = 47f;
-            var slotX = bounds.X + 60f + fullStars * 52f;
-            var scaledWidth = starWidth * fraction;
-            var scaledHeight = starHeight * fraction;
+            float slotX = bounds.X + 60f + fullStars * 52f;
+            float scaledWidth = starWidth * fraction;
+            float scaledHeight = starHeight * fraction;
             elements.Add(Sprite(
                 $"{id}-star-half",
                 DroidAssets.SongSelectStar,
@@ -136,7 +140,7 @@ public sealed partial class SongSelectScene
                     starY + (starHeight - scaledHeight) / 2f,
                     scaledWidth,
                     scaledHeight),
-                White,
+                s_white,
                 1f,
                 action));
         }

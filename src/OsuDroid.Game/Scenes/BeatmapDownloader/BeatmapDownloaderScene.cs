@@ -1,10 +1,8 @@
-using System.Globalization;
-using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Beatmaps.Online;
+using OsuDroid.Game.Localization;
 using OsuDroid.Game.Runtime;
-using OsuDroid.Game.UI;
 
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.BeatmapDownloader;
 
 public sealed partial class BeatmapDownloaderScene
 {
@@ -21,129 +19,143 @@ public sealed partial class BeatmapDownloaderScene
     private const float CardHeight = CardTopHeight + CardDifficultyHeight + CardFooterHeight;
     private const float Radius = 14f * Dp;
 
-    private static readonly UiColor Background = UiColor.Opaque(19, 19, 26);
-    private static readonly UiColor AppBar = UiColor.Opaque(30, 30, 46);
-    private static readonly UiColor Panel = UiColor.Opaque(22, 22, 34);
-    private static readonly UiColor Footer = UiColor.Opaque(30, 30, 46);
-    private static readonly UiColor Field = UiColor.Opaque(54, 54, 83);
-    private static readonly UiColor Accent = UiColor.Opaque(243, 115, 115);
-    private static readonly UiColor White = UiColor.Opaque(255, 255, 255);
-    private static readonly UiColor Secondary = UiColor.Opaque(178, 178, 204);
-    private static readonly UiColor Muted = UiColor.Opaque(130, 130, 168);
-    private static readonly UiColor CoverFallback = UiColor.Opaque(75, 75, 128);
-    private static readonly UiColor FilterPanel = UiColor.Opaque(33, 33, 51);
-    private static readonly UiColor ModalShade = new(19, 19, 26, 190);
+    private static readonly UiColor s_background = UiColor.Opaque(19, 19, 26);
+    private static readonly UiColor s_appBar = UiColor.Opaque(30, 30, 46);
+    private static readonly UiColor s_panel = UiColor.Opaque(22, 22, 34);
+    private static readonly UiColor s_footer = UiColor.Opaque(30, 30, 46);
+    private static readonly UiColor s_field = UiColor.Opaque(54, 54, 83);
+    private static readonly UiColor s_accent = UiColor.Opaque(243, 115, 115);
+    private static readonly UiColor s_white = UiColor.Opaque(255, 255, 255);
+    private static readonly UiColor s_secondary = UiColor.Opaque(178, 178, 204);
+    private static readonly UiColor s_muted = UiColor.Opaque(130, 130, 168);
+    private static readonly UiColor s_coverFallback = UiColor.Opaque(75, 75, 128);
+    private static readonly UiColor s_filterPanel = UiColor.Opaque(33, 33, 51);
+    private static readonly UiColor s_modalShade = new(19, 19, 26, 190);
 
-    private static readonly HttpClient CoverClient = new();
+    private static readonly HttpClient s_coverClient = new();
 
-    private readonly IBeatmapMirrorClient mirrorClient;
-    private readonly IBeatmapDownloadService downloadService;
-    private IBeatmapPreviewPlayer previewPlayer;
-    private readonly string coverCacheDirectory;
-    private ITextInputService textInputService;
-    private CancellationTokenSource searchCancellation = new();
-    private IReadOnlyList<BeatmapMirrorSet> sets = [];
-    private readonly HashSet<string> coverDownloads = new(StringComparer.Ordinal);
-    private bool isSearching;
-    private bool hasMore = true;
-    private bool hasSearchError;
-    private bool isSearchFocused;
-    private bool filtersOpen;
-    private bool sortDropdownOpen;
-    private bool statusDropdownOpen;
-    private bool mirrorsOpen;
-    private float sortDropdownScroll;
-    private float statusDropdownScroll;
-    private int previewPlayCount;
-    private DateTime lastPreviewStartedUtc;
-    private int? previewingSetIndex;
-    private bool ownsPreviewPlayback;
-    private int offset;
-    private int visibleStartIndex;
-    private int? selectedSetIndex;
-    private int selectedDifficultyIndex;
-    private bool preferNoVideoDownloads;
-    private bool forceRomanizedMetadata;
-    private float scrollOffset;
-    private string query = string.Empty;
-    private string? message = "Search beatmaps";
-    private string? lastImportedSetDirectory;
-    private BeatmapMirrorKind mirror = BeatmapMirrorKind.OsuDirect;
-    private BeatmapMirrorSort sort = BeatmapMirrorSort.RankedDate;
-    private BeatmapMirrorOrder order = BeatmapMirrorOrder.Descending;
-    private BeatmapRankedStatus? status;
+    private readonly IBeatmapMirrorClient _mirrorClient;
+    private readonly IBeatmapDownloadService _downloadService;
+    private readonly GameLocalizer _localizer;
+    private IBeatmapPreviewPlayer _previewPlayer;
+    private readonly string _coverCacheDirectory;
+    private ITextInputService _textInputService;
+    private CancellationTokenSource _searchCancellation = new();
+    private IReadOnlyList<BeatmapMirrorSet> _sets = [];
+    private readonly HashSet<string> _coverDownloads = new(StringComparer.Ordinal);
+    private bool _isSearching;
+    private bool _hasMore = true;
+    private bool _hasSearchError;
+    private bool _isSearchFocused;
+    private bool _filtersOpen;
+    private bool _sortDropdownOpen;
+    private bool _statusDropdownOpen;
+    private bool _mirrorsOpen;
+    private float _sortDropdownScroll;
+    private float _statusDropdownScroll;
+    private int _previewPlayCount;
+    private DateTime _lastPreviewStartedUtc;
+    private int? _previewingSetIndex;
+    private bool _ownsPreviewPlayback;
+    private int _offset;
+    private int _visibleStartIndex;
+    private int? _selectedSetIndex;
+    private int _selectedDifficultyIndex;
+    private bool _preferNoVideoDownloads;
+    private bool _forceRomanizedMetadata;
+    private float _scrollOffset;
+    private string _query = string.Empty;
+    private string? _message;
+    private string? _lastImportedSetDirectory;
+    private BeatmapMirrorKind _mirror = BeatmapMirrorKind.OsuDirect;
+    private BeatmapMirrorSort _sort = BeatmapMirrorSort.RankedDate;
+    private BeatmapMirrorOrder _order = BeatmapMirrorOrder.Descending;
+    private BeatmapRankedStatus? _status;
 
     public BeatmapDownloaderScene(
-        IBeatmapMirrorClient mirrorClient,
-        IBeatmapDownloadService downloadService,
-        ITextInputService textInputService,
-        IBeatmapPreviewPlayer previewPlayer,
-        string coverCacheDirectory)
+        IBeatmapMirrorClient _mirrorClient,
+        IBeatmapDownloadService _downloadService,
+        ITextInputService _textInputService,
+        IBeatmapPreviewPlayer _previewPlayer,
+        string _coverCacheDirectory,
+        GameLocalizer? _localizer = null)
     {
-        this.mirrorClient = mirrorClient;
-        this.downloadService = downloadService;
-        this.textInputService = textInputService;
-        this.previewPlayer = previewPlayer;
-        this.coverCacheDirectory = coverCacheDirectory;
-        Directory.CreateDirectory(coverCacheDirectory);
+        this._mirrorClient = _mirrorClient;
+        this._downloadService = _downloadService;
+        this._textInputService = _textInputService;
+        this._previewPlayer = _previewPlayer;
+        this._coverCacheDirectory = _coverCacheDirectory;
+        this._localizer = _localizer ?? new GameLocalizer();
+        _message = this._localizer["BeatmapDownloader_SearchInitial"];
+        Directory.CreateDirectory(_coverCacheDirectory);
     }
 
-    public string Query => query;
+    public string Query => _query;
 
-    public BeatmapMirrorKind Mirror => mirror;
+    public BeatmapMirrorKind Mirror => _mirror;
 
     public string? ConsumeLastImportedSetDirectoryNotification()
     {
-        var directory = lastImportedSetDirectory;
-        lastImportedSetDirectory = null;
+        string? directory = _lastImportedSetDirectory;
+        _lastImportedSetDirectory = null;
         return directory;
     }
 
     public void Enter()
     {
-        if (sets.Count == 0 && !isSearching)
+        if (_sets.Count == 0 && !_isSearching)
+        {
             _ = SearchAsync(false);
+        }
     }
 
     public void Leave()
     {
         HideSearchInput();
-        if (ownsPreviewPlayback)
-            previewPlayer.StopPreview();
-        previewingSetIndex = null;
-        ownsPreviewPlayback = false;
-        searchCancellation.Cancel();
-        filtersOpen = false;
-        sortDropdownOpen = false;
-        statusDropdownOpen = false;
-        mirrorsOpen = false;
-        selectedSetIndex = null;
+        if (_ownsPreviewPlayback)
+        {
+            _previewPlayer.StopPreview();
+        }
+
+        _previewingSetIndex = null;
+        _ownsPreviewPlayback = false;
+        _searchCancellation.Cancel();
+        _filtersOpen = false;
+        _sortDropdownOpen = false;
+        _statusDropdownOpen = false;
+        _mirrorsOpen = false;
+        _selectedSetIndex = null;
     }
 
-    public void SetTextInputService(ITextInputService service) => textInputService = service;
+    public void SetTextInputService(ITextInputService service) => _textInputService = service;
 
-    public void SetPreferNoVideoDownloads(bool preferNoVideo) => preferNoVideoDownloads = preferNoVideo;
+    public void SetPreferNoVideoDownloads(bool preferNoVideo) => _preferNoVideoDownloads = preferNoVideo;
 
-    public void SetForceRomanized(bool forceRomanized) => forceRomanizedMetadata = forceRomanized;
+    public void SetForceRomanized(bool forceRomanized) => _forceRomanizedMetadata = forceRomanized;
 
     public void SetPreviewPlayer(IBeatmapPreviewPlayer player)
     {
-        if (ReferenceEquals(previewPlayer, player))
+        if (ReferenceEquals(_previewPlayer, player))
+        {
             return;
+        }
 
-        if (ownsPreviewPlayback)
-            previewPlayer.StopPreview();
-        previewPlayer = player;
-        previewingSetIndex = null;
-        ownsPreviewPlayback = false;
+        if (_ownsPreviewPlayback)
+        {
+            _previewPlayer.StopPreview();
+        }
+
+        _previewPlayer = player;
+        _previewingSetIndex = null;
+        _ownsPreviewPlayback = false;
     }
 
 
     public GameFrameSnapshot CreateSnapshot(VirtualViewport viewport) => new("BeatmapDownloader", "Beatmap Downloader", string.Empty, Array.Empty<string>(), 0, false, CreateFrame(viewport));
 
-    private string DisplayTitle(BeatmapMirrorSet set) => forceRomanizedMetadata || string.IsNullOrWhiteSpace(set.TitleUnicode) ? set.Title : set.TitleUnicode;
+    private string DisplayTitle(BeatmapMirrorSet set) => _forceRomanizedMetadata || string.IsNullOrWhiteSpace(set.TitleUnicode) ? set.Title : set.TitleUnicode;
 
-    private string DisplayArtist(BeatmapMirrorSet set) => forceRomanizedMetadata || string.IsNullOrWhiteSpace(set.ArtistUnicode) ? set.Artist : set.ArtistUnicode;
+    private string DisplayArtist(BeatmapMirrorSet set) => _forceRomanizedMetadata || string.IsNullOrWhiteSpace(set.ArtistUnicode) ? set.Artist : set.ArtistUnicode;
 
 
 

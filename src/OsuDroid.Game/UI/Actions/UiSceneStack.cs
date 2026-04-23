@@ -1,21 +1,26 @@
-namespace OsuDroid.Game.UI;
+namespace OsuDroid.Game.UI.Actions;
 
 public sealed class UiSceneStack
 {
-    private readonly Stack<string> sceneNames = new();
+    private readonly Stack<string> _sceneNames = new();
 
-    public UiSceneStack(string rootSceneName) => sceneNames.Push(rootSceneName);
+    public UiSceneStack(string rootSceneName)
+    {
+        _sceneNames.Push(rootSceneName);
+    }
 
-    public string Current => sceneNames.Peek();
+    public string Current => _sceneNames.Peek();
 
-    public void Push(string sceneName) => sceneNames.Push(sceneName);
+    public void Push(string sceneName) => _sceneNames.Push(sceneName);
 
     public bool TryPop()
     {
-        if (sceneNames.Count == 1)
+        if (_sceneNames.Count == 1)
+        {
             return false;
+        }
 
-        _ = sceneNames.Pop();
+        _ = _sceneNames.Pop();
         return true;
     }
 }

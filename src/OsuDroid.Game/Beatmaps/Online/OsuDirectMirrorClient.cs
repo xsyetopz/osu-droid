@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text.Json;
-using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Beatmaps.Online;
 
@@ -25,8 +24,8 @@ public interface IBeatmapMirrorClient
 
 public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirrorClient
 {
-    private static readonly Uri OsuDirectBaseUri = new("https://osu.direct/");
-    private static readonly Uri CatboyBaseUri = new("https://catboy.best/");
+    private static readonly Uri s_osuDirectBaseUri = new("https://osu.direct/");
+    private static readonly Uri s_catboyBaseUri = new("https://catboy.best/");
 
     public IReadOnlyList<BeatmapMirrorDefinition> Mirrors { get; } =
     [
@@ -36,9 +35,9 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
 
     public Uri CreateSearchUri(BeatmapMirrorSearchRequest request)
     {
-        var endpoint = request.Mirror == BeatmapMirrorKind.Catboy
-            ? new Uri(CatboyBaseUri, "api/v2/search")
-            : new Uri(OsuDirectBaseUri, "api/v2/search");
+        Uri endpoint = request.Mirror == BeatmapMirrorKind.Catboy
+            ? new Uri(s_catboyBaseUri, "api/v2/search")
+            : new Uri(s_osuDirectBaseUri, "api/v2/search");
 
         var parameters = new Dictionary<string, string?>
         {
@@ -49,15 +48,23 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
         };
 
         if (request.Mirror == BeatmapMirrorKind.Catboy)
+        {
             parameters["limit"] = request.Limit.ToString(CultureInfo.InvariantCulture);
+        }
         else
+        {
             parameters["amount"] = request.Limit.ToString(CultureInfo.InvariantCulture);
+        }
 
         if (request.Status is not null)
+        {
             parameters["status"] = ((int)request.Status.Value).ToString(CultureInfo.InvariantCulture);
+        }
 
-        var builder = new UriBuilder(endpoint);
-        builder.Query = string.Join('&', parameters.Select(pair => $"{Uri.EscapeDataString(pair.Key)}={Uri.EscapeDataString(pair.Value ?? string.Empty)}"));
+        var builder = new UriBuilder(endpoint)
+        {
+            Query = string.Join('&', parameters.Select(pair => $"{Uri.EscapeDataString(pair.Key)}={Uri.EscapeDataString(pair.Value ?? string.Empty)}"))
+        };
         return builder.Uri;
     }
 
@@ -66,24 +73,26 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
     public Uri CreateDownloadUri(BeatmapMirrorKind mirror, long beatmapSetId, bool withVideo)
     {
         if (mirror == BeatmapMirrorKind.Catboy)
-            return new Uri(CatboyBaseUri, $"d/{beatmapSetId}");
+        {
+            return new Uri(s_catboyBaseUri, $"d/{beatmapSetId}");
+        }
 
-        var uri = new Uri(OsuDirectBaseUri, $"api/d/{beatmapSetId}");
+        var uri = new Uri(s_osuDirectBaseUri, $"api/d/{beatmapSetId}");
         return withVideo ? uri : new Uri(uri, "?noVideo=1");
     }
 
     public Uri CreatePreviewUri(BeatmapMirrorKind mirror, long beatmapId) => mirror == BeatmapMirrorKind.Catboy
-        ? new Uri(CatboyBaseUri, $"preview/audio/{beatmapId}")
-        : new Uri(OsuDirectBaseUri, $"api/media/preview/{beatmapId}");
+        ? new Uri(s_catboyBaseUri, $"preview/audio/{beatmapId}")
+        : new Uri(s_osuDirectBaseUri, $"api/media/preview/{beatmapId}");
 
     public async Task<IReadOnlyList<BeatmapMirrorSet>> SearchAsync(BeatmapMirrorSearchRequest request, CancellationToken cancellationToken)
     {
         using var message = new HttpRequestMessage(HttpMethod.Get, CreateSearchUri(request));
         message.Headers.UserAgent.Add(new ProductInfoHeaderValue("Chrome", "Android"));
-        using var response = await httpClient.SendAsync(message, cancellationToken).ConfigureAwait(false);
+        using HttpResponseMessage response = await httpClient.SendAsync(message, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
-        using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
+        using Stream stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using JsonDocument document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
         return ParseSearchResponse(request.Mirror, document.RootElement);
     }
 
@@ -92,12 +101,12 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
         Directory.CreateDirectory(Path.GetDirectoryName(destinationPath) ?? ".");
         using var message = new HttpRequestMessage(HttpMethod.Get, source);
         message.Headers.UserAgent.Add(new ProductInfoHeaderValue("Chrome", "Android"));
-        using var response = await httpClient.SendAsync(message, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+        using HttpResponseMessage response = await httpClient.SendAsync(message, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
-        var totalBytes = response.Content.Headers.ContentLength;
-        using var sourceStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        using var fileStream = File.Create(destinationPath);
-        var buffer = new byte[81920];
+        long? totalBytes = response.Content.Headers.ContentLength;
+        using Stream sourceStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using FileStream fileStream = File.Create(destinationPath);
+        byte[] buffer = new byte[81920];
         var stopwatch = Stopwatch.StartNew();
         long bytesReceived = 0;
         int read;
@@ -106,7 +115,7 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
         {
             await fileStream.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
             bytesReceived += read;
-            var speed = stopwatch.Elapsed.TotalSeconds > 0 ? bytesReceived / stopwatch.Elapsed.TotalSeconds : 0;
+            double speed = stopwatch.Elapsed.TotalSeconds > 0 ? bytesReceived / stopwatch.Elapsed.TotalSeconds : 0;
             progress?.Report(new BeatmapDownloadProgress(bytesReceived, totalBytes, BeatmapDownloadPhase.Downloading, speed));
         }
     }
@@ -114,24 +123,28 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
     private static List<BeatmapMirrorSet> ParseSearchResponse(BeatmapMirrorKind mirror, JsonElement root)
     {
         var sets = new List<BeatmapMirrorSet>();
-        var array = root.ValueKind == JsonValueKind.Array
+        JsonElement array = root.ValueKind == JsonValueKind.Array
             ? root
-            : root.TryGetProperty("beatmapsets", out var beatmapsets) ? beatmapsets : root;
+            : root.TryGetProperty("beatmapsets", out JsonElement beatmapsets) ? beatmapsets : root;
 
         if (array.ValueKind != JsonValueKind.Array)
-            return sets;
-
-        foreach (var setElement in array.EnumerateArray())
         {
-            var id = GetInt64(setElement, "id");
+            return sets;
+        }
+
+        foreach (JsonElement setElement in array.EnumerateArray())
+        {
+            long id = GetInt64(setElement, "id");
             var beatmaps = new List<BeatmapMirrorBeatmap>();
-            if (setElement.TryGetProperty("beatmaps", out var beatmapsElement) && beatmapsElement.ValueKind == JsonValueKind.Array)
+            if (setElement.TryGetProperty("beatmaps", out JsonElement beatmapsElement) && beatmapsElement.ValueKind == JsonValueKind.Array)
             {
-                foreach (var beatmapElement in beatmapsElement.EnumerateArray())
+                foreach (JsonElement beatmapElement in beatmapsElement.EnumerateArray())
                 {
-                    var mode = GetMode(beatmapElement);
+                    int mode = GetMode(beatmapElement);
                     if (mode is not 0)
+                    {
                         continue;
+                    }
 
                     beatmaps.Add(new BeatmapMirrorBeatmap(
                         Id: GetInt64(beatmapElement, "id"),
@@ -151,7 +164,9 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
             }
 
             if (beatmaps.Count == 0)
+            {
                 continue;
+            }
 
             sets.Add(new BeatmapMirrorSet(
                 Mirror: mirror,
@@ -172,13 +187,11 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
 
     private static string? TryGetCoverUrl(BeatmapMirrorKind mirror, long setId, JsonElement setElement)
     {
-        if (mirror == BeatmapMirrorKind.Catboy)
-            return setId > 0 ? $"https://assets.ppy.sh/beatmaps/{setId}/covers/card.jpg" : null;
-
-        if (!setElement.TryGetProperty("covers", out var covers) || covers.ValueKind != JsonValueKind.Object)
-            return null;
-
-        return covers.TryGetProperty("card", out var card) && card.ValueKind == JsonValueKind.String ? card.GetString() : null;
+        return mirror == BeatmapMirrorKind.Catboy
+            ? setId > 0 ? $"https://assets.ppy.sh/beatmaps/{setId}/covers/card.jpg" : null
+            : !setElement.TryGetProperty("covers", out JsonElement covers) || covers.ValueKind != JsonValueKind.Object
+            ? null
+            : covers.TryGetProperty("card", out JsonElement card) && card.ValueKind == JsonValueKind.String ? card.GetString() : null;
     }
 
     private static string ToApiSort(BeatmapMirrorSort sort) => sort switch
@@ -212,36 +225,47 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
         _ => BeatmapRankedStatus.Pending,
     };
 
-    private static long GetInt64(JsonElement element, string name) => element.TryGetProperty(name, out var property) && property.TryGetInt64(out var value) ? value : 0L;
+    private static long GetInt64(JsonElement element, string name) => element.TryGetProperty(name, out JsonElement property) && property.TryGetInt64(out long value) ? value : 0L;
 
-    private static int GetInt32(JsonElement element, string name) => element.TryGetProperty(name, out var property) && property.TryGetInt32(out var value) ? value : 0;
+    private static int GetInt32(JsonElement element, string name) => element.TryGetProperty(name, out JsonElement property) && property.TryGetInt32(out int value) ? value : 0;
 
-    private static float GetSingle(JsonElement element, string name) => element.TryGetProperty(name, out var property) && property.TryGetSingle(out var value) ? value : 0f;
+    private static float GetSingle(JsonElement element, string name) => element.TryGetProperty(name, out JsonElement property) && property.TryGetSingle(out float value) ? value : 0f;
 
-    private static string GetString(JsonElement element, string name) => element.TryGetProperty(name, out var property) && property.ValueKind == JsonValueKind.String ? property.GetString() ?? string.Empty : string.Empty;
+    private static string GetString(JsonElement element, string name) => element.TryGetProperty(name, out JsonElement property) && property.ValueKind == JsonValueKind.String ? property.GetString() ?? string.Empty : string.Empty;
 
-    private static bool GetBoolean(JsonElement element, string name) => element.TryGetProperty(name, out var property) && property.ValueKind == JsonValueKind.True;
+    private static bool GetBoolean(JsonElement element, string name) => element.TryGetProperty(name, out JsonElement property) && property.ValueKind == JsonValueKind.True;
 
     private static int GetMode(JsonElement element)
     {
-        foreach (var name in new[] { "mode_int", "ruleset_id", "mode" })
+        foreach (string? name in new[] { "mode_int", "ruleset_id", "mode" })
         {
-            if (!element.TryGetProperty(name, out var property))
+            if (!element.TryGetProperty(name, out JsonElement property))
+            {
                 continue;
+            }
 
-            if (property.ValueKind == JsonValueKind.Number && property.TryGetInt32(out var number))
+            if (property.ValueKind == JsonValueKind.Number && property.TryGetInt32(out int number))
+            {
                 return number;
+            }
 
             if (property.ValueKind == JsonValueKind.String)
+            {
                 return ParseModeString(property.GetString());
+            }
         }
 
-        if (element.TryGetProperty("ruleset", out var ruleset))
+        if (element.TryGetProperty("ruleset", out JsonElement ruleset))
         {
-            if (ruleset.ValueKind == JsonValueKind.Number && ruleset.TryGetInt32(out var number))
+            if (ruleset.ValueKind == JsonValueKind.Number && ruleset.TryGetInt32(out int number))
+            {
                 return number;
+            }
+
             if (ruleset.ValueKind == JsonValueKind.String)
+            {
                 return ParseModeString(ruleset.GetString());
+            }
         }
 
         return 0;

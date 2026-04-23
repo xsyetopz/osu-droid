@@ -50,7 +50,7 @@ public static class OnlineProtocol
         string replayPath,
         string replayChecksum)
     {
-        var replayFileName = Path.GetFileName(replayPath);
+        string replayFileName = Path.GetFileName(replayPath);
         return new ReplayUploadRequest(
             OsuDroidOnlineConstants.Endpoint + "submit.php",
             new Dictionary<string, string>(StringComparer.Ordinal)
@@ -70,7 +70,7 @@ public static class OnlineProtocol
 
     public static string GetReplayUrl(int playId, BeatmapLeaderboardScoringMode mode)
     {
-        var folder = mode == BeatmapLeaderboardScoringMode.PerformancePoints ? "bestpp" : "upload";
+        string folder = mode == BeatmapLeaderboardScoringMode.PerformancePoints ? "bestpp" : "upload";
         return $"{OsuDroidOnlineConstants.Endpoint}{folder}/{playId}.odr";
     }
 
@@ -78,8 +78,10 @@ public static class OnlineProtocol
     {
         var content = new MultipartFormDataContent();
 
-        foreach (var field in request.Fields)
+        foreach (KeyValuePair<string, string> field in request.Fields)
+        {
             content.Add(new StringContent(field.Value), field.Key);
+        }
 
         var replay = new StreamContent(replayStream);
         replay.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");

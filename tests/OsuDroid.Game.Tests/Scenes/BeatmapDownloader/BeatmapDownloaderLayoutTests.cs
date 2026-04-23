@@ -1,13 +1,3 @@
-using System.Net;
-using System.Reflection;
-using OsuDroid.Game.Beatmaps.Import;
-using OsuDroid.Game.Beatmaps.Online;
-using OsuDroid.Game.Compatibility.Database;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Runtime.Paths;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
-
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class BeatmapDownloaderTests
@@ -16,11 +6,11 @@ public sealed partial class BeatmapDownloaderTests
     [Test]
     public void DownloaderBackButtonUsesSharedMaterialIcon()
     {
-        var scene = CreateScene();
+        BeatmapDownloaderScene scene = CreateScene();
 
-        var frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
-        var backIcon = frame.Elements.Single(element => element.Id == "downloader-back");
-        var refresh = frame.Elements.FirstOrDefault(element => element.Id == "downloader-refresh");
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiElementSnapshot backIcon = frame.Elements.Single(element => element.Id == "downloader-back");
+        UiElementSnapshot? refresh = frame.Elements.FirstOrDefault(element => element.Id == "downloader-refresh");
 
         Assert.That(backIcon.Kind, Is.EqualTo(UiElementKind.MaterialIcon));
         Assert.That(backIcon.MaterialIcon, Is.EqualTo(UiMaterialIcon.ArrowBack));
@@ -30,10 +20,10 @@ public sealed partial class BeatmapDownloaderTests
     [Test]
     public void FilterPanelMatchesLegacyThreeControlShape()
     {
-        var scene = CreateScene();
+        BeatmapDownloaderScene scene = CreateScene();
         scene.ToggleFilters();
 
-        var frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
 
         Assert.That(frame.Elements.Any(element => element.Id == "downloader-filter-sort-bg"), Is.True);
         Assert.That(frame.Elements.Any(element => element.Id == "downloader-filter-order-bg"), Is.True);
@@ -43,12 +33,12 @@ public sealed partial class BeatmapDownloaderTests
     [Test]
     public void DownloaderCardsUseColoredDifficultyDotsAndMaterialButtons()
     {
-        var scene = CreateScene();
+        BeatmapDownloaderScene scene = CreateScene();
         SetSets(scene, [CreateSet()]);
 
-        var frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
 
-        var difficulty = frame.Elements.Where(element => element.Id.StartsWith("downloader-card-0-diff-", StringComparison.Ordinal)).ToArray();
+        UiElementSnapshot[] difficulty = frame.Elements.Where(element => element.Id.StartsWith("downloader-card-0-diff-", StringComparison.Ordinal)).ToArray();
         Assert.That(difficulty, Has.Length.EqualTo(2));
         Assert.That(difficulty.All(element => element.Kind == UiElementKind.Text), Is.True);
         Assert.That(difficulty.All(element => element.Text == "⦿"), Is.True);
@@ -64,12 +54,12 @@ public sealed partial class BeatmapDownloaderTests
     [Test]
     public void DownloaderCardDifficultyDotsStayInsideCardWhenThereAreManyDifficulties()
     {
-        var scene = CreateScene();
+        BeatmapDownloaderScene scene = CreateScene();
         SetSets(scene, [CreateSetWithDifficulties(16)]);
 
-        var frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
-        var card = frame.Elements.Single(element => element.Id == "downloader-card-0");
-        var dots = frame.Elements
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiElementSnapshot card = frame.Elements.Single(element => element.Id == "downloader-card-0");
+        UiElementSnapshot[] dots = frame.Elements
             .Where(element => element.Id.StartsWith("downloader-card-0-diff-", StringComparison.Ordinal))
             .ToArray();
 
@@ -82,13 +72,13 @@ public sealed partial class BeatmapDownloaderTests
     [Test]
     public void DownloaderDetailsDifficultyDotsStayInsidePanelWhenThereAreManyDifficulties()
     {
-        var scene = CreateScene();
+        BeatmapDownloaderScene scene = CreateScene();
         SetSets(scene, [CreateSetWithDifficulties(16)]);
         scene.SelectCard(0);
 
-        var frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
-        var panel = frame.Elements.Single(element => element.Id == "downloader-details-panel");
-        var dots = frame.Elements
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "downloader-details-panel");
+        UiElementSnapshot[] dots = frame.Elements
             .Where(element => element.Id.StartsWith("downloader-details-diff-", StringComparison.Ordinal) && !element.Id.EndsWith("-selected", StringComparison.Ordinal))
             .ToArray();
 
@@ -100,18 +90,18 @@ public sealed partial class BeatmapDownloaderTests
     [Test]
     public void DownloaderHeaderRendersAboveScrolledCards()
     {
-        var scene = CreateScene();
+        BeatmapDownloaderScene scene = CreateScene();
         SetSets(scene, Enumerable.Range(0, 20).Select(_ => CreateSet()).ToArray());
-        var viewport = VirtualViewport.LegacyLandscape;
+        VirtualViewport viewport = VirtualViewport.LegacyLandscape;
 
         scene.Scroll(360f * DroidUiMetrics.DpScale, viewport);
 
-        var frame = scene.CreateSnapshot(viewport).UiFrame;
-        var cardIndex = ElementIndex(frame, "downloader-card-0");
-        var appBarIndex = ElementIndex(frame, "downloader-appbar");
-        var searchIndex = ElementIndex(frame, "downloader-search");
-        var backIndex = ElementIndex(frame, "downloader-back");
-        var card = frame.Elements[cardIndex];
+        UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
+        int cardIndex = ElementIndex(frame, "downloader-card-0");
+        int appBarIndex = ElementIndex(frame, "downloader-appbar");
+        int searchIndex = ElementIndex(frame, "downloader-search");
+        int backIndex = ElementIndex(frame, "downloader-back");
+        UiElementSnapshot card = frame.Elements[cardIndex];
 
         Assert.That(card.Bounds.Y, Is.LessThan(DroidUiMetrics.AppBarHeight));
         Assert.That(cardIndex, Is.LessThan(appBarIndex));
@@ -122,12 +112,12 @@ public sealed partial class BeatmapDownloaderTests
     [Test]
     public void StatusPillUsesAndroidPanelColorAndCenteredText()
     {
-        var scene = CreateScene();
+        BeatmapDownloaderScene scene = CreateScene();
         SetSets(scene, [CreateSet()]);
 
-        var frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
-        var statusBackground = frame.Elements.Single(element => element.Id == "downloader-card-0-status-bg");
-        var statusText = frame.Elements.Single(element => element.Id == "downloader-card-0-status");
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiElementSnapshot statusBackground = frame.Elements.Single(element => element.Id == "downloader-card-0-status-bg");
+        UiElementSnapshot statusText = frame.Elements.Single(element => element.Id == "downloader-card-0-status");
 
         Assert.That(statusBackground.Color, Is.EqualTo(UiColor.Opaque(22, 22, 34)));
         Assert.That(statusText.TextStyle!.Alignment, Is.EqualTo(UiTextAlignment.Center));
@@ -136,16 +126,16 @@ public sealed partial class BeatmapDownloaderTests
     [Test]
     public void FiltersButtonUsesCenteredCompoundLayout()
     {
-        var scene = CreateScene();
+        BeatmapDownloaderScene scene = CreateScene();
 
-        var frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
-        var button = frame.Elements.Single(element => element.Id == "downloader-filters-hit");
-        var icon = frame.Elements.Single(element => element.Id == "downloader-filters-icon");
-        var text = frame.Elements.Single(element => element.Id == "downloader-filters-text");
-        var contentLeft = icon.Bounds.X;
-        var contentRight = text.Bounds.Right;
-        var buttonCenter = button.Bounds.X + button.Bounds.Width / 2f;
-        var contentCenter = contentLeft + (contentRight - contentLeft) / 2f;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiElementSnapshot button = frame.Elements.Single(element => element.Id == "downloader-filters-hit");
+        UiElementSnapshot icon = frame.Elements.Single(element => element.Id == "downloader-filters-icon");
+        UiElementSnapshot text = frame.Elements.Single(element => element.Id == "downloader-filters-text");
+        float contentLeft = icon.Bounds.X;
+        float contentRight = text.Bounds.Right;
+        float buttonCenter = button.Bounds.X + button.Bounds.Width / 2f;
+        float contentCenter = contentLeft + (contentRight - contentLeft) / 2f;
 
         Assert.That(Math.Abs(buttonCenter - contentCenter), Is.LessThan(1.5f));
         Assert.That(text.TextStyle!.VerticalAlignment, Is.EqualTo(UiTextVerticalAlignment.Middle));

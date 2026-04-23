@@ -9,13 +9,17 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
     public void UpsertBeatmaps(IReadOnlyList<BeatmapInfo> beatmaps)
     {
         if (beatmaps.Count == 0)
+        {
             return;
+        }
 
-        using var connection = database.OpenConnection();
-        using var transaction = connection.BeginTransaction();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteTransaction transaction = connection.BeginTransaction();
 
-        foreach (var beatmap in beatmaps)
+        foreach (BeatmapInfo beatmap in beatmaps)
+        {
             UpsertBeatmap(connection, transaction, beatmap);
+        }
 
         transaction.Commit();
     }
@@ -23,18 +27,20 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
     public void DeleteBeatmapSets(IReadOnlyList<string> directories)
     {
         if (directories.Count == 0)
+        {
             return;
+        }
 
-        using var connection = database.OpenConnection();
-        using var transaction = connection.BeginTransaction();
-        using var command = connection.CreateCommand();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteTransaction transaction = connection.BeginTransaction();
+        using SqliteCommand command = connection.CreateCommand();
         command.Transaction = transaction;
         command.CommandText = "DELETE FROM BeatmapInfo WHERE setDirectory = $setDirectory";
-        var parameter = command.CreateParameter();
+        SqliteParameter parameter = command.CreateParameter();
         parameter.ParameterName = "$setDirectory";
         command.Parameters.Add(parameter);
 
-        foreach (var directory in directories)
+        foreach (string directory in directories)
         {
             parameter.Value = directory;
             command.ExecuteNonQuery();
@@ -45,8 +51,8 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
 
     public void DeleteBeatmapSetData(string directory)
     {
-        using var connection = database.OpenConnection();
-        using var transaction = connection.BeginTransaction();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteTransaction transaction = connection.BeginTransaction();
         ExecuteSetDirectoryDelete(connection, transaction, "DELETE FROM BeatmapInfo WHERE setDirectory = $setDirectory", directory);
         ExecuteSetDirectoryDelete(connection, transaction, "DELETE FROM BeatmapOptions WHERE setDirectory = $setDirectory", directory);
         ExecuteSetDirectoryDelete(connection, transaction, "DELETE FROM BeatmapSetCollection_BeatmapSetInfo WHERE setDirectory = $setDirectory", directory);
@@ -55,8 +61,8 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
 
     public bool IsBeatmapSetImported(string directory)
     {
-        using var connection = database.OpenConnection();
-        using var command = connection.CreateCommand();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "SELECT EXISTS(SELECT setDirectory FROM BeatmapInfo WHERE setDirectory = $setDirectory LIMIT 1)";
         command.Parameters.AddWithValue("$setDirectory", directory);
         return Convert.ToInt32(command.ExecuteScalar(), System.Globalization.CultureInfo.InvariantCulture) != 0;
@@ -64,8 +70,8 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
 
     public void UpdateStarRatings(string md5, string setDirectory, string filename, float? droidStarRating, float? standardStarRating)
     {
-        using var connection = database.OpenConnection();
-        using var command = connection.CreateCommand();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = """
             UPDATE BeatmapInfo
             SET droidStarRating = $droidStarRating,
@@ -83,9 +89,9 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
 
     public long GetDifficultyMetadata(string key)
     {
-        using var connection = database.OpenConnection();
+        using SqliteConnection connection = database.OpenConnection();
         EnsureDifficultyMetadataTable(connection);
-        using var command = connection.CreateCommand();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "SELECT value FROM BeatmapDifficultyMetadata WHERE key = $key";
         command.Parameters.AddWithValue("$key", key);
         return command.ExecuteScalar() is { } value
@@ -95,9 +101,9 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
 
     public void SetDifficultyMetadata(string key, long value)
     {
-        using var connection = database.OpenConnection();
+        using SqliteConnection connection = database.OpenConnection();
         EnsureDifficultyMetadataTable(connection);
-        using var command = connection.CreateCommand();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = """
             INSERT INTO BeatmapDifficultyMetadata (key, value)
             VALUES ($key, $value)
@@ -110,46 +116,50 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
 
     public void ResetDroidStarRatings()
     {
-        using var connection = database.OpenConnection();
-        using var command = connection.CreateCommand();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "UPDATE BeatmapInfo SET droidStarRating = NULL";
         command.ExecuteNonQuery();
     }
 
     public void ResetStandardStarRatings()
     {
-        using var connection = database.OpenConnection();
-        using var command = connection.CreateCommand();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "UPDATE BeatmapInfo SET standardStarRating = NULL";
         command.ExecuteNonQuery();
     }
 
     public IReadOnlyList<string> GetBeatmapSetDirectories()
     {
-        using var connection = database.OpenConnection();
-        using var command = connection.CreateCommand();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "SELECT DISTINCT setDirectory FROM BeatmapInfo";
-        using var reader = command.ExecuteReader();
+        using SqliteDataReader reader = command.ExecuteReader();
         var directories = new List<string>();
 
         while (reader.Read())
+        {
             directories.Add(reader.GetString(0));
+        }
 
         return directories;
     }
 
     public BeatmapLibrarySnapshot LoadLibrary()
     {
-        using var connection = database.OpenConnection();
-        using var command = connection.CreateCommand();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "SELECT * FROM BeatmapInfo ORDER BY artist, title, version";
-        using var reader = command.ExecuteReader();
+        using SqliteDataReader reader = command.ExecuteReader();
         var beatmaps = new List<BeatmapInfo>();
 
         while (reader.Read())
+        {
             beatmaps.Add(ReadBeatmap(reader));
+        }
 
-        var sets = beatmaps
+        BeatmapSetInfo[] sets = beatmaps
             .GroupBy(beatmap => beatmap.SetDirectory, StringComparer.Ordinal)
             .Select(group => new BeatmapSetInfo(group.First().SetId, group.Key, group.ToArray()))
             .OrderBy(set => set.Beatmaps.FirstOrDefault()?.Artist ?? string.Empty, StringComparer.OrdinalIgnoreCase)
@@ -161,11 +171,11 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
 
     public BeatmapOptions GetBeatmapOptions(string setDirectory)
     {
-        using var connection = database.OpenConnection();
-        using var command = connection.CreateCommand();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "SELECT setDirectory, isFavorite, offset FROM BeatmapOptions WHERE setDirectory = $setDirectory";
         command.Parameters.AddWithValue("$setDirectory", setDirectory);
-        using var reader = command.ExecuteReader();
+        using SqliteDataReader reader = command.ExecuteReader();
 
         return reader.Read()
             ? new BeatmapOptions(reader.GetString(0), reader.GetInt32(1) != 0, reader.GetInt32(2))
@@ -174,8 +184,8 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
 
     public void UpsertBeatmapOptions(BeatmapOptions options)
     {
-        using var connection = database.OpenConnection();
-        using var command = connection.CreateCommand();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = """
             INSERT INTO BeatmapOptions (setDirectory, isFavorite, offset)
             VALUES ($setDirectory, $isFavorite, $offset)
@@ -191,8 +201,8 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
 
     public IReadOnlyList<BeatmapCollection> GetCollections(string? selectedSetDirectory = null)
     {
-        using var connection = database.OpenConnection();
-        using var command = connection.CreateCommand();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = """
             SELECT c.name,
                    COUNT(j.setDirectory) AS beatmapCount,
@@ -203,7 +213,7 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
             ORDER BY LOWER(c.name), c.name
             """;
         command.Parameters.AddWithValue("$selectedSetDirectory", selectedSetDirectory ?? string.Empty);
-        using var reader = command.ExecuteReader();
+        using SqliteDataReader reader = command.ExecuteReader();
         var collections = new List<BeatmapCollection>();
 
         while (reader.Read())
@@ -219,23 +229,25 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
 
     public IReadOnlySet<string> GetCollectionSetDirectories(string name)
     {
-        using var connection = database.OpenConnection();
-        using var command = connection.CreateCommand();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "SELECT setDirectory FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = $name";
         command.Parameters.AddWithValue("$name", name);
-        using var reader = command.ExecuteReader();
+        using SqliteDataReader reader = command.ExecuteReader();
         var directories = new HashSet<string>(StringComparer.Ordinal);
 
         while (reader.Read())
+        {
             directories.Add(reader.GetString(0));
+        }
 
         return directories;
     }
 
     public bool CollectionExists(string name)
     {
-        using var connection = database.OpenConnection();
-        using var command = connection.CreateCommand();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "SELECT EXISTS(SELECT name FROM BeatmapSetCollection WHERE name = $name LIMIT 1)";
         command.Parameters.AddWithValue("$name", name);
         return Convert.ToInt32(command.ExecuteScalar(), System.Globalization.CultureInfo.InvariantCulture) != 0;
@@ -243,8 +255,8 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
 
     public void CreateCollection(string name)
     {
-        using var connection = database.OpenConnection();
-        using var command = connection.CreateCommand();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "INSERT OR IGNORE INTO BeatmapSetCollection (name) VALUES ($name)";
         command.Parameters.AddWithValue("$name", name);
         command.ExecuteNonQuery();
@@ -252,8 +264,8 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
 
     public void DeleteCollection(string name)
     {
-        using var connection = database.OpenConnection();
-        using var transaction = connection.BeginTransaction();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteTransaction transaction = connection.BeginTransaction();
         ExecuteCollectionDelete(connection, transaction, "DELETE FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = $name", name);
         ExecuteCollectionDelete(connection, transaction, "DELETE FROM BeatmapSetCollection WHERE name = $name", name);
         transaction.Commit();
@@ -261,8 +273,8 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
 
     public void AddBeatmapToCollection(string name, string setDirectory)
     {
-        using var connection = database.OpenConnection();
-        using var command = connection.CreateCommand();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "INSERT OR IGNORE INTO BeatmapSetCollection_BeatmapSetInfo (collectionName, setDirectory) VALUES ($name, $setDirectory)";
         command.Parameters.AddWithValue("$name", name);
         command.Parameters.AddWithValue("$setDirectory", setDirectory);
@@ -271,8 +283,8 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
 
     public void RemoveBeatmapFromCollection(string name, string setDirectory)
     {
-        using var connection = database.OpenConnection();
-        using var command = connection.CreateCommand();
+        using SqliteConnection connection = database.OpenConnection();
+        using SqliteCommand command = connection.CreateCommand();
         command.CommandText = "DELETE FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = $name AND setDirectory = $setDirectory";
         command.Parameters.AddWithValue("$name", name);
         command.Parameters.AddWithValue("$setDirectory", setDirectory);

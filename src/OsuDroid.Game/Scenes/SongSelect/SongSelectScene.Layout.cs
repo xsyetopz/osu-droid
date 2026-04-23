@@ -1,35 +1,31 @@
 using OsuDroid.Game.Beatmaps;
-using OsuDroid.Game.Beatmaps.Difficulty;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.UI;
-using System.Globalization;
 
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.SongSelect;
 
 public sealed partial class SongSelectScene
 {
     private UiFrameSnapshot CreateFrame(VirtualViewport viewport)
     {
-        var start = PerfDiagnostics.Start();
-        Array.Fill(visibleSetIndices, -1);
-        Array.Fill(visibleDifficultyIndices, -1);
-        Array.Fill(visibleCollectionIndices, -1);
+        long start = PerfDiagnostics.Start();
+        Array.Fill(_visibleSetIndices, -1);
+        Array.Fill(_visibleDifficultyIndices, -1);
+        Array.Fill(_visibleCollectionIndices, -1);
 
         var elements = new List<UiElementSnapshot>
         {
-            Fill("songselect-base", new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), Black),
+            Fill("songselect-base", new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), s_black),
         };
 
         AddBeatmapBackground(elements, viewport);
-        elements.Add(Fill("songselect-dim", new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), BackgroundShade));
+        elements.Add(Fill("songselect-dim", new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), s_backgroundShade));
         AddBeatmapRows(elements, viewport);
-        AddTopPanel(elements, viewport);
+        AddTopPanel(elements);
         AddBottomControls(elements, viewport);
         AddScorePreview(elements, viewport);
         AddModal(elements, viewport);
 
         var frame = new UiFrameSnapshot(viewport, elements, DroidAssets.MainMenuManifest);
-        PerfDiagnostics.Log("songSelect.createFrame", start, $"elements={elements.Count} sets={visibleSnapshot.Sets.Count}");
+        PerfDiagnostics.Log("songSelect.createFrame", start, $"elements={elements.Count} sets={_visibleSnapshot.Sets.Count}");
         return frame;
     }
 
@@ -37,45 +33,45 @@ public sealed partial class SongSelectScene
 
     private static void AddBottomControls(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        var backY = viewport.VirtualHeight - BackButtonSize;
-        elements.Add(Sprite("songselect-back", DroidAssets.SongSelectBack, new UiRect(0f, backY, BackButtonSize, BackButtonSize), White, 1f, UiAction.SongSelectBack));
+        float backY = viewport.VirtualHeight - BackButtonSize;
+        elements.Add(Sprite("songselect-back", DroidAssets.SongSelectBack, new UiRect(0f, backY, BackButtonSize, BackButtonSize), s_white, 1f, UiAction.SongSelectBack));
 
-        var smallY = viewport.VirtualHeight - SmallButtonSize;
-        var modsX = BackButtonSize;
-        elements.Add(Sprite("songselect-mods", DroidAssets.SongSelectMods, new UiRect(modsX, smallY, SmallButtonSize, SmallButtonSize), White, 1f, UiAction.SongSelectMods));
-        elements.Add(Sprite("songselect-options", DroidAssets.SongSelectOptions, new UiRect(modsX + SmallButtonSize, smallY, SmallButtonSize, SmallButtonSize), White, 1f, UiAction.SongSelectBeatmapOptions));
-        elements.Add(Sprite("songselect-random", DroidAssets.SongSelectRandom, new UiRect(modsX + SmallButtonSize * 2f, smallY, SmallButtonSize, SmallButtonSize), White, 1f, UiAction.SongSelectRandom));
+        float smallY = viewport.VirtualHeight - SmallButtonSize;
+        float modsX = BackButtonSize;
+        elements.Add(Sprite("songselect-mods", DroidAssets.SongSelectMods, new UiRect(modsX, smallY, SmallButtonSize, SmallButtonSize), s_white, 1f, UiAction.SongSelectMods));
+        elements.Add(Sprite("songselect-options", DroidAssets.SongSelectOptions, new UiRect(modsX + SmallButtonSize, smallY, SmallButtonSize, SmallButtonSize), s_white, 1f, UiAction.SongSelectBeatmapOptions));
+        elements.Add(Sprite("songselect-random", DroidAssets.SongSelectRandom, new UiRect(modsX + SmallButtonSize * 2f, smallY, SmallButtonSize, SmallButtonSize), s_white, 1f, UiAction.SongSelectRandom));
     }
 
     private void AddScorePreview(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        elements.Add(Sprite("songselect-scoring-switcher", DroidAssets.RankingDisabled, new UiRect(10f, 10f, 50f, 50f), White, 1f));
+        elements.Add(Sprite("songselect-scoring-switcher", DroidAssets.RankingDisabled, new UiRect(10f, 10f, 50f, 50f), s_white, 1f));
 
-        var panelX = BackButtonSize + SmallButtonSize * 3f + OnlinePanelGap;
-        var panelY = viewport.VirtualHeight - OnlinePanelHeight;
+        float panelX = BackButtonSize + SmallButtonSize * 3f + OnlinePanelGap;
+        float panelY = viewport.VirtualHeight - OnlinePanelHeight;
         OnlineProfilePanelSnapshots.Add(
             elements,
             "songselect-score",
             new UiRect(panelX, panelY, OnlinePanelWidth, OnlinePanelHeight),
             OnlineAvatarFooterSize,
-            profile);
+            _profile);
     }
 
     private void AddTopPanelText(List<UiElementSnapshot> elements, BeatmapInfo beatmap)
     {
-        var titleY = 2f;
-        elements.Add(Text("songselect-title", $"{DisplayArtist(beatmap)} - {DisplayTitle(beatmap)} [{beatmap.Version}]", 70f, titleY, 1024f, 32f, 24f, White));
+        float titleY = 2f;
+        elements.Add(Text("songselect-title", $"{DisplayArtist(beatmap)} - {DisplayTitle(beatmap)} [{beatmap.Version}]", 70f, titleY, 1024f, 32f, 24f, s_white));
 
-        var creatorY = titleY + 32f + 2f;
-        elements.Add(Text("songselect-creator", $"Beatmap by {beatmap.Creator}", 70f, creatorY, 1024f, 26f, 20f, White));
+        float creatorY = titleY + 32f + 2f;
+        elements.Add(Text("songselect-creator", _localizer.Format("SongSelect_BeatmapBy", beatmap.Creator), 70f, creatorY, 1024f, 26f, 20f, s_white));
 
-        var lengthY = creatorY + 26f + 2f;
-        elements.Add(Text("songselect-length", FormatLengthLine(beatmap), 4f, lengthY, 1024f, 26f, 18f, White));
+        float lengthY = creatorY + 26f + 2f;
+        elements.Add(Text("songselect-length", FormatLengthLine(beatmap), 4f, lengthY, 1024f, 26f, 18f, s_white));
 
-        var objectsY = lengthY + 26f + 2f;
-        elements.Add(Text("songselect-objects", FormatObjectLine(beatmap), 4f, objectsY, 1120f, 26f, 18f, White));
+        float objectsY = lengthY + 26f + 2f;
+        elements.Add(Text("songselect-objects", FormatObjectLine(beatmap), 4f, objectsY, 1120f, 26f, 18f, s_white));
 
-        var difficultyY = objectsY + 26f + 2f;
-        elements.Add(Text("songselect-difficulty", FormatDifficultyLine(beatmap), 4f, difficultyY, 1024f, 24f, 18f, White));
+        float difficultyY = objectsY + 26f + 2f;
+        elements.Add(Text("songselect-difficulty", FormatDifficultyLine(beatmap), 4f, difficultyY, 1024f, 24f, 18f, s_white));
     }
 }

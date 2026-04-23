@@ -1,14 +1,10 @@
-using OsuDroid.Game.Beatmaps;
-using OsuDroid.Game.Beatmaps.Difficulty;
 using OsuDroid.Game.Runtime;
-using OsuDroid.Game.UI;
-using System.Globalization;
 
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.SongSelect;
 
 public sealed partial class SongSelectScene
 {
-    private static readonly UiAction[] SetActions =
+    private static readonly UiAction[] s_setActions =
     [
         UiAction.SongSelectSet0,
         UiAction.SongSelectSet1,
@@ -20,7 +16,7 @@ public sealed partial class SongSelectScene
         UiAction.SongSelectSet7,
     ];
 
-    private static readonly UiAction[] DifficultyActions =
+    private static readonly UiAction[] s_difficultyActions =
     [
         UiAction.SongSelectDifficulty0,
         UiAction.SongSelectDifficulty1,
@@ -40,7 +36,7 @@ public sealed partial class SongSelectScene
         UiAction.SongSelectDifficulty15,
     ];
 
-    private static readonly UiAction[] CollectionToggleActions =
+    private static readonly UiAction[] s_collectionToggleActions =
     [
         UiAction.SongSelectCollectionToggle0,
         UiAction.SongSelectCollectionToggle1,
@@ -52,7 +48,7 @@ public sealed partial class SongSelectScene
         UiAction.SongSelectCollectionToggle7,
     ];
 
-    private static readonly UiAction[] CollectionDeleteActions =
+    private static readonly UiAction[] s_collectionDeleteActions =
     [
         UiAction.SongSelectCollectionDelete0,
         UiAction.SongSelectCollectionDelete1,
@@ -66,21 +62,21 @@ public sealed partial class SongSelectScene
 
     public GameFrameSnapshot CreateSnapshot(VirtualViewport viewport) => new("SongSelect", "Song Select", string.Empty, Array.Empty<string>(), 0, false, CreateFrame(viewport));
 
-    public static UiAction SetAction(int visibleSlot) => ActionAt(SetActions, visibleSlot);
+    public static UiAction SetAction(int visibleSlot) => ActionAt(s_setActions, visibleSlot);
 
-    public static int SetIndex(UiAction action) => UiActionGroups.TryGetSongSelectSetIndex(action, out var index) ? index : -1;
+    public static int SetIndex(UiAction action) => UiActionGroups.TryGetSongSelectSetIndex(action, out int index) ? index : -1;
 
-    public static UiAction DifficultyAction(int index) => ActionAt(DifficultyActions, index);
+    public static UiAction DifficultyAction(int index) => ActionAt(s_difficultyActions, index);
 
-    public static int DifficultyIndex(UiAction action) => UiActionGroups.TryGetSongSelectDifficultyIndex(action, out var index) ? index : -1;
+    public static int DifficultyIndex(UiAction action) => UiActionGroups.TryGetSongSelectDifficultyIndex(action, out int index) ? index : -1;
 
-    public static UiAction CollectionToggleAction(int index) => ActionAt(CollectionToggleActions, index);
+    public static UiAction CollectionToggleAction(int index) => ActionAt(s_collectionToggleActions, index);
 
-    public static int CollectionToggleIndex(UiAction action) => UiActionGroups.TryGetSongSelectCollectionToggleIndex(action, out var index) ? index : -1;
+    public static int CollectionToggleIndex(UiAction action) => UiActionGroups.TryGetSongSelectCollectionToggleIndex(action, out int index) ? index : -1;
 
-    public static UiAction CollectionDeleteAction(int index) => ActionAt(CollectionDeleteActions, index);
+    public static UiAction CollectionDeleteAction(int index) => ActionAt(s_collectionDeleteActions, index);
 
-    public static int CollectionDeleteIndex(UiAction action) => UiActionGroups.TryGetSongSelectCollectionDeleteIndex(action, out var index) ? index : -1;
+    public static int CollectionDeleteIndex(UiAction action) => UiActionGroups.TryGetSongSelectCollectionDeleteIndex(action, out int index) ? index : -1;
 
     private static UiAction ActionAt(UiAction[] actions, int index) => index >= 0 && index < actions.Length ? actions[index] : UiAction.None;
 }

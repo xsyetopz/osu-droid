@@ -1,5 +1,3 @@
-using OsuDroid.Game.UI;
-
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
@@ -44,9 +42,9 @@ public sealed partial class UiCompatibilityTests
     [Test]
     public void SongSelectFirstSetAliasResolvesToSetZero()
     {
-        Assert.That(UiActionGroups.TryGetSongSelectSetIndex(UiAction.SongSelectFirstSet, out var index), Is.True);
+        Assert.That(UiActionGroups.TryGetSongSelectSetIndex(UiAction.SongSelectFirstSet, out int index), Is.True);
         Assert.That(index, Is.Zero);
-        Assert.That(UiActionGroups.TryGetSongSelectSetAction(index, out var action), Is.True);
+        Assert.That(UiActionGroups.TryGetSongSelectSetAction(index, out UiAction action), Is.True);
         Assert.That(action, Is.EqualTo(UiAction.SongSelectSet0));
     }
 
@@ -65,10 +63,10 @@ public sealed partial class UiCompatibilityTests
 
     private static void AssertRoundTrip(int count, TryGetActionByIndex tryGetAction, TryGetIndexByAction tryGetIndex)
     {
-        for (var index = 0; index < count; index++)
+        for (int index = 0; index < count; index++)
         {
-            Assert.That(tryGetAction(index, out var action), Is.True, $"Index {index}");
-            Assert.That(tryGetIndex(action, out var mappedIndex), Is.True, action.ToString());
+            Assert.That(tryGetAction(index, out UiAction action), Is.True, $"Index {index}");
+            Assert.That(tryGetIndex(action, out int mappedIndex), Is.True, action.ToString());
             Assert.That(mappedIndex, Is.EqualTo(index), action.ToString());
         }
     }

@@ -22,28 +22,27 @@ public static class OnlineResponseParser
 {
     public static OnlineResponse ParseLines(IEnumerable<string> lines)
     {
-        var parsed = lines.ToArray();
+        string[] parsed = lines.ToArray();
 
-        if (parsed.Length == 0 || parsed[0].Length == 0)
-            return OnlineResponse.Failure("Got empty response", parsed);
-
-        if (!string.Equals(parsed[0], "SUCCESS", StringComparison.Ordinal))
-            return OnlineResponse.Failure(parsed.Length >= 2 ? parsed[1] : "Unknown server error", parsed);
-
-        return OnlineResponse.Success(parsed);
+        return parsed.Length == 0 || parsed[0].Length == 0
+            ? OnlineResponse.Failure("Got empty response", parsed)
+            : !string.Equals(parsed[0], "SUCCESS", StringComparison.Ordinal)
+            ? OnlineResponse.Failure(parsed.Length >= 2 ? parsed[1] : "Unknown server error", parsed)
+            : OnlineResponse.Success(parsed);
     }
 
     public static LoginProfile ParseLoginProfile(IReadOnlyList<string> successLines)
     {
         if (successLines.Count < 2)
+        {
             throw new FormatException("Invalid server response");
+        }
 
-        var fields = successLines[1].Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        string[] fields = successLines[1].Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
 
-        if (fields.Length < 7)
-            throw new FormatException("Invalid server response");
-
-        return new LoginProfile(
+        return fields.Length < 7
+            ? throw new FormatException("Invalid server response")
+            : new LoginProfile(
             long.Parse(fields[0], CultureInfo.InvariantCulture),
             fields[1],
             long.Parse(fields[2], CultureInfo.InvariantCulture),

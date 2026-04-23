@@ -1,4 +1,4 @@
-namespace OsuDroid.Game.UI;
+namespace OsuDroid.Game.UI.Geometry;
 
 public sealed record VirtualViewport(
     int SurfaceWidth,
@@ -16,13 +16,17 @@ public sealed record VirtualViewport(
     public static VirtualViewport FromSurface(int surfaceWidth, int surfaceHeight)
     {
         if (surfaceWidth <= 0)
+        {
             throw new ArgumentOutOfRangeException(nameof(surfaceWidth), surfaceWidth, null);
+        }
 
         if (surfaceHeight <= 0)
+        {
             throw new ArgumentOutOfRangeException(nameof(surfaceHeight), surfaceHeight, null);
+        }
 
-        var scale = surfaceWidth / LegacyWidth;
-        var virtualHeight = surfaceHeight / scale;
+        float scale = surfaceWidth / LegacyWidth;
+        float virtualHeight = surfaceHeight / scale;
         return new VirtualViewport(surfaceWidth, surfaceHeight, LegacyWidth, virtualHeight, scale, 0f, 0f);
     }
 

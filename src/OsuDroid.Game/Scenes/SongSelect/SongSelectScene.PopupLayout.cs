@@ -1,224 +1,252 @@
+using System.Globalization;
 using OsuDroid.Game.Beatmaps;
 using OsuDroid.Game.Beatmaps.Difficulty;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.UI;
-using System.Globalization;
 
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.SongSelect;
 
 public sealed partial class SongSelectScene
 {
+#pragma warning disable IDE0072 // Sort mode defaults to Title for unknown values.
     private void AddModal(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        if (!propertiesOpen && !beatmapOptionsOpen)
+        if (!_propertiesOpen && !_beatmapOptionsOpen)
+        {
             return;
+        }
 
-        elements.Add(Fill("songselect-popup-shade", new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), ModalShade, 1f, UiAction.SongSelectPropertiesDismiss));
+        elements.Add(Fill("songselect-popup-shade", new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), s_modalShade, 1f, UiAction.SongSelectPropertiesDismiss));
 
-        if (collectionsOpen)
+        if (_collectionsOpen)
+        {
             AddCollectionsPanel(elements, viewport);
-        else if (beatmapOptionsOpen)
+        }
+        else if (_beatmapOptionsOpen)
+        {
             AddBeatmapOptionsPanel(elements, viewport);
+        }
         else
+        {
             AddPropertiesPanel(elements, viewport);
+        }
 
-        if (deleteBeatmapConfirmOpen)
+        if (_deleteBeatmapConfirmOpen)
+        {
             AddConfirmPanel(
                 elements,
                 viewport,
                 "songselect-delete-beatmap",
-                "Delete beatmap",
-                "Are you sure?",
+                _localizer["SongSelect_DeleteBeatmapTitle"],
+                _localizer["SongSelect_DeleteBeatmapMessage"],
                 UiAction.SongSelectPropertiesDeleteConfirm,
                 UiAction.SongSelectPropertiesDeleteCancel);
-        else if (collectionPendingDelete is not null)
+        }
+        else if (_collectionPendingDelete is not null)
+        {
             AddConfirmPanel(
                 elements,
                 viewport,
                 "songselect-delete-collection",
-                "Remove collection",
-                "Are you sure?",
+                _localizer["SongSelect_RemoveCollectionTitle"],
+                _localizer["SongSelect_DeleteBeatmapMessage"],
                 UiAction.SongSelectCollectionDeleteConfirm,
                 UiAction.SongSelectCollectionDeleteCancel);
+        }
     }
 
     private void AddPropertiesPanel(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        var options = CurrentOptions() ?? new BeatmapOptions(string.Empty);
-        var panelHeight = PropertiesRowHeight * 5f;
+        BeatmapOptions options = CurrentOptions() ?? new BeatmapOptions(string.Empty);
+        float panelHeight = PropertiesRowHeight * 5f;
         var panel = new UiRect((viewport.VirtualWidth - PropertiesWidth) / 2f, (viewport.VirtualHeight - panelHeight) / 2f, PropertiesWidth, panelHeight);
-        elements.Add(Fill("songselect-properties-panel", panel, PropertiesPanel, 1f, UiAction.SongSelectPropertiesPanel, 14f * Dp));
+        elements.Add(Fill("songselect-properties-panel", panel, s_propertiesPanel, 1f, UiAction.SongSelectPropertiesPanel, 14f * Dp));
 
-        AddPropertiesRowText(elements, "songselect-properties-title", "Song Properties", panel.X, panel.Y, panel.Width, PropertiesRowHeight, 15f * Dp, White, UiAction.SongSelectPropertiesPanel);
+        AddPropertiesRowText(elements, "songselect-properties-title", _localizer["SongSelect_PropertiesTitle"], panel.X, panel.Y, panel.Width, PropertiesRowHeight, 15f * Dp, s_white, UiAction.SongSelectPropertiesPanel);
         AddDivider(elements, "songselect-properties-divider-title", panel.X, panel.Y + PropertiesRowHeight, panel.Width);
 
-        var offsetY = panel.Y + PropertiesRowHeight;
-        var buttonWidth = 70f * Dp;
-        elements.Add(Fill("songselect-properties-offset-minus-hit", new UiRect(panel.X, offsetY, buttonWidth, PropertiesRowHeight), PropertiesPanel, 1f, UiAction.SongSelectPropertiesOffsetMinus));
-        elements.Add(MaterialIcon("songselect-properties-offset-minus", UiMaterialIcon.Minus, new UiRect(panel.X + (buttonWidth - 24f * Dp) / 2f, offsetY + 14f * Dp, 24f * Dp, 24f * Dp), White, 1f, UiAction.SongSelectPropertiesOffsetMinus));
-        var input = PropertiesOffsetInputBounds(viewport);
-        elements.Add(Fill("songselect-properties-offset-input-hit", input, PropertiesPanel, 1f, UiAction.SongSelectPropertiesOffsetInput));
-        AddPropertiesRowText(elements, "songselect-properties-offset-label", "Offset", input.X, input.Y + 4f * Dp, input.Width, 16f * Dp, 10f * Dp, PropertiesSecondary, UiAction.SongSelectPropertiesOffsetInput);
-        AddPropertiesRowText(elements, "songselect-properties-offset-value", options.Offset.ToString(CultureInfo.InvariantCulture), input.X, input.Y + 18f * Dp, input.Width, 30f * Dp, 18f * Dp, White, UiAction.SongSelectPropertiesOffsetInput);
-        elements.Add(Fill("songselect-properties-offset-plus-hit", new UiRect(panel.Right - buttonWidth, offsetY, buttonWidth, PropertiesRowHeight), PropertiesPanel, 1f, UiAction.SongSelectPropertiesOffsetPlus));
-        elements.Add(MaterialIcon("songselect-properties-offset-plus", UiMaterialIcon.Plus, new UiRect(panel.Right - buttonWidth + (buttonWidth - 24f * Dp) / 2f, offsetY + 14f * Dp, 24f * Dp, 24f * Dp), White, 1f, UiAction.SongSelectPropertiesOffsetPlus));
+        float offsetY = panel.Y + PropertiesRowHeight;
+        float buttonWidth = 70f * Dp;
+        elements.Add(Fill("songselect-properties-offset-minus-hit", new UiRect(panel.X, offsetY, buttonWidth, PropertiesRowHeight), s_propertiesPanel, 1f, UiAction.SongSelectPropertiesOffsetMinus));
+        elements.Add(MaterialIcon("songselect-properties-offset-minus", UiMaterialIcon.Minus, new UiRect(panel.X + (buttonWidth - 24f * Dp) / 2f, offsetY + 14f * Dp, 24f * Dp, 24f * Dp), s_white, 1f, UiAction.SongSelectPropertiesOffsetMinus));
+        UiRect input = PropertiesOffsetInputBounds(viewport);
+        elements.Add(Fill("songselect-properties-offset-input-hit", input, s_propertiesPanel, 1f, UiAction.SongSelectPropertiesOffsetInput));
+        AddPropertiesRowText(elements, "songselect-properties-offset-label", _localizer["SongSelect_Offset"], input.X, input.Y + 4f * Dp, input.Width, 16f * Dp, 10f * Dp, s_propertiesSecondary, UiAction.SongSelectPropertiesOffsetInput);
+        AddPropertiesRowText(elements, "songselect-properties-offset-value", options.Offset.ToString(CultureInfo.InvariantCulture), input.X, input.Y + 18f * Dp, input.Width, 30f * Dp, 18f * Dp, s_white, UiAction.SongSelectPropertiesOffsetInput);
+        elements.Add(Fill("songselect-properties-offset-plus-hit", new UiRect(panel.Right - buttonWidth, offsetY, buttonWidth, PropertiesRowHeight), s_propertiesPanel, 1f, UiAction.SongSelectPropertiesOffsetPlus));
+        elements.Add(MaterialIcon("songselect-properties-offset-plus", UiMaterialIcon.Plus, new UiRect(panel.Right - buttonWidth + (buttonWidth - 24f * Dp) / 2f, offsetY + 14f * Dp, 24f * Dp, 24f * Dp), s_white, 1f, UiAction.SongSelectPropertiesOffsetPlus));
         AddDivider(elements, "songselect-properties-divider-offset", panel.X, offsetY + PropertiesRowHeight, panel.Width);
 
-        var favoriteY = offsetY + PropertiesRowHeight;
-        AddIconRow(elements, "songselect-properties-favorite", options.IsFavorite ? UiMaterialIcon.Heart : UiMaterialIcon.HeartOutline, "Add to Favorites", panel.X, favoriteY, panel.Width, UiAction.SongSelectPropertiesFavorite, White);
+        float favoriteY = offsetY + PropertiesRowHeight;
+        AddIconRow(elements, "songselect-properties-favorite", options.IsFavorite ? UiMaterialIcon.Heart : UiMaterialIcon.HeartOutline, _localizer["SongSelect_AddToFavorites"], panel.X, favoriteY, panel.Width, UiAction.SongSelectPropertiesFavorite, s_white);
         AddDivider(elements, "songselect-properties-divider-favorite", panel.X, favoriteY + PropertiesRowHeight, panel.Width);
 
-        var manageY = favoriteY + PropertiesRowHeight;
-        AddIconRow(elements, "songselect-properties-manage", UiMaterialIcon.Folder, "Manage Favorites", panel.X, manageY, panel.Width, UiAction.SongSelectPropertiesManageCollections, White);
+        float manageY = favoriteY + PropertiesRowHeight;
+        AddIconRow(elements, "songselect-properties-manage", UiMaterialIcon.Folder, _localizer["SongSelect_ManageFavorites"], panel.X, manageY, panel.Width, UiAction.SongSelectPropertiesManageCollections, s_white);
         AddDivider(elements, "songselect-properties-divider-manage", panel.X, manageY + PropertiesRowHeight, panel.Width);
 
-        AddIconRow(elements, "songselect-properties-delete", UiMaterialIcon.Delete, "Delete beatmap", panel.X, manageY + PropertiesRowHeight, panel.Width, UiAction.SongSelectPropertiesDelete, PropertiesDanger);
+        AddIconRow(elements, "songselect-properties-delete", UiMaterialIcon.Delete, _localizer["SongSelect_DeleteBeatmapTitle"], panel.X, manageY + PropertiesRowHeight, panel.Width, UiAction.SongSelectPropertiesDelete, s_propertiesDanger);
     }
 
     private void AddBeatmapOptionsPanel(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        var search = BeatmapOptionsSearchBounds(viewport);
-        elements.Add(Fill("songselect-beatmap-options-search", search, BeatmapOptionsSearchPanel, 1f, UiAction.SongSelectBeatmapOptionsSearch, BeatmapOptionsRadius));
+        UiRect search = BeatmapOptionsSearchBounds(viewport);
+        elements.Add(Fill("songselect-beatmap-options-search", search, s_beatmapOptionsSearchPanel, 1f, UiAction.SongSelectBeatmapOptionsSearch, BeatmapOptionsRadius));
         elements.Add(TextMiddle(
             "songselect-beatmap-options-search-text",
-            searchQuery.Length == 0 ? "Search for..." : searchQuery,
+            searchQuery.Length == 0 ? _localizer["SongSelect_SearchPlaceholder"] : searchQuery,
             search.X + 16f * Dp,
             search.Y,
             search.Width - 64f * Dp,
             search.Height,
             16f * Dp,
-            searchQuery.Length == 0 ? PropertiesSecondary : White,
+            searchQuery.Length == 0 ? s_propertiesSecondary : s_white,
             UiTextAlignment.Left,
             UiAction.SongSelectBeatmapOptionsSearch));
-        elements.Add(MaterialIcon("songselect-beatmap-options-search-icon", UiMaterialIcon.Search, new UiRect(search.Right - 40f * Dp, search.Y + 16f * Dp, 24f * Dp, 24f * Dp), PropertiesSecondary, 1f, UiAction.SongSelectBeatmapOptionsSearch));
+        elements.Add(MaterialIcon("songselect-beatmap-options-search-icon", UiMaterialIcon.Search, new UiRect(search.Right - 40f * Dp, search.Y + 16f * Dp, 24f * Dp, 24f * Dp), s_propertiesSecondary, 1f, UiAction.SongSelectBeatmapOptionsSearch));
 
-        var optionsY = search.Bottom + 12f * Dp;
-        var algorithmText = displayAlgorithm == DifficultyAlgorithm.Standard ? "osu!standard" : "osu!droid";
-        var sortText = SortLabel(sortMode);
-        var folderText = collectionFilter ?? DefaultFavoriteFolderName;
-        var favoriteWidth = IconOnlyOptionsButtonWidth();
-        var algorithmWidth = TextOptionsButtonWidth(algorithmText);
-        var sortWidth = TextOptionsButtonWidth(sortText);
-        var folderWidth = TextOptionsButtonWidth(folderText, BeatmapOptionsFolderEndPadding);
-        var stripWidth = favoriteWidth + algorithmWidth + sortWidth + folderWidth + BeatmapOptionsDividerWidth * 3f;
-        var x = search.X;
-        elements.Add(Fill("songselect-beatmap-options-strip", new UiRect(search.X, optionsY, stripWidth, BeatmapOptionsRowHeight), PropertiesPanel, 1f, UiAction.SongSelectPropertiesPanel, BeatmapOptionsRadius));
+        float optionsY = search.Bottom + 12f * Dp;
+        string algorithmText = _displayAlgorithm == DifficultyAlgorithm.Standard ? "osu!standard" : "osu!droid";
+        string sortText = SortLabel(sortMode);
+        string folderText = collectionFilter ?? _localizer["SongSelect_DefaultFavoriteFolder"];
+        float favoriteWidth = IconOnlyOptionsButtonWidth();
+        float algorithmWidth = TextOptionsButtonWidth(algorithmText);
+        float sortWidth = TextOptionsButtonWidth(sortText);
+        float folderWidth = TextOptionsButtonWidth(folderText, BeatmapOptionsFolderEndPadding);
+        float stripWidth = favoriteWidth + algorithmWidth + sortWidth + folderWidth + BeatmapOptionsDividerWidth * 3f;
+        float x = search.X;
+        elements.Add(Fill("songselect-beatmap-options-strip", new UiRect(search.X, optionsY, stripWidth, BeatmapOptionsRowHeight), s_propertiesPanel, 1f, UiAction.SongSelectPropertiesPanel, BeatmapOptionsRadius));
 
-        AddOptionsButton(elements, "songselect-beatmap-options-favorite", new UiRect(x, optionsY, favoriteWidth, BeatmapOptionsRowHeight), favoriteOnlyFilter ? UiMaterialIcon.Heart : UiMaterialIcon.HeartOutline, string.Empty, UiAction.SongSelectBeatmapOptionsFavorite, favoriteOnlyFilter ? BeatmapOptionsAccent : BeatmapOptionsInactiveCheckbox);
+        AddOptionsButton(elements, "songselect-beatmap-options-favorite", new UiRect(x, optionsY, favoriteWidth, BeatmapOptionsRowHeight), favoriteOnlyFilter ? UiMaterialIcon.Heart : UiMaterialIcon.HeartOutline, string.Empty, UiAction.SongSelectBeatmapOptionsFavorite, favoriteOnlyFilter ? s_beatmapOptionsAccent : s_beatmapOptionsInactiveCheckbox);
         x += favoriteWidth;
         AddOptionsDivider(elements, "songselect-beatmap-options-divider-favorite", x, optionsY);
         x += BeatmapOptionsDividerWidth;
-        AddOptionsButton(elements, "songselect-beatmap-options-algorithm", new UiRect(x, optionsY, algorithmWidth, BeatmapOptionsRowHeight), UiMaterialIcon.StarOutline, algorithmText, UiAction.SongSelectBeatmapOptionsAlgorithm, White);
+        AddOptionsButton(elements, "songselect-beatmap-options-algorithm", new UiRect(x, optionsY, algorithmWidth, BeatmapOptionsRowHeight), UiMaterialIcon.StarOutline, algorithmText, UiAction.SongSelectBeatmapOptionsAlgorithm, s_white);
         x += algorithmWidth;
         AddOptionsDivider(elements, "songselect-beatmap-options-divider-algorithm", x, optionsY);
         x += BeatmapOptionsDividerWidth;
-        AddOptionsButton(elements, "songselect-beatmap-options-sort", new UiRect(x, optionsY, sortWidth, BeatmapOptionsRowHeight), UiMaterialIcon.Sort, sortText, UiAction.SongSelectBeatmapOptionsSort, White);
+        AddOptionsButton(elements, "songselect-beatmap-options-sort", new UiRect(x, optionsY, sortWidth, BeatmapOptionsRowHeight), UiMaterialIcon.Sort, sortText, UiAction.SongSelectBeatmapOptionsSort, s_white);
         x += sortWidth;
         AddOptionsDivider(elements, "songselect-beatmap-options-divider-sort", x, optionsY);
         x += BeatmapOptionsDividerWidth;
-        AddOptionsButton(elements, "songselect-beatmap-options-folder", new UiRect(x, optionsY, folderWidth, BeatmapOptionsRowHeight), UiMaterialIcon.FolderOutline, folderText, UiAction.SongSelectBeatmapOptionsFolder, White);
+        AddOptionsButton(elements, "songselect-beatmap-options-folder", new UiRect(x, optionsY, folderWidth, BeatmapOptionsRowHeight), UiMaterialIcon.FolderOutline, folderText, UiAction.SongSelectBeatmapOptionsFolder, s_white);
     }
 
     private void AddCollectionsPanel(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        var set = SelectedSet;
-        var sourceCollections = library.GetCollections(set?.Directory).ToArray();
-        var collections = collectionsFilterMode
-            ? new[] { new BeatmapCollection(DefaultFavoriteFolderName, 0, collectionFilter is null) }.Concat(sourceCollections).ToArray()
+        BeatmapSetInfo? set = SelectedSet;
+        BeatmapCollection[] sourceCollections = library.GetCollections(set?.Directory).ToArray();
+        BeatmapCollection[] collections = _collectionsFilterMode
+            ? new[] { new BeatmapCollection(_localizer["SongSelect_DefaultFavoriteFolder"], 0, collectionFilter is null) }.Concat(sourceCollections).ToArray()
             : sourceCollections;
-        var panelHeight = viewport.VirtualHeight - CollectionsMargin * 2f;
+        float panelHeight = viewport.VirtualHeight - CollectionsMargin * 2f;
         var panel = new UiRect((viewport.VirtualWidth - CollectionsWidth) / 2f, viewport.VirtualHeight - CollectionsMargin - panelHeight, CollectionsWidth, panelHeight);
-        elements.Add(Fill("songselect-collections-panel", panel, CollectionsPanelDark, 1f, UiAction.SongSelectPropertiesPanel, 14f * Dp));
-        AddIconRow(elements, "songselect-collections-new", UiMaterialIcon.Plus, CreateFavoriteFolderLabel, panel.X, panel.Y, panel.Width, UiAction.SongSelectCollectionsNewFolder, White);
+        elements.Add(Fill("songselect-collections-panel", panel, s_collectionsPanelDark, 1f, UiAction.SongSelectPropertiesPanel, 14f * Dp));
+        AddIconRow(elements, "songselect-collections-new", UiMaterialIcon.Plus, _localizer["SongSelect_CreateNewFolder"], panel.X, panel.Y, panel.Width, UiAction.SongSelectCollectionsNewFolder, s_white);
         AddDivider(elements, "songselect-collections-divider-new", panel.X, panel.Y + PropertiesRowHeight, panel.Width);
 
-        var listY = panel.Y + PropertiesRowHeight + 12f * Dp;
-        var rowGap = 8f * Dp;
-        var rowStep = CollectionRowHeight + rowGap;
-        var first = Math.Max(0, (int)MathF.Floor(collectionScrollY / rowStep));
-        var yOffset = -(collectionScrollY - first * rowStep);
-        for (var slot = 0; slot < VisibleCollectionSlots; slot++)
+        float listY = panel.Y + PropertiesRowHeight + 12f * Dp;
+        float rowGap = 8f * Dp;
+        float rowStep = CollectionRowHeight + rowGap;
+        int first = Math.Max(0, (int)MathF.Floor(collectionScrollY / rowStep));
+        float yOffset = -(collectionScrollY - first * rowStep);
+        for (int slot = 0; slot < VisibleCollectionSlots; slot++)
         {
-            var index = first + slot;
+            int index = first + slot;
             if (index >= collections.Length)
+            {
                 break;
+            }
 
-            var rowY = listY + yOffset + slot * rowStep;
+            float rowY = listY + yOffset + slot * rowStep;
             if (rowY > panel.Bottom - rowGap)
+            {
                 break;
+            }
 
-            visibleCollectionIndices[slot] = index;
-            AddCollectionRow(elements, slot, collections[index], panel.X + 12f * Dp, rowY, panel.Width - 24f * Dp, collectionsFilterMode, collectionFilter);
+            _visibleCollectionIndices[slot] = index;
+            AddCollectionRow(elements, slot, collections[index], panel.X + 12f * Dp, rowY, panel.Width - 24f * Dp, _collectionsFilterMode, collectionFilter);
         }
 
         if (collections.Length == 0)
-            elements.Add(TextMiddle("songselect-collections-empty", "No collections", panel.X, listY, panel.Width, CollectionRowHeight, 16f * Dp, PropertiesSecondary, UiTextAlignment.Center));
+        {
+            elements.Add(TextMiddle("songselect-collections-empty", _localizer["SongSelect_NoCollections"], panel.X, listY, panel.Width, CollectionRowHeight, 16f * Dp, s_propertiesSecondary, UiTextAlignment.Center));
+        }
     }
 
-    private static void AddCollectionRow(List<UiElementSnapshot> elements, int slot, BeatmapCollection collection, float x, float y, float width, bool filterMode, string? selectedFilter)
+    private void AddCollectionRow(List<UiElementSnapshot> elements, int slot, BeatmapCollection collection, float x, float y, float width, bool filterMode, string? selectedFilter)
     {
-        var action = filterMode ? CollectionToggleAction(slot) : UiAction.None;
-        elements.Add(Fill($"songselect-collection-{slot}", new UiRect(x, y, width, CollectionRowHeight), PropertiesPanel, 1f, action, 14f * Dp));
-        elements.Add(TextMiddle($"songselect-collection-{slot}-name", collection.Name, x + 16f * Dp, y, width - 180f * Dp, CollectionRowHeight, 15f * Dp, White, UiTextAlignment.Left, action));
+        UiAction action = filterMode ? CollectionToggleAction(slot) : UiAction.None;
+        elements.Add(Fill($"songselect-collection-{slot}", new UiRect(x, y, width, CollectionRowHeight), s_propertiesPanel, 1f, action, 14f * Dp));
+        elements.Add(TextMiddle($"songselect-collection-{slot}-name", collection.Name, x + 16f * Dp, y, width - 180f * Dp, CollectionRowHeight, 15f * Dp, s_white, UiTextAlignment.Left, action));
         if (!filterMode || slot != 0)
-            elements.Add(TextMiddle($"songselect-collection-{slot}-count", $"· {collection.BeatmapCount} beatmaps", x + 170f * Dp, y, width - 280f * Dp, CollectionRowHeight, 12f * Dp, PropertiesSecondary, UiTextAlignment.Left, action));
+        {
+            elements.Add(TextMiddle($"songselect-collection-{slot}-count", _localizer.Format("SongSelect_CollectionBeatmaps", collection.BeatmapCount), x + 170f * Dp, y, width - 280f * Dp, CollectionRowHeight, 12f * Dp, s_propertiesSecondary, UiTextAlignment.Left, action));
+        }
+
         if (filterMode)
         {
-            var isDefaultSelected = slot == 0 && selectedFilter is null;
+            bool isDefaultSelected = slot == 0 && selectedFilter is null;
             if (isDefaultSelected || string.Equals(collection.Name, selectedFilter, StringComparison.Ordinal))
-                elements.Add(MaterialIcon($"songselect-collection-{slot}-selected", UiMaterialIcon.Check, new UiRect(x + width - 40f * Dp, y + 18f * Dp, 24f * Dp, 24f * Dp), White, 1f, action));
+            {
+                elements.Add(MaterialIcon($"songselect-collection-{slot}-selected", UiMaterialIcon.Check, new UiRect(x + width - 40f * Dp, y + 18f * Dp, 24f * Dp, 24f * Dp), s_white, 1f, action));
+            }
+
             return;
         }
 
-        AddSmallAction(elements, $"songselect-collection-{slot}-delete", UiMaterialIcon.Delete, x + width - 112f * Dp, y, CollectionDeleteAction(slot), PropertiesDanger);
-        AddSmallAction(elements, $"songselect-collection-{slot}-toggle", collection.ContainsSelectedSet ? UiMaterialIcon.Minus : UiMaterialIcon.Plus, x + width - 56f * Dp, y, CollectionToggleAction(slot), White);
+        AddSmallAction(elements, $"songselect-collection-{slot}-delete", UiMaterialIcon.Delete, x + width - 112f * Dp, y, CollectionDeleteAction(slot), s_propertiesDanger);
+        AddSmallAction(elements, $"songselect-collection-{slot}-toggle", collection.ContainsSelectedSet ? UiMaterialIcon.Minus : UiMaterialIcon.Plus, x + width - 56f * Dp, y, CollectionToggleAction(slot), s_white);
     }
 
     private static void AddSmallAction(List<UiElementSnapshot> elements, string id, UiMaterialIcon icon, float x, float y, UiAction action, UiColor color)
     {
-        elements.Add(Fill(id + "-hit", new UiRect(x, y, 56f * Dp, CollectionRowHeight), PropertiesPanel, 1f, action));
+        elements.Add(Fill(id + "-hit", new UiRect(x, y, 56f * Dp, CollectionRowHeight), s_propertiesPanel, 1f, action));
         elements.Add(MaterialIcon(id, icon, new UiRect(x + 16f * Dp, y + 18f * Dp, 24f * Dp, 24f * Dp), color, 1f, action));
     }
 
-    private static void AddConfirmPanel(List<UiElementSnapshot> elements, VirtualViewport viewport, string id, string title, string message, UiAction confirmAction, UiAction cancelAction)
+    private void AddConfirmPanel(List<UiElementSnapshot> elements, VirtualViewport viewport, string id, string title, string message, UiAction confirmAction, UiAction cancelAction)
     {
         elements.Add(Fill(id + "-shade", new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), new UiColor(0, 0, 0, 96), 1f, cancelAction));
-        var width = 300f * Dp;
-        var height = 150f * Dp;
+        float width = 300f * Dp;
+        float height = 150f * Dp;
         var panel = new UiRect((viewport.VirtualWidth - width) / 2f, (viewport.VirtualHeight - height) / 2f, width, height);
-        elements.Add(Fill(id + "-panel", panel, PropertiesPanel, 1f, UiAction.SongSelectPropertiesPanel, 14f * Dp));
-        AddPropertiesRowText(elements, id + "-title", title, panel.X, panel.Y, panel.Width, 44f * Dp, 15f * Dp, White, UiAction.SongSelectPropertiesPanel);
-        AddPropertiesRowText(elements, id + "-message", message, panel.X, panel.Y + 44f * Dp, panel.Width, 44f * Dp, 14f * Dp, PropertiesSecondary, UiAction.SongSelectPropertiesPanel);
-        AddFullWidthRow(elements, id + "-yes", "Yes", panel.X, panel.Y + 88f * Dp, panel.Width / 2f, confirmAction, PropertiesDanger);
-        AddFullWidthRow(elements, id + "-no", "No", panel.X + panel.Width / 2f, panel.Y + 88f * Dp, panel.Width / 2f, cancelAction, White);
+        elements.Add(Fill(id + "-panel", panel, s_propertiesPanel, 1f, UiAction.SongSelectPropertiesPanel, 14f * Dp));
+        AddPropertiesRowText(elements, id + "-title", title, panel.X, panel.Y, panel.Width, 44f * Dp, 15f * Dp, s_white, UiAction.SongSelectPropertiesPanel);
+        AddPropertiesRowText(elements, id + "-message", message, panel.X, panel.Y + 44f * Dp, panel.Width, 44f * Dp, 14f * Dp, s_propertiesSecondary, UiAction.SongSelectPropertiesPanel);
+        AddFullWidthRow(elements, id + "-yes", _localizer["Common_Yes"], panel.X, panel.Y + 88f * Dp, panel.Width / 2f, confirmAction, s_propertiesDanger);
+        AddFullWidthRow(elements, id + "-no", _localizer["Common_No"], panel.X + panel.Width / 2f, panel.Y + 88f * Dp, panel.Width / 2f, cancelAction, s_white);
     }
 
     private static void AddFullWidthRow(List<UiElementSnapshot> elements, string id, string text, float x, float y, float width, UiAction action, UiColor color)
     {
-        elements.Add(Fill(id + "-hit", new UiRect(x, y, width, PropertiesRowHeight), PropertiesPanel, 1f, action));
+        elements.Add(Fill(id + "-hit", new UiRect(x, y, width, PropertiesRowHeight), s_propertiesPanel, 1f, action));
         elements.Add(TextMiddle(id, text, x + 16f * Dp, y, width - 32f * Dp, PropertiesRowHeight, 15f * Dp, color, UiTextAlignment.Left, action));
     }
 
     private static void AddIconRow(List<UiElementSnapshot> elements, string id, UiMaterialIcon icon, string text, float x, float y, float width, UiAction action, UiColor color)
     {
-        elements.Add(Fill(id + "-hit", new UiRect(x, y, width, PropertiesRowHeight), PropertiesPanel, 1f, action));
+        elements.Add(Fill(id + "-hit", new UiRect(x, y, width, PropertiesRowHeight), s_propertiesPanel, 1f, action));
         elements.Add(MaterialIcon(id + "-icon", icon, new UiRect(x + 24f * Dp, y + 14f * Dp, 24f * Dp, 24f * Dp), color, 1f, action));
         elements.Add(TextMiddle(id, text, x + 58f * Dp, y, width - 74f * Dp, PropertiesRowHeight, 15f * Dp, color, UiTextAlignment.Left, action));
     }
 
     private static void AddOptionsButton(List<UiElementSnapshot> elements, string id, UiRect bounds, UiMaterialIcon icon, string text, UiAction action, UiColor iconColor)
     {
-        elements.Add(Fill(id + "-hit", bounds, PropertiesPanel, 0f, action));
-        var iconX = bounds.X + BeatmapOptionsHorizontalPadding;
+        elements.Add(Fill(id + "-hit", bounds, s_propertiesPanel, 0f, action));
+        float iconX = bounds.X + BeatmapOptionsHorizontalPadding;
         if (text.Length == 0)
+        {
             iconX = bounds.X + (bounds.Width - BeatmapOptionsIconSize) / 2f;
+        }
+
         elements.Add(MaterialIcon(id + "-icon", icon, new UiRect(iconX, bounds.Y + 14f * Dp, BeatmapOptionsIconSize, BeatmapOptionsIconSize), iconColor, 1f, action));
         if (text.Length > 0)
-            elements.Add(TextMiddle(id, text, bounds.X + BeatmapOptionsHorizontalPadding + BeatmapOptionsIconSize + BeatmapOptionsDrawableGap, bounds.Y, bounds.Width - BeatmapOptionsHorizontalPadding * 2f - BeatmapOptionsIconSize - BeatmapOptionsDrawableGap, bounds.Height, BeatmapOptionsTextSize, White, UiTextAlignment.Left, action));
+        {
+            elements.Add(TextMiddle(id, text, bounds.X + BeatmapOptionsHorizontalPadding + BeatmapOptionsIconSize + BeatmapOptionsDrawableGap, bounds.Y, bounds.Width - BeatmapOptionsHorizontalPadding * 2f - BeatmapOptionsIconSize - BeatmapOptionsDrawableGap, bounds.Height, BeatmapOptionsTextSize, s_white, UiTextAlignment.Left, action));
+        }
     }
 
     private static void AddOptionsDivider(List<UiElementSnapshot> elements, string id, float x, float y) =>
-        elements.Add(Fill(id, new UiRect(x, y, BeatmapOptionsDividerWidth, BeatmapOptionsRowHeight), BeatmapOptionsDivider, 1f));
+        elements.Add(Fill(id, new UiRect(x, y, BeatmapOptionsDividerWidth, BeatmapOptionsRowHeight), s_beatmapOptionsDivider, 1f));
 
     private static float IconOnlyOptionsButtonWidth() => BeatmapOptionsHorizontalPadding * 2f + BeatmapOptionsIconSize;
 
@@ -231,23 +259,23 @@ public sealed partial class SongSelectScene
         elements.Add(TextMiddle(id, text, x, y, width, height, size, color, UiTextAlignment.Center, action));
 
     private static void AddDivider(List<UiElementSnapshot> elements, string id, float x, float y, float width) =>
-        elements.Add(Fill(id, new UiRect(x, y, width, 1f * Dp), PropertiesDivider, 1f));
+        elements.Add(Fill(id, new UiRect(x, y, width, 1f * Dp), s_propertiesDivider, 1f));
 
     private static UiRect BeatmapOptionsSearchBounds(VirtualViewport viewport)
     {
-        var width = Math.Min(BeatmapOptionsWidth, viewport.VirtualWidth - 120f * Dp);
+        float width = Math.Min(BeatmapOptionsWidth, viewport.VirtualWidth - 120f * Dp);
         return new UiRect((viewport.VirtualWidth - width) / 2f, 8f * Dp, width, BeatmapOptionsSearchHeight);
     }
 
-    private static string SortLabel(SongSelectSortMode mode) => mode switch
+    private string SortLabel(SongSelectSortMode mode) => mode switch
     {
-        SongSelectSortMode.Artist => "Artist",
-        SongSelectSortMode.Creator => "Creator",
-        SongSelectSortMode.Date => "Date",
-        SongSelectSortMode.Bpm => "BPM",
-        SongSelectSortMode.DroidStars => "Droid ★",
-        SongSelectSortMode.StandardStars => "Std ★",
-        SongSelectSortMode.Length => "Length",
-        _ => "Title",
+        SongSelectSortMode.Artist => _localizer["Sort_Artist"],
+        SongSelectSortMode.Creator => _localizer["Sort_Creator"],
+        SongSelectSortMode.Date => _localizer["Sort_Date"],
+        SongSelectSortMode.Bpm => _localizer["Sort_Bpm"],
+        SongSelectSortMode.DroidStars => _localizer["Sort_DroidStars"],
+        SongSelectSortMode.StandardStars => _localizer["Sort_StandardStars"],
+        SongSelectSortMode.Length => _localizer["Sort_Length"],
+        _ => _localizer["Sort_Title"],
     };
 }

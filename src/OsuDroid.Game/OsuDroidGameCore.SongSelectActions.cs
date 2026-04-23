@@ -1,42 +1,42 @@
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
+using OsuDroid.Game.Beatmaps.Difficulty;
 
 namespace OsuDroid.Game;
 
 public sealed partial class OsuDroidGameCore
 {
+#pragma warning disable IDE0072 // UiAction has cross-scene members; Song Select handles only its own actions.
     private bool HandleSongSelectUiAction(UiAction action, VirtualViewport viewport) => action switch
     {
         UiAction.SongSelectBack => Do(() => BackToMainMenu(MainMenuReturnTransition.SongSelectBack)),
-        UiAction.SongSelectBeatmapOptions => Do(songSelect.OpenBeatmapOptions),
-        UiAction.SongSelectBeatmapOptionsSearch => Do(() => songSelect.FocusBeatmapOptionsSearch(viewport)),
-        UiAction.SongSelectBeatmapOptionsFavorite => Do(songSelect.ToggleBeatmapOptionsFavoriteOnly),
+        UiAction.SongSelectBeatmapOptions => Do(_songSelect.OpenBeatmapOptions),
+        UiAction.SongSelectBeatmapOptionsSearch => Do(() => _songSelect.FocusBeatmapOptionsSearch(viewport)),
+        UiAction.SongSelectBeatmapOptionsFavorite => Do(_songSelect.ToggleBeatmapOptionsFavoriteOnly),
         UiAction.SongSelectBeatmapOptionsAlgorithm => Do(ToggleSongSelectDifficultyAlgorithm),
-        UiAction.SongSelectBeatmapOptionsSort => Do(songSelect.CycleBeatmapOptionsSort),
-        UiAction.SongSelectBeatmapOptionsFolder => Do(songSelect.ToggleCollectionFilterPicker),
-        UiAction.SongSelectRandom => Do(songSelect.SelectRandomSet),
-        UiAction.SongSelectPropertiesDismiss => Do(songSelect.ClosePopups),
+        UiAction.SongSelectBeatmapOptionsSort => Do(_songSelect.CycleBeatmapOptionsSort),
+        UiAction.SongSelectBeatmapOptionsFolder => Do(_songSelect.ToggleCollectionFilterPicker),
+        UiAction.SongSelectRandom => Do(_songSelect.SelectRandomSet),
+        UiAction.SongSelectPropertiesDismiss => Do(_songSelect.ClosePopups),
         UiAction.SongSelectPropertiesPanel => true,
-        UiAction.SongSelectPropertiesOffsetInput => Do(() => songSelect.FocusOffsetInput(viewport)),
-        UiAction.SongSelectPropertiesOffsetMinus => Do(() => songSelect.AdjustOffset(-1)),
-        UiAction.SongSelectPropertiesOffsetPlus => Do(() => songSelect.AdjustOffset(1)),
-        UiAction.SongSelectPropertiesFavorite => Do(songSelect.ToggleFavorite),
-        UiAction.SongSelectPropertiesManageCollections => Do(songSelect.OpenCollections),
-        UiAction.SongSelectPropertiesDelete => Do(songSelect.RequestDeleteBeatmap),
-        UiAction.SongSelectPropertiesDeleteConfirm => Do(songSelect.ConfirmDeleteBeatmap),
-        UiAction.SongSelectPropertiesDeleteCancel => Do(songSelect.CancelDeleteBeatmap),
-        UiAction.SongSelectCollectionsNewFolder => Do(() => songSelect.FocusNewCollectionInput(viewport)),
-        UiAction.SongSelectCollectionsClose => Do(songSelect.CloseCollections),
-        UiAction.SongSelectCollectionDeleteConfirm => Do(songSelect.ConfirmDeleteCollection),
-        UiAction.SongSelectCollectionDeleteCancel => Do(songSelect.CancelDeleteCollection),
+        UiAction.SongSelectPropertiesOffsetInput => Do(() => _songSelect.FocusOffsetInput(viewport)),
+        UiAction.SongSelectPropertiesOffsetMinus => Do(() => _songSelect.AdjustOffset(-1)),
+        UiAction.SongSelectPropertiesOffsetPlus => Do(() => _songSelect.AdjustOffset(1)),
+        UiAction.SongSelectPropertiesFavorite => Do(_songSelect.ToggleFavorite),
+        UiAction.SongSelectPropertiesManageCollections => Do(_songSelect.OpenCollections),
+        UiAction.SongSelectPropertiesDelete => Do(_songSelect.RequestDeleteBeatmap),
+        UiAction.SongSelectPropertiesDeleteConfirm => Do(_songSelect.ConfirmDeleteBeatmap),
+        UiAction.SongSelectPropertiesDeleteCancel => Do(_songSelect.CancelDeleteBeatmap),
+        UiAction.SongSelectCollectionsNewFolder => Do(() => _songSelect.FocusNewCollectionInput(viewport)),
+        UiAction.SongSelectCollectionsClose => Do(_songSelect.CloseCollections),
+        UiAction.SongSelectCollectionDeleteConfirm => Do(_songSelect.ConfirmDeleteCollection),
+        UiAction.SongSelectCollectionDeleteCancel => Do(_songSelect.CancelDeleteCollection),
         _ => false,
     };
 
     private void ToggleSongSelectDifficultyAlgorithm()
     {
-        var algorithm = songSelect.ToggleBeatmapOptionsAlgorithm();
-        var storedValue = algorithm == Beatmaps.Difficulty.DifficultyAlgorithm.Standard ? 1 : 0;
-        settingsStore.SetInt("difficultyAlgorithm", storedValue);
-        options.SetIntValue("difficultyAlgorithm", storedValue);
+        DifficultyAlgorithm algorithm = _songSelect.ToggleBeatmapOptionsAlgorithm();
+        int storedValue = algorithm == Beatmaps.Difficulty.DifficultyAlgorithm.Standard ? 1 : 0;
+        _settingsStore.SetInt("difficultyAlgorithm", storedValue);
+        _options.SetIntValue("difficultyAlgorithm", storedValue);
     }
 }

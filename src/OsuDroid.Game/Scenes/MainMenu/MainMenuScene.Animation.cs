@@ -1,14 +1,13 @@
-using OsuDroid.Game.UI;
-
-namespace OsuDroid.Game.Scenes;
+namespace OsuDroid.Game.Scenes.MainMenu;
 
 public sealed partial class MainMenuScene
 {
+#pragma warning disable IDE0072 // Fallback arms are intentional for scene state defaults.
     private UiRect GetLogoBounds(VirtualViewport viewport)
     {
-        var collapsed = GetCenteredLogoBounds(viewport);
-        var expanded = GetExpandedLogoBounds(viewport);
-        var progress = GetMenuTransitionProgress();
+        UiRect collapsed = GetCenteredLogoBounds(viewport);
+        UiRect expanded = GetExpandedLogoBounds();
+        float progress = GetMenuTransitionProgress();
         return new UiRect(
             Lerp(collapsed.X, expanded.X, progress),
             Lerp(collapsed.Y, expanded.Y, progress),
@@ -18,73 +17,84 @@ public sealed partial class MainMenuScene
 
     private static UiRect GetCenteredLogoBounds(VirtualViewport viewport)
     {
-        var logoSize = ExpandedLogoReferenceSize / MainMenuReferenceToVirtualScale;
+        float logoSize = ExpandedLogoReferenceSize / MainMenuReferenceToVirtualScale;
         return new UiRect((viewport.VirtualWidth - logoSize) / 2f, (viewport.VirtualHeight - logoSize) / 2f, logoSize, logoSize);
     }
 
-    private static UiRect GetExpandedLogoBounds(VirtualViewport viewport) => ReferenceRect(ExpandedLogoReferenceX, ExpandedLogoReferenceY, ExpandedLogoReferenceSize, ExpandedLogoReferenceSize);
+    private static UiRect GetExpandedLogoBounds() => ReferenceRect(ExpandedLogoReferenceX, ExpandedLogoReferenceY, ExpandedLogoReferenceSize, ExpandedLogoReferenceSize);
 
-    private float GetMenuTransitionProgress() => menuVisibility switch
+    private float GetMenuTransitionProgress() => _menuVisibility switch
     {
         MenuVisibility.Collapsed => 0f,
-        MenuVisibility.Expanding => EaseOutExpo((float)Math.Clamp(transitionMilliseconds / MenuExpandDurationMilliseconds, 0d, 1d)),
+        MenuVisibility.Expanding => EaseOutExpo((float)Math.Clamp(_transitionMilliseconds / MenuExpandDurationMilliseconds, 0d, 1d)),
         MenuVisibility.Expanded => 1f,
-        MenuVisibility.Collapsing => 1f - EaseOutBounce((float)Math.Clamp(transitionMilliseconds / MenuCollapseDurationMilliseconds, 0d, 1d)),
+        MenuVisibility.Collapsing => 1f - EaseOutBounce((float)Math.Clamp(_transitionMilliseconds / MenuCollapseDurationMilliseconds, 0d, 1d)),
         MenuVisibility.Exiting => 1f,
         _ => 0f,
     };
 
-    private float GetMenuButtonAlpha() => menuVisibility switch
+    private float GetMenuButtonAlpha() => _menuVisibility switch
     {
-        MenuVisibility.Expanding => 0.9f * EaseOutCubic((float)Math.Clamp(transitionMilliseconds / MenuExpandDurationMilliseconds, 0d, 1d)),
+        MenuVisibility.Collapsed => 0f,
+        MenuVisibility.Expanding => 0.9f * EaseOutCubic((float)Math.Clamp(_transitionMilliseconds / MenuExpandDurationMilliseconds, 0d, 1d)),
         MenuVisibility.Expanded => 0.9f,
-        MenuVisibility.Collapsing => 0.9f * (1f - EaseOutExpo((float)Math.Clamp(transitionMilliseconds / MenuCollapseDurationMilliseconds, 0d, 1d))),
+        MenuVisibility.Collapsing => 0.9f * (1f - EaseOutExpo((float)Math.Clamp(_transitionMilliseconds / MenuCollapseDurationMilliseconds, 0d, 1d))),
+        MenuVisibility.Exiting => 0f,
         _ => 0f,
     };
 
     private float GetAnimatedMenuButtonX(float finalX)
     {
-        return menuVisibility switch
+        return _menuVisibility switch
         {
-            MenuVisibility.Expanding => Lerp(finalX - ButtonExpandOffset / MainMenuReferenceToVirtualScale, finalX, EaseOutElastic((float)Math.Clamp(transitionMilliseconds / 500d, 0d, 1d))),
-            MenuVisibility.Collapsing => Lerp(finalX, finalX - ButtonCollapseOffset / MainMenuReferenceToVirtualScale, EaseOutExpo((float)Math.Clamp(transitionMilliseconds / MenuCollapseDurationMilliseconds, 0d, 1d))),
+            MenuVisibility.Collapsed => finalX,
+            MenuVisibility.Expanding => Lerp(finalX - ButtonExpandOffset / MainMenuReferenceToVirtualScale, finalX, EaseOutElastic((float)Math.Clamp(_transitionMilliseconds / 500d, 0d, 1d))),
+            MenuVisibility.Expanded => finalX,
+            MenuVisibility.Collapsing => Lerp(finalX, finalX - ButtonCollapseOffset / MainMenuReferenceToVirtualScale, EaseOutExpo((float)Math.Clamp(_transitionMilliseconds / MenuCollapseDurationMilliseconds, 0d, 1d))),
+            MenuVisibility.Exiting => finalX,
             _ => finalX,
         };
     }
 
     private float GetLogoHeartbeatScale()
     {
-        if (heartbeatMilliseconds < 0d)
+        if (_heartbeatMilliseconds < 0d)
+        {
             return 1f;
+        }
 
-        var growDuration = currentBeatMilliseconds * 0.9d;
-        var shrinkDuration = currentBeatMilliseconds * 0.07d;
-        if (heartbeatMilliseconds <= growDuration)
-            return Lerp(1f, LogoBeatScale, (float)(heartbeatMilliseconds / growDuration));
+        double growDuration = _currentBeatMilliseconds * 0.9d;
+        double shrinkDuration = _currentBeatMilliseconds * 0.07d;
+        if (_heartbeatMilliseconds <= growDuration)
+        {
+            return Lerp(1f, LogoBeatScale, (float)(_heartbeatMilliseconds / growDuration));
+        }
 
-        var shrinkProgress = (float)Math.Clamp((heartbeatMilliseconds - growDuration) / shrinkDuration, 0d, 1d);
+        float shrinkProgress = (float)Math.Clamp((_heartbeatMilliseconds - growDuration) / shrinkDuration, 0d, 1d);
         return Lerp(LogoBeatScale, 1f, shrinkProgress);
     }
 
-    private float GetExitProgress() => menuVisibility == MenuVisibility.Exiting
-        ? (float)Math.Clamp(exitMilliseconds / ExitAnimationMilliseconds, 0d, 1d)
+    private float GetExitProgress() => _menuVisibility == MenuVisibility.Exiting
+        ? (float)Math.Clamp(_exitMilliseconds / ExitAnimationMilliseconds, 0d, 1d)
         : 0f;
 
     private UiColor GetPressedColor(UiAction action)
     {
-        if (action == UiAction.None || pressedAction != action)
-            return white;
+        if (action == UiAction.None || _pressedAction != action)
+        {
+            return s_white;
+        }
 
-        var channel = (byte)MathF.Round(byte.MaxValue * PressTint);
+        byte channel = (byte)MathF.Round(byte.MaxValue * PressTint);
         return UiColor.Opaque(channel, channel, channel);
     }
 
-    private string GetVersionText() => $"osu!droid {displayVersion}";
+    private string GetVersionText() => $"osu!droid {_displayVersion}";
 
     private static UiRect CreateVersionPillBounds(VirtualViewport viewport, string text)
     {
-        var width = EstimateVersionTextWidth(text) + VersionPillTextXInset * 2f;
-        var height = VersionPillTextHeight + VersionPillTextYInset * 2f;
+        float width = EstimateVersionTextWidth(text) + VersionPillTextXInset * 2f;
+        float height = VersionPillTextHeight + VersionPillTextYInset * 2f;
         return new UiRect(VersionPillMargin, viewport.VirtualHeight - height - VersionPillMargin, width, height);
     }
 
@@ -105,9 +115,14 @@ public sealed partial class MainMenuScene
     private static float EaseOutElastic(float progress)
     {
         if (progress <= 0f)
+        {
             return 0f;
+        }
+
         if (progress >= 1f)
+        {
             return 1f;
+        }
 
         const float period = 2f * MathF.PI / 3f;
         return MathF.Pow(2f, -10f * progress) * MathF.Sin((progress * 10f - 0.75f) * period) + 1f;
@@ -118,23 +133,24 @@ public sealed partial class MainMenuScene
         const float bounce = 7.5625f;
         const float divisor = 2.75f;
 
-        if (progress < 1f / divisor)
-            return bounce * progress * progress;
-        if (progress < 2f / divisor)
-            return bounce * (progress -= 1.5f / divisor) * progress + 0.75f;
-        if (progress < 2.5f / divisor)
-            return bounce * (progress -= 2.25f / divisor) * progress + 0.9375f;
-        return bounce * (progress -= 2.625f / divisor) * progress + 0.984375f;
+        return progress < 1f / divisor
+            ? bounce * progress * progress
+            : progress < 2f / divisor
+            ? bounce * (progress -= 1.5f / divisor) * progress + 0.75f
+            : progress < 2.5f / divisor
+            ? bounce * (progress -= 2.25f / divisor) * progress + 0.9375f
+            : bounce * (progress -= 2.625f / divisor) * progress + 0.984375f;
     }
 
     private static UiRect ScaleFromCenter(UiRect bounds, float scale)
     {
-        var width = bounds.Width * scale;
-        var height = bounds.Height * scale;
+        float width = bounds.Width * scale;
+        float height = bounds.Height * scale;
         return new UiRect(
             bounds.X - (width - bounds.Width) / 2f,
             bounds.Y - (height - bounds.Height) / 2f,
             width,
             height);
     }
+#pragma warning restore IDE0072
 }

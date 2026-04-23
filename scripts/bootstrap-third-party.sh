@@ -21,15 +21,8 @@ fi
 
 mkdir -p "$root_dir/third_party"
 
-clone_if_missing() {
-  path="$1"
-  remote="$2"
-
-  if [ ! -d "$root_dir/$path/.git" ]; then
-    "$git_bin" clone "$remote" "$root_dir/$path"
-  fi
-}
-
-clone_if_missing "third_party/osu-droid-legacy" "https://github.com/osudroid/osu-droid.git"
+"$git_bin" -C "$root_dir" submodule sync --recursive
+"$git_bin" -C "$root_dir" submodule update --init --recursive third_party/osu-droid-legacy
+"$git_bin" -C "$root_dir" submodule update --init --recursive third_party/osu-droid-language-pack
 
 echo "third_party checkouts prepared under $root_dir/third_party"

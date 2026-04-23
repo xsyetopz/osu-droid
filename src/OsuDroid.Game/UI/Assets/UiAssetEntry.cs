@@ -1,4 +1,4 @@
-namespace OsuDroid.Game.UI;
+namespace OsuDroid.Game.UI.Assets;
 
 public sealed record UiAssetEntry(
     string LogicalName,

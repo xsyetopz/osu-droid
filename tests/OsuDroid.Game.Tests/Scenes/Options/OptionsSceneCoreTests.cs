@@ -1,10 +1,7 @@
-using OsuDroid.Game;
 using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Localization;
 using OsuDroid.Game.Runtime;
 using OsuDroid.Game.Runtime.Paths;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Tests;
 
@@ -19,8 +16,8 @@ public sealed partial class OptionsSceneTests
         scene.HandleAction(UiAction.OptionsSectionAudio, viewport);
         scene.Scroll(160f, viewport);
 
-        var warmup = scene.CreateSnapshotForSection(OptionsSection.Advanced, viewport);
-        var active = scene.CreateSnapshot(viewport);
+        GameFrameSnapshot warmup = scene.CreateSnapshotForSection(OptionsSection.Advanced, viewport);
+        GameFrameSnapshot active = scene.CreateSnapshot(viewport);
 
         Assert.That(warmup.SelectedIndex, Is.EqualTo((int)OptionsSection.Advanced));
         Assert.That(scene.ActiveSection, Is.EqualTo(OptionsSection.Audio));
@@ -30,7 +27,7 @@ public sealed partial class OptionsSceneTests
     [Test]
     public void CoreRoutesMainMenuOptionsToOptionsSceneBackAndScrolls()
     {
-        var path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"options-core-{Guid.NewGuid():N}");
+        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"options-core-{Guid.NewGuid():N}");
         try
         {
             var core = OsuDroidGameCore.Create(path, "debug");
@@ -42,9 +39,9 @@ public sealed partial class OptionsSceneTests
             Assert.That(core.TapMainMenu(MainMenuButtonSlot.Second), Is.EqualTo(MainMenuRoute.Settings));
             Assert.That(core.CreateFrame(viewport).Scene, Is.EqualTo("Options"));
 
-            var beforeScroll = core.CreateFrame(viewport).UiFrame.Elements.Single(element => element.Id == "options-row-0");
+            UiElementSnapshot beforeScroll = core.CreateFrame(viewport).UiFrame.Elements.Single(element => element.Id == "options-row-0");
             core.ScrollActiveScene(160f, contentPoint, viewport);
-            var afterScroll = core.CreateFrame(viewport).UiFrame.Elements.Single(element => element.Id == "options-row-0");
+            UiElementSnapshot afterScroll = core.CreateFrame(viewport).UiFrame.Elements.Single(element => element.Id == "options-row-0");
             Assert.That(afterScroll.Bounds.Y, Is.LessThan(beforeScroll.Bounds.Y));
 
             core.HandleUiAction(UiAction.OptionsBack);
@@ -54,23 +51,25 @@ public sealed partial class OptionsSceneTests
         finally
         {
             if (Directory.Exists(path))
+            {
                 Directory.Delete(path, true);
+            }
         }
     }
     [Test]
     public void CoreWarmupFramesIncludeMainMenuAboutAndEveryOptionsSection()
     {
-        var path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"options-warmup-{Guid.NewGuid():N}");
+        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"options-warmup-{Guid.NewGuid():N}");
         try
         {
             var core = OsuDroidGameCore.Create(path, "debug");
             var viewport = VirtualViewport.FromSurface(1280, 720);
 
-            var frames = core.CreateWarmupFrames(viewport);
-            var optionFrames = frames
+            IReadOnlyList<UiFrameSnapshot> frames = core.CreateWarmupFrames(viewport);
+            UiFrameSnapshot[] optionFrames = frames
                 .Where(frame => frame.Elements.Any(element => element.Id == "options-root"))
                 .ToArray();
-            var selectedActions = optionFrames
+            UiAction[] selectedActions = optionFrames
                 .Select(frame => frame.Elements.Single(element => element.Id == "options-section-selected").Action)
                 .ToArray();
 
@@ -82,13 +81,15 @@ public sealed partial class OptionsSceneTests
         finally
         {
             if (Directory.Exists(path))
+            {
                 Directory.Delete(path, true);
+            }
         }
     }
     [Test]
     public void CoreWarmupFramesDoNotChangeActiveScene()
     {
-        var path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"options-warmup-scene-{Guid.NewGuid():N}");
+        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"options-warmup-scene-{Guid.NewGuid():N}");
         try
         {
             var core = OsuDroidGameCore.Create(path, "debug");
@@ -105,21 +106,23 @@ public sealed partial class OptionsSceneTests
 
             _ = core.CreateWarmupFrames(viewport);
 
-            var frame = core.CreateFrame(viewport);
+            GameFrameSnapshot frame = core.CreateFrame(viewport);
             Assert.That(frame.Scene, Is.EqualTo("Options"));
             Assert.That(frame.SelectedIndex, Is.EqualTo((int)OptionsSection.Audio));
         }
         finally
         {
             if (Directory.Exists(path))
+            {
                 Directory.Delete(path, true);
+            }
         }
     }
 
     [Test]
     public void CoreAppliesOptionsVolumeSlidersToRuntimeAudioPlayers()
     {
-        var path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"options-volume-{Guid.NewGuid():N}");
+        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"options-volume-{Guid.NewGuid():N}");
         try
         {
             var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(path));
@@ -151,7 +154,9 @@ public sealed partial class OptionsSceneTests
         finally
         {
             if (Directory.Exists(path))
+            {
                 Directory.Delete(path, true);
+            }
         }
     }
 

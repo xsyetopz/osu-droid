@@ -1,9 +1,3 @@
-using OsuDroid.Game;
-using OsuDroid.Game.Compatibility.Database;
-using OsuDroid.Game.Localization;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
-
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class OptionsSceneTests

@@ -1,9 +1,3 @@
-using OsuDroid.Game.Compatibility.Database;
-using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Runtime.Paths;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
-
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
@@ -12,7 +6,9 @@ public sealed partial class UiCompatibilityTests
     {
         var directory = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
         while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "OsuDroid.sln")))
+        {
             directory = directory.Parent;
+        }
 
         return directory?.FullName ?? throw new DirectoryNotFoundException("Repository root not found.");
     }
@@ -21,9 +17,11 @@ public sealed partial class UiCompatibilityTests
     {
         const string contentPrefix = "droid/";
         if (!contentName.StartsWith(contentPrefix, StringComparison.Ordinal))
+        {
             throw new ArgumentException($"Unsupported asset content name: {contentName}", nameof(contentName));
+        }
 
-        var relativePath = contentName.Replace('/', Path.DirectorySeparatorChar) + ".png";
+        string relativePath = contentName.Replace('/', Path.DirectorySeparatorChar) + ".png";
         return Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Resources", "Raw", "assets", relativePath);
     }
 

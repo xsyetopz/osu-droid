@@ -27,18 +27,20 @@ public sealed class BeatmapProcessingService(
     IBeatmapLibrary library,
     IGameSettingsStore? settingsStore = null) : IBeatmapProcessingService
 {
-    private readonly object gate = new();
-    private readonly HashSet<string> queuedArchives = new(StringComparer.OrdinalIgnoreCase);
-    private Task? task;
-    private BeatmapProcessingState state = new();
-    private BeatmapLibrarySnapshot? completedSnapshot;
+    private readonly object _gate = new();
+    private readonly HashSet<string> _queuedArchives = new(StringComparer.OrdinalIgnoreCase);
+    private Task? _task;
+    private BeatmapProcessingState _state = new();
+    private BeatmapLibrarySnapshot? _completedSnapshot;
 
     public BeatmapProcessingState State
     {
         get
         {
-            lock (gate)
-                return state;
+            lock (_gate)
+            {
+                return _state;
+            }
         }
     }
 
@@ -47,37 +49,43 @@ public sealed class BeatmapProcessingService(
     public void EnqueueArchive(string archivePath)
     {
         if (string.IsNullOrWhiteSpace(archivePath))
+        {
             return;
+        }
 
-        lock (gate)
-            queuedArchives.Add(Path.GetFullPath(archivePath));
+        lock (_gate)
+        {
+            _queuedArchives.Add(Path.GetFullPath(archivePath));
+        }
     }
 
     public void Start()
     {
-        lock (gate)
+        lock (_gate)
         {
-            if (task is { IsCompleted: false } || !HasPendingWork())
+            if (_task is { IsCompleted: false } || !HasPendingWork())
+            {
                 return;
+            }
 
-            state = new BeatmapProcessingState(true, 0, "Processing beatmaps...");
-            completedSnapshot = null;
-            task = Task.Run(ProcessPendingWork);
+            _state = new BeatmapProcessingState(true, 0, "Processing beatmaps...");
+            _completedSnapshot = null;
+            _task = Task.Run(ProcessPendingWork);
         }
     }
 
     public bool TryConsumeCompletedSnapshot(out BeatmapLibrarySnapshot snapshot)
     {
-        lock (gate)
+        lock (_gate)
         {
-            if (completedSnapshot is null)
+            if (_completedSnapshot is null)
             {
                 snapshot = BeatmapLibrarySnapshot.Empty;
                 return false;
             }
 
-            snapshot = completedSnapshot;
-            completedSnapshot = null;
+            snapshot = _completedSnapshot;
+            _completedSnapshot = null;
             return true;
         }
     }
@@ -86,12 +94,12 @@ public sealed class BeatmapProcessingService(
     {
         try
         {
-            var archives = EnumeratePendingArchives().ToArray();
-            var needsScan = library.NeedsScanRefresh();
-            var totalSteps = archives.Length + (needsScan ? 1 : 0);
-            var completedSteps = 0;
+            string[] archives = EnumeratePendingArchives().ToArray();
+            bool needsScan = library.NeedsScanRefresh();
+            int totalSteps = archives.Length + (needsScan ? 1 : 0);
+            int completedSteps = 0;
 
-            foreach (var archive in archives)
+            foreach (string? archive in archives)
             {
                 SetState(new BeatmapProcessingState(true, CalculatePercent(completedSteps, totalSteps), "Importing beatmaps..."));
                 _ = importService.ImportOsz(archive, DeleteImportedArchives());
@@ -112,16 +120,18 @@ public sealed class BeatmapProcessingService(
                 snapshot = library.Load();
             }
 
-            lock (gate)
+            lock (_gate)
             {
-                completedSnapshot = snapshot;
-                state = new BeatmapProcessingState(false, 100, "Processing beatmaps...");
+                _completedSnapshot = snapshot;
+                _state = new BeatmapProcessingState(false, 100, "Processing beatmaps...");
             }
         }
         catch
         {
-            lock (gate)
-                state = new BeatmapProcessingState(false, 100, "Processing beatmaps...");
+            lock (_gate)
+            {
+                _state = new BeatmapProcessingState(false, 100, "Processing beatmaps...");
+            }
         }
     }
 
@@ -129,37 +139,49 @@ public sealed class BeatmapProcessingService(
     {
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         string[] queued;
-        lock (gate)
-            queued = queuedArchives.ToArray();
-
-        foreach (var archive in queued.OrderBy(path => path, StringComparer.OrdinalIgnoreCase))
+        lock (_gate)
         {
-            if (File.Exists(archive) && seen.Add(archive))
-                yield return archive;
+            queued = _queuedArchives.ToArray();
         }
 
-        foreach (var archive in EnumeratePendingArchives(paths.Songs))
+        foreach (string? archive in queued.OrderBy(path => path, StringComparer.OrdinalIgnoreCase))
+        {
+            if (File.Exists(archive) && seen.Add(archive))
+            {
+                yield return archive;
+            }
+        }
+
+        foreach (string archive in EnumeratePendingArchives(paths.Songs))
         {
             if (seen.Add(archive))
+            {
                 yield return archive;
+            }
         }
 
         if (!ShouldScanDownloads())
+        {
             yield break;
+        }
 
-        foreach (var archive in EnumeratePendingArchives(paths.Downloads))
+        foreach (string archive in EnumeratePendingArchives(paths.Downloads))
         {
             if (seen.Add(archive))
+            {
                 yield return archive;
+            }
         }
     }
 
     private static IEnumerable<string> EnumeratePendingArchives(string directory)
     {
         if (!Directory.Exists(directory))
+        {
             yield break;
+        }
 
-        foreach (var archive in Directory.EnumerateFiles(directory, "*.osz", SearchOption.TopDirectoryOnly)
+        foreach (string? archive in Directory.EnumerateFiles(directory, "*.osz", SearchOption.TopDirectoryOnly)
                      .OrderBy(path => path, StringComparer.OrdinalIgnoreCase))
         {
             yield return archive;
@@ -172,21 +194,19 @@ public sealed class BeatmapProcessingService(
 
     private void SetState(BeatmapProcessingState next)
     {
-        lock (gate)
-            state = next;
+        lock (_gate)
+        {
+            _state = next;
+        }
     }
 
     private void ClearQueuedArchive(string archivePath)
     {
-        lock (gate)
-            queuedArchives.Remove(archivePath);
+        lock (_gate)
+        {
+            _queuedArchives.Remove(archivePath);
+        }
     }
 
-    private static int CalculatePercent(int completedSteps, int totalSteps)
-    {
-        if (totalSteps <= 0)
-            return 100;
-
-        return Math.Clamp((int)MathF.Round(completedSteps * 100f / totalSteps), 0, 100);
-    }
+    private static int CalculatePercent(int completedSteps, int totalSteps) => totalSteps <= 0 ? 100 : Math.Clamp((int)MathF.Round(completedSteps * 100f / totalSteps), 0, 100);
 }

@@ -1,8 +1,4 @@
-using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Runtime;
-using OsuDroid.Game.Runtime.Paths;
-using OsuDroid.Game.Scenes;
-using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Tests;
 
@@ -14,23 +10,23 @@ public sealed partial class UiCompatibilityTests
     {
         var viewport = VirtualViewport.FromSurface(1280, 720);
         var scene = new MainMenuScene(nowPlaying: new MenuNowPlayingState("artist - title", true));
-        var spectrum = new float[512];
+        float[] spectrum = new float[512];
         Array.Fill(spectrum, 1f);
         scene.SetSpectrum(spectrum, true);
         scene.Update(TimeSpan.FromMilliseconds(16));
 
-        var collapsed = scene.CreateSnapshot(viewport).UiFrame;
-        var collapsedLogo = collapsed.Elements.Single(element => element.Id == "logo");
-        var collapsedSpectrum = collapsed.Elements.First(element => element.Id.StartsWith("logo-spectrum-", StringComparison.Ordinal));
+        UiFrameSnapshot collapsed = scene.CreateSnapshot(viewport).UiFrame;
+        UiElementSnapshot collapsedLogo = collapsed.Elements.Single(element => element.Id == "logo");
+        UiElementSnapshot collapsedSpectrum = collapsed.Elements.First(element => element.Id.StartsWith("logo-spectrum-", StringComparison.Ordinal));
         Assert.That(collapsedSpectrum.Bounds.X, Is.EqualTo(collapsedLogo.Bounds.X + collapsedLogo.Bounds.Width / 2f).Within(0.001f));
 
         scene.ToggleCookie();
         scene.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
         scene.SetSpectrum(spectrum, true);
         scene.Update(TimeSpan.FromMilliseconds(16));
-        var expanded = scene.CreateSnapshot(viewport).UiFrame;
-        var expandedLogo = expanded.Elements.Single(element => element.Id == "logo");
-        var expandedSpectrum = expanded.Elements.First(element => element.Id.StartsWith("logo-spectrum-", StringComparison.Ordinal));
+        UiFrameSnapshot expanded = scene.CreateSnapshot(viewport).UiFrame;
+        UiElementSnapshot expandedLogo = expanded.Elements.Single(element => element.Id == "logo");
+        UiElementSnapshot expandedSpectrum = expanded.Elements.First(element => element.Id.StartsWith("logo-spectrum-", StringComparison.Ordinal));
 
         Assert.That(expandedSpectrum.Bounds.X, Is.EqualTo(expandedLogo.Bounds.X + expandedLogo.Bounds.Width / 2f).Within(0.001f));
     }
@@ -38,9 +34,9 @@ public sealed partial class UiCompatibilityTests
     public void MainMenuOnlyDrawsNowPlayingTextWhenTrackStateExists()
     {
         var viewport = VirtualViewport.FromSurface(1280, 720);
-        var emptyFrame = new MainMenuScene().CreateSnapshot(viewport).UiFrame;
-        var populatedFrame = new MainMenuScene(nowPlaying: new MenuNowPlayingState("artist - title", false)).CreateSnapshot(viewport).UiFrame;
-        var title = populatedFrame.Elements.Single(element => element.Id == "music-title");
+        UiFrameSnapshot emptyFrame = new MainMenuScene().CreateSnapshot(viewport).UiFrame;
+        UiFrameSnapshot populatedFrame = new MainMenuScene(nowPlaying: new MenuNowPlayingState("artist - title", false)).CreateSnapshot(viewport).UiFrame;
+        UiElementSnapshot title = populatedFrame.Elements.Single(element => element.Id == "music-title");
 
         Assert.That(emptyFrame.Elements.Any(element => element.Id == "music-title"), Is.False);
         Assert.That(title.Text, Is.EqualTo("artist - title"));
@@ -50,29 +46,46 @@ public sealed partial class UiCompatibilityTests
         Assert.That(title.Bounds.Right, Is.EqualTo(MainMenuScene.MusicNowPlayingTextRight));
         Assert.That(title.Bounds.Right, Is.LessThanOrEqualTo(VirtualViewport.LegacyWidth));
 
-        var panel = populatedFrame.Elements.Single(element => element.Id == "music-now-playing");
+        UiElementSnapshot panel = populatedFrame.Elements.Single(element => element.Id == "music-now-playing");
         Assert.That(panel.MeasuredTextAnchor, Is.Not.Null);
         Assert.That(panel.MeasuredTextAnchor!.Text, Is.EqualTo("artist - title"));
         Assert.That(panel.MeasuredTextAnchor.RightX, Is.EqualTo(MainMenuScene.MusicNowPlayingTextRight));
         Assert.That(panel.MeasuredTextAnchor.LeftPadding, Is.EqualTo(MainMenuScene.MusicNowPlayingSpriteLeftPadding));
     }
+
+    [Test]
+    public void MainMenuNowPlayingTitleUsesAndroidCharacterEllipsis()
+    {
+        const string legacyTitle = "UNDEAD CORPORATION - Embraced by the Flame";
+        const string expectedTitle = "UNDEAD CORPORATION - Embraced by...";
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+        UiFrameSnapshot frame = new MainMenuScene(nowPlaying: new MenuNowPlayingState(legacyTitle, false)).CreateSnapshot(viewport).UiFrame;
+        UiElementSnapshot title = frame.Elements.Single(element => element.Id == "music-title");
+        UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "music-now-playing");
+
+        Assert.That(MainMenuScene.MusicNowPlayingCharactersMaximum, Is.EqualTo(35));
+        Assert.That(MainMenuScene.TruncateNowPlayingTitle(legacyTitle), Is.EqualTo(expectedTitle));
+        Assert.That(title.Text, Is.EqualTo(expectedTitle));
+        Assert.That(panel.MeasuredTextAnchor!.Text, Is.EqualTo(expectedTitle));
+    }
+
     [Test]
     public void MainMenuCookieUsesAndroidHeartbeatBeat()
     {
         var scene = new MainMenuScene();
         var viewport = VirtualViewport.FromSurface(1280, 720);
-        var baseFrame = scene.CreateSnapshot(viewport).UiFrame;
-        var baseLogo = baseFrame.Elements.Single(element => element.Id == "logo");
-        var baseOverlay = baseFrame.Elements.Single(element => element.Id == "logo-glow");
+        UiFrameSnapshot baseFrame = scene.CreateSnapshot(viewport).UiFrame;
+        UiElementSnapshot baseLogo = baseFrame.Elements.Single(element => element.Id == "logo");
+        UiElementSnapshot baseOverlay = baseFrame.Elements.Single(element => element.Id == "logo-glow");
 
         scene.Update(TimeSpan.FromMilliseconds(MainMenuScene.LogoBeatMilliseconds - 1d));
-        var beforeBeat = scene.CreateSnapshot(viewport).UiFrame.Elements.Single(element => element.Id == "logo");
+        UiElementSnapshot beforeBeat = scene.CreateSnapshot(viewport).UiFrame.Elements.Single(element => element.Id == "logo");
 
         scene.Update(TimeSpan.FromMilliseconds(1d));
         scene.Update(TimeSpan.FromMilliseconds(450d));
-        var heartbeatFrame = scene.CreateSnapshot(viewport).UiFrame;
-        var heartbeat = heartbeatFrame.Elements.Single(element => element.Id == "logo");
-        var heartbeatOverlay = heartbeatFrame.Elements.Single(element => element.Id == "logo-glow");
+        UiFrameSnapshot heartbeatFrame = scene.CreateSnapshot(viewport).UiFrame;
+        UiElementSnapshot heartbeat = heartbeatFrame.Elements.Single(element => element.Id == "logo");
+        UiElementSnapshot heartbeatOverlay = heartbeatFrame.Elements.Single(element => element.Id == "logo-glow");
 
         AssertRectClose(beforeBeat.Bounds, baseLogo.Bounds);
         Assert.That(heartbeat.Bounds.Width, Is.GreaterThan(baseLogo.Bounds.Width * 1.03f));
@@ -87,16 +100,16 @@ public sealed partial class UiCompatibilityTests
     {
         var scene = new MainMenuScene(nowPlaying: new MenuNowPlayingState("artist - title", true, 500, 1000));
         var viewport = VirtualViewport.FromSurface(surfaceWidth, surfaceHeight);
-        var frame = scene.CreateSnapshot(viewport).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
         var elements = frame.Elements.ToList();
 
-        var nowPlaying = elements.Single(element => element.Id == "music-now-playing");
-        var progress = elements.Single(element => element.Id == "music-progress-fg");
-        var previous = elements.Single(element => element.Id == DroidAssets.MusicPrevious);
-        var play = elements.Single(element => element.Id == DroidAssets.MusicPlay);
-        var pause = elements.Single(element => element.Id == DroidAssets.MusicPause);
-        var stop = elements.Single(element => element.Id == DroidAssets.MusicStop);
-        var next = elements.Single(element => element.Id == DroidAssets.MusicNext);
+        UiElementSnapshot nowPlaying = elements.Single(element => element.Id == "music-now-playing");
+        UiElementSnapshot progress = elements.Single(element => element.Id == "music-progress-fg");
+        UiElementSnapshot previous = elements.Single(element => element.Id == DroidAssets.MusicPrevious);
+        UiElementSnapshot play = elements.Single(element => element.Id == DroidAssets.MusicPlay);
+        UiElementSnapshot pause = elements.Single(element => element.Id == DroidAssets.MusicPause);
+        UiElementSnapshot stop = elements.Single(element => element.Id == DroidAssets.MusicStop);
+        UiElementSnapshot next = elements.Single(element => element.Id == DroidAssets.MusicNext);
 
         Assert.That(frame.Elements.Any(element => element.Id == "music-strip"), Is.False);
         AssertRectClose(nowPlaying.Bounds, MainMenuScene.GetAndroidMusicNowPlayingBounds());

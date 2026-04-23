@@ -4,7 +4,13 @@
       "path": "third_party/osu-droid-legacy",
       "remote": "https://github.com/osudroid/osu-droid.git",
       "branch": "master",
-      "commit": "UNPINNED"
+      "commit": "e816229c5be81eb25f51cead775a43d9db136498"
+    },
+    "osu-droid-language-pack": {
+      "path": "third_party/osu-droid-language-pack",
+      "remote": "https://github.com/osudroid/language-pack.git",
+      "tag": "2025.1007.0",
+      "commit": "0261d9af0f745b6888ad228a1b3bbb3a6375c57e"
     }
   }
 }
