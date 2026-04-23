@@ -9,7 +9,7 @@ public sealed partial class OsuDroidGameCore
         var key = MenuSfxKeyFor(action);
 
         if (key is not null)
-            attachedMenuSfxPlayer.Play(key);
+            activeMenuSfxPlayer.Play(key);
     }
 
     private static string? MenuSfxKeyFor(UiAction action)

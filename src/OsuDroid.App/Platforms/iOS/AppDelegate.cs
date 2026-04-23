@@ -1,10 +1,8 @@
 using Foundation;
 using OsuDroid.App.MonoGame;
 using OsuDroid.App.MonoGame.Bootstrap;
-using OsuDroid.App.Platform.Audio;
-using OsuDroid.App.Platform.Input;
+using OsuDroid.App.Platform;
 using OsuDroid.Game;
-using OsuDroid.Game.Runtime;
 using OsuDroid.Game.Runtime.Paths;
 using UIKit;
 
@@ -14,34 +12,20 @@ namespace OsuDroid.App;
 public sealed class AppDelegate : UIApplicationDelegate
 {
     private OsuDroidMonoGame? game;
-    private PlatformTextInputService? textInputService;
-    private PlatformBeatmapPreviewPlayer? previewPlayer;
-    private PlatformMenuSfxPlayer? menuSfxPlayer;
+    private PlatformRuntimeServices? runtimeServices;
 
     public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
     {
         application.IdleTimerDisabled = true;
-        textInputService = new PlatformTextInputService();
-        previewPlayer = new PlatformBeatmapPreviewPlayer();
-        menuSfxPlayer = new PlatformMenuSfxPlayer(Path.Combine(NSBundle.MainBundle.ResourcePath!, "assets", "droid", "sfx"));
+        runtimeServices = new PlatformRuntimeServices(Path.Combine(NSBundle.MainBundle.ResourcePath!, "assets", "droid", "sfx"));
 
         var bootstrapper = new GameBootstrapper(
             () => OsuDroidGameCore.Create(GetPathRoots(), BuildType, DisplayVersion, showStartupScene: true),
-            AttachPlatformServices);
+            runtimeServices.AttachTo);
 
         game = new OsuDroidMonoGame(bootstrapper);
         game.Run();
         return true;
-    }
-
-    private void AttachPlatformServices(OsuDroidGameCore core)
-    {
-        var audioStart = PerfDiagnostics.Start();
-        _ = BassAudioEngine.EnsureReady();
-        PerfDiagnostics.Log("bootstrap.bassInit", audioStart);
-        menuSfxPlayer?.Preload("welcome", "welcome_piano", "seeya", "menuclick", "menuhit", "menuback", "click-short", "click-short-confirm", "check-on", "check-off");
-        textInputService?.Attach();
-        core.AttachPlatformServices(textInputService, previewPlayer, menuSfxPlayer);
     }
 
     public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations(UIApplication application, UIWindow? forWindow) =>
@@ -51,12 +35,8 @@ public sealed class AppDelegate : UIApplicationDelegate
     {
         game?.Dispose();
         game = null;
-        textInputService?.Detach();
-        textInputService = null;
-        previewPlayer?.StopPreview();
-        previewPlayer = null;
-        menuSfxPlayer?.Dispose();
-        menuSfxPlayer = null;
+        runtimeServices?.Dispose();
+        runtimeServices = null;
         base.WillTerminate(application);
     }
 

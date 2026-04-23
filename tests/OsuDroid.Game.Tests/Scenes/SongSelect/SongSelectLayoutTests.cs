@@ -214,6 +214,11 @@ public sealed partial class SongSelectSceneTests
 
         Assert.That(frame.Elements.Any(element => element.Id == "songselect-previous-beatmap-background"), Is.False);
         Assert.That(background.Alpha, Is.EqualTo(1f));
+        Assert.That(background.Color, Is.EqualTo(UiColor.Opaque(0, 0, 0)));
         Assert.That(background.ExternalAssetPath, Does.EndWith("hard.jpg"));
+
+        scene.Update(TimeSpan.FromSeconds(1));
+        var fadedBackground = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame.Elements.Single(element => element.Id == "songselect-beatmap-background");
+        Assert.That(fadedBackground.Color, Is.EqualTo(UiColor.Opaque(255, 255, 255)));
     }
 }

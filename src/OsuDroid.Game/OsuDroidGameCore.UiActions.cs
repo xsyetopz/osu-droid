@@ -32,7 +32,7 @@ public sealed partial class OsuDroidGameCore
             return;
 
         if (activeScene == ActiveScene.MainMenu && action == UiAction.MainMenuThird && !mainMenu.IsSecondMenu)
-            attachedMenuSfxPlayer.Play("seeya");
+            activeMenuSfxPlayer.Play("seeya");
         else
             PlayMenuSfx(action);
     }
@@ -96,6 +96,6 @@ public sealed partial class OsuDroidGameCore
     {
         var key = options.ConsumePendingSfxKey();
         if (key is not null)
-            attachedMenuSfxPlayer.Play(key);
+            activeMenuSfxPlayer.Play(key);
     }
 }

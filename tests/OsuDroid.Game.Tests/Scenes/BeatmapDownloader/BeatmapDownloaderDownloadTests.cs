@@ -31,6 +31,18 @@ public sealed partial class BeatmapDownloaderTests
         Assert.That(frame.Elements.Any(element => element.Id == "downloader-download-spinner"), Is.True);
         Assert.That(frame.HitTest(new UiPoint(panel.Bounds.X + panel.Bounds.Width / 2f, panel.Bounds.Bottom - 20f * DroidUiMetrics.DpScale))!.Action, Is.EqualTo(UiAction.DownloaderDownloadCancel));
     }
+
+    [Test]
+    public void DownloadOverlayUsesImportingCopyWhenProgressPhaseIsImporting()
+    {
+        var scene = CreateScene(downloadService: new ImportingDownloadService());
+
+        var frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        var text = frame.Elements.Single(element => element.Id == "downloader-download-text");
+
+        Assert.That(text.Text, Is.EqualTo("Importing 2524875 LaXal - Dam Dadi Doo"));
+    }
+
     [Test]
     public void StatusDropdownIsViewportConstrainedAndScrollable()
     {
@@ -91,6 +103,19 @@ public sealed partial class BeatmapDownloaderTests
             if (Directory.Exists(path))
                 Directory.Delete(path, true);
         }
+    }
+
+    [Test]
+    public void SuccessfulDownloadPublishesLastImportedSetDirectoryNotification()
+    {
+        var scene = CreateScene(downloadService: new ImmediateSuccessDownloadService());
+        SetSets(scene, [CreateSet()]);
+
+        scene.Download(0, true);
+        SpinUntil(() => scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame.Elements.Any(element => element.Text == "Beatmap imported"));
+
+        Assert.That(scene.ConsumeLastImportedSetDirectoryNotification(), Is.EqualTo("100 Artist - Title"));
+        Assert.That(scene.ConsumeLastImportedSetDirectoryNotification(), Is.Null);
     }
 
     private static void SpinUntil(Func<bool> condition)

@@ -242,8 +242,13 @@ public sealed partial class SongSelectScene
         if (string.Equals(selectedBackgroundBeatmapKey, key, StringComparison.Ordinal))
             return;
 
+        var nextPath = beatmap?.GetBackgroundPath(songsPath);
         selectedBackgroundBeatmapKey = key;
-        selectedBackgroundPath = beatmap?.GetBackgroundPath(songsPath);
+        if (string.Equals(selectedBackgroundPath, nextPath, StringComparison.Ordinal))
+            return;
+
+        selectedBackgroundPath = nextPath;
+        selectedBackgroundLuminance = nextPath is null ? 1f : 0f;
     }
 
     private float? CurrentStarRating(BeatmapInfo beatmap) => displayAlgorithm == DifficultyAlgorithm.Standard ? beatmap.StandardStarRating : beatmap.DroidStarRating;

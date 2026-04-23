@@ -98,10 +98,10 @@ public sealed partial class SongSelectScene
 
     public void SelectCollectionFilter(int visibleSlot)
     {
-        if (visibleSlot < 0 || visibleSlot >= visibleCollectionActions.Length)
+        if (visibleSlot < 0 || visibleSlot >= visibleCollectionIndices.Length)
             return;
 
-        var index = visibleCollectionActions[visibleSlot] >= 0 ? visibleCollectionActions[visibleSlot] : visibleSlot;
+        var index = visibleCollectionIndices[visibleSlot] >= 0 ? visibleCollectionIndices[visibleSlot] : visibleSlot;
         if (index == 0)
             collectionFilter = null;
         else

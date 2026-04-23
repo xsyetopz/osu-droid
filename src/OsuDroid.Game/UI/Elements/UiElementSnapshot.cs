@@ -21,4 +21,11 @@ public sealed record UiElementSnapshot(
     string? ExternalAssetPath = null,
     UiSpriteFit SpriteFit = UiSpriteFit.Stretch,
     bool ClipToBounds = false,
-    UiRect? SpriteSource = null);
+    UiRect? SpriteSource = null,
+    UiMeasuredTextAnchor? MeasuredTextAnchor = null);
+
+public sealed record UiMeasuredTextAnchor(
+    string Text,
+    UiTextStyle TextStyle,
+    float RightX,
+    float LeftPadding);

@@ -49,11 +49,11 @@ public sealed partial class BeatmapDownloaderScene
     private void AddDownloadOverlay(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
         var state = downloadService.State;
-        if (!state.IsActive && !downloading)
+        if (!state.IsActive)
             return;
 
         var progress = state.Progress;
-        var text = progress?.State == "Importing"
+        var text = progress?.Phase == BeatmapDownloadPhase.Importing
             ? $"Importing {state.Filename}"
             : $"Downloading {state.Filename ?? "beatmap"}{FormatDownloadInfo(progress)}";
         var textWidth = Math.Min(400f * Dp, EstimateTextWidth(text, 13f * Dp));

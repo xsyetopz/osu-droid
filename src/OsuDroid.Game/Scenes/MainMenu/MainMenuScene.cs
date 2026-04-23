@@ -33,8 +33,8 @@ public sealed partial class MainMenuScene
     public const float MusicControlRightOffset = 35f;
     public const float MusicNowPlayingXOffset = 500f;
     public const float MusicNowPlayingHeight = 40f;
-    public const float MusicNowPlayingTitleLeftInset = 150f;
-    public const float MusicNowPlayingTitleRightEdge = VirtualViewport.LegacyWidth - 30f;
+    public const float MusicNowPlayingTextRight = VirtualViewport.LegacyWidth - 500f + 470f;
+    public const float MusicNowPlayingSpriteLeftPadding = 130f;
     public const float MusicProgressX = VirtualViewport.LegacyWidth - 320f;
     public const float MusicProgressY = 100f;
     public const float MusicProgressWidth = 300f;

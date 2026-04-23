@@ -29,13 +29,12 @@ public sealed partial class OsuDroidGameCore
     private readonly SongSelectScene songSelect;
     private readonly IBeatmapLibrary beatmapLibrary;
     private readonly IMenuMusicController musicController;
-    private readonly IMenuSfxPlayer menuSfxPlayer;
     private readonly IGameSettingsStore settingsStore;
     private readonly Random random = new();
     private readonly float[] menuSpectrumBuffer = new float[512];
     private ITextInputService textInputService;
     private IBeatmapPreviewPlayer previewPlayer;
-    private IMenuSfxPlayer attachedMenuSfxPlayer;
+    private IMenuSfxPlayer activeMenuSfxPlayer;
     private ActiveScene activeScene;
     private bool menuMusicPreviewEnabled;
     private MenuNowPlayingState? preservedDownloaderMusicState;
@@ -62,8 +61,7 @@ public sealed partial class OsuDroidGameCore
         var downloadService = services.BeatmapDownloadService ?? new BeatmapDownloadService(services.Paths, mirrorClient, importService);
         beatmapDownloader = new BeatmapDownloaderScene(mirrorClient, downloadService, textInputService, previewPlayer, Path.Combine(services.Paths.CacheRoot, "Covers"));
         musicController = services.MusicController ?? new PreviewMenuMusicController(previewPlayer);
-        menuSfxPlayer = services.MenuSfxPlayer ?? new NoOpMenuSfxPlayer();
-        attachedMenuSfxPlayer = menuSfxPlayer;
+        activeMenuSfxPlayer = services.MenuSfxPlayer ?? new NoOpMenuSfxPlayer();
         songSelect = new SongSelectScene(beatmapLibrary, musicController, difficultyService, services.Paths.Songs, profile, textInputService);
         QueueStartupPlaylist(beatmapLibrary);
         mainMenu.SetNowPlaying(musicController.State);
@@ -82,28 +80,13 @@ public sealed partial class OsuDroidGameCore
     public void AttachPlatformServices(ITextInputService? platformTextInputService, IBeatmapPreviewPlayer? platformPreviewPlayer, IMenuSfxPlayer? platformMenuSfxPlayer = null)
     {
         if (platformTextInputService is not null)
-        {
-            textInputService = platformTextInputService;
-            options.SetTextInputService(platformTextInputService);
-            beatmapDownloader.SetTextInputService(platformTextInputService);
-            songSelect.SetTextInputService(platformTextInputService);
-        }
+            AttachTextInputService(platformTextInputService);
 
         if (platformPreviewPlayer is not null)
-        {
-            previewPlayer = platformPreviewPlayer;
-            musicController.SetPreviewPlayer(platformPreviewPlayer);
-            songSelect.SetPreviewPlayer(platformPreviewPlayer);
-            beatmapDownloader.SetPreviewPlayer(platformPreviewPlayer);
-            if (menuMusicPreviewEnabled && !string.IsNullOrWhiteSpace(musicController.State.ArtistTitle))
-            {
-                musicController.Execute(MenuMusicCommand.Play);
-                mainMenu.SetNowPlaying(musicController.State);
-            }
-        }
+            AttachPreviewPlayer(platformPreviewPlayer);
 
         if (platformMenuSfxPlayer is not null)
-            attachedMenuSfxPlayer = platformMenuSfxPlayer;
+            AttachMenuSfxPlayer(platformMenuSfxPlayer);
     }
 
     public static OsuDroidGameCore Create(string corePath, string buildType, string displayVersion = "1.0", bool showStartupScene = false) =>
@@ -158,8 +141,8 @@ public sealed partial class OsuDroidGameCore
             startup.Update(elapsed);
             if (startup.ConsumeWelcomeSoundsRequest())
             {
-                attachedMenuSfxPlayer.Play("welcome");
-                attachedMenuSfxPlayer.Play("welcome_piano");
+                activeMenuSfxPlayer.Play("welcome");
+                activeMenuSfxPlayer.Play("welcome_piano");
             }
 
             if (!startup.IsComplete)
@@ -293,6 +276,41 @@ public sealed partial class OsuDroidGameCore
     {
         var repository = new BeatmapLibraryRepository(database);
         return new BeatmapLibrary(pathLayout, repository);
+    }
+
+    private void AttachTextInputService(ITextInputService service)
+    {
+        if (ReferenceEquals(textInputService, service))
+            return;
+
+        textInputService = service;
+        options.SetTextInputService(service);
+        beatmapDownloader.SetTextInputService(service);
+        songSelect.SetTextInputService(service);
+    }
+
+    private void AttachPreviewPlayer(IBeatmapPreviewPlayer player)
+    {
+        if (ReferenceEquals(previewPlayer, player))
+            return;
+
+        previewPlayer = player;
+        musicController.SetPreviewPlayer(player);
+        songSelect.SetPreviewPlayer(player);
+        beatmapDownloader.SetPreviewPlayer(player);
+        if (!menuMusicPreviewEnabled || string.IsNullOrWhiteSpace(musicController.State.ArtistTitle))
+            return;
+
+        musicController.Execute(MenuMusicCommand.Play);
+        mainMenu.SetNowPlaying(musicController.State);
+    }
+
+    private void AttachMenuSfxPlayer(IMenuSfxPlayer player)
+    {
+        if (ReferenceEquals(activeMenuSfxPlayer, player))
+            return;
+
+        activeMenuSfxPlayer = player;
     }
 
 

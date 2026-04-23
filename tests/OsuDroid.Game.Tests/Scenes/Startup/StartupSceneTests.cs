@@ -22,21 +22,23 @@ public sealed partial class UiCompatibilityTests
         Assert.That(spinner.AssetName, Is.EqualTo(DroidAssets.Loading));
         Assert.That(spinner.Bounds.Width, Is.EqualTo(212f * 0.4f).Within(0.01f));
         Assert.That(spinner.Bounds.Height, Is.EqualTo(212f * 0.4f).Within(0.01f));
-        Assert.That(loading.Elements.Any(element => element.Id == "startup-loading-title" && element.AssetName == DroidAssets.LoadingTitle), Is.True);
+        Assert.That(loading.Elements.Any(element => element.Id == "startup-loading-title"), Is.False);
+        Assert.That(loading.Elements.Any(element => element.Id == "startup-loading-text"), Is.False);
 
         scene.Update(TimeSpan.FromMilliseconds(StartupScene.LoadingMilliseconds));
         var fadingLoading = scene.CreateSnapshot(viewport).UiFrame;
         Assert.That(fadingLoading.Elements.Any(element => element.Id == "startup-welcome"), Is.False);
-        Assert.That(fadingLoading.Elements.Single(element => element.Id == "startup-loading-spinner").Alpha, Is.EqualTo(1f));
+        Assert.That(fadingLoading.Elements.Any(element => element.Id == "startup-loading-spinner"), Is.False);
         Assert.That(scene.ConsumeWelcomeSoundsRequest(), Is.False);
 
-        scene.Update(TimeSpan.FromMilliseconds(DroidUiTimings.StartupWelcomeDelayMilliseconds));
+        scene.Update(TimeSpan.FromMilliseconds(DroidUiTimings.StartupWelcomeDelayMilliseconds - StartupScene.LoadingMilliseconds));
         var welcomeStart = scene.CreateSnapshot(viewport).UiFrame;
         var welcome = welcomeStart.Elements.Single(element => element.Id == "startup-welcome");
         Assert.That(welcome.AssetName, Is.EqualTo(DroidAssets.Welcome));
         Assert.That(welcome.Alpha, Is.EqualTo(0f));
+        Assert.That(welcome.Bounds.Width, Is.EqualTo(375f).Within(0.01f));
         Assert.That(welcome.Bounds.Height, Is.EqualTo(0f).Within(0.01f));
-        Assert.That(welcomeStart.Elements.Single(element => element.Id == "startup-loading-spinner").Alpha, Is.EqualTo(0f));
+        Assert.That(welcomeStart.Elements.Any(element => element.Id == "startup-loading-spinner"), Is.False);
         Assert.That(scene.ConsumeWelcomeSoundsRequest(), Is.True);
         Assert.That(scene.ConsumeWelcomeSoundsRequest(), Is.False);
 
@@ -48,10 +50,12 @@ public sealed partial class UiCompatibilityTests
         scene.Update(TimeSpan.FromMilliseconds(DroidUiTimings.StartupWelcomeStretchMilliseconds / 2d));
         var fullHeight = scene.CreateSnapshot(viewport).UiFrame.Elements.Single(element => element.Id == "startup-welcome");
         Assert.That(fullHeight.Bounds.Height, Is.EqualTo(78f).Within(0.01f));
+        Assert.That(fullHeight.Bounds.Width, Is.EqualTo(375f).Within(0.01f));
 
         scene.Update(TimeSpan.FromMilliseconds(StartupScene.WelcomeMilliseconds));
         var finalWelcome = scene.CreateSnapshot(viewport).UiFrame.Elements.Single(element => element.Id == "startup-welcome");
         Assert.That(finalWelcome.Bounds.Height, Is.EqualTo(78f * 1.1f).Within(0.01f));
+        Assert.That(finalWelcome.Bounds.Width, Is.EqualTo(375f * 1.1f).Within(0.01f));
         Assert.That(finalWelcome.Alpha, Is.EqualTo(1f));
         Assert.That(scene.IsComplete, Is.True);
     }

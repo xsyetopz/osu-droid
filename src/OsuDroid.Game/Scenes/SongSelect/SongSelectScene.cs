@@ -26,6 +26,7 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
     private const float RowSpacing = 92f;
     private const float ExpandedRowSpacing = RowHeight - 25f;
     private const float RowBaseY = 300f;
+    private const float BackgroundLuminancePerSecond = 1f;
     private const float TopPanelHeight = 184f;
     private const float SongSelectTopX = -1640f;
     private const float SongSelectTopWidth = 5259.1304f;
@@ -68,9 +69,12 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
     private static readonly UiColor BeatmapOptionsSearchPanel = UiColor.Opaque(54, 54, 83);
     private static readonly UiColor BeatmapOptionsDivider = new(255, 255, 255, 10);
 
-    private readonly int[] visibleSetActions = Enumerable.Repeat(-1, VisibleSetSlots).ToArray();
-    private readonly int[] visibleDifficultyActions = Enumerable.Repeat(-1, VisibleDifficultySlots).ToArray();
-    private readonly int[] visibleCollectionActions = Enumerable.Repeat(-1, VisibleCollectionSlots).ToArray();
+    private readonly int[] visibleSetIndices = Enumerable.Repeat(-1, VisibleSetSlots).ToArray();
+    private readonly int[] visibleDifficultyIndices = Enumerable.Repeat(-1, VisibleDifficultySlots).ToArray();
+    private readonly int[] visibleCollectionIndices = Enumerable.Repeat(-1, VisibleCollectionSlots).ToArray();
+    private readonly SelectionState selectionState = new();
+    private readonly QueryState queryState = new();
+    private readonly BackgroundState backgroundState = new();
     private readonly OnlineProfileSnapshot profile = profile ?? OnlineProfileSnapshot.Guest;
     private readonly Func<int, int> randomIndexProvider = randomIndexProvider ?? Random.Shared.Next;
     private readonly object difficultyGate = new();
@@ -83,24 +87,85 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
     private BeatmapLibrarySnapshot visibleSnapshot = BeatmapLibrarySnapshot.Empty;
     private Task? libraryRefreshTask;
     private BeatmapLibrarySnapshot? completedLibraryRefresh;
-    private int selectedSetIndex;
-    private int selectedDifficultyIndex;
-    private float scrollY;
-    private float collectionScrollY;
-    private float selectedSetExpansion = 1f;
     private bool propertiesOpen;
     private bool beatmapOptionsOpen;
     private bool collectionsOpen;
     private bool collectionsFilterMode;
     private bool deleteBeatmapConfirmOpen;
     private string? collectionPendingDelete;
-    private string searchQuery = string.Empty;
-    private bool favoriteOnlyFilter;
-    private string? collectionFilter;
-    private string? selectedBackgroundPath;
-    private string? selectedBackgroundBeatmapKey;
-    private SongSelectSortMode sortMode = SongSelectSortMode.Title;
     private DifficultyAlgorithm displayAlgorithm = difficultyService.Algorithm;
+
+    private int selectedSetIndex
+    {
+        get => selectionState.SetIndex;
+        set => selectionState.SetIndex = value;
+    }
+
+    private int selectedDifficultyIndex
+    {
+        get => selectionState.DifficultyIndex;
+        set => selectionState.DifficultyIndex = value;
+    }
+
+    private float scrollY
+    {
+        get => selectionState.ScrollY;
+        set => selectionState.ScrollY = value;
+    }
+
+    private float collectionScrollY
+    {
+        get => selectionState.CollectionScrollY;
+        set => selectionState.CollectionScrollY = value;
+    }
+
+    private float selectedSetExpansion
+    {
+        get => selectionState.SetExpansion;
+        set => selectionState.SetExpansion = value;
+    }
+
+    private string searchQuery
+    {
+        get => queryState.SearchQuery;
+        set => queryState.SearchQuery = value;
+    }
+
+    private bool favoriteOnlyFilter
+    {
+        get => queryState.FavoriteOnlyFilter;
+        set => queryState.FavoriteOnlyFilter = value;
+    }
+
+    private string? collectionFilter
+    {
+        get => queryState.CollectionFilter;
+        set => queryState.CollectionFilter = value;
+    }
+
+    private SongSelectSortMode sortMode
+    {
+        get => queryState.SortMode;
+        set => queryState.SortMode = value;
+    }
+
+    private string? selectedBackgroundPath
+    {
+        get => backgroundState.Path;
+        set => backgroundState.Path = value;
+    }
+
+    private string? selectedBackgroundBeatmapKey
+    {
+        get => backgroundState.BeatmapKey;
+        set => backgroundState.BeatmapKey = value;
+    }
+
+    private float selectedBackgroundLuminance
+    {
+        get => backgroundState.Luminance;
+        set => backgroundState.Luminance = Math.Clamp(value, 0f, 1f);
+    }
 
     public BeatmapInfo? SelectedBeatmap => SelectedSet?.Beatmaps.Count > 0
         ? SelectedSet.Beatmaps[Math.Clamp(selectedDifficultyIndex, 0, SelectedSet.Beatmaps.Count - 1)]
@@ -153,6 +218,7 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
     {
         var elapsedSeconds = (float)elapsed.TotalSeconds;
         selectedSetExpansion = Math.Clamp(selectedSetExpansion + elapsedSeconds * 2f, 0f, 1f);
+        selectedBackgroundLuminance += elapsedSeconds * BackgroundLuminancePerSecond;
         ApplyCompletedLibraryRefresh();
         ApplyCompletedDifficultyUpdates();
     }

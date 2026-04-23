@@ -5,7 +5,7 @@ namespace OsuDroid.Game.Scenes;
 
 public sealed class StartupScene
 {
-    public const double LoadingMilliseconds = DroidUiTimings.StartupLoadingMilliseconds;
+    public const double LoadingMilliseconds = DroidUiTimings.StartupLoadingFadeOutMilliseconds;
     public const double WelcomeMilliseconds = DroidUiTimings.StartupWelcomeMilliseconds;
 
     private const double LoadingFadeOutMilliseconds = DroidUiTimings.StartupLoadingFadeOutMilliseconds;
@@ -44,30 +44,18 @@ public sealed class StartupScene
             new("startup-background", UiElementKind.Fill, new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), fallbackBackground, 1f),
         };
 
-        AddLoadingTitle(elements, viewport);
-        AddSpinner(elements, viewport);
-        AddStatusText(elements, viewport);
+        AddLoadingSpinner(elements, viewport);
         AddWelcome(elements, viewport);
 
-        return new GameFrameSnapshot("Startup", "Loading", "Loading skin...", Array.Empty<string>(), 0, false, new UiFrameSnapshot(viewport, elements, DroidAssets.StartupManifest));
+        return new GameFrameSnapshot("Startup", "Welcome", "Welcome", Array.Empty<string>(), 0, false, new UiFrameSnapshot(viewport, elements, DroidAssets.StartupManifest));
     }
 
-    private void AddLoadingTitle(List<UiElementSnapshot> elements, VirtualViewport viewport)
+    private void AddLoadingSpinner(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        var asset = DroidAssets.StartupManifest.Get(DroidAssets.LoadingTitle);
-        var scale = viewport.VirtualWidth / asset.NativeSize.Width;
-        var height = asset.NativeSize.Height * scale;
-        elements.Add(new UiElementSnapshot(
-            "startup-loading-title",
-            UiElementKind.Sprite,
-            new UiRect(0f, 0f, viewport.VirtualWidth, height),
-            white,
-            LoadingAlpha,
-            DroidAssets.LoadingTitle));
-    }
+        var alpha = LoadingAlpha;
+        if (alpha <= 0f)
+            return;
 
-    private void AddSpinner(List<UiElementSnapshot> elements, VirtualViewport viewport)
-    {
         var asset = DroidAssets.StartupManifest.Get(DroidAssets.Loading);
         var size = asset.NativeSize.Width * 0.4f;
         var progress = (float)(elapsedMilliseconds / 2000d);
@@ -76,21 +64,9 @@ public sealed class StartupScene
             UiElementKind.Sprite,
             new UiRect((viewport.VirtualWidth - size) / 2f, (viewport.VirtualHeight - size) / 2f, size, size),
             white,
-            LoadingAlpha,
+            alpha,
             DroidAssets.Loading,
             RotationDegrees: progress * 360f));
-    }
-
-    private void AddStatusText(List<UiElementSnapshot> elements, VirtualViewport viewport)
-    {
-        elements.Add(new UiElementSnapshot(
-            "startup-loading-text",
-            UiElementKind.Text,
-            new UiRect(0f, viewport.VirtualHeight - 70f, viewport.VirtualWidth, 34f),
-            white,
-            LoadingAlpha,
-            Text: "Loading skin...",
-            TextStyle: new UiTextStyle(22f, Alignment: UiTextAlignment.Center)));
     }
 
     private void AddWelcome(List<UiElementSnapshot> elements, VirtualViewport viewport)
@@ -104,7 +80,7 @@ public sealed class StartupScene
             ? (float)Math.Clamp(welcomeElapsed / WelcomeStretchMilliseconds, 0d, 1d)
             : 1f + 0.1f * (float)Math.Clamp((welcomeElapsed - WelcomeStretchMilliseconds) / (WelcomeMilliseconds - WelcomeStretchMilliseconds), 0d, 1d);
         var asset = DroidAssets.StartupManifest.Get(DroidAssets.Welcome);
-        var width = asset.NativeSize.Width;
+        var width = asset.NativeSize.Width * (welcomeElapsed < WelcomeStretchMilliseconds ? 1f : yScale);
         var height = asset.NativeSize.Height * yScale;
         elements.Add(new UiElementSnapshot(
             "startup-welcome",
@@ -115,9 +91,7 @@ public sealed class StartupScene
             DroidAssets.Welcome));
     }
 
-    private static double WelcomeStartMilliseconds => LoadingMilliseconds + WelcomeDelayMilliseconds;
+    private static double WelcomeStartMilliseconds => WelcomeDelayMilliseconds;
 
-    private float LoadingAlpha => elapsedMilliseconds < LoadingMilliseconds
-        ? 1f
-        : 1f - (float)Math.Clamp((elapsedMilliseconds - LoadingMilliseconds) / LoadingFadeOutMilliseconds, 0d, 1d);
+    private float LoadingAlpha => 1f - (float)Math.Clamp(elapsedMilliseconds / LoadingFadeOutMilliseconds, 0d, 1d);
 }

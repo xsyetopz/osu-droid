@@ -144,7 +144,7 @@ public sealed partial class SongSelectScene
             if (rowY > panel.Bottom - rowGap)
                 break;
 
-            visibleCollectionActions[slot] = index;
+            visibleCollectionIndices[slot] = index;
             AddCollectionRow(elements, slot, collections[index], panel.X + 12f * Dp, rowY, panel.Width - 24f * Dp, collectionsFilterMode, collectionFilter);
         }
 
@@ -154,7 +154,7 @@ public sealed partial class SongSelectScene
 
     private static void AddCollectionRow(List<UiElementSnapshot> elements, int slot, BeatmapCollection collection, float x, float y, float width, bool filterMode, string? selectedFilter)
     {
-        var action = filterMode ? UiActionForCollectionToggle(slot) : UiAction.None;
+        var action = filterMode ? CollectionToggleAction(slot) : UiAction.None;
         elements.Add(Fill($"songselect-collection-{slot}", new UiRect(x, y, width, CollectionRowHeight), PropertiesPanel, 1f, action, 14f * Dp));
         elements.Add(TextMiddle($"songselect-collection-{slot}-name", collection.Name, x + 16f * Dp, y, width - 180f * Dp, CollectionRowHeight, 15f * Dp, White, UiTextAlignment.Left, action));
         if (!filterMode || slot != 0)
@@ -166,8 +166,8 @@ public sealed partial class SongSelectScene
             return;
         }
 
-        AddSmallAction(elements, $"songselect-collection-{slot}-delete", UiMaterialIcon.Delete, x + width - 112f * Dp, y, UiActionForCollectionDelete(slot), PropertiesDanger);
-        AddSmallAction(elements, $"songselect-collection-{slot}-toggle", collection.ContainsSelectedSet ? UiMaterialIcon.Minus : UiMaterialIcon.Plus, x + width - 56f * Dp, y, UiActionForCollectionToggle(slot), White);
+        AddSmallAction(elements, $"songselect-collection-{slot}-delete", UiMaterialIcon.Delete, x + width - 112f * Dp, y, CollectionDeleteAction(slot), PropertiesDanger);
+        AddSmallAction(elements, $"songselect-collection-{slot}-toggle", collection.ContainsSelectedSet ? UiMaterialIcon.Minus : UiMaterialIcon.Plus, x + width - 56f * Dp, y, CollectionToggleAction(slot), White);
     }
 
     private static void AddSmallAction(List<UiElementSnapshot> elements, string id, UiMaterialIcon icon, float x, float y, UiAction action, UiColor color)

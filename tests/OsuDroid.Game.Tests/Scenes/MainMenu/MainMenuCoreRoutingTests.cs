@@ -150,6 +150,35 @@ public sealed partial class UiCompatibilityTests
         Assert.That(core.ConsumePendingExternalUrl(), Is.EqualTo("https://osudroid.moe/changelog/latest"));
         Assert.That(core.PendingExternalUrl, Is.Null);
     }
+
+    [Test]
+    public void StartupWelcomeSoundsUseAttachedMenuSfxPlayer()
+    {
+        var database = new DroidDatabase(Path.Combine(TestContext.CurrentContext.WorkDirectory, $"main-menu-sfx-startup-{Guid.NewGuid():N}.db"));
+        database.EnsureCreated();
+        var recorder = new RecordingMenuSfxPlayer();
+        var core = new OsuDroidGameCore(new GameServices(database, new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(TestContext.CurrentContext.WorkDirectory)), "test", "1.0", ShowStartupScene: true));
+        core.AttachPlatformServices(platformTextInputService: null, platformPreviewPlayer: null, recorder);
+
+        core.Update(TimeSpan.FromMilliseconds(StartupScene.LoadingMilliseconds + StartupScene.WelcomeMilliseconds));
+
+        Assert.That(recorder.Keys, Is.EquivalentTo(new[] { "welcome", "welcome_piano" }));
+    }
+
+    [Test]
+    public void MainMenuThirdButtonPlaysSeeyaOnFirstMenu()
+    {
+        var database = new DroidDatabase(Path.Combine(TestContext.CurrentContext.WorkDirectory, $"main-menu-sfx-seeya-{Guid.NewGuid():N}.db"));
+        database.EnsureCreated();
+        var recorder = new RecordingMenuSfxPlayer();
+        var core = new OsuDroidGameCore(new GameServices(database, new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(TestContext.CurrentContext.WorkDirectory)), "test", "1.0"));
+        core.AttachPlatformServices(platformTextInputService: null, platformPreviewPlayer: null, recorder);
+
+        core.HandleUiAction(UiAction.MainMenuThird);
+
+        Assert.That(recorder.Keys, Is.EqualTo(new[] { "seeya" }));
+    }
+
     [Test]
     public void SceneStackKeepsRootScene()
     {
@@ -160,5 +189,12 @@ public sealed partial class UiCompatibilityTests
         Assert.That(stack.Current, Is.EqualTo("SongSelect"));
         Assert.That(stack.TryPop(), Is.True);
         Assert.That(stack.Current, Is.EqualTo("MainMenu"));
+    }
+
+    private sealed class RecordingMenuSfxPlayer : IMenuSfxPlayer
+    {
+        public List<string> Keys { get; } = [];
+
+        public void Play(string key) => Keys.Add(key);
     }
 }

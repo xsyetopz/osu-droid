@@ -56,13 +56,11 @@ public sealed partial class BeatmapDownloaderScene
         if (index < 0 || index >= sets.Count)
             return;
 
-        downloading = true;
         var importResult = await downloadService.DownloadAndImportAsync(sets[index], withVideo, CancellationToken.None).ConfigureAwait(false);
-        downloading = false;
         if (importResult.IsSuccess)
         {
             selectedSetIndex = null;
-            importedSetDirectory = importResult.SetDirectory;
+            lastImportedSetDirectory = importResult.SetDirectory;
             message = "Beatmap imported";
         }
         else

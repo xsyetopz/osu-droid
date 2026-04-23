@@ -18,6 +18,9 @@ internal sealed partial class MonoGameUiRenderer
         if (destination.Width <= 0 || destination.Height <= 0)
             return;
 
+        if (element.MeasuredTextAnchor is { } anchor)
+            _ = textStore.GetTexture(anchor.Text, anchor.TextStyle, UiColor.Opaque(255, 255, 255), 1f, frame.Viewport.Scale, metrics);
+
         switch (element.Kind)
         {
             case UiElementKind.Fill:

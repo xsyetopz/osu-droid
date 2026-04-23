@@ -107,7 +107,7 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
             await fileStream.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
             bytesReceived += read;
             var speed = stopwatch.Elapsed.TotalSeconds > 0 ? bytesReceived / stopwatch.Elapsed.TotalSeconds : 0;
-            progress?.Report(new BeatmapDownloadProgress(bytesReceived, totalBytes, "Downloading", speed));
+            progress?.Report(new BeatmapDownloadProgress(bytesReceived, totalBytes, BeatmapDownloadPhase.Downloading, speed));
         }
     }
 

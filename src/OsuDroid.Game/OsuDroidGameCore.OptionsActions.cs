@@ -27,14 +27,19 @@ public sealed partial class OsuDroidGameCore
     private void ApplyRoute(MainMenuRoute route)
     {
         var start = PerfDiagnostics.Start();
-        if (route == MainMenuRoute.Settings)
-            activeScene = ActiveScene.Options;
-        else if (route == MainMenuRoute.Solo)
+        activeScene = route switch
         {
-            activeScene = ActiveScene.SongSelect;
-            songSelect.Enter(musicController.State.BeatmapSetDirectory, musicController.State.BeatmapFilename);
-        }
+            MainMenuRoute.Settings => ActiveScene.Options,
+            MainMenuRoute.Solo => EnterSongSelectScene(),
+            _ => activeScene,
+        };
 
         PerfDiagnostics.Log("core.applyRoute", start, $"route={route} active={activeScene}");
+    }
+
+    private ActiveScene EnterSongSelectScene()
+    {
+        songSelect.Enter(musicController.State.BeatmapSetDirectory, musicController.State.BeatmapFilename);
+        return ActiveScene.SongSelect;
     }
 }

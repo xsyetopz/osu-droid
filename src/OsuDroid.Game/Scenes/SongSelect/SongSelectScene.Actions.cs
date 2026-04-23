@@ -14,10 +14,10 @@ public sealed partial class SongSelectScene
         if (propertiesOpen || beatmapOptionsOpen || collectionsOpen)
             return;
 
-        if (visibleSlot < 0 || visibleSlot >= visibleSetActions.Length)
+        if (visibleSlot < 0 || visibleSlot >= visibleSetIndices.Length)
             return;
 
-        var index = visibleSetActions[visibleSlot] >= 0 ? visibleSetActions[visibleSlot] : visibleSlot;
+        var index = visibleSetIndices[visibleSlot] >= 0 ? visibleSetIndices[visibleSlot] : visibleSlot;
         if (index < 0 || index >= visibleSnapshot.Sets.Count)
             return;
 
@@ -56,11 +56,11 @@ public sealed partial class SongSelectScene
         if (propertiesOpen || beatmapOptionsOpen || collectionsOpen)
             return;
 
-        if (index < 0 || index >= visibleDifficultyActions.Length)
+        if (index < 0 || index >= visibleDifficultyIndices.Length)
             return;
 
         var set = SelectedSet;
-        var difficultyIndex = visibleDifficultyActions[index] >= 0 ? visibleDifficultyActions[index] : index;
+        var difficultyIndex = visibleDifficultyIndices[index] >= 0 ? visibleDifficultyIndices[index] : index;
         if (set is null || difficultyIndex < 0 || difficultyIndex >= set.Beatmaps.Count)
             return;
 
@@ -110,11 +110,11 @@ public sealed partial class SongSelectScene
 
     public void OpenPropertiesForDifficulty(int visibleSlot)
     {
-        if (visibleSlot < 0 || visibleSlot >= visibleDifficultyActions.Length)
+        if (visibleSlot < 0 || visibleSlot >= visibleDifficultyIndices.Length)
             return;
 
         var set = SelectedSet;
-        var difficultyIndex = visibleDifficultyActions[visibleSlot] >= 0 ? visibleDifficultyActions[visibleSlot] : visibleSlot;
+        var difficultyIndex = visibleDifficultyIndices[visibleSlot] >= 0 ? visibleDifficultyIndices[visibleSlot] : visibleSlot;
         if (set is null || difficultyIndex < 0 || difficultyIndex >= set.Beatmaps.Count)
             return;
 

@@ -45,10 +45,16 @@ public sealed partial class UiCompatibilityTests
         Assert.That(emptyFrame.Elements.Any(element => element.Id == "music-title"), Is.False);
         Assert.That(title.Text, Is.EqualTo("artist - title"));
         Assert.That(title.TextStyle?.Alignment, Is.EqualTo(UiTextAlignment.Right));
-        Assert.That(title.ClipToBounds, Is.True);
-        Assert.That(title.Bounds.X, Is.EqualTo(MainMenuScene.GetAndroidMusicNowPlayingBounds().X + MainMenuScene.MusicNowPlayingTitleLeftInset));
-        Assert.That(title.Bounds.Right, Is.EqualTo(MainMenuScene.MusicNowPlayingTitleRightEdge));
+        Assert.That(title.ClipToBounds, Is.False);
+        Assert.That(title.Bounds.X, Is.Zero);
+        Assert.That(title.Bounds.Right, Is.EqualTo(MainMenuScene.MusicNowPlayingTextRight));
         Assert.That(title.Bounds.Right, Is.LessThanOrEqualTo(VirtualViewport.LegacyWidth));
+
+        var panel = populatedFrame.Elements.Single(element => element.Id == "music-now-playing");
+        Assert.That(panel.MeasuredTextAnchor, Is.Not.Null);
+        Assert.That(panel.MeasuredTextAnchor!.Text, Is.EqualTo("artist - title"));
+        Assert.That(panel.MeasuredTextAnchor.RightX, Is.EqualTo(MainMenuScene.MusicNowPlayingTextRight));
+        Assert.That(panel.MeasuredTextAnchor.LeftPadding, Is.EqualTo(MainMenuScene.MusicNowPlayingSpriteLeftPadding));
     }
     [Test]
     public void MainMenuCookieUsesAndroidHeartbeatBeat()

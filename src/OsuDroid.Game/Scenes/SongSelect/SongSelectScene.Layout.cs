@@ -11,9 +11,9 @@ public sealed partial class SongSelectScene
     private UiFrameSnapshot CreateFrame(VirtualViewport viewport)
     {
         var start = PerfDiagnostics.Start();
-        Array.Fill(visibleSetActions, -1);
-        Array.Fill(visibleDifficultyActions, -1);
-        Array.Fill(visibleCollectionActions, -1);
+        Array.Fill(visibleSetIndices, -1);
+        Array.Fill(visibleDifficultyIndices, -1);
+        Array.Fill(visibleCollectionIndices, -1);
 
         var elements = new List<UiElementSnapshot>
         {

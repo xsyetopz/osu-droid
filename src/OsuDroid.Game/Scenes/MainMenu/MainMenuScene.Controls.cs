@@ -98,8 +98,9 @@ public sealed partial class MainMenuScene
     private void AddMusicControls(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
         var nowPlayingBounds = GetAndroidMusicNowPlayingBounds();
-        var titleX = nowPlayingBounds.X + MusicNowPlayingTitleLeftInset;
-        var titleBounds = new UiRect(titleX, nowPlayingBounds.Y + 3f, MusicNowPlayingTitleRightEdge - titleX, 35f);
+        var titleBounds = new UiRect(0f, nowPlayingBounds.Y, MusicNowPlayingTextRight, 35f);
+        var titleStyle = new UiTextStyle(28f, false, UiTextAlignment.Right);
+        var title = nowPlaying.ArtistTitle;
 
         elements.Add(new UiElementSnapshot(
             "music-now-playing",
@@ -107,9 +108,12 @@ public sealed partial class MainMenuScene
             nowPlayingBounds,
             white,
             1f,
-            DroidAssets.MusicNowPlaying));
+            DroidAssets.MusicNowPlaying,
+            MeasuredTextAnchor: string.IsNullOrWhiteSpace(title)
+                ? null
+                : new UiMeasuredTextAnchor(title, titleStyle, MusicNowPlayingTextRight, MusicNowPlayingSpriteLeftPadding)));
 
-        if (!string.IsNullOrWhiteSpace(nowPlaying.ArtistTitle))
+        if (!string.IsNullOrWhiteSpace(title))
         {
             elements.Add(new UiElementSnapshot(
                 "music-title",
@@ -117,9 +121,8 @@ public sealed partial class MainMenuScene
                 titleBounds,
                 white,
                 1f,
-                Text: nowPlaying.ArtistTitle,
-                TextStyle: new UiTextStyle(22f, false, UiTextAlignment.Right),
-                ClipToBounds: true));
+                Text: title,
+                TextStyle: titleStyle));
         }
 
         AddMusicControl(elements, DroidAssets.MusicPrevious, UiAction.MainMenuMusicPrevious, 6f);

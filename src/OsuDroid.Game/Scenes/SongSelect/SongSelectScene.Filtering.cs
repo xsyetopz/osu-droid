@@ -129,11 +129,11 @@ public sealed partial class SongSelectScene
 
     private BeatmapCollection? CollectionAtVisibleSlot(int visibleSlot)
     {
-        if (visibleSlot < 0 || visibleSlot >= visibleCollectionActions.Length)
+        if (visibleSlot < 0 || visibleSlot >= visibleCollectionIndices.Length)
             return null;
 
         var collections = library.GetCollections(SelectedSet?.Directory);
-        var index = visibleCollectionActions[visibleSlot] >= 0 ? visibleCollectionActions[visibleSlot] : visibleSlot;
+        var index = visibleCollectionIndices[visibleSlot] >= 0 ? visibleCollectionIndices[visibleSlot] : visibleSlot;
         return index >= 0 && index < collections.Count ? collections[index] : null;
     }
 

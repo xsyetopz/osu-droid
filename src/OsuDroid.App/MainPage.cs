@@ -6,19 +6,14 @@ using XnaGameRunBehavior = Microsoft.Xna.Framework.GameRunBehavior;
 using OsuDroid.App.MonoGame.Bootstrap;
 using OsuDroid.App.Platform;
 using OsuDroid.App.MonoGame;
-using OsuDroid.App.Platform.Audio;
-using OsuDroid.App.Platform.Input;
 using OsuDroid.Game;
-using OsuDroid.Game.Runtime;
 
 namespace OsuDroid.App;
 
 public sealed class MainPage : ContentPage
 {
     private readonly IPlatformPaths platformPaths;
-    private readonly PlatformTextInputService textInputService = new();
-    private readonly PlatformBeatmapPreviewPlayer previewPlayer = new();
-    private readonly PlatformMenuSfxPlayer menuSfxPlayer = new(Path.Combine(AppContext.BaseDirectory, "assets", "droid", "sfx"));
+    private PlatformRuntimeServices? runtimeServices;
     private OsuDroidMonoGame? monoGame;
 
     public MainPage(IServiceProvider services)
@@ -32,12 +27,7 @@ public sealed class MainPage : ContentPage
 
     private void AttachPlatformServices(OsuDroidGameCore game)
     {
-        var audioStart = PerfDiagnostics.Start();
-        _ = BassAudioEngine.EnsureReady();
-        PerfDiagnostics.Log("bootstrap.bassInit", audioStart);
-        menuSfxPlayer.Preload("welcome", "welcome_piano", "seeya", "menuclick", "menuhit", "menuback", "click-short", "click-short-confirm", "check-on", "check-off");
-        textInputService.Attach();
-        game.AttachPlatformServices(textInputService, previewPlayer, menuSfxPlayer);
+        runtimeServices?.AttachTo(game);
     }
 
     private void OnLoaded(object? sender, EventArgs args)
@@ -45,6 +35,7 @@ public sealed class MainPage : ContentPage
         if (monoGame is not null)
             return;
 
+        runtimeServices = new PlatformRuntimeServices(Path.Combine(AppContext.BaseDirectory, "assets", "droid", "sfx"));
         var bootstrapper = new GameBootstrapper(
             () => OsuDroidGameCore.Create(
                 platformPaths.Roots,
@@ -65,9 +56,8 @@ public sealed class MainPage : ContentPage
     {
         monoGame?.Dispose();
         monoGame = null;
-        textInputService.Detach();
-        previewPlayer.StopPreview();
-        menuSfxPlayer.Dispose();
+        runtimeServices?.Dispose();
+        runtimeServices = null;
     }
 }
 #endif

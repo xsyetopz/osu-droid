@@ -52,7 +52,6 @@ public sealed partial class BeatmapDownloaderScene
     private bool sortDropdownOpen;
     private bool statusDropdownOpen;
     private bool mirrorsOpen;
-    private bool downloading;
     private float sortDropdownScroll;
     private float statusDropdownScroll;
     private int previewPlayCount;
@@ -66,7 +65,7 @@ public sealed partial class BeatmapDownloaderScene
     private float scrollOffset;
     private string query = string.Empty;
     private string? message = "Search beatmaps";
-    private string? importedSetDirectory;
+    private string? lastImportedSetDirectory;
     private BeatmapMirrorKind mirror = BeatmapMirrorKind.OsuDirect;
     private BeatmapMirrorSort sort = BeatmapMirrorSort.RankedDate;
     private BeatmapMirrorOrder order = BeatmapMirrorOrder.Descending;
@@ -91,10 +90,10 @@ public sealed partial class BeatmapDownloaderScene
 
     public BeatmapMirrorKind Mirror => mirror;
 
-    public string? ConsumeImportedSetDirectory()
+    public string? ConsumeLastImportedSetDirectoryNotification()
     {
-        var directory = importedSetDirectory;
-        importedSetDirectory = null;
+        var directory = lastImportedSetDirectory;
+        lastImportedSetDirectory = null;
         return directory;
     }
 

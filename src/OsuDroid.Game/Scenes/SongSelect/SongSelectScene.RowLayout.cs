@@ -10,9 +10,15 @@ public sealed partial class SongSelectScene
 {
     private void AddBeatmapBackground(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
-        elements.Add(new UiElementSnapshot("songselect-fallback-background", UiElementKind.Sprite, new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), White, 1f, DroidAssets.MenuBackground, SpriteFit: UiSpriteFit.Cover));
-        if (SelectedBackgroundPath is { } backgroundPath)
-            elements.Add(new UiElementSnapshot("songselect-beatmap-background", UiElementKind.Sprite, new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), White, 1f, ExternalAssetPath: backgroundPath, SpriteFit: UiSpriteFit.Cover));
+        if (SelectedBackgroundPath is not { } backgroundPath)
+        {
+            elements.Add(new UiElementSnapshot("songselect-fallback-background", UiElementKind.Sprite, new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), White, 1f, DroidAssets.MenuBackground, SpriteFit: UiSpriteFit.Cover));
+        }
+        else
+        {
+            var channel = (byte)Math.Clamp((int)MathF.Round(selectedBackgroundLuminance * 255f), 0, 255);
+            elements.Add(new UiElementSnapshot("songselect-beatmap-background", UiElementKind.Sprite, new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), UiColor.Opaque(channel, channel, channel), 1f, ExternalAssetPath: backgroundPath, SpriteFit: UiSpriteFit.Cover));
+        }
     }
 
     private void AddTopPanel(List<UiElementSnapshot> elements, VirtualViewport viewport)
@@ -63,7 +69,7 @@ public sealed partial class SongSelectScene
             else if (rowY > -RowHeight && rowY < viewport.VirtualHeight && visibleSlot < VisibleSetSlots)
             {
                 var action = SetAction(visibleSlot);
-                visibleSetActions[visibleSlot] = setIndex;
+                visibleSetIndices[visibleSlot] = setIndex;
                 AddSetRow(elements, $"songselect-set-{visibleSlot}", firstBeatmap, new UiRect(x, rowY, RowWidth, RowHeight), action);
                 visibleSlot++;
             }
@@ -86,7 +92,7 @@ public sealed partial class SongSelectScene
             var x = anchorX + 170f * MathF.Abs(MathF.Cos(centerY * MathF.PI / (viewport.VirtualHeight * 2f))) - 100f;
             var isSelected = index == selectedDifficultyIndex;
             var action = DifficultyAction(index);
-            visibleDifficultyActions[index] = index;
+            visibleDifficultyIndices[index] = index;
             AddDifficultyRow(elements, $"songselect-diff-row-{index}", beatmap, new UiRect(x, y, RowWidth, RowHeight), isSelected, action);
             y += ExpandedRowSpacing * selectedSetExpansion;
         }

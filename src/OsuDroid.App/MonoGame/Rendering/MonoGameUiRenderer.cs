@@ -26,6 +26,7 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
         foreach (var element in frame.Elements)
         {
             var destination = ToSurfaceRect(frame, element);
+            destination = ApplyMeasuredTextAnchor(frame, element, destination);
             var color = ToXnaColor(element.Color, element.Alpha);
 
             if (element.Kind == UiElementKind.Fill)
@@ -204,6 +205,20 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
         var source = new XnaRect(sourceX, sourceY, width, height);
         spriteBatch.Draw(texture, destination, source, XnaColor.White);
         return destination;
+    }
+
+    private XnaRect ApplyMeasuredTextAnchor(UiFrameSnapshot frame, UiElementSnapshot element, XnaRect destination)
+    {
+        if (element.MeasuredTextAnchor is not { } anchor)
+            return destination;
+
+        var textTexture = textStore.GetTexture(anchor.Text, anchor.TextStyle, UiColor.Opaque(255, 255, 255), 1f, frame.Viewport.Scale);
+        var right = frame.Viewport.OffsetX + anchor.RightX * frame.Viewport.Scale;
+        var leftPadding = anchor.LeftPadding * frame.Viewport.Scale;
+        return destination with
+        {
+            X = (int)MathF.Round(right - textTexture.Width - leftPadding),
+        };
     }
 
     private static XnaRect FitTextTexture(Texture2D texture, XnaRect bounds, UiTextStyle style)

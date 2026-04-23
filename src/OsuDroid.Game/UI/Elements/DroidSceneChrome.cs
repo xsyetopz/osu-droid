@@ -4,26 +4,23 @@ public static class DroidSceneChrome
 {
     public static void AddAppBar(List<UiElementSnapshot> elements, string idPrefix, float width, UiColor background)
     {
-        elements.Add(new UiElementSnapshot(
+        elements.Add(UiElementFactory.Fill(
             idPrefix + "-appbar",
-            UiElementKind.Fill,
             new UiRect(0f, 0f, width, DroidUiMetrics.AppBarHeight),
-            background,
-            1f));
+            background));
     }
 
     public static void AddBackButton(List<UiElementSnapshot> elements, string idPrefix, UiAction action, UiColor background, UiColor iconColor)
     {
-        elements.Add(new UiElementSnapshot(
+        elements.Add(UiElementFactory.Fill(
             idPrefix + "-back-hit",
-            UiElementKind.Fill,
             new UiRect(0f, 0f, DroidUiMetrics.AppBarHeight, DroidUiMetrics.AppBarHeight),
             background,
             0f,
-            Action: action));
-        elements.Add(new UiElementSnapshot(
+            action));
+        elements.Add(UiElementFactory.MaterialIcon(
             idPrefix + "-back",
-            UiElementKind.MaterialIcon,
+            UiMaterialIcon.ArrowBack,
             new UiRect(
                 16f * DroidUiMetrics.DpScale,
                 16f * DroidUiMetrics.DpScale,
@@ -31,7 +28,6 @@ public static class DroidSceneChrome
                 DroidUiMetrics.SectionIconSize),
             iconColor,
             1f,
-            Action: action,
-            MaterialIcon: UiMaterialIcon.ArrowBack));
+            action));
     }
 }

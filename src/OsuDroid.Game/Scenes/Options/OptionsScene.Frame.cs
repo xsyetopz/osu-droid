@@ -238,62 +238,17 @@ public sealed partial class OptionsScene
 
     private static bool IsVisible(UiRect bounds, VirtualViewport viewport) => bounds.Bottom >= AppBarHeight && bounds.Y <= viewport.VirtualHeight;
 
-    private static UiElementSnapshot Fill(string id, UiRect bounds, UiColor color, float alpha = 1f, UiAction action = UiAction.None, float cornerRadius = 0f, bool enabled = true, UiCornerMode cornerMode = UiCornerMode.All) => new(
-        id,
-        UiElementKind.Fill,
-        bounds,
-        color,
-        alpha,
-        null,
-        action,
-        null,
-        null,
-        enabled,
-        null,
-        cornerRadius,
-        null,
-        cornerMode);
+    private static UiElementSnapshot Fill(string id, UiRect bounds, UiColor color, float alpha = 1f, UiAction action = UiAction.None, float cornerRadius = 0f, bool enabled = true, UiCornerMode cornerMode = UiCornerMode.All) =>
+        UiElementFactory.Fill(id, bounds, color, alpha, action, cornerRadius, enabled, cornerMode);
 
-    private static UiElementSnapshot Sprite(string id, string assetName, UiRect bounds, UiColor color, float alpha = 1f, UiAction action = UiAction.None, bool enabled = true) => new(
-        id,
-        UiElementKind.Sprite,
-        bounds,
-        color,
-        alpha,
-        assetName,
-        action,
-        null,
-        null,
-        enabled);
+    private static UiElementSnapshot Sprite(string id, string assetName, UiRect bounds, UiColor color, float alpha = 1f, UiAction action = UiAction.None, bool enabled = true) =>
+        UiElementFactory.Sprite(id, assetName, bounds, color, alpha, action, enabled);
 
+    private static UiElementSnapshot MaterialIcon(string id, UiMaterialIcon icon, UiRect bounds, UiColor color, float alpha = 1f, UiAction action = UiAction.None, bool enabled = true) =>
+        UiElementFactory.MaterialIcon(id, icon, bounds, color, alpha, action, enabled);
 
-    private static UiElementSnapshot MaterialIcon(string id, UiMaterialIcon icon, UiRect bounds, UiColor color, float alpha = 1f, UiAction action = UiAction.None, bool enabled = true) => new(
-        id,
-        UiElementKind.MaterialIcon,
-        bounds,
-        color,
-        alpha,
-        null,
-        action,
-        null,
-        null,
-        enabled,
-        null,
-        0f,
-        icon);
-
-    private static UiElementSnapshot Icon(string id, UiIcon icon, UiRect bounds, UiColor color, float alpha = 1f, UiAction action = UiAction.None, bool enabled = true) => new(
-        id,
-        UiElementKind.Icon,
-        bounds,
-        color,
-        alpha,
-        null,
-        action,
-        null,
-        null,
-        enabled,
-        icon);
+    private static UiElementSnapshot Icon(string id, UiIcon icon, UiRect bounds, UiColor color, float alpha = 1f, UiAction action = UiAction.None, bool enabled = true) =>
+        UiElementFactory.Icon(id, icon, bounds, color, alpha, action, enabled);
 
     private static UiElementSnapshot Text(
         string id,
@@ -307,15 +262,7 @@ public sealed partial class OptionsScene
         float alpha = 1f,
         bool bold = false,
         UiAction action = UiAction.None,
-        bool enabled = true) => new(
-            id,
-            UiElementKind.Text,
-            new UiRect(x, y, width, height),
-            color,
-            alpha,
-            null,
-            action,
-            value,
-            new UiTextStyle(size, bold),
-            enabled);
+        bool enabled = true) =>
+        UiElementFactory.Text(id, value, new UiRect(x, y, width, height), size, color, action, enabled, bold, alpha: alpha);
+
 }

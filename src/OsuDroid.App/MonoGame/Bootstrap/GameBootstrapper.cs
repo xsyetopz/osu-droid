@@ -5,7 +5,7 @@ using OsuDroid.Game.Scenes;
 
 namespace OsuDroid.App.MonoGame.Bootstrap;
 
-public sealed class GameBootstrapper(Func<OsuDroidGameCore> createCore, Action<OsuDroidGameCore>? attachPlatformServices = null)
+public sealed class GameBootstrapper(Func<OsuDroidGameCore> createCore, Action<OsuDroidGameCore>? attachPlatformRuntime = null)
 {
     private readonly object gate = new();
     private Task? bootTask;
@@ -59,7 +59,7 @@ public sealed class GameBootstrapper(Func<OsuDroidGameCore> createCore, Action<O
             SetProgress(8, "Loading data...");
             var createdCore = createCore();
             SetProgress(72, "Loading audio...");
-            attachPlatformServices?.Invoke(createdCore);
+            attachPlatformRuntime?.Invoke(createdCore);
             SetProgress(96, "Almost ready...");
 
             lock (gate)

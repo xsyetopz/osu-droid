@@ -44,10 +44,10 @@ public sealed class BeatmapDownloadService(
         {
             var archiveName = BeatmapImportService.SanitizeArchiveName($"{beatmapSet.Id} {beatmapSet.Artist} - {beatmapSet.Title}{(withVideo ? string.Empty : " [no video]")}");
             var destination = Path.Combine(paths.Downloads, archiveName + ".osz");
-            state = new BeatmapDownloadState(beatmapSet.Id, archiveName, new BeatmapDownloadProgress(0, null, "Connecting"), IsActive: true);
+            state = new BeatmapDownloadState(beatmapSet.Id, archiveName, new BeatmapDownloadProgress(0, null, BeatmapDownloadPhase.Connecting), IsActive: true);
             var progress = new Progress<BeatmapDownloadProgress>(downloadProgress => state = state with { Progress = downloadProgress, IsActive = true });
             await mirrorClient.DownloadAsync(mirrorClient.CreateDownloadUri(beatmapSet.Mirror, beatmapSet.Id, withVideo), destination, progress, linkedCancellation.Token).ConfigureAwait(false);
-            state = state with { Progress = new BeatmapDownloadProgress(0, null, "Importing"), IsActive = true };
+            state = state with { Progress = new BeatmapDownloadProgress(0, null, BeatmapDownloadPhase.Importing), IsActive = true };
             var importResult = importService.ImportOsz(destination);
             state = importResult.IsSuccess ? new BeatmapDownloadState() : state with { ErrorMessage = importResult.ErrorMessage, IsActive = false };
             return importResult;
