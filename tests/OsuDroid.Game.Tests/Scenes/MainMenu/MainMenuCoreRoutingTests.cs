@@ -1,4 +1,5 @@
 using OsuDroid.Game.Compatibility.Database;
+using OsuDroid.Game.Beatmaps;
 using OsuDroid.Game.Runtime;
 using OsuDroid.Game.Runtime.Paths;
 using OsuDroid.Game.Scenes;
@@ -26,7 +27,8 @@ public sealed partial class UiCompatibilityTests
     {
         var database = new DroidDatabase(Path.Combine(TestContext.CurrentContext.WorkDirectory, $"main-menu-exit-{Guid.NewGuid():N}.db"));
         database.EnsureCreated();
-        var core = new OsuDroidGameCore(new GameServices(database, new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(TestContext.CurrentContext.WorkDirectory)), "test", "1.0"));
+        var music = new RecordingMenuMusicController();
+        var core = new OsuDroidGameCore(new GameServices(database, new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(TestContext.CurrentContext.WorkDirectory)), "test", "1.0", MusicController: music));
 
         core.HandleUiAction(UiAction.MainMenuCookie);
         core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
@@ -37,6 +39,7 @@ public sealed partial class UiCompatibilityTests
         core.Update(TimeSpan.FromMilliseconds(MainMenuScene.ExitAnimationMilliseconds));
 
         Assert.That(core.LastRoute, Is.EqualTo(MainMenuRoute.Exit));
+        Assert.That(music.LastCommand, Is.EqualTo(MenuMusicCommand.Stop));
     }
     [Test]
     public void MainMenuReturnTransitionFadesPreviousBackgroundLikeAndroidSongMenuBack()
@@ -160,9 +163,33 @@ public sealed partial class UiCompatibilityTests
         var core = new OsuDroidGameCore(new GameServices(database, new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(TestContext.CurrentContext.WorkDirectory)), "test", "1.0", ShowStartupScene: true));
         core.AttachPlatformServices(platformTextInputService: null, platformPreviewPlayer: null, recorder);
 
-        core.Update(TimeSpan.FromMilliseconds(StartupScene.LoadingMilliseconds + StartupScene.WelcomeMilliseconds));
+        core.Update(TimeSpan.FromMilliseconds(DroidUiTimings.StartupWelcomeDelayMilliseconds + StartupScene.WelcomeMilliseconds));
 
         Assert.That(recorder.Keys, Is.EquivalentTo(new[] { "welcome", "welcome_piano" }));
+    }
+
+    [Test]
+    public void StartupDefersBeatmapPreviewUntilWelcomeCompletes()
+    {
+        var root = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"startup-music-{Guid.NewGuid():N}");
+        var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(root));
+        paths.EnsureDirectories();
+        Directory.CreateDirectory(Path.Combine(paths.Songs, "1 Artist - Title"));
+        File.WriteAllBytes(Path.Combine(paths.Songs, "1 Artist - Title", "audio.mp3"), [1]);
+        var database = new DroidDatabase(Path.Combine(root, "test.db"));
+        database.EnsureCreated();
+        var music = new RecordingMenuMusicController();
+        var library = new StartupMusicLibrary();
+        var core = new OsuDroidGameCore(new GameServices(database, paths, "test", "1.0", music, BeatmapLibrary: library, ShowStartupScene: true));
+
+        core.AttachPlatformServices(platformTextInputService: null, platformPreviewPlayer: new NoOpBeatmapPreviewPlayer());
+
+        Assert.That(music.SetPlaylistPlayFlags, Is.EqualTo(new[] { false }));
+        Assert.That(music.PlayCommands, Is.Zero);
+
+        core.Update(TimeSpan.FromMilliseconds(DroidUiTimings.StartupWelcomeDelayMilliseconds + StartupScene.WelcomeMilliseconds));
+
+        Assert.That(music.PlayCommands, Is.EqualTo(1));
     }
 
     [Test]
@@ -196,5 +223,116 @@ public sealed partial class UiCompatibilityTests
         public List<string> Keys { get; } = [];
 
         public void Play(string key) => Keys.Add(key);
+    }
+
+    private sealed class RecordingMenuMusicController : IMenuMusicController
+    {
+        public List<bool> SetPlaylistPlayFlags { get; } = [];
+
+        public int PlayCommands { get; private set; }
+
+        public MenuMusicCommand LastCommand { get; private set; }
+
+        public MenuNowPlayingState State { get; private set; } = new();
+
+        public void SetPreviewPlayer(IBeatmapPreviewPlayer player)
+        {
+        }
+
+        public void Queue(MenuTrack track, bool play) => State = new MenuNowPlayingState(track.DisplayTitle, play);
+
+        public void SetPlaylist(IReadOnlyList<MenuTrack> tracks, int startIndex, bool play)
+        {
+            SetPlaylistPlayFlags.Add(play);
+            if (tracks.Count > 0)
+                State = new MenuNowPlayingState(tracks[Math.Clamp(startIndex, 0, tracks.Count - 1)].DisplayTitle, play);
+        }
+
+        public void Execute(MenuMusicCommand command)
+        {
+            LastCommand = command;
+            if (command == MenuMusicCommand.Play)
+                PlayCommands++;
+        }
+
+        public void Update(TimeSpan elapsed)
+        {
+        }
+
+        public bool TryReadSpectrum1024(float[] destination) => false;
+    }
+
+    private sealed class StartupMusicLibrary : IBeatmapLibrary
+    {
+        private readonly BeatmapLibrarySnapshot snapshot = new([
+            new BeatmapSetInfo(1, "1 Artist - Title", [
+                new BeatmapInfo(
+                    "Easy.osu",
+                    "1 Artist - Title",
+                    "md5",
+                    null,
+                    "audio.mp3",
+                    null,
+                    null,
+                    1,
+                    "Title",
+                    string.Empty,
+                    "Artist",
+                    string.Empty,
+                    "Mapper",
+                    "Easy",
+                    string.Empty,
+                    string.Empty,
+                    0,
+                    5,
+                    5,
+                    5,
+                    5,
+                    1,
+                    1,
+                    120,
+                    120,
+                    120,
+                    1000,
+                    0,
+                    1,
+                    0,
+                    0,
+                    1,
+                    false)
+            ])
+        ]);
+
+        public BeatmapLibrarySnapshot Snapshot => snapshot;
+
+        public BeatmapLibrarySnapshot Load() => snapshot;
+
+        public BeatmapLibrarySnapshot Scan(IReadOnlySet<string>? forceUpdateDirectories = null) => snapshot;
+
+        public bool NeedsScanRefresh() => false;
+
+        public BeatmapOptions GetOptions(string setDirectory) => new(setDirectory);
+
+        public void SaveOptions(BeatmapOptions options)
+        {
+        }
+
+        public IReadOnlyList<BeatmapCollection> GetCollections(string? selectedSetDirectory = null) => [];
+
+        public IReadOnlySet<string> GetCollectionSetDirectories(string name) => new HashSet<string>(StringComparer.Ordinal);
+
+        public bool CreateCollection(string name) => true;
+
+        public void DeleteCollection(string name)
+        {
+        }
+
+        public void ToggleCollectionMembership(string name, string setDirectory)
+        {
+        }
+
+        public void DeleteBeatmapSet(string directory)
+        {
+        }
     }
 }

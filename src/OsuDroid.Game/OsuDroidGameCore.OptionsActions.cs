@@ -27,6 +27,12 @@ public sealed partial class OsuDroidGameCore
     private void ApplyRoute(MainMenuRoute route)
     {
         var start = PerfDiagnostics.Start();
+        if (route == MainMenuRoute.Exit)
+        {
+            musicController.Execute(MenuMusicCommand.Stop);
+            mainMenu.SetNowPlaying(musicController.State);
+        }
+
         activeScene = route switch
         {
             MainMenuRoute.Settings => ActiveScene.Options,

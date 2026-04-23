@@ -24,11 +24,15 @@ public sealed partial class SongSelectSceneTests
         Assert.That(frame.Elements.Any(element => element.Id == "songselect-properties-panel"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "songselect-beatmap-options-search"), Is.True);
         Assert.That(frame.Elements.Single(element => element.Id == "songselect-beatmap-options-search-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.Search));
-        Assert.That(frame.Elements.Single(element => element.Id == "songselect-beatmap-options-favorite-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.HeartOutline));
-        Assert.That(frame.Elements.Single(element => element.Id == "songselect-beatmap-options-algorithm-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.Star));
+        var favoriteIcon = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-favorite-icon");
+        Assert.That(favoriteIcon.MaterialIcon, Is.EqualTo(UiMaterialIcon.HeartOutline));
+        Assert.That(favoriteIcon.Color, Is.EqualTo(UiColor.Opaque(54, 54, 83)));
+        Assert.That(frame.Elements.Single(element => element.Id == "songselect-beatmap-options-algorithm-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.StarOutline));
         Assert.That(frame.Elements.Single(element => element.Id == "songselect-beatmap-options-sort-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.Sort));
-        Assert.That(frame.Elements.Single(element => element.Id == "songselect-beatmap-options-folder-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.Folder));
+        Assert.That(frame.Elements.Single(element => element.Id == "songselect-beatmap-options-folder-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.FolderOutline));
+        Assert.That(frame.Elements.Single(element => element.Id == "songselect-beatmap-options-folder").Text, Is.EqualTo("Default"));
     }
+
     [Test]
     public void BeatmapOptionsUsesLegacyRoundedContainerGraphics()
     {
@@ -50,6 +54,30 @@ public sealed partial class SongSelectSceneTests
         Assert.That(hitFills, Has.All.Property(nameof(UiElementSnapshot.Alpha)).EqualTo(0f));
         Assert.That(frame.Elements.Count(element => element.Id.StartsWith("songselect-beatmap-options-divider-", StringComparison.Ordinal)), Is.EqualTo(3));
     }
+
+    [Test]
+    public void BeatmapOptionsTabStripUsesAndroidWrapContentSizing()
+    {
+        var scene = new SongSelectScene(new FakeLibrary(CreateSnapshot()), new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"));
+        var dp = DroidUiMetrics.DpScale;
+
+        scene.Enter();
+        scene.OpenBeatmapOptions();
+
+        var frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        var favorite = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-favorite-hit");
+        var algorithm = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-algorithm-hit");
+        var sort = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-sort-hit");
+        var folder = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-folder-hit");
+        var strip = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-strip");
+
+        Assert.That(favorite.Bounds.Width, Is.EqualTo(56f * dp).Within(0.001f));
+        Assert.That(algorithm.Bounds.Width, Is.EqualTo(ExpectedOptionsWidth("osu!droid", 16f)).Within(0.001f));
+        Assert.That(sort.Bounds.Width, Is.EqualTo(ExpectedOptionsWidth("Title", 16f)).Within(0.001f));
+        Assert.That(folder.Bounds.Width, Is.EqualTo(ExpectedOptionsWidth("Default", 24f)).Within(0.001f));
+        Assert.That(strip.Bounds.Width, Is.EqualTo(favorite.Bounds.Width + algorithm.Bounds.Width + sort.Bounds.Width + folder.Bounds.Width + 3f * dp).Within(0.001f));
+    }
+
     [Test]
     public void BeatmapOptionsSearchAndFavoriteFilterVisibleSets()
     {
@@ -68,7 +96,9 @@ public sealed partial class SongSelectSceneTests
 
         Assert.That(frame.Elements.Any(element => element.Text?.Contains("Artist - Title", StringComparison.Ordinal) == true), Is.False);
         Assert.That(frame.Elements.Any(element => element.Text?.Contains("Other - Song", StringComparison.Ordinal) == true), Is.True);
-        Assert.That(frame.Elements.Single(element => element.Id == "songselect-beatmap-options-favorite-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.Heart));
+        var favoriteIcon = frame.Elements.Single(element => element.Id == "songselect-beatmap-options-favorite-icon");
+        Assert.That(favoriteIcon.MaterialIcon, Is.EqualTo(UiMaterialIcon.Heart));
+        Assert.That(favoriteIcon.Color, Is.EqualTo(UiColor.Opaque(243, 115, 115)));
     }
     [Test]
     public void FolderFilterPopupUsesLegacyBottomAnchoredCollectionsPanel()
@@ -91,9 +121,57 @@ public sealed partial class SongSelectSceneTests
         Assert.That(panel.Bounds.Bottom, Is.EqualTo(viewport.VirtualHeight - 20f * dp).Within(0.001f));
         Assert.That(panel.CornerRadius, Is.EqualTo(14f * dp));
         Assert.That(panel.Color, Is.EqualTo(UiColor.Opaque(19, 19, 26)));
-        Assert.That(frame.Elements.Single(element => element.Id == "songselect-collections-new").Text, Is.EqualTo("New folder"));
-        Assert.That(frame.Elements.Single(element => element.Id == "songselect-collection-0-name").Text, Is.EqualTo("All folders"));
+        Assert.That(frame.Elements.Single(element => element.Id == "songselect-collections-new").Text, Is.EqualTo("Create new folder"));
+        Assert.That(frame.Elements.Single(element => element.Id == "songselect-collection-0-name").Text, Is.EqualTo("Default"));
         Assert.That(frame.Elements.Single(element => element.Id == "songselect-collection-1-name").Text, Is.EqualTo("Folder"));
         Assert.That(frame.Elements.Any(element => element.Id == "songselect-collection-0-delete"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "songselect-collection-0-toggle"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "songselect-collection-0-count"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "songselect-collection-0-selected"), Is.True);
+    }
+
+    [Test]
+    public void FolderFilterPopupShowsDefaultWhenNoCustomCollectionsExist()
+    {
+        var scene = new SongSelectScene(new FakeLibrary(CreateSnapshot()), new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"));
+        scene.Enter();
+        scene.OpenBeatmapOptions();
+        scene.OpenCollectionFilter();
+
+        var frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+
+        Assert.That(frame.Elements.Single(element => element.Id == "songselect-collection-0-name").Text, Is.EqualTo("Default"));
+        Assert.That(frame.Elements.Any(element => element.Id == "songselect-collection-1-name"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "songselect-collections-empty"), Is.False);
+    }
+
+    [Test]
+    public void SelectingDefaultFolderClearsFolderFilterAndRestoresOverlayLabel()
+    {
+        var library = new FakeLibrary(CreateSnapshot());
+        var scene = new SongSelectScene(library, new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"));
+
+        library.CreateCollection("Folder");
+        scene.Enter();
+        scene.OpenBeatmapOptions();
+        scene.OpenCollectionFilter();
+        scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720));
+        scene.HandleCollectionPrimaryAction(1);
+
+        var filteredFrame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        Assert.That(filteredFrame.Elements.Single(element => element.Id == "songselect-beatmap-options-folder").Text, Is.EqualTo("Folder"));
+
+        scene.OpenCollectionFilter();
+        scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720));
+        scene.HandleCollectionPrimaryAction(0);
+
+        var defaultFrame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        Assert.That(defaultFrame.Elements.Single(element => element.Id == "songselect-beatmap-options-folder").Text, Is.EqualTo("Default"));
+    }
+
+    private static float ExpectedOptionsWidth(string text, float endPaddingDp)
+    {
+        var dp = DroidUiMetrics.DpScale;
+        return 16f * dp + 24f * dp + 12f * dp + text.Length * 14f * dp * 0.62f + endPaddingDp * dp;
     }
 }

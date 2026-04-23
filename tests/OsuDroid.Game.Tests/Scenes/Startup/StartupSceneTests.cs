@@ -69,9 +69,18 @@ public sealed partial class UiCompatibilityTests
 
         Assert.That(frame.AssetManifest, Is.SameAs(DroidAssets.StartupManifest));
         Assert.That(frame.Elements.Single(element => element.Id == "bootstrap-background").Color, Is.EqualTo(UiColor.Opaque(0, 0, 0)));
-        Assert.That(frame.Elements.Any(element => element.Id == "bootstrap-loading-spinner" && element.AssetName == DroidAssets.Loading), Is.True);
+        var spinner = frame.Elements.Single(element => element.Id == "bootstrap-loading-spinner");
+        Assert.That(spinner.AssetName, Is.EqualTo(DroidAssets.Loading));
+        Assert.That(spinner.Bounds.Width, Is.EqualTo(212f * 0.4f).Within(0.01f));
+        Assert.That(spinner.Bounds.Height, Is.EqualTo(212f * 0.4f).Within(0.01f));
         Assert.That(frame.Elements.Any(element => element.Id == "bootstrap-loading-title" && element.AssetName == DroidAssets.LoadingTitle), Is.True);
-        Assert.That(frame.Elements.Single(element => element.Id == "bootstrap-loading-progress").Text, Is.EqualTo("10 %"));
-        Assert.That(frame.Elements.Single(element => element.Id == "bootstrap-loading-text").Text, Is.EqualTo("Loading skin..."));
+        var progress = frame.Elements.Single(element => element.Id == "bootstrap-loading-progress");
+        Assert.That(progress.Text, Is.EqualTo("10 %"));
+        Assert.That(progress.Bounds.Y, Is.EqualTo((720f + 212f) / 2f - 212f / 4f).Within(0.01f));
+        Assert.That(progress.TextStyle?.Size, Is.EqualTo(28f * 0.5f).Within(0.01f));
+        var text = frame.Elements.Single(element => element.Id == "bootstrap-loading-text");
+        Assert.That(text.Text, Is.EqualTo("Loading skin..."));
+        Assert.That(text.Bounds.Y, Is.EqualTo(720f - 28f * 0.6f - 20f).Within(0.01f));
+        Assert.That(text.TextStyle?.Size, Is.EqualTo(28f * 0.6f).Within(0.01f));
     }
 }

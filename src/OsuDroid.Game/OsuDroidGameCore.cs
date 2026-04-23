@@ -37,6 +37,7 @@ public sealed partial class OsuDroidGameCore
     private IMenuSfxPlayer activeMenuSfxPlayer;
     private ActiveScene activeScene;
     private bool menuMusicPreviewEnabled;
+    private bool startMenuMusicAfterStartup;
     private MenuNowPlayingState? preservedDownloaderMusicState;
 
     public OsuDroidGameCore(GameServices services)
@@ -63,9 +64,9 @@ public sealed partial class OsuDroidGameCore
         musicController = services.MusicController ?? new PreviewMenuMusicController(previewPlayer);
         activeMenuSfxPlayer = services.MenuSfxPlayer ?? new NoOpMenuSfxPlayer();
         songSelect = new SongSelectScene(beatmapLibrary, musicController, difficultyService, services.Paths.Songs, profile, textInputService);
-        QueueStartupPlaylist(beatmapLibrary);
-        mainMenu.SetNowPlaying(musicController.State);
         activeScene = services.ShowStartupScene ? ActiveScene.Startup : ActiveScene.MainMenu;
+        QueueStartupPlaylist(beatmapLibrary, activeScene != ActiveScene.Startup);
+        mainMenu.SetNowPlaying(musicController.State);
     }
 
     public GameServices Services { get; }
@@ -149,6 +150,7 @@ public sealed partial class OsuDroidGameCore
                 return;
 
             activeScene = ActiveScene.MainMenu;
+            StartDeferredMenuMusic();
         }
 
         musicController.Update(elapsed);
@@ -298,6 +300,25 @@ public sealed partial class OsuDroidGameCore
         musicController.SetPreviewPlayer(player);
         songSelect.SetPreviewPlayer(player);
         beatmapDownloader.SetPreviewPlayer(player);
+        if (!menuMusicPreviewEnabled || string.IsNullOrWhiteSpace(musicController.State.ArtistTitle))
+            return;
+
+        if (activeScene == ActiveScene.Startup)
+        {
+            startMenuMusicAfterStartup = true;
+            return;
+        }
+
+        musicController.Execute(MenuMusicCommand.Play);
+        mainMenu.SetNowPlaying(musicController.State);
+    }
+
+    private void StartDeferredMenuMusic()
+    {
+        if (!startMenuMusicAfterStartup)
+            return;
+
+        startMenuMusicAfterStartup = false;
         if (!menuMusicPreviewEnabled || string.IsNullOrWhiteSpace(musicController.State.ArtistTitle))
             return;
 

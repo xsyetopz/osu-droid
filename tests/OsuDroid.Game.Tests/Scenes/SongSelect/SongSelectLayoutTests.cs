@@ -21,12 +21,13 @@ public sealed partial class SongSelectSceneTests
         Assert.That(frame.Elements.Any(element => element.Id == "songselect-beatmap-background" && element.SpriteFit == UiSpriteFit.Cover), Is.True);
         Assert.That(frame.Elements.Any(element => element.Id == "songselect-diff-row-0"), Is.True);
         Assert.That(frame.Elements.Any(element => element.Id == "songselect-diff-row-0-star-0" && element.AssetName == DroidAssets.SongSelectStar), Is.True);
+        var difficultyRow = frame.Elements.Single(element => element.Id == "songselect-diff-row-0");
         var fractionalStar = frame.Elements.Single(element => element.Id == "songselect-diff-row-0-star-half");
         Assert.That(fractionalStar.Bounds.Width, Is.EqualTo(46f * 0.4f).Within(0.01f));
-        Assert.That(fractionalStar.Bounds.Height, Is.EqualTo(47f));
-        Assert.That(fractionalStar.SpriteSource, Is.Not.Null);
-        Assert.That(fractionalStar.SpriteSource!.Value.Width, Is.EqualTo(46f * 0.4f).Within(0.01f));
-        Assert.That(fractionalStar.SpriteSource.Value.Height, Is.EqualTo(47f));
+        Assert.That(fractionalStar.Bounds.Height, Is.EqualTo(47f * 0.4f).Within(0.01f));
+        Assert.That(fractionalStar.Bounds.X, Is.EqualTo(difficultyRow.Bounds.X + 60f + 52f * 2f + (46f - 46f * 0.4f) / 2f).Within(0.01f));
+        Assert.That(fractionalStar.Bounds.Y, Is.EqualTo(difficultyRow.Bounds.Y + 50f + (47f - 47f * 0.4f) / 2f).Within(0.01f));
+        Assert.That(fractionalStar.SpriteSource, Is.Null);
         Assert.That(frame.Elements.Any(element => element.Id == "songselect-detail-panel"), Is.False);
         Assert.That(frame.Elements.Single(element => element.Id == "songselect-top-overlay").Bounds.X, Is.EqualTo(-1640f));
         Assert.That(frame.Elements.Single(element => element.Id == "songselect-top-overlay").Alpha, Is.EqualTo(0.6f));

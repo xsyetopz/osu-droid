@@ -45,6 +45,14 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
     private const float BeatmapOptionsRowHeight = 50f * Dp;
     private const float BeatmapOptionsRadius = 14f * Dp;
     private const float BeatmapOptionsDividerWidth = 1f * Dp;
+    private const float BeatmapOptionsHorizontalPadding = 16f * Dp;
+    private const float BeatmapOptionsFolderEndPadding = 24f * Dp;
+    private const float BeatmapOptionsDrawableGap = 12f * Dp;
+    private const float BeatmapOptionsIconSize = 24f * Dp;
+    private const float BeatmapOptionsTextSize = 14f * Dp;
+    private const float BeatmapOptionsTextWidthFactor = 0.62f;
+    private const string DefaultFavoriteFolderName = "Default";
+    private const string CreateFavoriteFolderLabel = "Create new folder";
     private const float CollectionsWidth = 500f * Dp;
     private const float CollectionsMargin = 20f * Dp;
     private const float CollectionRowHeight = 60f * Dp;
@@ -68,6 +76,8 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
     private static readonly UiColor PropertiesDanger = UiColor.Opaque(255, 191, 191);
     private static readonly UiColor BeatmapOptionsSearchPanel = UiColor.Opaque(54, 54, 83);
     private static readonly UiColor BeatmapOptionsDivider = new(255, 255, 255, 10);
+    private static readonly UiColor BeatmapOptionsAccent = UiColor.Opaque(243, 115, 115);
+    private static readonly UiColor BeatmapOptionsInactiveCheckbox = UiColor.Opaque(54, 54, 83);
 
     private readonly int[] visibleSetIndices = Enumerable.Repeat(-1, VisibleSetSlots).ToArray();
     private readonly int[] visibleDifficultyIndices = Enumerable.Repeat(-1, VisibleDifficultySlots).ToArray();

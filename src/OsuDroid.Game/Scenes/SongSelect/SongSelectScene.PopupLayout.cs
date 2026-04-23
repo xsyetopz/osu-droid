@@ -93,27 +93,30 @@ public sealed partial class SongSelectScene
         elements.Add(MaterialIcon("songselect-beatmap-options-search-icon", UiMaterialIcon.Search, new UiRect(search.Right - 40f * Dp, search.Y + 16f * Dp, 24f * Dp, 24f * Dp), PropertiesSecondary, 1f, UiAction.SongSelectBeatmapOptionsSearch));
 
         var optionsY = search.Bottom + 12f * Dp;
-        var x = search.X;
-        var favoriteWidth = 56f * Dp;
-        var algorithmWidth = 190f * Dp;
-        var sortWidth = 150f * Dp;
-        var folderWidth = 210f * Dp;
+        var algorithmText = displayAlgorithm == DifficultyAlgorithm.Standard ? "osu!standard" : "osu!droid";
+        var sortText = SortLabel(sortMode);
+        var folderText = collectionFilter ?? DefaultFavoriteFolderName;
+        var favoriteWidth = IconOnlyOptionsButtonWidth();
+        var algorithmWidth = TextOptionsButtonWidth(algorithmText);
+        var sortWidth = TextOptionsButtonWidth(sortText);
+        var folderWidth = TextOptionsButtonWidth(folderText, BeatmapOptionsFolderEndPadding);
         var stripWidth = favoriteWidth + algorithmWidth + sortWidth + folderWidth + BeatmapOptionsDividerWidth * 3f;
+        var x = search.X;
         elements.Add(Fill("songselect-beatmap-options-strip", new UiRect(search.X, optionsY, stripWidth, BeatmapOptionsRowHeight), PropertiesPanel, 1f, UiAction.SongSelectPropertiesPanel, BeatmapOptionsRadius));
 
-        AddOptionsButton(elements, "songselect-beatmap-options-favorite", new UiRect(x, optionsY, favoriteWidth, BeatmapOptionsRowHeight), favoriteOnlyFilter ? UiMaterialIcon.Heart : UiMaterialIcon.HeartOutline, string.Empty, UiAction.SongSelectBeatmapOptionsFavorite);
+        AddOptionsButton(elements, "songselect-beatmap-options-favorite", new UiRect(x, optionsY, favoriteWidth, BeatmapOptionsRowHeight), favoriteOnlyFilter ? UiMaterialIcon.Heart : UiMaterialIcon.HeartOutline, string.Empty, UiAction.SongSelectBeatmapOptionsFavorite, favoriteOnlyFilter ? BeatmapOptionsAccent : BeatmapOptionsInactiveCheckbox);
         x += favoriteWidth;
         AddOptionsDivider(elements, "songselect-beatmap-options-divider-favorite", x, optionsY);
         x += BeatmapOptionsDividerWidth;
-        AddOptionsButton(elements, "songselect-beatmap-options-algorithm", new UiRect(x, optionsY, algorithmWidth, BeatmapOptionsRowHeight), UiMaterialIcon.Star, displayAlgorithm == DifficultyAlgorithm.Standard ? "osu!standard" : "osu!droid", UiAction.SongSelectBeatmapOptionsAlgorithm);
+        AddOptionsButton(elements, "songselect-beatmap-options-algorithm", new UiRect(x, optionsY, algorithmWidth, BeatmapOptionsRowHeight), UiMaterialIcon.StarOutline, algorithmText, UiAction.SongSelectBeatmapOptionsAlgorithm, White);
         x += algorithmWidth;
         AddOptionsDivider(elements, "songselect-beatmap-options-divider-algorithm", x, optionsY);
         x += BeatmapOptionsDividerWidth;
-        AddOptionsButton(elements, "songselect-beatmap-options-sort", new UiRect(x, optionsY, sortWidth, BeatmapOptionsRowHeight), UiMaterialIcon.Sort, SortLabel(sortMode), UiAction.SongSelectBeatmapOptionsSort);
+        AddOptionsButton(elements, "songselect-beatmap-options-sort", new UiRect(x, optionsY, sortWidth, BeatmapOptionsRowHeight), UiMaterialIcon.Sort, sortText, UiAction.SongSelectBeatmapOptionsSort, White);
         x += sortWidth;
         AddOptionsDivider(elements, "songselect-beatmap-options-divider-sort", x, optionsY);
         x += BeatmapOptionsDividerWidth;
-        AddOptionsButton(elements, "songselect-beatmap-options-folder", new UiRect(x, optionsY, folderWidth, BeatmapOptionsRowHeight), UiMaterialIcon.Folder, collectionFilter ?? "Folder", UiAction.SongSelectBeatmapOptionsFolder);
+        AddOptionsButton(elements, "songselect-beatmap-options-folder", new UiRect(x, optionsY, folderWidth, BeatmapOptionsRowHeight), UiMaterialIcon.FolderOutline, folderText, UiAction.SongSelectBeatmapOptionsFolder, White);
     }
 
     private void AddCollectionsPanel(List<UiElementSnapshot> elements, VirtualViewport viewport)
@@ -121,12 +124,12 @@ public sealed partial class SongSelectScene
         var set = SelectedSet;
         var sourceCollections = library.GetCollections(set?.Directory).ToArray();
         var collections = collectionsFilterMode
-            ? new[] { new BeatmapCollection("All folders", sourceCollections.Sum(collection => collection.BeatmapCount), collectionFilter is null) }.Concat(sourceCollections).ToArray()
+            ? new[] { new BeatmapCollection(DefaultFavoriteFolderName, 0, collectionFilter is null) }.Concat(sourceCollections).ToArray()
             : sourceCollections;
         var panelHeight = viewport.VirtualHeight - CollectionsMargin * 2f;
         var panel = new UiRect((viewport.VirtualWidth - CollectionsWidth) / 2f, viewport.VirtualHeight - CollectionsMargin - panelHeight, CollectionsWidth, panelHeight);
         elements.Add(Fill("songselect-collections-panel", panel, CollectionsPanelDark, 1f, UiAction.SongSelectPropertiesPanel, 14f * Dp));
-        AddIconRow(elements, "songselect-collections-new", UiMaterialIcon.Plus, "New folder", panel.X, panel.Y, panel.Width, UiAction.SongSelectCollectionsNewFolder, White);
+        AddIconRow(elements, "songselect-collections-new", UiMaterialIcon.Plus, CreateFavoriteFolderLabel, panel.X, panel.Y, panel.Width, UiAction.SongSelectCollectionsNewFolder, White);
         AddDivider(elements, "songselect-collections-divider-new", panel.X, panel.Y + PropertiesRowHeight, panel.Width);
 
         var listY = panel.Y + PropertiesRowHeight + 12f * Dp;
@@ -161,7 +164,8 @@ public sealed partial class SongSelectScene
             elements.Add(TextMiddle($"songselect-collection-{slot}-count", $"· {collection.BeatmapCount} beatmaps", x + 170f * Dp, y, width - 280f * Dp, CollectionRowHeight, 12f * Dp, PropertiesSecondary, UiTextAlignment.Left, action));
         if (filterMode)
         {
-            if (string.Equals(collection.Name, selectedFilter, StringComparison.Ordinal))
+            var isDefaultSelected = slot == 0 && selectedFilter is null;
+            if (isDefaultSelected || string.Equals(collection.Name, selectedFilter, StringComparison.Ordinal))
                 elements.Add(MaterialIcon($"songselect-collection-{slot}-selected", UiMaterialIcon.Check, new UiRect(x + width - 40f * Dp, y + 18f * Dp, 24f * Dp, 24f * Dp), White, 1f, action));
             return;
         }
@@ -202,19 +206,26 @@ public sealed partial class SongSelectScene
         elements.Add(TextMiddle(id, text, x + 58f * Dp, y, width - 74f * Dp, PropertiesRowHeight, 15f * Dp, color, UiTextAlignment.Left, action));
     }
 
-    private static void AddOptionsButton(List<UiElementSnapshot> elements, string id, UiRect bounds, UiMaterialIcon icon, string text, UiAction action)
+    private static void AddOptionsButton(List<UiElementSnapshot> elements, string id, UiRect bounds, UiMaterialIcon icon, string text, UiAction action, UiColor iconColor)
     {
         elements.Add(Fill(id + "-hit", bounds, PropertiesPanel, 0f, action));
-        var iconX = bounds.X + 16f * Dp;
+        var iconX = bounds.X + BeatmapOptionsHorizontalPadding;
         if (text.Length == 0)
-            iconX = bounds.X + (bounds.Width - 24f * Dp) / 2f;
-        elements.Add(MaterialIcon(id + "-icon", icon, new UiRect(iconX, bounds.Y + 14f * Dp, 24f * Dp, 24f * Dp), White, 1f, action));
+            iconX = bounds.X + (bounds.Width - BeatmapOptionsIconSize) / 2f;
+        elements.Add(MaterialIcon(id + "-icon", icon, new UiRect(iconX, bounds.Y + 14f * Dp, BeatmapOptionsIconSize, BeatmapOptionsIconSize), iconColor, 1f, action));
         if (text.Length > 0)
-            elements.Add(TextMiddle(id, text, bounds.X + 52f * Dp, bounds.Y, bounds.Width - 68f * Dp, bounds.Height, 14f * Dp, White, UiTextAlignment.Left, action));
+            elements.Add(TextMiddle(id, text, bounds.X + BeatmapOptionsHorizontalPadding + BeatmapOptionsIconSize + BeatmapOptionsDrawableGap, bounds.Y, bounds.Width - BeatmapOptionsHorizontalPadding * 2f - BeatmapOptionsIconSize - BeatmapOptionsDrawableGap, bounds.Height, BeatmapOptionsTextSize, White, UiTextAlignment.Left, action));
     }
 
     private static void AddOptionsDivider(List<UiElementSnapshot> elements, string id, float x, float y) =>
         elements.Add(Fill(id, new UiRect(x, y, BeatmapOptionsDividerWidth, BeatmapOptionsRowHeight), BeatmapOptionsDivider, 1f));
+
+    private static float IconOnlyOptionsButtonWidth() => BeatmapOptionsHorizontalPadding * 2f + BeatmapOptionsIconSize;
+
+    private static float TextOptionsButtonWidth(string text, float endPadding = BeatmapOptionsHorizontalPadding) =>
+        BeatmapOptionsHorizontalPadding + BeatmapOptionsIconSize + BeatmapOptionsDrawableGap + EstimateOptionsTextWidth(text) + endPadding;
+
+    private static float EstimateOptionsTextWidth(string text) => text.Length * BeatmapOptionsTextSize * BeatmapOptionsTextWidthFactor;
 
     private static void AddPropertiesRowText(List<UiElementSnapshot> elements, string id, string text, float x, float y, float width, float height, float size, UiColor color, UiAction action) =>
         elements.Add(TextMiddle(id, text, x, y, width, height, size, color, UiTextAlignment.Center, action));

@@ -112,6 +112,8 @@ public sealed partial class SongSelectScene
         elements.Add(Sprite(id, DroidAssets.SongSelectButtonBackground, bounds, tint, 0.8f, action));
         elements.Add(Text($"{id}-title", $"{beatmap.Version} ({beatmap.Creator})", bounds.X + 32f, bounds.Y + 22f, 540f, 34f, 24f, textColor, UiTextAlignment.Left, action));
 
+        // Legacy source: third_party/osu-droid-legacy/.../menu/BeatmapItem.java.
+        // Fractional stars are scaled around AndEngine's default center, not cropped.
         var stars = Math.Clamp(CurrentStarRating(beatmap) ?? 0f, 0f, 10f);
         var fullStars = Math.Min(10, (int)MathF.Floor(stars));
         var starY = bounds.Y + 50f;
@@ -120,9 +122,23 @@ public sealed partial class SongSelectScene
 
         var fraction = stars - fullStars;
         if (fraction > 0f && fullStars < 10)
-            elements.Add(Sprite($"{id}-star-half", DroidAssets.SongSelectStar, new UiRect(bounds.X + 60f + fullStars * 52f, starY, 46f * fraction, 47f), White, 1f, action) with
-            {
-                SpriteSource = new UiRect(0f, 0f, 46f * fraction, 47f),
-            });
+        {
+            const float starWidth = 46f;
+            const float starHeight = 47f;
+            var slotX = bounds.X + 60f + fullStars * 52f;
+            var scaledWidth = starWidth * fraction;
+            var scaledHeight = starHeight * fraction;
+            elements.Add(Sprite(
+                $"{id}-star-half",
+                DroidAssets.SongSelectStar,
+                new UiRect(
+                    slotX + (starWidth - scaledWidth) / 2f,
+                    starY + (starHeight - scaledHeight) / 2f,
+                    scaledWidth,
+                    scaledHeight),
+                White,
+                1f,
+                action));
+        }
     }
 }

@@ -93,17 +93,30 @@ public sealed class PreviewMenuMusicController(IBeatmapPreviewPlayer initialPrev
                 Step(-1);
                 break;
             case MenuMusicCommand.Play:
-                if (currentIndex >= 0 && currentIndex < queue.Count && !State.IsPlaying && previewPlayer.PositionMilliseconds > 0)
+                var playSnapshot = CurrentPlaybackSnapshot();
+                if (currentIndex >= 0 && currentIndex < queue.Count && !State.IsPlaying && playSnapshot is { PositionMilliseconds: > 0 })
                 {
                     previewPlayer.ResumePreview();
-                    State = State with { IsPlaying = previewPlayer.IsPlaying, PositionMilliseconds = previewPlayer.PositionMilliseconds };
+                    var resumedSnapshot = CurrentPlaybackSnapshot();
+                    State = State with
+                    {
+                        IsPlaying = resumedSnapshot?.IsPlaying == true,
+                        PositionMilliseconds = resumedSnapshot?.PositionMilliseconds ?? State.PositionMilliseconds,
+                        LengthMilliseconds = CurrentTrackLength(resumedSnapshot),
+                    };
                 }
                 else
                     PlayCurrentOrNext();
                 break;
             case MenuMusicCommand.Pause:
                 previewPlayer.PausePreview();
-                State = State with { IsPlaying = false, PositionMilliseconds = previewPlayer.PositionMilliseconds };
+                var pauseSnapshot = CurrentPlaybackSnapshot();
+                State = State with
+                {
+                    IsPlaying = false,
+                    PositionMilliseconds = pauseSnapshot?.PositionMilliseconds ?? State.PositionMilliseconds,
+                    LengthMilliseconds = CurrentTrackLength(pauseSnapshot),
+                };
                 break;
             case MenuMusicCommand.Stop:
                 previewPlayer.StopPreview();
@@ -117,17 +130,18 @@ public sealed class PreviewMenuMusicController(IBeatmapPreviewPlayer initialPrev
 
     public void Update(TimeSpan elapsed)
     {
+        var snapshot = CurrentPlaybackSnapshot();
         if (!State.IsPlaying)
         {
-            if (currentIndex >= 0 && currentIndex < queue.Count && previewPlayer.IsPlaying)
+            if (currentIndex >= 0 && currentIndex < queue.Count && snapshot is { IsPlaying: true })
             {
                 var track = queue[currentIndex];
                 State = State with
                 {
                     IsPlaying = true,
-                    PositionMilliseconds = previewPlayer.PositionMilliseconds,
+                    PositionMilliseconds = snapshot.PositionMilliseconds,
                     ArtistTitle = track.DisplayTitle,
-                    LengthMilliseconds = Math.Max(track.LengthMilliseconds, 0),
+                    LengthMilliseconds = CurrentTrackLength(snapshot),
                     Bpm = track.Bpm,
                     BeatmapSetDirectory = track.BeatmapSetDirectory,
                     BeatmapFilename = track.BeatmapFilename,
@@ -137,19 +151,25 @@ public sealed class PreviewMenuMusicController(IBeatmapPreviewPlayer initialPrev
             return;
         }
 
-        if (!previewPlayer.IsPlaying)
+        if (snapshot is not { IsPlaying: true })
         {
-            if (queue.Count > 1)
+            if (HasCurrentTrackEnded(snapshot) && queue.Count > 1)
                 Step(1);
             else
-                State = State with { IsPlaying = false, PositionMilliseconds = previewPlayer.PositionMilliseconds };
+                State = State with
+                {
+                    IsPlaying = false,
+                    PositionMilliseconds = snapshot?.PositionMilliseconds ?? State.PositionMilliseconds,
+                    LengthMilliseconds = CurrentTrackLength(snapshot),
+                };
             return;
         }
 
-        var position = previewPlayer.PositionMilliseconds;
+        var position = snapshot.PositionMilliseconds;
         if (position <= 0)
             position = State.PositionMilliseconds + (int)Math.Max(0d, elapsed.TotalMilliseconds);
-        if (State.LengthMilliseconds > 0 && position >= State.LengthMilliseconds)
+        var length = CurrentTrackLength(snapshot);
+        if (length > 0 && position >= length)
         {
             if (queue.Count > 1)
             {
@@ -157,10 +177,10 @@ public sealed class PreviewMenuMusicController(IBeatmapPreviewPlayer initialPrev
                 return;
             }
 
-            position = State.LengthMilliseconds;
+            position = length;
         }
 
-        State = State with { PositionMilliseconds = position };
+        State = State with { PositionMilliseconds = position, LengthMilliseconds = length };
     }
 
     public bool TryReadSpectrum1024(float[] destination) => previewPlayer.TryReadSpectrum1024(destination);
@@ -215,21 +235,52 @@ public sealed class PreviewMenuMusicController(IBeatmapPreviewPlayer initialPrev
             return false;
         }
 
-        var isPlaying = previewPlayer.IsPlaying;
+        var snapshot = CurrentPlaybackSnapshot(track);
+        var isPlaying = snapshot is { IsPlaying: true };
         State = State with
         {
             ArtistTitle = track.DisplayTitle,
             IsPlaying = isPlaying,
-            PositionMilliseconds = isPlaying ? previewPlayer.PositionMilliseconds : 0,
-            LengthMilliseconds = Math.Max(track.LengthMilliseconds, 0),
+            PositionMilliseconds = isPlaying ? snapshot!.PositionMilliseconds : 0,
+            LengthMilliseconds = TrackLength(track, snapshot),
             Bpm = track.Bpm,
             BeatmapSetDirectory = track.BeatmapSetDirectory,
             BeatmapFilename = track.BeatmapFilename,
         };
         PerfDiagnostics.Log("menuMusic.playCurrent", start, $"identity=\"{track.Identity}\" isPlaying={isPlaying}");
-        return isPlaying;
+        return true;
+    }
+
+    private BeatmapPreviewPlaybackSnapshot? CurrentPlaybackSnapshot() =>
+        currentIndex >= 0 && currentIndex < queue.Count
+            ? CurrentPlaybackSnapshot(queue[currentIndex])
+            : null;
+
+    private BeatmapPreviewPlaybackSnapshot? CurrentPlaybackSnapshot(MenuTrack track)
+    {
+        var snapshot = previewPlayer.PlaybackSnapshot;
+        return string.Equals(snapshot.Source, track.AudioPath, StringComparison.Ordinal)
+            ? snapshot
+            : null;
+    }
+
+    private int CurrentTrackLength(BeatmapPreviewPlaybackSnapshot? snapshot) =>
+        currentIndex >= 0 && currentIndex < queue.Count
+            ? TrackLength(queue[currentIndex], snapshot)
+            : Math.Max(State.LengthMilliseconds, 0);
+
+    private static int TrackLength(MenuTrack track, BeatmapPreviewPlaybackSnapshot? snapshot) =>
+        snapshot is { DurationMilliseconds: > 0 }
+            ? snapshot.DurationMilliseconds
+            : Math.Max(track.LengthMilliseconds, 0);
+
+    private bool HasCurrentTrackEnded(BeatmapPreviewPlaybackSnapshot? snapshot)
+    {
+        if (snapshot is null)
+            return false;
+
+        var length = CurrentTrackLength(snapshot);
+        return length <= 0 || Math.Max(snapshot.PositionMilliseconds, State.PositionMilliseconds) >= length - 50;
     }
 
 }
-
-

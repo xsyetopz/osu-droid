@@ -1,10 +1,18 @@
 namespace OsuDroid.Game.Runtime;
 
+public sealed record BeatmapPreviewPlaybackSnapshot(
+    string? Source = null,
+    bool IsPlaying = false,
+    int PositionMilliseconds = 0,
+    int DurationMilliseconds = 0);
+
 public interface IBeatmapPreviewPlayer
 {
     bool IsPlaying { get; }
 
     int PositionMilliseconds { get; }
+
+    BeatmapPreviewPlaybackSnapshot PlaybackSnapshot { get; }
 
     void Play(string audioPath, int previewTimeMilliseconds);
 
@@ -24,6 +32,8 @@ public sealed class NoOpBeatmapPreviewPlayer : IBeatmapPreviewPlayer
     public bool IsPlaying => false;
 
     public int PositionMilliseconds => 0;
+
+    public BeatmapPreviewPlaybackSnapshot PlaybackSnapshot { get; } = new();
 
     public void Play(string audioPath, int previewTimeMilliseconds)
     {

@@ -14,13 +14,22 @@ public sealed partial class SongSelectSceneTests
 
         public int PositionMilliseconds { get; private set; }
 
+        public string? Source { get; private set; }
+
+        public BeatmapPreviewPlaybackSnapshot PlaybackSnapshot => new(Source, IsPlaying, PositionMilliseconds);
+
         public void Play(string audioPath, int previewTimeMilliseconds)
         {
             IsPlaying = true;
+            Source = audioPath;
             PositionMilliseconds = previewTimeMilliseconds;
         }
 
-        public void Play(Uri previewUri) => IsPlaying = true;
+        public void Play(Uri previewUri)
+        {
+            IsPlaying = true;
+            Source = previewUri.ToString();
+        }
 
         public void PausePreview() => IsPlaying = false;
 
@@ -29,6 +38,7 @@ public sealed partial class SongSelectSceneTests
         public void StopPreview()
         {
             IsPlaying = false;
+            Source = null;
             PositionMilliseconds = 0;
         }
 

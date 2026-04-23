@@ -22,7 +22,7 @@ public sealed partial class OsuDroidGameCore
         mainMenu.SetNowPlaying(musicController.State);
     }
 
-    private void QueueStartupPlaylist(IBeatmapLibrary library)
+    private void QueueStartupPlaylist(IBeatmapLibrary library, bool play = true)
     {
         if (!menuMusicPreviewEnabled)
             return;
@@ -37,7 +37,9 @@ public sealed partial class OsuDroidGameCore
         if (tracks.Length == 0)
             return;
 
-        musicController.SetPlaylist(tracks, random.Next(tracks.Length), true);
+        musicController.SetPlaylist(tracks, random.Next(tracks.Length), play);
+        if (!play)
+            startMenuMusicAfterStartup = true;
     }
 
     private IEnumerable<MenuTrack> CreateMenuPlaylist(BeatmapLibrarySnapshot snapshot) => snapshot.Sets

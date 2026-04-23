@@ -65,6 +65,41 @@ public sealed class MenuMusicControllerTests
     }
 
     [Test]
+    public void QueueIgnoresStalePlaybackFromPreviouslySelectedTrack()
+    {
+        var player = new ConfirmingPreviewPlayer();
+        var controller = new PreviewMenuMusicController(player);
+        var first = CreateTrack(CreateAudioFile(), "First.osu", "Artist - First", 1000);
+        var second = CreateTrack(CreateAudioFile(), "Second.osu", "Artist - Second", 1000);
+        controller.Queue(first, true);
+        player.AcceptPlayRequests = false;
+
+        controller.Queue(second, true);
+        controller.Update(TimeSpan.FromMilliseconds(16));
+
+        Assert.That(controller.State.ArtistTitle, Is.EqualTo("Artist - Second"));
+        Assert.That(controller.State.IsPlaying, Is.False);
+        Assert.That(player.Source, Is.EqualTo(first.AudioPath));
+    }
+
+    [Test]
+    public void PlaybackDurationOverridesBeatmapLengthForProgressAndAdvance()
+    {
+        var player = new ConfirmingPreviewPlayer { DurationMilliseconds = 1000 };
+        var controller = new PreviewMenuMusicController(player);
+        var first = CreateTrack(CreateAudioFile(), "First.osu", "Artist - First", 5000);
+        var second = CreateTrack(CreateAudioFile(), "Second.osu", "Artist - Second", 5000);
+        controller.SetPlaylist([first, second], 0, true);
+
+        Assert.That(controller.State.LengthMilliseconds, Is.EqualTo(1000));
+
+        player.PositionMilliseconds = 1000;
+        controller.Update(TimeSpan.FromMilliseconds(16));
+
+        Assert.That(controller.State.ArtistTitle, Is.EqualTo("Artist - Second"));
+    }
+
+    [Test]
     public void PlaylistSkipsFailedTracksUntilPlayableTrackStarts()
     {
         var player = new ConfirmingPreviewPlayer();
@@ -109,15 +144,34 @@ public sealed class MenuMusicControllerTests
     {
         public bool IsPlaying { get; private set; }
 
+        public bool AcceptPlayRequests { get; set; } = true;
+
         public int PositionMilliseconds { get; set; }
+
+        public int DurationMilliseconds { get; set; }
+
+        public string? Source { get; set; }
+
+        public BeatmapPreviewPlaybackSnapshot PlaybackSnapshot => new(Source, IsPlaying, PositionMilliseconds, DurationMilliseconds);
 
         public void Play(string audioPath, int previewTimeMilliseconds)
         {
+            if (!AcceptPlayRequests)
+                return;
+
             IsPlaying = true;
+            Source = audioPath;
             PositionMilliseconds = previewTimeMilliseconds;
         }
 
-        public void Play(Uri previewUri) => IsPlaying = true;
+        public void Play(Uri previewUri)
+        {
+            if (!AcceptPlayRequests)
+                return;
+
+            IsPlaying = true;
+            Source = previewUri.ToString();
+        }
 
         public void PausePreview() => IsPlaying = false;
 
@@ -126,6 +180,7 @@ public sealed class MenuMusicControllerTests
         public void StopPreview()
         {
             IsPlaying = false;
+            Source = null;
             PositionMilliseconds = 0;
         }
 

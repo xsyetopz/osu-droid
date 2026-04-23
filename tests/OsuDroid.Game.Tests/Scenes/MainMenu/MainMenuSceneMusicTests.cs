@@ -85,12 +85,13 @@ public sealed partial class UiCompatibilityTests
     [TestCase(2340, 1080)]
     public void MainMenuUsesAndroidMusicControlGeometry(int surfaceWidth, int surfaceHeight)
     {
-        var scene = new MainMenuScene();
+        var scene = new MainMenuScene(nowPlaying: new MenuNowPlayingState("artist - title", true, 500, 1000));
         var viewport = VirtualViewport.FromSurface(surfaceWidth, surfaceHeight);
         var frame = scene.CreateSnapshot(viewport).UiFrame;
         var elements = frame.Elements.ToList();
 
         var nowPlaying = elements.Single(element => element.Id == "music-now-playing");
+        var progress = elements.Single(element => element.Id == "music-progress-fg");
         var previous = elements.Single(element => element.Id == DroidAssets.MusicPrevious);
         var play = elements.Single(element => element.Id == DroidAssets.MusicPlay);
         var pause = elements.Single(element => element.Id == DroidAssets.MusicPause);
@@ -100,6 +101,8 @@ public sealed partial class UiCompatibilityTests
         Assert.That(frame.Elements.Any(element => element.Id == "music-strip"), Is.False);
         AssertRectClose(nowPlaying.Bounds, MainMenuScene.GetAndroidMusicNowPlayingBounds());
         Assert.That(nowPlaying.Alpha, Is.EqualTo(1f));
+        Assert.That(progress.Color, Is.EqualTo(UiColor.Opaque(230, 230, 230)));
+        Assert.That(progress.Alpha, Is.EqualTo(0.8f));
         AssertMusicControl(previous, DroidAssets.MusicPrevious, UiAction.MainMenuMusicPrevious, 6f);
         AssertMusicControl(play, DroidAssets.MusicPlay, UiAction.MainMenuMusicPlay, 5f);
         AssertMusicControl(pause, DroidAssets.MusicPause, UiAction.MainMenuMusicPause, 4f);

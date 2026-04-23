@@ -16,6 +16,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
     private readonly object playbackGate = new();
     private readonly SemaphoreSlim playSignal = new(0);
     private readonly float[] spectrumFrame = new float[SpectrumSize];
+    private BeatmapPreviewPlaybackSnapshot playbackSnapshot = new();
     private PreviewRequest? pendingPlayRequest;
     private Task? playWorker;
     private long playGeneration;
@@ -66,6 +67,15 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
         }
     }
 
+    public BeatmapPreviewPlaybackSnapshot PlaybackSnapshot
+    {
+        get
+        {
+            lock (playbackGate)
+                return CreatePlaybackSnapshotLocked();
+        }
+    }
+
     public void Play(string audioPath, int previewTimeMilliseconds)
     {
         if (string.IsNullOrWhiteSpace(audioPath) || !File.Exists(audioPath))
@@ -73,6 +83,8 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
 
         lock (playbackGate)
         {
+            FreeCurrentChannel();
+            playbackSnapshot = new();
             pendingPlayRequest = new PreviewRequest(audioPath, previewTimeMilliseconds, ++playGeneration);
             playWorker ??= Task.Run(ProcessPlayRequests);
         }
@@ -135,7 +147,11 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
             {
                 BassAudioEngine.LogBassError($"BASS_ChannelPlay({previewUri})");
                 FreeCurrentChannel();
+                playbackSnapshot = new();
+                return;
             }
+
+            playbackSnapshot = new BeatmapPreviewPlaybackSnapshot(previewUri.ToString(), true, PositionMillisecondsLocked(), DurationMillisecondsLocked());
         }
     }
 
@@ -148,6 +164,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
 #if IOS
             fallbackPlayer?.Pause();
 #endif
+            playbackSnapshot = CreatePlaybackSnapshotLocked();
         }
     }
 
@@ -161,6 +178,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
             if (fallbackPlayer is not null && !fallbackPlayer.Playing)
                 fallbackPlayer.Play();
 #endif
+            playbackSnapshot = CreatePlaybackSnapshotLocked();
         }
     }
 
@@ -171,6 +189,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
             pendingPlayRequest = null;
             playGeneration++;
             FreeCurrentChannel();
+            playbackSnapshot = new();
         }
     }
 
@@ -204,6 +223,70 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
         disposed = true;
         StopPreview();
         playSignal.Release();
+    }
+
+    private BeatmapPreviewPlaybackSnapshot CreatePlaybackSnapshotLocked()
+    {
+        if (playbackSnapshot.Source is null)
+            return new();
+
+        return playbackSnapshot with
+        {
+            IsPlaying = IsPlayingLocked(),
+            PositionMilliseconds = PositionMillisecondsLocked(),
+            DurationMilliseconds = DurationMillisecondsLocked(),
+        };
+    }
+
+    private bool IsPlayingLocked() =>
+        channel != 0 && Bass.ChannelIsActive(channel) == PlaybackState.Playing
+#if IOS
+        || fallbackPlayer?.Playing == true
+#endif
+        ;
+
+    private int PositionMillisecondsLocked()
+    {
+        if (channel == 0)
+        {
+#if IOS
+            return fallbackPlayer is null ? 0 : (int)Math.Min(int.MaxValue, fallbackPlayer.CurrentTime * 1000d);
+#else
+            return 0;
+#endif
+        }
+
+        var bytes = Bass.ChannelGetPosition(channel, PositionFlags.Bytes);
+        if (bytes < 0)
+            return 0;
+
+        var seconds = Bass.ChannelBytes2Seconds(channel, bytes);
+        if (double.IsNaN(seconds) || double.IsInfinity(seconds) || seconds < 0d)
+            return 0;
+
+        return (int)Math.Min(int.MaxValue, seconds * 1000d);
+    }
+
+    private int DurationMillisecondsLocked()
+    {
+        if (channel == 0)
+        {
+#if IOS
+            return fallbackPlayer is null ? playbackSnapshot.DurationMilliseconds : (int)Math.Min(int.MaxValue, fallbackPlayer.Duration * 1000d);
+#else
+            return playbackSnapshot.DurationMilliseconds;
+#endif
+        }
+
+        var bytes = Bass.ChannelGetLength(channel, PositionFlags.Bytes);
+        if (bytes < 0)
+            return playbackSnapshot.DurationMilliseconds;
+
+        var seconds = Bass.ChannelBytes2Seconds(channel, bytes);
+        if (double.IsNaN(seconds) || double.IsInfinity(seconds) || seconds <= 0d)
+            return playbackSnapshot.DurationMilliseconds;
+
+        return (int)Math.Min(int.MaxValue, seconds * 1000d);
     }
 }
 #endif

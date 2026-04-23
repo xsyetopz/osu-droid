@@ -165,7 +165,7 @@ public sealed partial class MainMenuScene
             "music-progress-fg",
             UiElementKind.Fill,
             new UiRect(progressBounds.X, progressBounds.Y, progressBounds.Width * ratio, progressBounds.Height),
-            UiColor.Opaque(235, 112, 112),
+            UiColor.Opaque(230, 230, 230),
             0.8f,
             CornerRadius: 3f));
     }

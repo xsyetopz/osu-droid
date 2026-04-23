@@ -1,6 +1,7 @@
 #if ANDROID || IOS
 using ManagedBass;
 using ManagedBass.Fx;
+using OsuDroid.Game.Runtime;
 #if IOS
 using AVFoundation;
 using Foundation;
@@ -61,6 +62,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer
 
             FreeCurrentChannel();
             channel = handle;
+            playbackSnapshot = new BeatmapPreviewPlaybackSnapshot(request.AudioPath, true, PositionMillisecondsLocked(), DurationMillisecondsLocked());
         }
 
         OsuDroid.Game.Runtime.PerfDiagnostics.Log("audio.previewPlay", start, $"backend=bass path=\"{Path.GetFileName(request.AudioPath)}\"");
@@ -93,18 +95,23 @@ public sealed partial class PlatformBeatmapPreviewPlayer
             if (fallbackPlayer is null)
             {
                 Console.Error.WriteLine($"[osu-droid] AVAudioPlayer.FromUrl failed: {audioPath}");
+                playbackSnapshot = new();
                 return;
             }
 
             fallbackPlayer.PrepareToPlay();
             if (previewTimeMilliseconds > 0)
                 fallbackPlayer.CurrentTime = previewTimeMilliseconds / 1000d;
-            fallbackPlayer.Play();
+            if (fallbackPlayer.Play())
+                playbackSnapshot = new BeatmapPreviewPlaybackSnapshot(audioPath, true, PositionMillisecondsLocked(), DurationMillisecondsLocked());
+            else
+                playbackSnapshot = new();
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"[osu-droid] AVAudioPlayer fallback exception: {ex}");
             FreeFallbackPlayer();
+            playbackSnapshot = new();
         }
 #endif
     }
@@ -134,6 +141,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer
 #if IOS
             FreeFallbackPlayer();
 #endif
+            playbackSnapshot = new();
             return;
         }
 
@@ -144,6 +152,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer
 #if IOS
         FreeFallbackPlayer();
 #endif
+        playbackSnapshot = new();
     }
 
     private sealed record PreviewRequest(string AudioPath, int PreviewTimeMilliseconds, long Generation);

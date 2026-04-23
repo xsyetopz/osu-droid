@@ -7,6 +7,13 @@ public readonly record struct BootstrapLoadingProgress(int Percent, string Statu
 
 public static class BootstrapLoadingScene
 {
+    // Legacy source: third_party/osu-droid-legacy/.../menu/SplashScene.java.
+    private const float LoadingSpinnerScale = 0.4f;
+    private const float ProgressTextScale = 0.5f;
+    private const float StatusTextScale = 0.6f;
+    private const float StartupFontSize = 28f;
+    private const float StatusBottomPadding = 20f;
+
     private static readonly UiColor Black = UiColor.Opaque(0, 0, 0);
     private static readonly UiColor White = UiColor.Opaque(255, 255, 255);
     private static readonly UiColor LoadingText = UiColor.Opaque(220, 220, 230);
@@ -42,7 +49,8 @@ public static class BootstrapLoadingScene
 
     private static void AddSpinner(List<UiElementSnapshot> elements, VirtualViewport viewport, TimeSpan elapsed)
     {
-        var size = 112f;
+        var asset = DroidAssets.StartupManifest.Get(DroidAssets.Loading);
+        var size = asset.NativeSize.Width * LoadingSpinnerScale;
         var rotation = (float)(elapsed.TotalMilliseconds % 900d / 900d * 360d);
         elements.Add(new UiElementSnapshot(
             "bootstrap-loading-spinner",
@@ -56,25 +64,29 @@ public static class BootstrapLoadingScene
 
     private static void AddProgressText(List<UiElementSnapshot> elements, VirtualViewport viewport, BootstrapLoadingProgress progress)
     {
+        var loadingAsset = DroidAssets.StartupManifest.Get(DroidAssets.Loading);
+        var progressTextSize = StartupFontSize * ProgressTextScale;
+        var progressY = (viewport.VirtualHeight + loadingAsset.NativeSize.Height) / 2f - loadingAsset.NativeSize.Height / 4f;
         elements.Add(new UiElementSnapshot(
             "bootstrap-loading-progress",
             UiElementKind.Text,
-            new UiRect(0f, viewport.VirtualHeight * 0.57f, viewport.VirtualWidth, 34f),
+            new UiRect(0f, progressY, viewport.VirtualWidth, progressTextSize + 6f),
             LoadingText,
             1f,
             Text: $"{Math.Clamp(progress.Percent, 0, 100)} %",
-            TextStyle: new UiTextStyle(22f, Alignment: UiTextAlignment.Center)));
+            TextStyle: new UiTextStyle(progressTextSize, Alignment: UiTextAlignment.Center)));
     }
 
     private static void AddStatusText(List<UiElementSnapshot> elements, VirtualViewport viewport, BootstrapLoadingProgress progress)
     {
+        var statusTextSize = StartupFontSize * StatusTextScale;
         elements.Add(new UiElementSnapshot(
             "bootstrap-loading-text",
             UiElementKind.Text,
-            new UiRect(0f, viewport.VirtualHeight - 76f, viewport.VirtualWidth, 34f),
+            new UiRect(0f, viewport.VirtualHeight - statusTextSize - StatusBottomPadding, viewport.VirtualWidth, statusTextSize + 6f),
             LoadingText,
             1f,
             Text: progress.StatusText,
-            TextStyle: new UiTextStyle(22f, Alignment: UiTextAlignment.Center)));
+            TextStyle: new UiTextStyle(statusTextSize, Alignment: UiTextAlignment.Center)));
     }
 }
