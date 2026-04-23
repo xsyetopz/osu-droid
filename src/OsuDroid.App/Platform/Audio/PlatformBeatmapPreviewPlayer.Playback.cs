@@ -38,6 +38,8 @@ public sealed partial class PlatformBeatmapPreviewPlayer
         }
 
         Seek(handle, request.PreviewTimeMilliseconds);
+        lock (playbackGate)
+            ApplyBassVolumeLocked(handle);
         if (!Bass.ChannelPlay(handle, false))
         {
             BassAudioEngine.LogBassError($"BASS_ChannelPlay({Path.GetFileName(request.AudioPath)})");
@@ -100,6 +102,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer
             }
 
             fallbackPlayer.PrepareToPlay();
+            fallbackPlayer.Volume = volume;
             if (previewTimeMilliseconds > 0)
                 fallbackPlayer.CurrentTime = previewTimeMilliseconds / 1000d;
             if (fallbackPlayer.Play())

@@ -21,6 +21,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
     private Task? playWorker;
     private long playGeneration;
     private int channel;
+    private float volume = 1f;
 #if IOS
     private AVAudioPlayer? fallbackPlayer;
 #endif
@@ -143,6 +144,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
             }
 
             channel = handle;
+            ApplyBassVolumeLocked(channel);
             if (!Bass.ChannelPlay(channel, true))
             {
                 BassAudioEngine.LogBassError($"BASS_ChannelPlay({previewUri})");
@@ -190,6 +192,19 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
             playGeneration++;
             FreeCurrentChannel();
             playbackSnapshot = new();
+        }
+    }
+
+    public void SetVolume(float normalizedVolume)
+    {
+        lock (playbackGate)
+        {
+            volume = Math.Clamp(normalizedVolume, 0f, 1f);
+            ApplyBassVolumeLocked(channel);
+#if IOS
+            if (fallbackPlayer is not null)
+                fallbackPlayer.Volume = volume;
+#endif
         }
     }
 
@@ -287,6 +302,12 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
             return playbackSnapshot.DurationMilliseconds;
 
         return (int)Math.Min(int.MaxValue, seconds * 1000d);
+    }
+
+    private void ApplyBassVolumeLocked(int handle)
+    {
+        if (handle != 0)
+            _ = Bass.ChannelSetAttribute(handle, ChannelAttribute.Volume, volume);
     }
 }
 #endif

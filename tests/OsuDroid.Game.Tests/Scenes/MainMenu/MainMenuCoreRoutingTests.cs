@@ -1,5 +1,6 @@
 using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Beatmaps;
+using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Runtime;
 using OsuDroid.Game.Runtime.Paths;
 using OsuDroid.Game.Scenes;
@@ -193,6 +194,33 @@ public sealed partial class UiCompatibilityTests
     }
 
     [Test]
+    public void SoloRouteShowsBeatmapProcessingBootstrapOnlyWhenBeatmapsNeedProcessing()
+    {
+        var root = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"beatmap-processing-route-{Guid.NewGuid():N}");
+        var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(root));
+        paths.EnsureDirectories();
+        var database = new DroidDatabase(Path.Combine(root, "test.db"));
+        database.EnsureCreated();
+        var processing = new FakeBeatmapProcessingService();
+        var core = new OsuDroidGameCore(new GameServices(database, paths, "test", "1.0", BeatmapProcessingService: processing));
+
+        core.HandleUiAction(UiAction.MainMenuCookie);
+        core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
+        core.HandleUiAction(UiAction.MainMenuFirst);
+        core.HandleUiAction(UiAction.MainMenuFirst);
+
+        var processingFrame = core.CreateFrame(VirtualViewport.FromSurface(1280, 720));
+        Assert.That(processingFrame.Scene, Is.EqualTo("Bootstrap"));
+        Assert.That(processing.StartCalls, Is.EqualTo(1));
+        Assert.That(processingFrame.UiFrame.Elements.Any(element => element.Id == "bootstrap-loading-title"), Is.True);
+
+        processing.Complete();
+        core.Update(TimeSpan.Zero);
+
+        Assert.That(core.CreateFrame(VirtualViewport.FromSurface(1280, 720)).Scene, Is.EqualTo("SongSelect"));
+    }
+
+    [Test]
     public void MainMenuThirdButtonPlaysSeeyaOnFirstMenu()
     {
         var database = new DroidDatabase(Path.Combine(TestContext.CurrentContext.WorkDirectory, $"main-menu-sfx-seeya-{Guid.NewGuid():N}.db"));
@@ -223,6 +251,43 @@ public sealed partial class UiCompatibilityTests
         public List<string> Keys { get; } = [];
 
         public void Play(string key) => Keys.Add(key);
+
+        public void SetVolume(float normalizedVolume)
+        {
+        }
+    }
+
+    private sealed class FakeBeatmapProcessingService : IBeatmapProcessingService
+    {
+        public BeatmapProcessingState State { get; private set; } = new(true, 35, "Processing beatmaps...");
+
+        public int StartCalls { get; private set; }
+
+        private BeatmapLibrarySnapshot? completedSnapshot;
+
+        public bool HasPendingWork() => completedSnapshot is null;
+
+        public void Start() => StartCalls++;
+
+        public bool TryConsumeCompletedSnapshot(out BeatmapLibrarySnapshot snapshot)
+        {
+            if (completedSnapshot is null)
+            {
+                snapshot = BeatmapLibrarySnapshot.Empty;
+                return false;
+            }
+
+            snapshot = completedSnapshot;
+            completedSnapshot = null;
+            State = new BeatmapProcessingState();
+            return true;
+        }
+
+        public void Complete()
+        {
+            completedSnapshot = BeatmapLibrarySnapshot.Empty;
+            State = new BeatmapProcessingState(false, 100, "Processing beatmaps...");
+        }
     }
 
     private sealed class RecordingMenuMusicController : IMenuMusicController

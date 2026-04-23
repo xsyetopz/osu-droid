@@ -24,25 +24,30 @@ public sealed partial class OptionsScene
     private readonly Dictionary<string, string> stringValues = new(StringComparer.Ordinal);
     private readonly GameLocalizer localizer;
     private readonly IGameSettingsStore? settingsStore;
+    private readonly OptionsPathDefaults pathDefaults;
     private ITextInputService textInputService;
     private OptionsSection activeSection;
     private float contentScrollOffset;
     private float sectionScrollOffset;
     private string? pendingSfxKey;
+    private string? changedSettingKey;
 
-    public OptionsScene(GameLocalizer localizer, IGameSettingsStore? settingsStore = null, ITextInputService? textInputService = null)
+    public OptionsScene(GameLocalizer localizer, IGameSettingsStore? settingsStore = null, ITextInputService? textInputService = null, OptionsPathDefaults? pathDefaults = null)
     {
         this.localizer = localizer;
         this.settingsStore = settingsStore;
+        this.pathDefaults = pathDefaults ?? OptionsPathDefaults.Empty;
         this.textInputService = textInputService ?? new NoOpTextInputService();
         foreach (var row in sections.SelectMany(section => section.Categories).SelectMany(category => category.Rows))
         {
             if (row.Kind == SettingsRowKind.Checkbox)
                 boolValues[row.Key] = settingsStore?.GetBool(row.Key, row.DefaultChecked) ?? row.DefaultChecked;
             else if (row.Kind == SettingsRowKind.Slider)
-                intValues[row.Key] = settingsStore?.GetInt(row.Key, row.DefaultValue) ?? row.DefaultValue;
+                intValues[row.Key] = ClampSliderValue(row, settingsStore?.GetInt(row.Key, row.DefaultValue) ?? row.DefaultValue);
+            else if (row.Kind == SettingsRowKind.Select)
+                intValues[row.Key] = ClampSelectValue(row, settingsStore?.GetInt(row.Key, row.DefaultValue) ?? row.DefaultValue);
             else if (row.Kind == SettingsRowKind.Input)
-                stringValues[row.Key] = settingsStore?.GetString(row.Key, string.Empty) ?? string.Empty;
+                stringValues[row.Key] = NormalizeInputValue(row, settingsStore?.GetString(row.Key, InputDefaultValue(row)) ?? InputDefaultValue(row));
         }
     }
 
@@ -72,6 +77,13 @@ public sealed partial class OptionsScene
     {
         var key = pendingSfxKey;
         pendingSfxKey = null;
+        return key;
+    }
+
+    public string? ConsumeChangedSettingKey()
+    {
+        var key = changedSettingKey;
+        changedSettingKey = null;
         return key;
     }
 
@@ -170,6 +182,14 @@ public sealed partial class OptionsScene
 
     public string GetStringValue(string key) => stringValues.TryGetValue(key, out var value) ? value : string.Empty;
 
+    private string GetInputDisplayValue(SettingsRow row)
+    {
+        var value = GetStringValue(row.Key);
+        if (string.IsNullOrEmpty(value) && row.ValueKey is not null)
+            value = localizer[row.ValueKey];
+        return IsPathInput(row.Key) ? OptionsPathDisplayFormatter.Format(value) : value;
+    }
+
     public void Scroll(float deltaY, VirtualViewport viewport) => Scroll(deltaY, new UiPoint(ContentPaddingX + SectionRailWidth + ListGap, ContentTop), viewport);
 
     public void Scroll(float deltaY, UiPoint point, VirtualViewport viewport)
@@ -213,6 +233,7 @@ public sealed partial class OptionsScene
             var updated = !value;
             boolValues[key] = updated;
             settingsStore?.SetBool(key, updated);
+            changedSettingKey = key;
             pendingSfxKey = updated ? "check-on" : "check-off";
         }
     }
@@ -261,15 +282,31 @@ public sealed partial class OptionsScene
         var next = current + step;
         if (next > row.Max)
             next = row.Min;
+        next = ClampSliderValue(row, next);
         intValues[row.Key] = next;
         settingsStore?.SetInt(row.Key, next);
+        changedSettingKey = row.Key;
     }
 
     private void CycleSelect(SettingsRow row)
     {
-        var current = settingsStore?.GetInt(row.Key, 0) ?? 0;
-        var next = (current + 1) % 3;
+        var valueCount = row.ValueKeys?.Count ?? (row.ValueKey is null ? 0 : 1);
+        if (valueCount <= 1)
+            return;
+
+        var current = ClampSelectValue(row, GetIntValue(row.Key));
+        var next = (current + 1) % valueCount;
+        intValues[row.Key] = next;
         settingsStore?.SetInt(row.Key, next);
+        changedSettingKey = row.Key;
+    }
+
+    private string GetSelectValue(SettingsRow row)
+    {
+        if (row.ValueKeys is { Count: > 0 } valueKeys)
+            return localizer[valueKeys[ClampSelectValue(row, GetIntValue(row.Key))]];
+
+        return row.ValueKey is null ? string.Empty : localizer[row.ValueKey];
     }
 
     private void FocusInput(SettingsRow row, int rowIndex, VirtualViewport viewport)
@@ -279,15 +316,41 @@ public sealed partial class OptionsScene
             GetStringValue(row.Key),
             text =>
             {
-                stringValues[row.Key] = text;
-                settingsStore?.SetString(row.Key, text);
+                var value = NormalizeInputValue(row, text);
+                stringValues[row.Key] = value;
+                settingsStore?.SetString(row.Key, value);
+                changedSettingKey = row.Key;
             },
             text =>
             {
-                stringValues[row.Key] = text;
-                settingsStore?.SetString(row.Key, text);
+                var value = NormalizeInputValue(row, text);
+                stringValues[row.Key] = value;
+                settingsStore?.SetString(row.Key, value);
+                changedSettingKey = row.Key;
             },
             rowBounds));
+    }
+
+    private string NormalizeInputValue(SettingsRow row, string? value)
+    {
+        if (!IsPathInput(row.Key))
+            return value ?? string.Empty;
+
+        return string.IsNullOrWhiteSpace(value) ? InputDefaultValue(row) : value.Trim();
+    }
+
+    private string InputDefaultValue(SettingsRow row) =>
+        IsPathInput(row.Key) ? pathDefaults.GetDefaultValue(row.Key) : string.Empty;
+
+    private static bool IsPathInput(string key) =>
+        key is "corePath" or "skinTopPath" or "directory";
+
+    private static int ClampSliderValue(SettingsRow row, int value) => Math.Clamp(value, row.Min, row.Max);
+
+    private static int ClampSelectValue(SettingsRow row, int value)
+    {
+        var valueCount = row.ValueKeys?.Count ?? (row.ValueKey is null ? 0 : 1);
+        return valueCount <= 0 ? 0 : Math.Clamp(value, 0, valueCount - 1);
     }
 
     private UiRect? FindRowBounds(int targetRowIndex, VirtualViewport viewport)

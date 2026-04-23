@@ -1,6 +1,7 @@
 using OsuDroid.Game;
 using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Localization;
+using OsuDroid.Game.Runtime;
 using OsuDroid.Game.Scenes;
 using OsuDroid.Game.UI;
 
@@ -104,7 +105,8 @@ public sealed partial class OptionsSceneTests
     [Test]
     public void OptionsSceneAdvancedDirectoriesUseAndroidRowsWithoutFakeUnavailableText()
     {
-        var scene = new OptionsScene(new GameLocalizer());
+        var defaults = new OptionsPathDefaults("/tmp/osu!droid", "/tmp/osu!droid/Skin", "/tmp/osu!droid/Songs");
+        var scene = new OptionsScene(new GameLocalizer(), pathDefaults: defaults);
         var viewport = VirtualViewport.FromSurface(1280, 720);
 
         scene.HandleAction(UiAction.OptionsSectionAdvanced, viewport);
@@ -115,7 +117,9 @@ public sealed partial class OptionsSceneTests
         Assert.That(scene.ActiveRows, Does.Contain("Skin top path"));
         Assert.That(scene.ActiveRows, Does.Contain("Songs directory"));
         Assert.That(texts, Does.Not.Contain("Unavailable in this build"));
-        Assert.That(texts, Does.Contain("/sdcard/osu!droid/Songs"));
+        Assert.That(texts, Does.Contain(defaults.CorePath));
+        Assert.That(texts, Does.Contain(defaults.SkinTopPath));
+        Assert.That(texts, Does.Contain(defaults.SongsDirectory));
     }
     [Test]
     public void OptionsSceneSelectRowsKeepValueAndDropdownOnRight()
@@ -130,8 +134,21 @@ public sealed partial class OptionsSceneTests
 
         Assert.That(summary.Bounds.Right, Is.LessThan(value.Bounds.X));
         Assert.That(value.Bounds.Right, Is.LessThanOrEqualTo(dropdown.Bounds.X));
+        Assert.That(value.TextStyle!.Alignment, Is.EqualTo(UiTextAlignment.Right));
         Assert.That(dropdown.Bounds.X, Is.GreaterThan(row.Bounds.Right - DroidUiMetrics.RowPadding - DroidUiMetrics.SectionIconSize - 0.01f));
         Assert.That(dropdown.Bounds.Y + dropdown.Bounds.Height / 2f, Is.EqualTo(row.Bounds.Y + row.Bounds.Height / 2f).Within(0.001f));
+    }
+    [Test]
+    public void OptionsSceneSelectRowsCycleVisibleStoredValue()
+    {
+        var scene = new OptionsScene(new GameLocalizer());
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+
+        scene.HandleAction(UiAction.OptionsRow2, viewport);
+        var frame = scene.CreateSnapshot(viewport).UiFrame;
+
+        var value = frame.Elements.Single(element => element.Id == "options-row-2-value");
+        Assert.That(value.Text, Is.EqualTo("osu!standard"));
     }
     [Test]
     public void OptionsSceneSliderUsesAndroidSeekbarLayoutAndDrawableMetrics()
@@ -153,6 +170,7 @@ public sealed partial class OptionsSceneTests
         Assert.That(label.Bounds.X, Is.EqualTo(sliderRow.Bounds.X + DroidUiMetrics.SeekbarContainerMarginX).Within(0.001f));
         Assert.That(summary.Bounds.Right, Is.LessThan(track.Bounds.X));
         Assert.That(value.Bounds.Right, Is.EqualTo(track.Bounds.Right).Within(0.001f));
+        Assert.That(value.TextStyle!.Alignment, Is.EqualTo(UiTextAlignment.Right));
         Assert.That(track.Bounds.Right, Is.EqualTo(sliderRow.Bounds.Right - DroidUiMetrics.SeekbarContainerMarginX).Within(0.001f));
         Assert.That(track.Bounds.Width, Is.LessThanOrEqualTo(DroidUiMetrics.ControlColumnWidth + 0.001f));
         Assert.That(track.Bounds.Width, Is.GreaterThanOrEqualTo(96f * DroidUiMetrics.DpScale - 0.001f));
@@ -162,6 +180,67 @@ public sealed partial class OptionsSceneTests
         Assert.That(thumb.Bounds.Width, Is.EqualTo(DroidUiMetrics.SeekbarThumbSize).Within(0.001f));
         Assert.That(thumb.Bounds.Height, Is.EqualTo(DroidUiMetrics.SeekbarThumbSize).Within(0.001f));
         Assert.That(thumb.Color, Is.EqualTo(UiColor.Opaque(255, 255, 255)));
+    }
+    [Test]
+    public void OptionsScenePathInputsUseStoredOverridesAndRestoreDefaultsOnBlankInput()
+    {
+        var defaults = new OptionsPathDefaults("/core", "/core/Skin", "/core/Songs");
+        var settings = new MemorySettingsStore();
+        settings.SetString("corePath", "/custom-core");
+        var textInput = new CapturingTextInputService();
+        var scene = new OptionsScene(new GameLocalizer(), settings, textInput, defaults);
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+
+        scene.HandleAction(UiAction.OptionsSectionAdvanced, viewport);
+        var frame = scene.CreateSnapshot(viewport).UiFrame;
+        Assert.That(frame.Elements.Where(element => element.Kind == UiElementKind.Text).Select(element => element.Text), Does.Contain("/custom-core"));
+
+        scene.HandleAction(UiAction.OptionsRow0, viewport);
+        Assert.That(textInput.ActiveRequest!.Text, Is.EqualTo("/custom-core"));
+        textInput.ActiveRequest!.OnSubmitted(string.Empty);
+
+        Assert.That(scene.GetStringValue("corePath"), Is.EqualTo(defaults.CorePath));
+        Assert.That(settings.GetString("corePath", string.Empty), Is.EqualTo(defaults.CorePath));
+    }
+    [Test]
+    public void OptionsScenePathInputsEllipsizeIosContainerPathsForDisplayOnly()
+    {
+        var corePath = "/var/mobile/Containers/Data/Application/79AEE6E3-E6B9-47A2-980F-055F26C2F8B7/Library/osu-droid";
+        var defaults = new OptionsPathDefaults(corePath, $"{corePath}/Skin", $"{corePath}/Songs");
+        var scene = new OptionsScene(new GameLocalizer(), pathDefaults: defaults);
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+
+        scene.HandleAction(UiAction.OptionsSectionAdvanced, viewport);
+        var frame = scene.CreateSnapshot(viewport).UiFrame;
+        var values = frame.Elements
+            .Where(element => element.Id.EndsWith("-input-value", StringComparison.Ordinal))
+            .Select(element => element.Text)
+            .ToArray();
+
+        Assert.That(values, Does.Contain("/var/mobile/…/Library/osu-droid"));
+        Assert.That(values, Does.Contain("/var/mobile/…/Library/osu-droid/Skin"));
+        Assert.That(values, Does.Contain("/var/mobile/…/Library/osu-droid/Songs"));
+        Assert.That(values, Does.Not.Contain(corePath));
+        Assert.That(scene.GetStringValue("corePath"), Is.EqualTo(corePath));
+    }
+    [Test]
+    public void OptionsScenePathInputsMiddleEllipsizeCustomLongPaths()
+    {
+        var path = "/very/long/custom/location/with/many/segments/that/does/not/match/ios/container/osu-droid/Songs";
+        var settings = new MemorySettingsStore();
+        settings.SetString("directory", path);
+        var scene = new OptionsScene(new GameLocalizer(), settings, pathDefaults: new OptionsPathDefaults("/core", "/core/Skin", "/core/Songs"));
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+
+        scene.HandleAction(UiAction.OptionsSectionAdvanced, viewport);
+        var frame = scene.CreateSnapshot(viewport).UiFrame;
+        var values = frame.Elements
+            .Where(element => element.Id.EndsWith("-input-value", StringComparison.Ordinal))
+            .Select(element => element.Text)
+            .ToArray();
+
+        Assert.That(values.Any(value => value is not null && value.Contains('…') && value.EndsWith("/container/osu-droid/Songs", StringComparison.Ordinal)), Is.True);
+        Assert.That(scene.GetStringValue("directory"), Is.EqualTo(path));
     }
     [Test]
     public void OptionsSceneUsesAndroidHalfRoundedCategoryAndRows()
@@ -192,5 +271,35 @@ public sealed partial class OptionsSceneTests
         Assert.That(selected.CornerRadius, Is.EqualTo(DroidUiMetrics.AndroidSidebarRadius));
         Assert.That(selected.CornerMode, Is.EqualTo(UiCornerMode.All));
         Assert.That(unselectedHit.Alpha, Is.Zero);
+    }
+}
+
+file sealed class MemorySettingsStore : IGameSettingsStore
+{
+    private readonly Dictionary<string, bool> boolValues = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, int> intValues = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> stringValues = new(StringComparer.Ordinal);
+
+    public bool GetBool(string key, bool defaultValue) => boolValues.GetValueOrDefault(key, defaultValue);
+
+    public int GetInt(string key, int defaultValue) => intValues.GetValueOrDefault(key, defaultValue);
+
+    public string GetString(string key, string defaultValue) => stringValues.GetValueOrDefault(key, defaultValue);
+
+    public void SetBool(string key, bool value) => boolValues[key] = value;
+
+    public void SetInt(string key, int value) => intValues[key] = value;
+
+    public void SetString(string key, string value) => stringValues[key] = value;
+}
+
+file sealed class CapturingTextInputService : ITextInputService
+{
+    public TextInputRequest? ActiveRequest { get; private set; }
+
+    public void RequestTextInput(TextInputRequest request) => ActiveRequest = request;
+
+    public void HideTextInput()
+    {
     }
 }

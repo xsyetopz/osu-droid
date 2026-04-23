@@ -3,7 +3,13 @@ using OsuDroid.Game.UI;
 
 namespace OsuDroid.Game.Scenes;
 
-public readonly record struct BootstrapLoadingProgress(int Percent, string StatusText);
+public enum BootstrapLoadingKind
+{
+    Generic,
+    BeatmapProcessing,
+}
+
+public readonly record struct BootstrapLoadingProgress(int Percent, string StatusText, BootstrapLoadingKind Kind = BootstrapLoadingKind.Generic);
 
 public static class BootstrapLoadingScene
 {
@@ -25,7 +31,8 @@ public static class BootstrapLoadingScene
             new("bootstrap-background", UiElementKind.Fill, new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), Black, 1f),
         };
 
-        AddLoadingTitle(elements, viewport);
+        if (progress.Kind == BootstrapLoadingKind.BeatmapProcessing)
+            AddLoadingTitle(elements, viewport);
         AddSpinner(elements, viewport, elapsed);
         AddProgressText(elements, viewport, progress);
         AddStatusText(elements, viewport, progress);

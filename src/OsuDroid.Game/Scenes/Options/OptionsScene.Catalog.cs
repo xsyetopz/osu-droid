@@ -9,7 +9,7 @@ public sealed partial class OptionsScene
         new("Options_CategoryOnline", [
             new("stayOnline", "Options_ServerConnectionTitle", "Options_ServerConnectionSummary", SettingsRowKind.Checkbox, true, Action: UiAction.OptionsToggleServerConnection),
             new("loadAvatar", "Options_LoadAvatarTitle", "Options_LoadAvatarSummary", SettingsRowKind.Checkbox, true, Action: UiAction.OptionsToggleLoadAvatar),
-            new("difficultyAlgorithm", "Options_DifficultyAlgorithmTitle", "Options_DifficultyAlgorithmSummary", SettingsRowKind.Select, ValueKey: "Options_DifficultyAlgorithmValue", IsBottom: true),
+            new("difficultyAlgorithm", "Options_DifficultyAlgorithmTitle", "Options_DifficultyAlgorithmSummary", SettingsRowKind.Select, IsBottom: true, ValueKeys: ["Options_DifficultyAlgorithmDroid", "Options_DifficultyAlgorithmStandard"]),
         ]),
         new("Options_CategoryAccount", [
             new("login", "Options_LoginTitle", "Options_LoginSummary", SettingsRowKind.Input),
@@ -27,7 +27,7 @@ public sealed partial class OptionsScene
             new("restore", "Options_RestoreTitle", "Options_RestoreSummary", SettingsRowKind.Button, IsBottom: true),
         ]),
         new("Options_CategoryLocalization", [
-            new("language", "Options_LanguageTitle", "Options_LanguageSummary", SettingsRowKind.Select, ValueKey: "Options_LanguageValue", IsBottom: true),
+            new("language", "Options_LanguageTitle", "Options_LanguageSummary", SettingsRowKind.Select, IsBottom: true, ValueKeys: ["Options_LanguageSystemDefault"]),
         ]),
     ];
 
@@ -132,7 +132,7 @@ public sealed partial class OptionsScene
             new("Options_CategoryDirectories", [
                 new("corePath", "Options_CorePathTitle", "Options_CorePathSummary", SettingsRowKind.Input),
                 new("skinTopPath", "Options_SkinTopPathTitle", "Options_SkinTopPathSummary", SettingsRowKind.Input),
-                new("directory", "Options_DirectoryTitle", "Options_DirectorySummary", SettingsRowKind.Input, ValueKey: "Options_DirectoryValue", IsBottom: true),
+                new("directory", "Options_DirectoryTitle", "Options_DirectorySummary", SettingsRowKind.Input, IsBottom: true),
             ]),
             new("Options_CategoryMiscellaneous", [
                 new("forceMaxRefreshRate", "Options_ForceMaxRefreshRateTitle", "Options_ForceMaxRefreshRateSummary", SettingsRowKind.Checkbox, false),

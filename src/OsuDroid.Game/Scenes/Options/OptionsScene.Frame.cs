@@ -163,10 +163,11 @@ public sealed partial class OptionsScene
         var chevron = new UiRect(bounds.Right - RowPadding - SectionIconSize, bounds.Y + (bounds.Height - SectionIconSize) / 2f, SectionIconSize, SectionIconSize);
         var alpha = row.IsEnabled ? 0.9f : 0.45f;
         var rowAction = row.IsEnabled ? RowAction(row, index) : UiAction.None;
-        if (row.ValueKey is not null)
+        var value = GetSelectValue(row);
+        if (!string.IsNullOrEmpty(value))
         {
             var valueWidth = 86f * DpScale;
-            elements.Add(Text($"options-row-{index}-value", localizer[row.ValueKey], chevron.X - 12f * DpScale - valueWidth, bounds.Y + (bounds.Height - RowTitleSize - 4f) / 2f, valueWidth, RowTitleSize + 4f, RowTitleSize, secondaryText, alpha, false, rowAction, row.IsEnabled));
+            elements.Add(Text($"options-row-{index}-value", value, chevron.X - 12f * DpScale - valueWidth, bounds.Y + (bounds.Height - RowTitleSize - 4f) / 2f, valueWidth, RowTitleSize + 4f, RowTitleSize, secondaryText, alpha, false, rowAction, row.IsEnabled, UiTextAlignment.Right));
         }
 
         elements.Add(MaterialIcon($"options-row-{index}-dropdown", UiMaterialIcon.ArrowDropDown, chevron, secondaryText, alpha, rowAction, row.IsEnabled));
@@ -178,9 +179,7 @@ public sealed partial class OptionsScene
         var alpha = row.IsEnabled ? 1f : 0.5f;
         var inputBounds = new UiRect(bounds.X + RowPadding, bounds.Y + RowPadding + RowTitleSize + 4f + 6f * DpScale + RowSummarySize + 4f + InputGap, bounds.Width - RowPadding * 2f, InputHeight);
         elements.Add(Fill($"options-row-{index}-input", inputBounds, inputBackground, alpha, rowAction, AndroidRoundedRectRadius, row.IsEnabled));
-        var value = GetStringValue(row.Key);
-        if (string.IsNullOrEmpty(value) && row.ValueKey is not null)
-            value = localizer[row.ValueKey];
+        var value = GetInputDisplayValue(row);
         if (!string.IsNullOrEmpty(value))
             elements.Add(Text($"options-row-{index}-input-value", value, inputBounds.X + 14f * DpScale, inputBounds.Y + 8f * DpScale, inputBounds.Width - 28f * DpScale, RowTitleSize + 4f, RowTitleSize, UiColor.Opaque(235, 235, 245), 0.85f * alpha, false, rowAction, row.IsEnabled));
     }
@@ -211,7 +210,7 @@ public sealed partial class OptionsScene
         if (!string.IsNullOrEmpty(localizer[row.SummaryKey]))
             elements.Add(Text($"options-row-{index}-summary", localizer[row.SummaryKey], containerX, summaryTop, textWidth, summaryHeight, RowSummarySize, secondaryText, alpha * 0.86f, false, rowAction, row.IsEnabled));
 
-        elements.Add(Text($"options-row-{index}-value", value.ToString(CultureInfo.InvariantCulture), trackX + trackWidth - valueWidth, valueTop, valueWidth, titleHeight, RowTitleSize, secondaryText, 0.9f * alpha, false, rowAction, row.IsEnabled));
+        elements.Add(Text($"options-row-{index}-value", value.ToString(CultureInfo.InvariantCulture), trackX + trackWidth - valueWidth, valueTop, valueWidth, titleHeight, RowTitleSize, secondaryText, 0.9f * alpha, false, rowAction, row.IsEnabled, UiTextAlignment.Right));
         elements.Add(Fill($"options-row-{index}-slider-track", new UiRect(trackX, trackY, trackWidth, SeekbarTrackHeight), sliderTrack, alpha, rowAction, 12f * DpScale, row.IsEnabled));
         elements.Add(Fill($"options-row-{index}-slider-fill", new UiRect(trackX, trackY, trackWidth * normalized, SeekbarTrackHeight), checkboxAccent, alpha, rowAction, 12f * DpScale, row.IsEnabled));
         elements.Add(Fill($"options-row-{index}-slider-thumb", new UiRect(thumbX, thumbY, SeekbarThumbSize, SeekbarThumbSize), white, alpha, rowAction, 12f * DpScale, row.IsEnabled));
@@ -262,7 +261,8 @@ public sealed partial class OptionsScene
         float alpha = 1f,
         bool bold = false,
         UiAction action = UiAction.None,
-        bool enabled = true) =>
-        UiElementFactory.Text(id, value, new UiRect(x, y, width, height), size, color, action, enabled, bold, alpha: alpha);
+        bool enabled = true,
+        UiTextAlignment alignment = UiTextAlignment.Left) =>
+        UiElementFactory.Text(id, value, new UiRect(x, y, width, height), size, color, action, enabled, bold, alignment, alpha: alpha);
 
 }

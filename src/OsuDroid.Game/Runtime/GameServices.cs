@@ -38,6 +38,7 @@ public sealed record GameServices(
     MenuNowPlayingState? NowPlaying = null,
     IBeatmapLibrary? BeatmapLibrary = null,
     IBeatmapImportService? BeatmapImportService = null,
+    IBeatmapProcessingService? BeatmapProcessingService = null,
     IBeatmapDownloadService? BeatmapDownloadService = null,
     IBeatmapMirrorClient? BeatmapMirrorClient = null,
     ITextInputService? TextInputService = null,

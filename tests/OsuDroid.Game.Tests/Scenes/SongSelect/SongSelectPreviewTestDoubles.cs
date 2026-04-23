@@ -42,6 +42,10 @@ public sealed partial class SongSelectSceneTests
             PositionMilliseconds = 0;
         }
 
+        public void SetVolume(float normalizedVolume)
+        {
+        }
+
         public bool TryReadSpectrum1024(float[] destination) => false;
     }
 }

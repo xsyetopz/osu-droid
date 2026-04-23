@@ -224,9 +224,21 @@
           xml:space="preserve">
         <value>Default</value>
     </data>
+    <data name="Options_DifficultyAlgorithmDroid"
+          xml:space="preserve">
+        <value>osu!droid</value>
+    </data>
+    <data name="Options_DifficultyAlgorithmStandard"
+          xml:space="preserve">
+        <value>osu!standard</value>
+    </data>
     <data name="Options_LanguageValue"
           xml:space="preserve">
         <value>System</value>
+    </data>
+    <data name="Options_LanguageSystemDefault"
+          xml:space="preserve">
+        <value>System default</value>
     </data>
     <data name="Options_CategoryHitObjects"
           xml:space="preserve">

@@ -18,11 +18,36 @@ public sealed partial class OsuDroidGameCore
             return false;
 
         options.HandleAction(action, viewport);
+        ApplyChangedOptionsSetting(options.ConsumeChangedSettingKey());
         PlayPendingOptionsSfx();
-        if (action == UiAction.OptionsToggleMusicPreview)
-            ApplyMusicPreviewSetting();
         return true;
     }
+
+    private void ApplyChangedOptionsSetting(string? key)
+    {
+        switch (key)
+        {
+            case "musicpreview":
+                ApplyMusicPreviewSetting();
+                break;
+            case "bgmvolume":
+                ApplyMusicVolumeSetting();
+                break;
+            case "soundvolume":
+                ApplyEffectVolumeSetting();
+                break;
+        }
+    }
+
+    private void ApplyOptionAudioVolumes()
+    {
+        ApplyMusicVolumeSetting();
+        ApplyEffectVolumeSetting();
+    }
+
+    private void ApplyMusicVolumeSetting() => previewPlayer.SetVolume(options.GetIntValue("bgmvolume") / 100f);
+
+    private void ApplyEffectVolumeSetting() => activeMenuSfxPlayer.SetVolume(options.GetIntValue("soundvolume") / 100f);
 
     private void ApplyRoute(MainMenuRoute route)
     {
@@ -45,7 +70,18 @@ public sealed partial class OsuDroidGameCore
 
     private ActiveScene EnterSongSelectScene()
     {
-        songSelect.Enter(musicController.State.BeatmapSetDirectory, musicController.State.BeatmapFilename);
+        pendingSongSelectBeatmapSetDirectory = musicController.State.BeatmapSetDirectory;
+        pendingSongSelectBeatmapFilename = musicController.State.BeatmapFilename;
+
+        if (beatmapProcessingService.HasPendingWork())
+        {
+            beatmapProcessingService.Start();
+            return ActiveScene.BeatmapProcessing;
+        }
+
+        songSelect.Enter(pendingSongSelectBeatmapSetDirectory, pendingSongSelectBeatmapFilename);
+        pendingSongSelectBeatmapSetDirectory = null;
+        pendingSongSelectBeatmapFilename = null;
         return ActiveScene.SongSelect;
     }
 }

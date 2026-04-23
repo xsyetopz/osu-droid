@@ -1,6 +1,8 @@
 using OsuDroid.Game;
 using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Localization;
+using OsuDroid.Game.Runtime;
+using OsuDroid.Game.Runtime.Paths;
 using OsuDroid.Game.Scenes;
 using OsuDroid.Game.UI;
 
@@ -112,5 +114,90 @@ public sealed partial class OptionsSceneTests
             if (Directory.Exists(path))
                 Directory.Delete(path, true);
         }
+    }
+
+    [Test]
+    public void CoreAppliesOptionsVolumeSlidersToRuntimeAudioPlayers()
+    {
+        var path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"options-volume-{Guid.NewGuid():N}");
+        try
+        {
+            var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(path));
+            paths.EnsureDirectories();
+            var database = new DroidDatabase(paths.GetDatabasePath("debug"));
+            database.EnsureCreated();
+            var preview = new RecordingPreviewPlayer();
+            var sfx = new RecordingMenuSfxPlayer();
+            var core = new OsuDroidGameCore(new GameServices(
+                database,
+                paths,
+                "debug",
+                "1.0",
+                BeatmapPreviewPlayer: preview,
+                MenuSfxPlayer: sfx,
+                SettingsStore: new JsonGameSettingsStore(Path.Combine(paths.CoreRoot, "config", "settings.json"))));
+            var viewport = VirtualViewport.FromSurface(1280, 720);
+
+            core.TapMainMenuCookie();
+            core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
+            _ = core.TapMainMenu(MainMenuButtonSlot.Second);
+            core.HandleUiAction(UiAction.OptionsSectionAudio, viewport);
+            core.HandleUiAction(UiAction.OptionsRow0, viewport);
+            core.HandleUiAction(UiAction.OptionsRow1, viewport);
+
+            Assert.That(preview.Volume, Is.EqualTo(0f));
+            Assert.That(sfx.Volume, Is.EqualTo(0f));
+        }
+        finally
+        {
+            if (Directory.Exists(path))
+                Directory.Delete(path, true);
+        }
+    }
+
+    private sealed class RecordingPreviewPlayer : IBeatmapPreviewPlayer
+    {
+        public float Volume { get; private set; } = 1f;
+
+        public bool IsPlaying => false;
+
+        public int PositionMilliseconds => 0;
+
+        public BeatmapPreviewPlaybackSnapshot PlaybackSnapshot { get; } = new();
+
+        public void Play(string audioPath, int previewTimeMilliseconds)
+        {
+        }
+
+        public void Play(Uri previewUri)
+        {
+        }
+
+        public void PausePreview()
+        {
+        }
+
+        public void ResumePreview()
+        {
+        }
+
+        public void StopPreview()
+        {
+        }
+
+        public void SetVolume(float normalizedVolume) => Volume = normalizedVolume;
+
+        public bool TryReadSpectrum1024(float[] destination) => false;
+    }
+
+    private sealed class RecordingMenuSfxPlayer : IMenuSfxPlayer
+    {
+        public float Volume { get; private set; } = 1f;
+
+        public void Play(string key)
+        {
+        }
+
+        public void SetVolume(float normalizedVolume) => Volume = normalizedVolume;
     }
 }

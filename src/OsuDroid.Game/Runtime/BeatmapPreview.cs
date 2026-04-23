@@ -24,6 +24,8 @@ public interface IBeatmapPreviewPlayer
 
     void StopPreview();
 
+    void SetVolume(float normalizedVolume);
+
     bool TryReadSpectrum1024(float[] destination);
 }
 
@@ -52,6 +54,10 @@ public sealed class NoOpBeatmapPreviewPlayer : IBeatmapPreviewPlayer
     }
 
     public void StopPreview()
+    {
+    }
+
+    public void SetVolume(float normalizedVolume)
     {
     }
 

@@ -86,6 +86,7 @@ public sealed partial class OsuDroidGameCore
         if (UiActionGroups.TryGetOptionsRowIndex(action, out _) && activeScene == ActiveScene.Options)
         {
             options.HandleAction(action, viewport);
+            ApplyChangedOptionsSetting(options.ConsumeChangedSettingKey());
             return true;
         }
 
