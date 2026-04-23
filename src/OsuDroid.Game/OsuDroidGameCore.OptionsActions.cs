@@ -1,6 +1,8 @@
 using OsuDroid.Game.Runtime;
 using OsuDroid.Game.Scenes;
 using OsuDroid.Game.UI;
+using OsuDroid.Game.Beatmaps.Difficulty;
+using OsuDroid.Game.Compatibility.Online;
 
 namespace OsuDroid.Game;
 
@@ -36,6 +38,21 @@ public sealed partial class OsuDroidGameCore
             case "soundvolume":
                 ApplyEffectVolumeSetting();
                 break;
+            case "difficultyAlgorithm":
+                ApplyDifficultyAlgorithmSetting();
+                break;
+            case "registerAcc":
+                PendingExternalUrl = $"https://{OsuDroidOnlineConstants.Hostname}/user/?action=register";
+                break;
+            case "update":
+                PendingExternalUrl = OsuDroidOnlineConstants.UpdateEndpointPrefix + CurrentUpdateLanguageCode();
+                break;
+            case "preferNoVideoDownloads":
+                ApplyDownloadPreferenceSetting();
+                break;
+            case "forceromanized":
+                ApplyRomanizedPreferenceSetting();
+                break;
         }
     }
 
@@ -48,6 +65,21 @@ public sealed partial class OsuDroidGameCore
     private void ApplyMusicVolumeSetting() => previewPlayer.SetVolume(options.GetIntValue("bgmvolume") / 100f);
 
     private void ApplyEffectVolumeSetting() => activeMenuSfxPlayer.SetVolume(options.GetIntValue("soundvolume") / 100f);
+
+    private void ApplyDifficultyAlgorithmSetting()
+    {
+        var algorithm = options.GetIntValue("difficultyAlgorithm") == 1 ? DifficultyAlgorithm.Standard : DifficultyAlgorithm.Droid;
+        songSelect.SetDisplayAlgorithm(algorithm);
+    }
+
+    private void ApplyRomanizedPreferenceSetting()
+    {
+        var forceRomanized = options.GetBoolValue("forceromanized");
+        songSelect.SetForceRomanized(forceRomanized);
+        beatmapDownloader.SetForceRomanized(forceRomanized);
+    }
+
+    private void ApplyDownloadPreferenceSetting() => beatmapDownloader.SetPreferNoVideoDownloads(options.GetBoolValue("preferNoVideoDownloads"));
 
     private void ApplyRoute(MainMenuRoute route)
     {

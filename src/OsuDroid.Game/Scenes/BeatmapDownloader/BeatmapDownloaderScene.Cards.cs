@@ -49,8 +49,8 @@ public sealed partial class BeatmapDownloaderScene
         AddCover(elements, $"downloader-card-{slot}-cover", set, new UiRect(x, y, CardWidth, CardTopHeight), cardAction);
         elements.Add(Fill($"downloader-card-{slot}-cover-dim", new UiRect(x, y, CardWidth, CardTopHeight), CoverFallback, 0.2f, cardAction, Radius));
         AddStatusPill(elements, $"downloader-card-{slot}-status", set.Status, x + 12f * Dp, y + 12f * Dp, cardAction);
-        elements.Add(Text($"downloader-card-{slot}-title", set.DisplayTitle, x + 16f * Dp, y + 32f * Dp, CardWidth - 32f * Dp, 30f * Dp, 17f * Dp, White, UiTextAlignment.Center, cardAction));
-        elements.Add(Text($"downloader-card-{slot}-artist", set.DisplayArtist, x + 16f * Dp, y + 60f * Dp, CardWidth - 32f * Dp, 24f * Dp, 14f * Dp, Secondary, UiTextAlignment.Center, cardAction));
+        elements.Add(Text($"downloader-card-{slot}-title", DisplayTitle(set), x + 16f * Dp, y + 32f * Dp, CardWidth - 32f * Dp, 30f * Dp, 17f * Dp, White, UiTextAlignment.Center, cardAction));
+        elements.Add(Text($"downloader-card-{slot}-artist", DisplayArtist(set), x + 16f * Dp, y + 60f * Dp, CardWidth - 32f * Dp, 24f * Dp, 14f * Dp, Secondary, UiTextAlignment.Center, cardAction));
         AddDifficultyDots(elements, $"downloader-card-{slot}-diff", set.Beatmaps, x + 8f * Dp, y + CardTopHeight + (CardDifficultyHeight - DifficultyGlyphRowHeight) / 2f, CardWidth - 16f * Dp, UiAction.None, null, true, cardAction);
 
         var footerY = y + CardTopHeight + CardDifficultyHeight;

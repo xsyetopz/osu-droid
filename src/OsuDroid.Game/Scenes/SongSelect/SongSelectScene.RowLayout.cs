@@ -98,7 +98,7 @@ public sealed partial class SongSelectScene
         }
     }
 
-    private static void AddSetRow(List<UiElementSnapshot> elements, string id, BeatmapInfo beatmap, UiRect bounds, UiAction action)
+    private void AddSetRow(List<UiElementSnapshot> elements, string id, BeatmapInfo beatmap, UiRect bounds, UiAction action)
     {
         elements.Add(Sprite(id, DroidAssets.SongSelectButtonBackground, bounds, SetRowTint, 0.8f, action));
         elements.Add(Text($"{id}-title", $"{DisplayArtist(beatmap)} - {DisplayTitle(beatmap)}", bounds.X + 32f, bounds.Y + 25f, 620f, 34f, 24f, White, UiTextAlignment.Left, action));

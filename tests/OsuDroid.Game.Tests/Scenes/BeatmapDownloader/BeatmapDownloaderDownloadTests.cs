@@ -91,7 +91,7 @@ public sealed partial class BeatmapDownloaderTests
                 core.Update(TimeSpan.FromMilliseconds(16));
                 var frame = core.CreateFrame(VirtualViewport.LegacyLandscape);
                 return frame.Scene == "BeatmapDownloader" &&
-                    frame.UiFrame.Elements.Any(element => element.Text == "Beatmap imported");
+                    frame.UiFrame.Elements.Any(element => element.Text == "Beatmap downloaded");
             });
 
             var current = core.CreateFrame(VirtualViewport.LegacyLandscape);
@@ -112,7 +112,7 @@ public sealed partial class BeatmapDownloaderTests
         SetSets(scene, [CreateSet()]);
 
         scene.Download(0, true);
-        SpinUntil(() => scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame.Elements.Any(element => element.Text == "Beatmap imported"));
+        SpinUntil(() => scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame.Elements.Any(element => element.Text == "Beatmap downloaded"));
 
         Assert.That(scene.ConsumeLastImportedSetDirectoryNotification(), Is.EqualTo("100 Artist - Title"));
         Assert.That(scene.ConsumeLastImportedSetDirectoryNotification(), Is.Null);

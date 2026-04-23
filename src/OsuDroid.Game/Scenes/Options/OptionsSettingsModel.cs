@@ -12,6 +12,12 @@ internal enum SettingsRowKind
     Slider,
 }
 
+internal enum SettingsRowAvailability
+{
+    Implemented,
+    Locked,
+}
+
 internal sealed record SettingsRow(
     string Key,
     string TitleKey,
@@ -25,7 +31,11 @@ internal sealed record SettingsRow(
     bool IsEnabled = true,
     UiAction Action = UiAction.None,
     bool IsBottom = false,
-    IReadOnlyList<string>? ValueKeys = null);
+    IReadOnlyList<string>? ValueKeys = null,
+    SettingsRowAvailability Availability = SettingsRowAvailability.Implemented)
+{
+    public bool IsLocked => Availability == SettingsRowAvailability.Locked;
+}
 
 internal sealed record SettingsCategory(string TitleKey, IReadOnlyList<SettingsRow> Rows);
 

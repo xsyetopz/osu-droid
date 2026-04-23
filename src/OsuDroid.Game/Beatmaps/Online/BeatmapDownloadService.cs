@@ -7,7 +7,7 @@ public interface IBeatmapDownloadService
 {
     BeatmapDownloadState State { get; }
 
-    Task<BeatmapImportResult> DownloadAndImportAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken);
+    Task<BeatmapDownloadResult> DownloadAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken);
 
     void CancelActiveDownload();
 }
@@ -19,10 +19,17 @@ public sealed record BeatmapDownloadState(
     string? ErrorMessage = null,
     bool IsActive = false);
 
+public sealed record BeatmapDownloadResult(bool IsSuccess, string? ArchivePath, string? ErrorMessage)
+{
+    public static BeatmapDownloadResult Success(string archivePath) => new(true, archivePath, null);
+
+    public static BeatmapDownloadResult Failed(string errorMessage) => new(false, null, errorMessage);
+}
+
 public sealed class BeatmapDownloadService(
     DroidGamePathLayout paths,
     IBeatmapMirrorClient mirrorClient,
-    IBeatmapImportService importService) : IBeatmapDownloadService
+    IBeatmapProcessingService? beatmapProcessingService = null) : IBeatmapDownloadService
 {
     private readonly SemaphoreSlim gate = new(1, 1);
     private BeatmapDownloadState state = new();
@@ -32,35 +39,38 @@ public sealed class BeatmapDownloadService(
 
     public void CancelActiveDownload() => activeDownloadCancellation?.Cancel();
 
-    public async Task<BeatmapImportResult> DownloadAndImportAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken)
+    public async Task<BeatmapDownloadResult> DownloadAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken)
     {
         if (!await gate.WaitAsync(0, cancellationToken).ConfigureAwait(false))
-            return BeatmapImportResult.Failed("Another beatmap is already downloading.");
+            return BeatmapDownloadResult.Failed("Another beatmap is already downloading.");
 
         using var linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         activeDownloadCancellation = linkedCancellation;
 
         try
         {
+            Directory.CreateDirectory(paths.Downloads);
             var archiveName = BeatmapImportService.SanitizeArchiveName($"{beatmapSet.Id} {beatmapSet.Artist} - {beatmapSet.Title}{(withVideo ? string.Empty : " [no video]")}");
             var destination = Path.Combine(paths.Downloads, archiveName + ".osz");
+            if (File.Exists(destination))
+                File.Delete(destination);
+
             state = new BeatmapDownloadState(beatmapSet.Id, archiveName, new BeatmapDownloadProgress(0, null, BeatmapDownloadPhase.Connecting), IsActive: true);
             var progress = new Progress<BeatmapDownloadProgress>(downloadProgress => state = state with { Progress = downloadProgress, IsActive = true });
             await mirrorClient.DownloadAsync(mirrorClient.CreateDownloadUri(beatmapSet.Mirror, beatmapSet.Id, withVideo), destination, progress, linkedCancellation.Token).ConfigureAwait(false);
-            state = state with { Progress = new BeatmapDownloadProgress(0, null, BeatmapDownloadPhase.Importing), IsActive = true };
-            var importResult = importService.ImportOsz(destination);
-            state = importResult.IsSuccess ? new BeatmapDownloadState() : state with { ErrorMessage = importResult.ErrorMessage, IsActive = false };
-            return importResult;
+            beatmapProcessingService?.EnqueueArchive(destination);
+            state = new BeatmapDownloadState();
+            return BeatmapDownloadResult.Success(destination);
         }
         catch (OperationCanceledException)
         {
             state = new BeatmapDownloadState(ErrorMessage: "Download canceled.");
-            return BeatmapImportResult.Failed("Download canceled.");
+            return BeatmapDownloadResult.Failed("Download canceled.");
         }
         catch (Exception exception)
         {
             state = state with { ErrorMessage = exception.Message, IsActive = false };
-            return BeatmapImportResult.Failed(exception.Message);
+            return BeatmapDownloadResult.Failed(exception.Message);
         }
         finally
         {

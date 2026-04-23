@@ -258,9 +258,9 @@ public sealed partial class SongSelectScene
         return viewport.VirtualWidth / 1.85f + 200f * MathF.Abs(MathF.Cos(centerY * MathF.PI / (viewport.VirtualHeight * 2f)));
     }
 
-    private static string DisplayTitle(BeatmapInfo beatmap) => string.IsNullOrWhiteSpace(beatmap.TitleUnicode) ? beatmap.Title : beatmap.TitleUnicode;
+    private string DisplayTitle(BeatmapInfo beatmap) => forceRomanizedMetadata || string.IsNullOrWhiteSpace(beatmap.TitleUnicode) ? beatmap.Title : beatmap.TitleUnicode;
 
-    private static string DisplayArtist(BeatmapInfo beatmap) => string.IsNullOrWhiteSpace(beatmap.ArtistUnicode) ? beatmap.Artist : beatmap.ArtistUnicode;
+    private string DisplayArtist(BeatmapInfo beatmap) => forceRomanizedMetadata || string.IsNullOrWhiteSpace(beatmap.ArtistUnicode) ? beatmap.Artist : beatmap.ArtistUnicode;
 
     private static string FormatLengthLine(BeatmapInfo beatmap)
     {

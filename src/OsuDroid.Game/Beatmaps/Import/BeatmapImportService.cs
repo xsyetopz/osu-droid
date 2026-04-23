@@ -6,7 +6,7 @@ namespace OsuDroid.Game.Beatmaps.Import;
 
 public interface IBeatmapImportService
 {
-    BeatmapImportResult ImportOsz(string oszPath);
+    BeatmapImportResult ImportOsz(string oszPath, bool deleteArchiveAfterImport = true);
 }
 
 public sealed record BeatmapImportResult(bool IsSuccess, string? SetDirectory, string? ErrorMessage)
@@ -18,7 +18,7 @@ public sealed record BeatmapImportResult(bool IsSuccess, string? SetDirectory, s
 
 public sealed partial class BeatmapImportService(DroidGamePathLayout paths, IBeatmapLibrary library) : IBeatmapImportService
 {
-    public BeatmapImportResult ImportOsz(string oszPath)
+    public BeatmapImportResult ImportOsz(string oszPath, bool deleteArchiveAfterImport = true)
     {
         if (!File.Exists(oszPath))
             return BeatmapImportResult.Failed("Beatmap archive not found.");
@@ -34,7 +34,8 @@ public sealed partial class BeatmapImportService(DroidGamePathLayout paths, IBea
 
             Directory.CreateDirectory(targetDirectory);
             ExtractZipSafely(oszPath, targetDirectory);
-            File.Delete(oszPath);
+            if (deleteArchiveAfterImport)
+                File.Delete(oszPath);
             library.Scan(new HashSet<string>(StringComparer.Ordinal) { setDirectory });
             return BeatmapImportResult.Success(setDirectory);
         }

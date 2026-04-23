@@ -27,8 +27,8 @@ public sealed partial class BeatmapDownloaderScene
         elements.Add(Fill("downloader-details-panel", new UiRect(x, y, panelWidth, 348f * Dp), Panel, 1f, UiAction.DownloaderDetailsPanel, Radius));
         AddCover(elements, "downloader-details-cover", set, new UiRect(x, y, panelWidth, 100f * Dp), UiAction.DownloaderDetailsPanel);
         elements.Add(Fill("downloader-details-cover-dim", new UiRect(x, y, panelWidth, 100f * Dp), CoverFallback, 0.2f, UiAction.DownloaderDetailsPanel, Radius));
-        elements.Add(Text("downloader-details-title", set.DisplayTitle, x + 16f * Dp, y + 18f * Dp, panelWidth - 120f * Dp, 26f * Dp, 17f * Dp, White));
-        elements.Add(Text("downloader-details-artist", set.DisplayArtist, x + 16f * Dp, y + 44f * Dp, panelWidth - 120f * Dp, 22f * Dp, 14f * Dp, Secondary));
+        elements.Add(Text("downloader-details-title", DisplayTitle(set), x + 16f * Dp, y + 18f * Dp, panelWidth - 120f * Dp, 26f * Dp, 17f * Dp, White));
+        elements.Add(Text("downloader-details-artist", DisplayArtist(set), x + 16f * Dp, y + 44f * Dp, panelWidth - 120f * Dp, 22f * Dp, 14f * Dp, Secondary));
         elements.Add(Text("downloader-details-creator", $"Mapped by {set.Creator}", x + 16f * Dp, y + 68f * Dp, panelWidth - 120f * Dp, 20f * Dp, 13f * Dp, Muted));
         AddStatusPill(elements, "downloader-details-status", set.Status, x + panelWidth - StatusPillWidth(set.Status) - 16f * Dp, y + 16f * Dp, UiAction.DownloaderDetailsPanel);
         AddDifficultyDots(elements, "downloader-details-diff", beatmaps, x + 12f * Dp, y + 108f * Dp, panelWidth - 24f * Dp, UiAction.None, selectedDifficultyIndex, true, UiAction.None);

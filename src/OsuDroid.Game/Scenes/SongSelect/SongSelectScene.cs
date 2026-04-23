@@ -103,6 +103,7 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
     private bool collectionsFilterMode;
     private bool deleteBeatmapConfirmOpen;
     private string? collectionPendingDelete;
+    private bool forceRomanizedMetadata;
     private DifficultyAlgorithm displayAlgorithm = difficultyService.Algorithm;
 
     private int selectedSetIndex
@@ -188,6 +189,27 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
     public void SetPreviewPlayer(IBeatmapPreviewPlayer player) => musicController.SetPreviewPlayer(player);
 
     public void SetTextInputService(ITextInputService service) => textInputService = service;
+
+    public void SetDisplayAlgorithm(DifficultyAlgorithm algorithm)
+    {
+        if (displayAlgorithm == algorithm)
+            return;
+
+        var selected = SelectedBeatmap;
+        displayAlgorithm = algorithm;
+        visibleSnapshot = SortDifficultyRows(visibleSnapshot);
+        RestoreSelectedDifficulty(selected);
+        scrollY = ClampScroll(CalculateSelectedSetScroll(selectedSetIndex));
+        QueueVisibleDifficultyCalculations();
+    }
+
+    public void SetForceRomanized(bool forceRomanized)
+    {
+        if (forceRomanizedMetadata == forceRomanized)
+            return;
+
+        forceRomanizedMetadata = forceRomanized;
+    }
 
     public void Enter(string? preferredSetDirectory = null, string? preferredBeatmapFilename = null)
     {

@@ -56,16 +56,20 @@ public sealed partial class BeatmapDownloaderScene
         if (index < 0 || index >= sets.Count)
             return;
 
-        var importResult = await downloadService.DownloadAndImportAsync(sets[index], withVideo, CancellationToken.None).ConfigureAwait(false);
-        if (importResult.IsSuccess)
+        var set = sets[index];
+        if (preferNoVideoDownloads && withVideo && MirrorDefinition(set.Mirror).SupportsNoVideoDownloads && set.HasVideo)
+            withVideo = false;
+
+        var downloadResult = await downloadService.DownloadAsync(set, withVideo, CancellationToken.None).ConfigureAwait(false);
+        if (downloadResult.IsSuccess)
         {
             selectedSetIndex = null;
-            lastImportedSetDirectory = importResult.SetDirectory;
-            message = "Beatmap imported";
+            lastImportedSetDirectory = downloadResult.ArchivePath is null ? null : Path.GetFileNameWithoutExtension(downloadResult.ArchivePath);
+            message = "Beatmap downloaded";
         }
         else
         {
-            message = importResult.ErrorMessage;
+            message = downloadResult.ErrorMessage;
         }
     }
 

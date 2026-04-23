@@ -69,14 +69,11 @@ public sealed partial class SongSelectScene
         ApplyBeatmapOptions();
     }
 
-    public void ToggleBeatmapOptionsAlgorithm()
+    public DifficultyAlgorithm ToggleBeatmapOptionsAlgorithm()
     {
-        var selected = SelectedBeatmap;
-        displayAlgorithm = displayAlgorithm == DifficultyAlgorithm.Droid ? DifficultyAlgorithm.Standard : DifficultyAlgorithm.Droid;
-        visibleSnapshot = SortDifficultyRows(visibleSnapshot);
-        RestoreSelectedDifficulty(selected);
-        scrollY = ClampScroll(CalculateSelectedSetScroll(selectedSetIndex));
-        QueueVisibleDifficultyCalculations();
+        var next = displayAlgorithm == DifficultyAlgorithm.Droid ? DifficultyAlgorithm.Standard : DifficultyAlgorithm.Droid;
+        SetDisplayAlgorithm(next);
+        return displayAlgorithm;
     }
 
     public void CycleBeatmapOptionsSort()

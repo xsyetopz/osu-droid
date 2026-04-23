@@ -1,4 +1,3 @@
-using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Beatmaps.Online;
 
 namespace OsuDroid.Game.Tests;
@@ -13,8 +12,8 @@ public sealed partial class BeatmapDownloaderTests
             new BeatmapDownloadProgress(1024, 1024, BeatmapDownloadPhase.Importing),
             IsActive: true);
 
-        public Task<BeatmapImportResult> DownloadAndImportAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken) =>
-            Task.FromResult(BeatmapImportResult.Failed("Not used."));
+        public Task<BeatmapDownloadResult> DownloadAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken) =>
+            Task.FromResult(BeatmapDownloadResult.Failed("Not used."));
 
         public void CancelActiveDownload()
         {
@@ -25,8 +24,8 @@ public sealed partial class BeatmapDownloaderTests
     {
         public BeatmapDownloadState State { get; } = new();
 
-        public Task<BeatmapImportResult> DownloadAndImportAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken) =>
-            Task.FromResult(BeatmapImportResult.Success("100 Artist - Title"));
+        public Task<BeatmapDownloadResult> DownloadAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken) =>
+            Task.FromResult(BeatmapDownloadResult.Success(Path.Combine("cache", "Downloads", "100 Artist - Title.osz")));
 
         public void CancelActiveDownload()
         {

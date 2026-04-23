@@ -62,6 +62,8 @@ public sealed partial class BeatmapDownloaderScene
     private int visibleStartIndex;
     private int? selectedSetIndex;
     private int selectedDifficultyIndex;
+    private bool preferNoVideoDownloads;
+    private bool forceRomanizedMetadata;
     private float scrollOffset;
     private string query = string.Empty;
     private string? message = "Search beatmaps";
@@ -120,6 +122,10 @@ public sealed partial class BeatmapDownloaderScene
 
     public void SetTextInputService(ITextInputService service) => textInputService = service;
 
+    public void SetPreferNoVideoDownloads(bool preferNoVideo) => preferNoVideoDownloads = preferNoVideo;
+
+    public void SetForceRomanized(bool forceRomanized) => forceRomanizedMetadata = forceRomanized;
+
     public void SetPreviewPlayer(IBeatmapPreviewPlayer player)
     {
         if (ReferenceEquals(previewPlayer, player))
@@ -134,6 +140,10 @@ public sealed partial class BeatmapDownloaderScene
 
 
     public GameFrameSnapshot CreateSnapshot(VirtualViewport viewport) => new("BeatmapDownloader", "Beatmap Downloader", string.Empty, Array.Empty<string>(), 0, false, CreateFrame(viewport));
+
+    private string DisplayTitle(BeatmapMirrorSet set) => forceRomanizedMetadata || string.IsNullOrWhiteSpace(set.TitleUnicode) ? set.Title : set.TitleUnicode;
+
+    private string DisplayArtist(BeatmapMirrorSet set) => forceRomanizedMetadata || string.IsNullOrWhiteSpace(set.ArtistUnicode) ? set.Artist : set.ArtistUnicode;
 
 
 

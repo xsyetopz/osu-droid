@@ -11,7 +11,7 @@ public sealed partial class OsuDroidGameCore
         UiAction.SongSelectBeatmapOptions => Do(songSelect.OpenBeatmapOptions),
         UiAction.SongSelectBeatmapOptionsSearch => Do(() => songSelect.FocusBeatmapOptionsSearch(viewport)),
         UiAction.SongSelectBeatmapOptionsFavorite => Do(songSelect.ToggleBeatmapOptionsFavoriteOnly),
-        UiAction.SongSelectBeatmapOptionsAlgorithm => Do(songSelect.ToggleBeatmapOptionsAlgorithm),
+        UiAction.SongSelectBeatmapOptionsAlgorithm => Do(ToggleSongSelectDifficultyAlgorithm),
         UiAction.SongSelectBeatmapOptionsSort => Do(songSelect.CycleBeatmapOptionsSort),
         UiAction.SongSelectBeatmapOptionsFolder => Do(songSelect.ToggleCollectionFilterPicker),
         UiAction.SongSelectRandom => Do(songSelect.SelectRandomSet),
@@ -31,4 +31,12 @@ public sealed partial class OsuDroidGameCore
         UiAction.SongSelectCollectionDeleteCancel => Do(songSelect.CancelDeleteCollection),
         _ => false,
     };
+
+    private void ToggleSongSelectDifficultyAlgorithm()
+    {
+        var algorithm = songSelect.ToggleBeatmapOptionsAlgorithm();
+        var storedValue = algorithm == Beatmaps.Difficulty.DifficultyAlgorithm.Standard ? 1 : 0;
+        settingsStore.SetInt("difficultyAlgorithm", storedValue);
+        options.SetIntValue("difficultyAlgorithm", storedValue);
+    }
 }

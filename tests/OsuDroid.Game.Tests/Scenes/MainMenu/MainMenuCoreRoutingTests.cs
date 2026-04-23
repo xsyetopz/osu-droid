@@ -267,6 +267,10 @@ public sealed partial class UiCompatibilityTests
 
         public bool HasPendingWork() => completedSnapshot is null;
 
+        public void EnqueueArchive(string archivePath)
+        {
+        }
+
         public void Start() => StartCalls++;
 
         public bool TryConsumeCompletedSnapshot(out BeatmapLibrarySnapshot snapshot)

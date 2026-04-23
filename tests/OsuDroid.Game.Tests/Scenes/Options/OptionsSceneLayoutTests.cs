@@ -61,19 +61,65 @@ public sealed partial class OptionsSceneTests
         var secondCheckbox = frame.Elements.Single(element => element.Id == "options-row-1-checkbox");
         var selectDropdown = frame.Elements.Single(element => element.Id == "options-row-2-dropdown");
 
-        Assert.That(row.IsEnabled, Is.True);
-        Assert.That(row.Action, Is.EqualTo(UiAction.OptionsToggleServerConnection));
+        Assert.That(row.IsEnabled, Is.False);
+        Assert.That(row.Action, Is.EqualTo(UiAction.None));
         Assert.That(row.Color, Is.EqualTo(UiColor.Opaque(22, 22, 34)));
         Assert.That(rowLabel.Text, Is.EqualTo("Server Connection"));
         Assert.That(rowSummary.Text, Is.EqualTo("Connect to osu!droid server"));
         Assert.That(rowLabel.Bounds.Y, Is.GreaterThan(row.Bounds.Y));
         Assert.That(rowSummary.Bounds.Y, Is.GreaterThan(rowLabel.Bounds.Y));
+        Assert.That(frame.Elements.Single(element => element.Id == "options-row-0-lock").MaterialIcon, Is.EqualTo(UiMaterialIcon.Lock));
         Assert.That(firstCheckbox.Kind, Is.EqualTo(UiElementKind.MaterialIcon));
         Assert.That(firstCheckbox.MaterialIcon, Is.EqualTo(UiMaterialIcon.Check));
         Assert.That(firstCheckbox.Color, Is.EqualTo(UiColor.Opaque(32, 32, 46)));
         Assert.That(secondCheckbox.MaterialIcon, Is.EqualTo(UiMaterialIcon.Check));
         Assert.That(selectDropdown.Kind, Is.EqualTo(UiElementKind.MaterialIcon));
         Assert.That(selectDropdown.MaterialIcon, Is.EqualTo(UiMaterialIcon.ArrowDropDown));
+    }
+
+    [Test]
+    public void OptionsSceneLockedRowsStayVisibleAndIgnoreTap()
+    {
+        var settings = new MemorySettingsStore();
+        var scene = new OptionsScene(new GameLocalizer(), settings);
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+        var initial = scene.GetBoolValue("stayOnline");
+
+        scene.HandleAction(UiAction.OptionsRow0, viewport);
+        var frame = scene.CreateSnapshot(viewport).UiFrame;
+
+        Assert.That(scene.GetBoolValue("stayOnline"), Is.EqualTo(initial));
+        Assert.That(frame.Elements.Single(element => element.Id == "options-row-0-lock").Kind, Is.EqualTo(UiElementKind.MaterialIcon));
+        Assert.That(frame.Elements.Single(element => element.Id == "options-row-0").IsEnabled, Is.False);
+    }
+
+    [Test]
+    public void OptionsSceneImplementedRowsDoNotDrawLockOverlay()
+    {
+        var scene = new OptionsScene(new GameLocalizer());
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+
+        scene.HandleAction(UiAction.OptionsSectionAudio, viewport);
+        var frame = scene.CreateSnapshot(viewport).UiFrame;
+
+        scene.HandleAction(UiAction.OptionsSectionGeneral, viewport);
+        frame = scene.CreateSnapshot(viewport).UiFrame;
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-2-lock"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-5-lock"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-7-lock"), Is.False);
+
+        scene.HandleAction(UiAction.OptionsSectionLibrary, viewport);
+        frame = scene.CreateSnapshot(viewport).UiFrame;
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-0-lock"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-1-lock"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-4-lock"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-6-lock"), Is.False);
+
+        scene.HandleAction(UiAction.OptionsSectionAudio, viewport);
+        frame = scene.CreateSnapshot(viewport).UiFrame;
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-0-lock"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-1-lock"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-7-lock"), Is.False);
     }
     [Test]
     public void OptionsSceneDrawsSliderInputButtonAndDisabledRows()
@@ -139,7 +185,7 @@ public sealed partial class OptionsSceneTests
         Assert.That(dropdown.Bounds.Y + dropdown.Bounds.Height / 2f, Is.EqualTo(row.Bounds.Y + row.Bounds.Height / 2f).Within(0.001f));
     }
     [Test]
-    public void OptionsSceneSelectRowsCycleVisibleStoredValue()
+    public void OptionsSceneImplementedSelectRowsCycleStoredValue()
     {
         var scene = new OptionsScene(new GameLocalizer());
         var viewport = VirtualViewport.FromSurface(1280, 720);
@@ -241,6 +287,29 @@ public sealed partial class OptionsSceneTests
 
         Assert.That(values.Any(value => value is not null && value.Contains('…') && value.EndsWith("/container/osu-droid/Songs", StringComparison.Ordinal)), Is.True);
         Assert.That(scene.GetStringValue("directory"), Is.EqualTo(path));
+    }
+
+    [Test]
+    public void OptionsSceneSliderDragUpdatesValueAndSuppressesScroll()
+    {
+        var settings = new MemorySettingsStore();
+        var scene = new OptionsScene(new GameLocalizer(), settings);
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+
+        scene.HandleAction(UiAction.OptionsSectionAudio, viewport);
+        var beforeScroll = scene.ContentScrollOffset;
+        var frame = scene.CreateSnapshot(viewport).UiFrame;
+        var track = frame.Elements.Single(element => element.Id == "options-row-0-slider-track");
+        var dragPoint = new UiPoint(track.Bounds.X + track.Bounds.Width * 0.75f, track.Bounds.Y + track.Bounds.Height / 2f);
+
+        Assert.That(scene.TryBeginSliderDrag("options-row-0-slider-thumb", dragPoint, viewport), Is.True);
+        scene.Scroll(240f, viewport);
+        scene.UpdateSliderDrag(dragPoint, viewport);
+        scene.EndSliderDrag(dragPoint, viewport);
+
+        Assert.That(scene.GetIntValue("bgmvolume"), Is.EqualTo(75).Within(1));
+        Assert.That(settings.GetInt("bgmvolume", 0), Is.EqualTo(75).Within(1));
+        Assert.That(scene.ContentScrollOffset, Is.EqualTo(beforeScroll));
     }
     [Test]
     public void OptionsSceneUsesAndroidHalfRoundedCategoryAndRows()

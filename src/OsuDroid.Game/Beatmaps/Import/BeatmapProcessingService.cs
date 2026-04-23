@@ -1,3 +1,4 @@
+using OsuDroid.Game.Runtime;
 using OsuDroid.Game.Runtime.Paths;
 
 namespace OsuDroid.Game.Beatmaps.Import;
@@ -11,6 +12,8 @@ public interface IBeatmapProcessingService
 {
     BeatmapProcessingState State { get; }
 
+    void EnqueueArchive(string archivePath);
+
     bool HasPendingWork();
 
     void Start();
@@ -21,9 +24,11 @@ public interface IBeatmapProcessingService
 public sealed class BeatmapProcessingService(
     DroidGamePathLayout paths,
     IBeatmapImportService importService,
-    IBeatmapLibrary library) : IBeatmapProcessingService
+    IBeatmapLibrary library,
+    IGameSettingsStore? settingsStore = null) : IBeatmapProcessingService
 {
     private readonly object gate = new();
+    private readonly HashSet<string> queuedArchives = new(StringComparer.OrdinalIgnoreCase);
     private Task? task;
     private BeatmapProcessingState state = new();
     private BeatmapLibrarySnapshot? completedSnapshot;
@@ -38,6 +43,15 @@ public sealed class BeatmapProcessingService(
     }
 
     public bool HasPendingWork() => EnumeratePendingArchives().Any() || library.NeedsScanRefresh();
+
+    public void EnqueueArchive(string archivePath)
+    {
+        if (string.IsNullOrWhiteSpace(archivePath))
+            return;
+
+        lock (gate)
+            queuedArchives.Add(Path.GetFullPath(archivePath));
+    }
 
     public void Start()
     {
@@ -80,7 +94,8 @@ public sealed class BeatmapProcessingService(
             foreach (var archive in archives)
             {
                 SetState(new BeatmapProcessingState(true, CalculatePercent(completedSteps, totalSteps), "Importing beatmaps..."));
-                _ = importService.ImportOsz(archive);
+                _ = importService.ImportOsz(archive, DeleteImportedArchives());
+                ClearQueuedArchive(archive);
                 completedSteps++;
                 SetState(new BeatmapProcessingState(true, CalculatePercent(completedSteps, totalSteps), "Importing beatmaps..."));
             }
@@ -112,20 +127,59 @@ public sealed class BeatmapProcessingService(
 
     private IEnumerable<string> EnumeratePendingArchives()
     {
-        if (!Directory.Exists(paths.Songs))
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        string[] queued;
+        lock (gate)
+            queued = queuedArchives.ToArray();
+
+        foreach (var archive in queued.OrderBy(path => path, StringComparer.OrdinalIgnoreCase))
+        {
+            if (File.Exists(archive) && seen.Add(archive))
+                yield return archive;
+        }
+
+        foreach (var archive in EnumeratePendingArchives(paths.Songs))
+        {
+            if (seen.Add(archive))
+                yield return archive;
+        }
+
+        if (!ShouldScanDownloads())
             yield break;
 
-        foreach (var archive in Directory.EnumerateFiles(paths.Songs, "*.osz", SearchOption.TopDirectoryOnly)
+        foreach (var archive in EnumeratePendingArchives(paths.Downloads))
+        {
+            if (seen.Add(archive))
+                yield return archive;
+        }
+    }
+
+    private static IEnumerable<string> EnumeratePendingArchives(string directory)
+    {
+        if (!Directory.Exists(directory))
+            yield break;
+
+        foreach (var archive in Directory.EnumerateFiles(directory, "*.osz", SearchOption.TopDirectoryOnly)
                      .OrderBy(path => path, StringComparer.OrdinalIgnoreCase))
         {
             yield return archive;
         }
     }
 
+    private bool DeleteImportedArchives() => settingsStore?.GetBool("deleteosz", true) ?? true;
+
+    private bool ShouldScanDownloads() => settingsStore?.GetBool("scandownload", false) ?? false;
+
     private void SetState(BeatmapProcessingState next)
     {
         lock (gate)
             state = next;
+    }
+
+    private void ClearQueuedArchive(string archivePath)
+    {
+        lock (gate)
+            queuedArchives.Remove(archivePath);
     }
 
     private static int CalculatePercent(int completedSteps, int totalSteps)

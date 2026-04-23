@@ -89,14 +89,16 @@ public sealed partial class OptionsScene
 
     private void AddRow(List<UiElementSnapshot> elements, SettingsRow row, int index, UiRect bounds)
     {
-        var rowAlpha = row.IsEnabled ? 1f : 0.5f;
-        var rowAction = row.IsEnabled ? RowAction(row, index) : UiAction.None;
+        var isInteractive = IsInteractive(row);
+        var rowAlpha = row.IsEnabled ? (row.IsLocked ? 0.72f : 1f) : 0.5f;
+        var rowAction = isInteractive ? RowAction(row, index) : UiAction.None;
         var rowCornerRadius = row.IsBottom ? AndroidRoundedRectRadius : 0f;
-        elements.Add(Fill($"options-row-{index}", bounds, rowBackground, rowAlpha, rowAction, rowCornerRadius, row.IsEnabled, row.IsBottom ? UiCornerMode.Bottom : UiCornerMode.None));
+        elements.Add(Fill($"options-row-{index}", bounds, rowBackground, rowAlpha, rowAction, rowCornerRadius, isInteractive, row.IsBottom ? UiCornerMode.Bottom : UiCornerMode.None));
 
         if (row.Kind == SettingsRowKind.Slider)
         {
             AddSliderControl(elements, row, index, bounds);
+            AddLockOverlay(elements, row, index, bounds);
             return;
         }
 
@@ -116,9 +118,9 @@ public sealed partial class OptionsScene
             ? bounds.Width - RowPadding * 2f
             : Math.Max(80f * DpScale, bounds.Width - RowPadding * 3f - reservedControlWidth);
         var textColor = row.IsEnabled ? disabledWhite : secondaryText;
-        elements.Add(Text($"options-row-{index}-label", localizer[row.TitleKey], bounds.X + RowPadding, textTop, textWidth, titleHeight, RowTitleSize, textColor, rowAlpha * 0.94f, true, rowAction, row.IsEnabled));
+        elements.Add(Text($"options-row-{index}-label", localizer[row.TitleKey], bounds.X + RowPadding, textTop, textWidth, titleHeight, RowTitleSize, textColor, rowAlpha * 0.94f, true, rowAction, isInteractive));
         if (!string.IsNullOrEmpty(localizer[row.SummaryKey]))
-            elements.Add(Text($"options-row-{index}-summary", localizer[row.SummaryKey], bounds.X + RowPadding, textTop + titleHeight + 6f * DpScale, textWidth, summaryHeight, RowSummarySize, secondaryText, rowAlpha * 0.86f, false, rowAction, row.IsEnabled));
+            elements.Add(Text($"options-row-{index}-summary", localizer[row.SummaryKey], bounds.X + RowPadding, textTop + titleHeight + 6f * DpScale, textWidth, summaryHeight, RowSummarySize, secondaryText, rowAlpha * 0.86f, false, rowAction, isInteractive));
 
         switch (row.Kind)
         {
@@ -135,60 +137,65 @@ public sealed partial class OptionsScene
                 break;
 
             case SettingsRowKind.Button:
-                elements.Add(MaterialIcon($"options-row-{index}-chevron", UiMaterialIcon.ChevronRight, new UiRect(bounds.Right - RowPadding - SectionIconSize, bounds.Y + (bounds.Height - SectionIconSize) / 2f, SectionIconSize, SectionIconSize), secondaryText, rowAlpha * 0.8f, rowAction, row.IsEnabled));
+                elements.Add(MaterialIcon($"options-row-{index}-chevron", UiMaterialIcon.ChevronRight, new UiRect(bounds.Right - RowPadding - SectionIconSize, bounds.Y + (bounds.Height - SectionIconSize) / 2f, SectionIconSize, SectionIconSize), secondaryText, rowAlpha * 0.8f, rowAction, isInteractive));
                 break;
 
         }
+
+        AddLockOverlay(elements, row, index, bounds);
     }
 
     private void AddCheckbox(List<UiElementSnapshot> elements, SettingsRow row, int index, UiRect bounds)
     {
         var checkbox = new UiRect(bounds.Right - RowPadding - SectionIconSize, bounds.Y + (bounds.Height - SectionIconSize) / 2f, SectionIconSize, SectionIconSize);
         var isChecked = GetBoolValue(row.Key);
-        var rowAction = row.IsEnabled ? RowAction(row, index) : UiAction.None;
-        var alpha = row.IsEnabled ? 1f : 0.55f;
+        var isInteractive = IsInteractive(row);
+        var rowAction = isInteractive ? RowAction(row, index) : UiAction.None;
+        var alpha = row.IsEnabled ? (row.IsLocked ? 0.72f : 1f) : 0.55f;
         if (isChecked)
         {
-            elements.Add(Fill($"options-row-{index}-checkbox-box", checkbox, checkboxAccent, alpha, rowAction, 2f * DpScale, row.IsEnabled));
-            elements.Add(MaterialIcon($"options-row-{index}-checkbox", UiMaterialIcon.Check, checkbox, UiColor.Opaque(32, 32, 46), alpha, rowAction, row.IsEnabled));
+            elements.Add(Fill($"options-row-{index}-checkbox-box", checkbox, checkboxAccent, alpha, rowAction, 2f * DpScale, isInteractive));
+            elements.Add(MaterialIcon($"options-row-{index}-checkbox", UiMaterialIcon.Check, checkbox, UiColor.Opaque(32, 32, 46), alpha, rowAction, isInteractive));
         }
         else
         {
-            elements.Add(MaterialIcon($"options-row-{index}-checkbox", UiMaterialIcon.CheckboxBlankOutline, checkbox, secondaryText, alpha, rowAction, row.IsEnabled));
+            elements.Add(MaterialIcon($"options-row-{index}-checkbox", UiMaterialIcon.CheckboxBlankOutline, checkbox, secondaryText, alpha, rowAction, isInteractive));
         }
     }
 
     private void AddSelectControl(List<UiElementSnapshot> elements, SettingsRow row, int index, UiRect bounds)
     {
         var chevron = new UiRect(bounds.Right - RowPadding - SectionIconSize, bounds.Y + (bounds.Height - SectionIconSize) / 2f, SectionIconSize, SectionIconSize);
-        var alpha = row.IsEnabled ? 0.9f : 0.45f;
-        var rowAction = row.IsEnabled ? RowAction(row, index) : UiAction.None;
+        var alpha = row.IsEnabled ? (row.IsLocked ? 0.65f : 0.9f) : 0.45f;
+        var isInteractive = IsInteractive(row);
+        var rowAction = isInteractive ? RowAction(row, index) : UiAction.None;
         var value = GetSelectValue(row);
         if (!string.IsNullOrEmpty(value))
         {
             var valueWidth = 86f * DpScale;
-            elements.Add(Text($"options-row-{index}-value", value, chevron.X - 12f * DpScale - valueWidth, bounds.Y + (bounds.Height - RowTitleSize - 4f) / 2f, valueWidth, RowTitleSize + 4f, RowTitleSize, secondaryText, alpha, false, rowAction, row.IsEnabled, UiTextAlignment.Right));
+            elements.Add(Text($"options-row-{index}-value", value, chevron.X - 12f * DpScale - valueWidth, bounds.Y + (bounds.Height - RowTitleSize - 4f) / 2f, valueWidth, RowTitleSize + 4f, RowTitleSize, secondaryText, alpha, false, rowAction, isInteractive, UiTextAlignment.Right));
         }
 
-        elements.Add(MaterialIcon($"options-row-{index}-dropdown", UiMaterialIcon.ArrowDropDown, chevron, secondaryText, alpha, rowAction, row.IsEnabled));
+        elements.Add(MaterialIcon($"options-row-{index}-dropdown", UiMaterialIcon.ArrowDropDown, chevron, secondaryText, alpha, rowAction, isInteractive));
     }
 
     private void AddInputControl(List<UiElementSnapshot> elements, SettingsRow row, int index, UiRect bounds)
     {
-        var rowAction = row.IsEnabled ? RowAction(row, index) : UiAction.None;
-        var alpha = row.IsEnabled ? 1f : 0.5f;
+        var isInteractive = IsInteractive(row);
+        var rowAction = isInteractive ? RowAction(row, index) : UiAction.None;
+        var alpha = row.IsEnabled ? (row.IsLocked ? 0.72f : 1f) : 0.5f;
         var inputBounds = new UiRect(bounds.X + RowPadding, bounds.Y + RowPadding + RowTitleSize + 4f + 6f * DpScale + RowSummarySize + 4f + InputGap, bounds.Width - RowPadding * 2f, InputHeight);
-        elements.Add(Fill($"options-row-{index}-input", inputBounds, inputBackground, alpha, rowAction, AndroidRoundedRectRadius, row.IsEnabled));
+        elements.Add(Fill($"options-row-{index}-input", inputBounds, inputBackground, alpha, rowAction, AndroidRoundedRectRadius, isInteractive));
         var value = GetInputDisplayValue(row);
         if (!string.IsNullOrEmpty(value))
-            elements.Add(Text($"options-row-{index}-input-value", value, inputBounds.X + 14f * DpScale, inputBounds.Y + 8f * DpScale, inputBounds.Width - 28f * DpScale, RowTitleSize + 4f, RowTitleSize, UiColor.Opaque(235, 235, 245), 0.85f * alpha, false, rowAction, row.IsEnabled));
+            elements.Add(Text($"options-row-{index}-input-value", value, inputBounds.X + 14f * DpScale, inputBounds.Y + 8f * DpScale, inputBounds.Width - 28f * DpScale, RowTitleSize + 4f, RowTitleSize, UiColor.Opaque(235, 235, 245), 0.85f * alpha, false, rowAction, isInteractive));
     }
 
     private void AddSliderControl(List<UiElementSnapshot> elements, SettingsRow row, int index, UiRect bounds)
     {
         var value = GetIntValue(row.Key);
         var normalized = row.Max == row.Min ? 0f : Math.Clamp((value - row.Min) / (float)(row.Max - row.Min), 0f, 1f);
-        var alpha = row.IsEnabled ? 1f : 0.5f;
+        var alpha = row.IsEnabled ? (row.IsLocked ? 0.72f : 1f) : 0.5f;
         var titleHeight = RowTitleSize + 4f;
         var summaryHeight = RowSummarySize + 4f;
         var containerX = bounds.X + SeekbarContainerMarginX;
@@ -205,15 +212,26 @@ public sealed partial class OptionsScene
         var thumbX = trackX + trackWidth * normalized - SeekbarThumbSize / 2f;
         var thumbY = trackY + SeekbarTrackHeight / 2f - SeekbarThumbSize / 2f;
 
-        var rowAction = row.IsEnabled ? RowAction(row, index) : UiAction.None;
-        elements.Add(Text($"options-row-{index}-label", localizer[row.TitleKey], containerX, textTop, textWidth, titleHeight, RowTitleSize, disabledWhite, alpha * 0.94f, true, rowAction, row.IsEnabled));
+        var isInteractive = IsInteractive(row);
+        var rowAction = isInteractive ? RowAction(row, index) : UiAction.None;
+        elements.Add(Text($"options-row-{index}-label", localizer[row.TitleKey], containerX, textTop, textWidth, titleHeight, RowTitleSize, disabledWhite, alpha * 0.94f, true, rowAction, isInteractive));
         if (!string.IsNullOrEmpty(localizer[row.SummaryKey]))
-            elements.Add(Text($"options-row-{index}-summary", localizer[row.SummaryKey], containerX, summaryTop, textWidth, summaryHeight, RowSummarySize, secondaryText, alpha * 0.86f, false, rowAction, row.IsEnabled));
+            elements.Add(Text($"options-row-{index}-summary", localizer[row.SummaryKey], containerX, summaryTop, textWidth, summaryHeight, RowSummarySize, secondaryText, alpha * 0.86f, false, rowAction, isInteractive));
 
-        elements.Add(Text($"options-row-{index}-value", value.ToString(CultureInfo.InvariantCulture), trackX + trackWidth - valueWidth, valueTop, valueWidth, titleHeight, RowTitleSize, secondaryText, 0.9f * alpha, false, rowAction, row.IsEnabled, UiTextAlignment.Right));
-        elements.Add(Fill($"options-row-{index}-slider-track", new UiRect(trackX, trackY, trackWidth, SeekbarTrackHeight), sliderTrack, alpha, rowAction, 12f * DpScale, row.IsEnabled));
-        elements.Add(Fill($"options-row-{index}-slider-fill", new UiRect(trackX, trackY, trackWidth * normalized, SeekbarTrackHeight), checkboxAccent, alpha, rowAction, 12f * DpScale, row.IsEnabled));
-        elements.Add(Fill($"options-row-{index}-slider-thumb", new UiRect(thumbX, thumbY, SeekbarThumbSize, SeekbarThumbSize), white, alpha, rowAction, 12f * DpScale, row.IsEnabled));
+        elements.Add(Text($"options-row-{index}-value", value.ToString(CultureInfo.InvariantCulture), trackX + trackWidth - valueWidth, valueTop, valueWidth, titleHeight, RowTitleSize, secondaryText, 0.9f * alpha, false, rowAction, isInteractive, UiTextAlignment.Right));
+        elements.Add(Fill($"options-row-{index}-slider-track", new UiRect(trackX, trackY, trackWidth, SeekbarTrackHeight), sliderTrack, alpha, rowAction, 12f * DpScale, isInteractive));
+        elements.Add(Fill($"options-row-{index}-slider-fill", new UiRect(trackX, trackY, trackWidth * normalized, SeekbarTrackHeight), checkboxAccent, alpha, rowAction, 12f * DpScale, isInteractive));
+        elements.Add(Fill($"options-row-{index}-slider-thumb", new UiRect(thumbX, thumbY, SeekbarThumbSize, SeekbarThumbSize), white, alpha, rowAction, 12f * DpScale, isInteractive));
+    }
+
+    private static void AddLockOverlay(List<UiElementSnapshot> elements, SettingsRow row, int index, UiRect bounds)
+    {
+        if (!row.IsLocked)
+            return;
+
+        var lockSize = 18f * DpScale;
+        var lockBounds = new UiRect(bounds.Right - RowPadding - lockSize, bounds.Y + 10f * DpScale, lockSize, lockSize);
+        elements.Add(MaterialIcon($"options-row-{index}-lock", UiMaterialIcon.Lock, lockBounds, secondaryText, 0.82f, UiAction.None, false));
     }
 
     private static float CalculateContentHeight(IReadOnlyList<SettingsCategory> categories) => categories.Sum(category => CategoryTopMargin + CalculateCategoryHeight(category));

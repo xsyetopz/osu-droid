@@ -18,6 +18,7 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
     private UiAction pressedAction;
     private bool isTouchDragging;
     private bool longPressFired;
+    private bool isUiDragCaptured;
 
     public bool IsPointerActive => activeTouchId is not null || isTouchDragging;
 
@@ -43,6 +44,16 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
                 isTouchDragging = false;
                 var pressedElement = currentFrame.HitTest(virtualPoint);
                 pressedAction = pressedElement?.Action ?? UiAction.None;
+                isUiDragCaptured = false;
+                if (pressedElement is not null && core.TryBeginUiDrag(pressedElement.Id, virtualPoint, currentFrame.Viewport))
+                {
+                    pressedAction = UiAction.None;
+                    isTouchDragging = false;
+                    longPressFired = false;
+                    isUiDragCaptured = true;
+                    continue;
+                }
+
                 touchStartedUtc = DateTime.UtcNow;
                 longPressFired = false;
                 core.PressUiAction(pressedAction);
@@ -56,6 +67,13 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
 
             if (touch.State == TouchLocationState.Moved)
             {
+                if (isUiDragCaptured)
+                {
+                    core.UpdateUiDrag(virtualPoint, currentFrame.Viewport);
+                    previousTouch = virtualPoint;
+                    continue;
+                }
+
                 var movedX = virtualPoint.X - touchStart.X;
                 var movedY = virtualPoint.Y - touchStart.Y;
                 if (!isTouchDragging && MathF.Sqrt(movedX * movedX + movedY * movedY) > TouchDragThreshold)
@@ -77,6 +95,15 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
 
             activeTouchId = null;
             core.ReleaseUiAction();
+            if (isUiDragCaptured)
+            {
+                core.EndUiDrag(virtualPoint, currentFrame.Viewport);
+                isUiDragCaptured = false;
+                isTouchDragging = false;
+                longPressFired = false;
+                continue;
+            }
+
             if (isTouchDragging || longPressFired)
             {
                 isTouchDragging = false;

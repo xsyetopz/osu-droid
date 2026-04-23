@@ -4,6 +4,7 @@ public enum UiMaterialIcon
 {
     ArrowBack,
     ArrowDropDown,
+    Lock,
     Refresh,
     Search,
     Tune,

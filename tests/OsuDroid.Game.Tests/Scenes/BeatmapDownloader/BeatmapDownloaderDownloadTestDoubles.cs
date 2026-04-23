@@ -1,6 +1,5 @@
 using System.Net;
 using System.Reflection;
-using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Beatmaps.Online;
 using OsuDroid.Game.Runtime;
 using OsuDroid.Game.Scenes;
@@ -14,8 +13,8 @@ public sealed partial class BeatmapDownloaderTests
     {
         public BeatmapDownloadState State { get; } = new();
 
-        public Task<BeatmapImportResult> DownloadAndImportAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken) =>
-            Task.FromResult(BeatmapImportResult.Failed("Not used."));
+        public Task<BeatmapDownloadResult> DownloadAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken) =>
+            Task.FromResult(BeatmapDownloadResult.Failed("Not used."));
 
         public void CancelActiveDownload()
         {
@@ -30,8 +29,8 @@ public sealed partial class BeatmapDownloaderTests
             new BeatmapDownloadProgress(128, 1024, BeatmapDownloadPhase.Downloading, 2048),
             IsActive: true);
 
-        public Task<BeatmapImportResult> DownloadAndImportAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken) =>
-            Task.FromResult(BeatmapImportResult.Failed("Not used."));
+        public Task<BeatmapDownloadResult> DownloadAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken) =>
+            Task.FromResult(BeatmapDownloadResult.Failed("Not used."));
 
         public void CancelActiveDownload()
         {

@@ -3,11 +3,13 @@ using OsuDroid.Game.Beatmaps.Difficulty;
 using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Beatmaps.Online;
 using OsuDroid.Game.Compatibility.Database;
+using OsuDroid.Game.Compatibility.Online;
 using OsuDroid.Game.Localization;
 using OsuDroid.Game.Runtime;
 using OsuDroid.Game.Runtime.Paths;
 using OsuDroid.Game.Scenes;
 using OsuDroid.Game.UI;
+using System.Globalization;
 
 namespace OsuDroid.Game;
 
@@ -55,7 +57,7 @@ public sealed partial class OsuDroidGameCore
         options = new OptionsScene(new GameLocalizer(), settingsStore, pathDefaults: OptionsPathDefaults.FromPaths(services.Paths));
         textInputService = services.TextInputService ?? new NoOpTextInputService();
         previewPlayer = services.BeatmapPreviewPlayer ?? new NoOpBeatmapPreviewPlayer();
-        var difficultyService = services.BeatmapDifficultyService ?? new BeatmapDifficultyService(new BeatmapLibraryRepository(services.Database), services.Paths.Songs);
+        var difficultyService = services.BeatmapDifficultyService ?? new BeatmapDifficultyService(new BeatmapLibraryRepository(services.Database), services.Paths.Songs, algorithm: ReadDifficultyAlgorithmSetting());
         difficultyService.EnsureCalculatorVersions();
         beatmapLibrary = services.BeatmapLibrary ?? CreateBeatmapLibrary(services.Database, services.Paths);
         var initialLibrary = beatmapLibrary.Load();
@@ -63,13 +65,14 @@ public sealed partial class OsuDroidGameCore
             _ = Task.Run(() => beatmapLibrary.Scan());
         var mirrorClient = services.BeatmapMirrorClient ?? new OsuDirectMirrorClient(new HttpClient());
         var importService = services.BeatmapImportService ?? new BeatmapImportService(services.Paths, beatmapLibrary);
-        beatmapProcessingService = services.BeatmapProcessingService ?? new BeatmapProcessingService(services.Paths, importService, beatmapLibrary);
-        var downloadService = services.BeatmapDownloadService ?? new BeatmapDownloadService(services.Paths, mirrorClient, importService);
+        beatmapProcessingService = services.BeatmapProcessingService ?? new BeatmapProcessingService(services.Paths, importService, beatmapLibrary, settingsStore);
+        var downloadService = services.BeatmapDownloadService ?? new BeatmapDownloadService(services.Paths, mirrorClient, beatmapProcessingService);
         beatmapDownloader = new BeatmapDownloaderScene(mirrorClient, downloadService, textInputService, previewPlayer, Path.Combine(services.Paths.CacheRoot, "Covers"));
         musicController = services.MusicController ?? new PreviewMenuMusicController(previewPlayer);
         activeMenuSfxPlayer = services.MenuSfxPlayer ?? new NoOpMenuSfxPlayer();
         ApplyOptionAudioVolumes();
         songSelect = new SongSelectScene(beatmapLibrary, musicController, difficultyService, services.Paths.Songs, profile, textInputService);
+        ApplyOptionsRuntimeSettings();
         activeScene = services.ShowStartupScene ? ActiveScene.Startup : ActiveScene.MainMenu;
         QueueStartupPlaylist(beatmapLibrary, activeScene != ActiveScene.Startup);
         mainMenu.SetNowPlaying(musicController.State);
@@ -107,10 +110,11 @@ public sealed partial class OsuDroidGameCore
         database.EnsureCreated();
         var library = CreateBeatmapLibrary(database, pathLayout);
         var mirrorClient = new OsuDirectMirrorClient(new HttpClient());
-        var importService = new BeatmapImportService(pathLayout, library);
-        var downloadService = new BeatmapDownloadService(pathLayout, mirrorClient, importService);
         var settingsStore = new JsonGameSettingsStore(Path.Combine(pathLayout.CoreRoot, "config", "settings.json"));
-        return new OsuDroidGameCore(new GameServices(database, pathLayout, buildType, displayVersion, BeatmapLibrary: library, BeatmapImportService: importService, BeatmapDownloadService: downloadService, BeatmapMirrorClient: mirrorClient, SettingsStore: settingsStore, ShowStartupScene: showStartupScene));
+        var importService = new BeatmapImportService(pathLayout, library);
+        var processingService = new BeatmapProcessingService(pathLayout, importService, library, settingsStore);
+        var downloadService = new BeatmapDownloadService(pathLayout, mirrorClient, processingService);
+        return new OsuDroidGameCore(new GameServices(database, pathLayout, buildType, displayVersion, BeatmapLibrary: library, BeatmapImportService: importService, BeatmapProcessingService: processingService, BeatmapDownloadService: downloadService, BeatmapMirrorClient: mirrorClient, SettingsStore: settingsStore, ShowStartupScene: showStartupScene));
     }
 
     public GameFrameSnapshot CurrentFrame => CreateFrame(VirtualViewport.LegacyLandscape);
@@ -232,6 +236,37 @@ public sealed partial class OsuDroidGameCore
             mainMenu.ReleasePress();
     }
 
+    public bool TryBeginUiDrag(string elementId, UiPoint point, VirtualViewport viewport)
+    {
+        if (activeScene != ActiveScene.Options)
+            return false;
+
+        var captured = options.TryBeginSliderDrag(elementId, point, viewport);
+        if (captured)
+            ApplyChangedOptionsSetting(options.ConsumeChangedSettingKey());
+        return captured;
+    }
+
+    public void UpdateUiDrag(UiPoint point, VirtualViewport viewport)
+    {
+        if (activeScene != ActiveScene.Options)
+            return;
+
+        if (!options.UpdateSliderDrag(point, viewport))
+            return;
+
+        ApplyChangedOptionsSetting(options.ConsumeChangedSettingKey());
+    }
+
+    public void EndUiDrag(UiPoint point, VirtualViewport viewport)
+    {
+        if (activeScene != ActiveScene.Options)
+            return;
+
+        options.EndSliderDrag(point, viewport);
+        ApplyChangedOptionsSetting(options.ConsumeChangedSettingKey());
+    }
+
     public void ScrollActiveScene(float deltaY, UiPoint point, VirtualViewport viewport)
     {
         if (activeScene == ActiveScene.Options)
@@ -302,6 +337,21 @@ public sealed partial class OsuDroidGameCore
     {
         var state = beatmapProcessingService.State;
         return new BootstrapLoadingProgress(state.Percent, state.StatusText, BootstrapLoadingKind.BeatmapProcessing);
+    }
+
+    private void ApplyOptionsRuntimeSettings()
+    {
+        ApplyDifficultyAlgorithmSetting();
+        ApplyRomanizedPreferenceSetting();
+        ApplyDownloadPreferenceSetting();
+    }
+
+    private DifficultyAlgorithm ReadDifficultyAlgorithmSetting() => settingsStore.GetInt("difficultyAlgorithm", 0) == 1 ? DifficultyAlgorithm.Standard : DifficultyAlgorithm.Droid;
+
+    private static string CurrentUpdateLanguageCode()
+    {
+        var language = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        return string.IsNullOrWhiteSpace(language) ? "en" : language;
     }
 
     private void AttachTextInputService(ITextInputService service)

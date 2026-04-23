@@ -31,6 +31,7 @@ public sealed partial class OptionsScene
     private float sectionScrollOffset;
     private string? pendingSfxKey;
     private string? changedSettingKey;
+    private int? activeSliderRowIndex;
 
     public OptionsScene(GameLocalizer localizer, IGameSettingsStore? settingsStore = null, ITextInputService? textInputService = null, OptionsPathDefaults? pathDefaults = null)
     {
@@ -146,26 +147,38 @@ public sealed partial class OptionsScene
                 break;
 
             case UiAction.OptionsToggleServerConnection:
+                if (!IsInteractive("stayOnline"))
+                    break;
                 Toggle("stayOnline");
                 break;
 
             case UiAction.OptionsToggleLoadAvatar:
+                if (!IsInteractive("loadAvatar"))
+                    break;
                 Toggle("loadAvatar");
                 break;
 
             case UiAction.OptionsToggleAnnouncements:
+                if (!IsInteractive("receiveAnnouncements"))
+                    break;
                 Toggle("receiveAnnouncements");
                 break;
 
             case UiAction.OptionsToggleMusicPreview:
+                if (!IsInteractive("musicpreview"))
+                    break;
                 Toggle("musicpreview");
                 break;
 
             case UiAction.OptionsToggleShiftPitch:
+                if (!IsInteractive("shiftPitchInRateChange"))
+                    break;
                 Toggle("shiftPitchInRateChange");
                 break;
 
             case UiAction.OptionsToggleBeatmapSounds:
+                if (!IsInteractive("beatmapSounds"))
+                    break;
                 Toggle("beatmapSounds");
                 break;
 
@@ -182,6 +195,25 @@ public sealed partial class OptionsScene
 
     public string GetStringValue(string key) => stringValues.TryGetValue(key, out var value) ? value : string.Empty;
 
+    public void SetIntValue(string key, int value)
+    {
+        var row = sections.SelectMany(section => section.Categories).SelectMany(category => category.Rows).FirstOrDefault(candidate => candidate.Key == key);
+        if (row is null)
+            return;
+
+        var normalized = row.Kind == SettingsRowKind.Select ? ClampSelectValue(row, value) : ClampSliderValue(row, value);
+        intValues[key] = normalized;
+        settingsStore?.SetInt(key, normalized);
+    }
+
+    internal static bool IsInteractive(SettingsRow row) => row.IsEnabled && !row.IsLocked;
+
+    private static bool IsInteractive(string key)
+    {
+        var row = sections.SelectMany(section => section.Categories).SelectMany(category => category.Rows).FirstOrDefault(candidate => candidate.Key == key);
+        return row is not null && IsInteractive(row);
+    }
+
     private string GetInputDisplayValue(SettingsRow row)
     {
         var value = GetStringValue(row.Key);
@@ -194,10 +226,52 @@ public sealed partial class OptionsScene
 
     public void Scroll(float deltaY, UiPoint point, VirtualViewport viewport)
     {
+        if (activeSliderRowIndex is not null)
+            return;
+
         if (IsSectionScrollPoint(point))
             sectionScrollOffset = Math.Clamp(sectionScrollOffset + deltaY, 0f, MaxSectionScrollOffset(viewport));
         else
             contentScrollOffset = Math.Clamp(contentScrollOffset + deltaY, 0f, MaxActiveContentScrollOffset(viewport));
+    }
+
+    public bool TryBeginSliderDrag(string elementId, UiPoint point, VirtualViewport viewport)
+    {
+        if (!TryParseSliderRowIndex(elementId, out var rowIndex))
+            return false;
+
+        var row = RowAt(rowIndex);
+        if (row?.Kind != SettingsRowKind.Slider || !IsInteractive(row))
+            return false;
+
+        activeSliderRowIndex = rowIndex;
+        return UpdateSliderDrag(point, viewport);
+    }
+
+    public bool UpdateSliderDrag(UiPoint point, VirtualViewport viewport)
+    {
+        if (activeSliderRowIndex is not int rowIndex)
+            return false;
+
+        var row = RowAt(rowIndex);
+        var bounds = FindRowBounds(rowIndex, viewport);
+        if (row is null || bounds is null)
+            return false;
+
+        var next = SliderValueAtPoint(row, bounds.Value, point.X);
+        if (GetIntValue(row.Key) == next)
+            return true;
+
+        intValues[row.Key] = next;
+        settingsStore?.SetInt(row.Key, next);
+        changedSettingKey = row.Key;
+        return true;
+    }
+
+    public void EndSliderDrag(UiPoint point, VirtualViewport viewport)
+    {
+        UpdateSliderDrag(point, viewport);
+        activeSliderRowIndex = null;
     }
 
     public GameFrameSnapshot CreateSnapshot(VirtualViewport viewport)
@@ -245,7 +319,7 @@ public sealed partial class OptionsScene
             return;
 
         var row = rows[rowIndex];
-        if (!row.IsEnabled)
+        if (!IsInteractive(row))
             return;
 
         switch (row.Kind)
@@ -270,6 +344,7 @@ public sealed partial class OptionsScene
                 break;
 
             case SettingsRowKind.Button:
+                changedSettingKey = row.Key;
                 pendingSfxKey = "click-short-confirm";
                 break;
         }
@@ -383,5 +458,35 @@ public sealed partial class OptionsScene
     }
 
     private float MaxActiveContentScrollOffset(VirtualViewport viewport) => Math.Max(0f, CalculateContentHeight(ActiveSectionData.Categories) - VisibleContentHeight(viewport));
+
+    private SettingsRow? RowAt(int rowIndex)
+    {
+        var rows = ActiveSectionData.Categories.SelectMany(category => category.Rows).ToArray();
+        return (uint)rowIndex < (uint)rows.Length ? rows[rowIndex] : null;
+    }
+
+    private static bool TryParseSliderRowIndex(string elementId, out int rowIndex)
+    {
+        rowIndex = -1;
+        const string prefix = "options-row-";
+        const string infix = "-slider-";
+        if (!elementId.StartsWith(prefix, StringComparison.Ordinal))
+            return false;
+
+        var suffixIndex = elementId.IndexOf(infix, prefix.Length, StringComparison.Ordinal);
+        if (suffixIndex < 0)
+            return false;
+
+        return int.TryParse(elementId.AsSpan(prefix.Length, suffixIndex - prefix.Length), NumberStyles.None, CultureInfo.InvariantCulture, out rowIndex);
+    }
+
+    private static int SliderValueAtPoint(SettingsRow row, UiRect bounds, float pointX)
+    {
+        var containerWidth = bounds.Width - SeekbarContainerMarginX * 2f;
+        var controlWidth = Math.Min(ControlColumnWidth, Math.Max(96f * DpScale, containerWidth * 0.44f));
+        var trackX = bounds.Right - SeekbarContainerMarginX - controlWidth;
+        var normalized = Math.Clamp((pointX - trackX) / controlWidth, 0f, 1f);
+        return ClampSliderValue(row, (int)MathF.Round(row.Min + normalized * (row.Max - row.Min)));
+    }
 
 }
