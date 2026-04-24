@@ -31,6 +31,7 @@ public sealed partial class OsuDroidGameCore
     private readonly IBeatmapProcessingService _beatmapProcessingService;
     private readonly IMenuMusicController _musicController;
     private readonly IGameSettingsStore _settingsStore;
+    private readonly GameSettingsBackupService _settingsBackupService;
     private readonly Random _random = new();
     private readonly float[] _menuSpectrumBuffer = new float[512];
     private ITextInputService _textInputService;
@@ -47,11 +48,12 @@ public sealed partial class OsuDroidGameCore
     {
         Services = services;
         _settingsStore = services.SettingsStore ?? new JsonGameSettingsStore(Path.Combine(services.Paths.CoreRoot, "config", "settings.json"));
+        _settingsBackupService = new GameSettingsBackupService(services.Paths, _settingsStore);
         _menuMusicPreviewEnabled = _settingsStore.GetBool("musicpreview", true);
         var localizer = new GameLocalizer();
-        OnlineProfileSnapshot profile = services.OnlineProfile ?? OnlineProfileSnapshot.Guest;
+        OnlineProfilePanelState? onlinePanelState = CreateOnlinePanelState(services.OnlineProfile);
         _startup = new StartupScene();
-        _mainMenu = new MainMenuScene(services.DisplayVersion, services.NowPlaying ?? new MenuNowPlayingState(), profile, string.Equals(services.BuildType, "debug", StringComparison.OrdinalIgnoreCase), localizer);
+        _mainMenu = new MainMenuScene(services.DisplayVersion, services.NowPlaying ?? new MenuNowPlayingState(), onlinePanelState, string.Equals(services.BuildType, "debug", StringComparison.OrdinalIgnoreCase), localizer);
         _options = new OptionsScene(localizer, _settingsStore, pathDefaults: OptionsPathDefaults.FromPaths(services.Paths));
         _textInputService = services.TextInputService ?? new NoOpTextInputService();
         _previewPlayer = services.BeatmapPreviewPlayer ?? new NoOpBeatmapPreviewPlayer();
@@ -68,11 +70,11 @@ public sealed partial class OsuDroidGameCore
         IBeatmapImportService importService = services.BeatmapImportService ?? new BeatmapImportService(services.Paths, _beatmapLibrary);
         _beatmapProcessingService = services.BeatmapProcessingService ?? new BeatmapProcessingService(services.Paths, importService, _beatmapLibrary, _settingsStore);
         IBeatmapDownloadService downloadService = services.BeatmapDownloadService ?? new BeatmapDownloadService(services.Paths, mirrorClient, _beatmapProcessingService);
-        _beatmapDownloader = new BeatmapDownloaderScene(mirrorClient, downloadService, _textInputService, _previewPlayer, Path.Combine(services.Paths.CacheRoot, "Covers"), localizer);
+        _beatmapDownloader = new BeatmapDownloaderScene(mirrorClient, downloadService, _textInputService, _previewPlayer, Path.Combine(services.Paths.CacheRoot, "Covers"), localizer, Path.Combine(services.Paths.Log, "beatmap-downloader.log"));
         _musicController = services.MusicController ?? new PreviewMenuMusicController(_previewPlayer);
         _activeMenuSfxPlayer = services.MenuSfxPlayer ?? new NoOpMenuSfxPlayer();
         ApplyOptionAudioVolumes();
-        _songSelect = new SongSelectScene(_beatmapLibrary, _musicController, difficultyService, services.Paths.Songs, profile, _textInputService, localizer: localizer);
+        _songSelect = new SongSelectScene(_beatmapLibrary, _musicController, difficultyService, services.Paths.Songs, onlinePanelState, _textInputService, localizer: localizer);
         ApplyOptionsRuntimeSettings();
         _activeScene = services.ShowStartupScene ? ActiveScene.Startup : ActiveScene.MainMenu;
         QueueStartupPlaylist(_beatmapLibrary, _activeScene != ActiveScene.Startup);
@@ -86,6 +88,9 @@ public sealed partial class OsuDroidGameCore
     public string? PendingExternalUrl { get; private set; }
 
     public MenuMusicCommand LastMusicCommand => _musicController.LastCommand;
+
+    private OnlineProfilePanelState? CreateOnlinePanelState(OnlineProfileSnapshot? profile) =>
+        _settingsStore.GetBool("stayOnline", false) ? OnlineProfilePanelState.FromOptionalProfile(profile) : null;
 
 
     public void AttachPlatformServices(ITextInputService? platformTextInputService, IBeatmapPreviewPlayer? platformPreviewPlayer, IMenuSfxPlayer? platformMenuSfxPlayer = null)
@@ -181,6 +186,7 @@ public sealed partial class OsuDroidGameCore
 
         if (_activeScene == ActiveScene.BeatmapDownloader)
         {
+            _beatmapDownloader.Update(elapsed);
             return;
         }
 
@@ -191,15 +197,18 @@ public sealed partial class OsuDroidGameCore
                 return;
             }
 
-            _songSelect.Enter(_pendingSongSelectBeatmapSetDirectory, _pendingSongSelectBeatmapFilename);
-            _pendingSongSelectBeatmapSetDirectory = null;
-            _pendingSongSelectBeatmapFilename = null;
-            _activeScene = ActiveScene.SongSelect;
+            _activeScene = EnterSongSelectOrDownloader();
         }
 
         if (_activeScene == ActiveScene.SongSelect)
         {
             _songSelect.Update(elapsed);
+            return;
+        }
+
+        if (_activeScene == ActiveScene.Options)
+        {
+            _options.Update(elapsed);
             return;
         }
 
@@ -400,6 +409,7 @@ public sealed partial class OsuDroidGameCore
         ApplyDifficultyAlgorithmSetting();
         ApplyRomanizedPreferenceSetting();
         ApplyDownloadPreferenceSetting();
+        ApplyOnlinePanelSetting();
     }
 
     private DifficultyAlgorithm ReadDifficultyAlgorithmSetting() => _settingsStore.GetInt("difficultyAlgorithm", 0) == 1 ? DifficultyAlgorithm.Standard : DifficultyAlgorithm.Droid;

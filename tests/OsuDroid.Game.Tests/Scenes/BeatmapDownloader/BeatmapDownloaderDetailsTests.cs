@@ -22,6 +22,29 @@ public sealed partial class BeatmapDownloaderTests
         Assert.That(selectedGlyph.Kind, Is.EqualTo(UiElementKind.Text));
         Assert.That(frame.HitTest(new UiPoint(selectedGlyph.Bounds.X + selectedGlyph.Bounds.Width / 2, selectedGlyph.Bounds.Y + selectedGlyph.Bounds.Height / 2))!.Action, Is.EqualTo(UiAction.DownloaderDetailsDifficulty0));
     }
+
+    [Test]
+    public void DetailsPanelUsesLegacyWrapContentConstraints()
+    {
+        BeatmapDownloaderScene scene = CreateScene();
+        SetSets(scene, [CreateSet()]);
+        scene.SelectCard(0);
+
+        VirtualViewport viewport = VirtualViewport.LegacyLandscape;
+        UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
+        UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "downloader-details-panel");
+        UiElementSnapshot body = frame.Elements.Single(element => element.Id == "downloader-details-body");
+        UiElementSnapshot download = frame.Elements.Single(element => element.Id == "downloader-details-download-bg");
+
+        Assert.That(panel.Bounds.Width, Is.EqualTo(500f * DroidUiMetrics.DpScale).Within(0.001f));
+        Assert.That(panel.Bounds.Height, Is.EqualTo(306f * DroidUiMetrics.DpScale).Within(0.001f));
+        Assert.That(panel.Bounds.X + panel.Bounds.Width / 2f, Is.EqualTo(viewport.VirtualWidth / 2f).Within(0.001f));
+        Assert.That(panel.Bounds.Y + panel.Bounds.Height / 2f, Is.EqualTo(viewport.VirtualHeight / 2f).Within(0.001f));
+        Assert.That(panel.Bounds.Bottom, Is.LessThanOrEqualTo(viewport.VirtualHeight - 8f * DroidUiMetrics.DpScale + 0.001f));
+        Assert.That(body.Bounds.Bottom, Is.EqualTo(panel.Bounds.Bottom).Within(0.001f));
+        Assert.That(download.Bounds.Bottom, Is.LessThanOrEqualTo(panel.Bounds.Bottom - 8f * DroidUiMetrics.DpScale));
+    }
+
     [Test]
     public void DetailsDifficultyRowIsCenteredAndUsesAndroidPaddedSelectionCell()
     {

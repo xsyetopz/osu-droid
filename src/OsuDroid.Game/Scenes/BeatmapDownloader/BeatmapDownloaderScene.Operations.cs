@@ -53,27 +53,89 @@ public sealed partial class BeatmapDownloaderScene
 
     private async Task DownloadAsync(int index, bool withVideo)
     {
-        if (index < 0 || index >= _sets.Count)
+        try
+        {
+            if (index < 0 || index >= _sets.Count)
+            {
+                return;
+            }
+
+            BeatmapMirrorSet set = _sets[index];
+            TraceDownload("started", $"set={set.Id} withVideo={withVideo}");
+            if (_preferNoVideoDownloads && withVideo && MirrorDefinition(set.Mirror).SupportsNoVideoDownloads && set.HasVideo)
+            {
+                withVideo = false;
+                TraceDownload("prefer-no-video", $"set={set.Id}");
+            }
+
+            BeatmapDownloadResult downloadResult = await _downloadService.DownloadAsync(set, withVideo, CancellationToken.None).ConfigureAwait(false);
+            if (downloadResult.IsSuccess)
+            {
+                EnqueueDownloadCompletion(new BeatmapDownloadCompletion(true, downloadResult.ArchivePath, null));
+                TraceDownload("service-success", $"set={set.Id} archive={Path.GetFileName(downloadResult.ArchivePath)}");
+            }
+            else
+            {
+                EnqueueDownloadCompletion(new BeatmapDownloadCompletion(false, null, downloadResult.ErrorMessage));
+                TraceDownload("service-failure", $"set={set.Id} error={downloadResult.ErrorMessage}");
+            }
+        }
+        catch (Exception exception)
+        {
+            EnqueueDownloadCompletion(new BeatmapDownloadCompletion(false, null, exception.Message));
+            TraceDownload("exception", $"index={index} error={exception.GetType().Name}: {exception.Message}");
+        }
+    }
+
+    private void EnqueueDownloadCompletion(BeatmapDownloadCompletion completion)
+    {
+        _downloadCompletions.Enqueue(completion);
+        TraceDownload("queued-completion", completion.IsSuccess ? Path.GetFileName(completion.ArchivePath) : completion.ErrorMessage);
+    }
+
+    private void ApplyQueuedDownloadCompletions()
+    {
+        while (_downloadCompletions.TryDequeue(out BeatmapDownloadCompletion? completion))
+        {
+            if (completion.IsSuccess)
+            {
+                _selectedSetIndex = null;
+                _lastImportedSetDirectory = completion.ArchivePath is null ? null : Path.GetFileNameWithoutExtension(completion.ArchivePath);
+                _message = _localizer["BeatmapDownloader_Downloaded"];
+                TraceDownload("applied-success", Path.GetFileName(completion.ArchivePath));
+            }
+            else
+            {
+                _message = completion.ErrorMessage;
+                TraceDownload("applied-failure", completion.ErrorMessage);
+            }
+        }
+    }
+
+    private void TraceDownload(string phase, string? detail = null)
+    {
+        string message = detail is null
+            ? $"osu!droid downloader {phase}"
+            : $"osu!droid downloader {phase} {detail}";
+        Console.WriteLine(message);
+
+        if (string.IsNullOrWhiteSpace(_downloadTracePath))
         {
             return;
         }
 
-        BeatmapMirrorSet set = _sets[index];
-        if (_preferNoVideoDownloads && withVideo && MirrorDefinition(set.Mirror).SupportsNoVideoDownloads && set.HasVideo)
+        try
         {
-            withVideo = false;
-        }
+            string? directory = Path.GetDirectoryName(_downloadTracePath);
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
 
-        BeatmapDownloadResult downloadResult = await _downloadService.DownloadAsync(set, withVideo, CancellationToken.None).ConfigureAwait(false);
-        if (downloadResult.IsSuccess)
-        {
-            _selectedSetIndex = null;
-            _lastImportedSetDirectory = downloadResult.ArchivePath is null ? null : Path.GetFileNameWithoutExtension(downloadResult.ArchivePath);
-            _message = _localizer["BeatmapDownloader_Downloaded"];
+            File.AppendAllText(_downloadTracePath, $"{DateTimeOffset.UtcNow:O} {message}{Environment.NewLine}");
         }
-        else
+        catch (Exception)
         {
-            _message = downloadResult.ErrorMessage;
         }
     }
 

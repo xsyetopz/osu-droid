@@ -1,4 +1,5 @@
 using OsuDroid.Game.Beatmaps;
+using OsuDroid.Game.Beatmaps.Import;
 
 namespace OsuDroid.Game.Tests;
 
@@ -30,6 +31,10 @@ public sealed partial class SongSelectSceneTests
             }
 
             return _snapshot;
+        }
+
+        public void ApplyOnlineMetadata(string setDirectory, BeatmapOnlineMetadata metadata)
+        {
         }
 
         public bool NeedsScanRefresh() => NeedsRefresh;
@@ -82,5 +87,9 @@ public sealed partial class SongSelectSceneTests
                 sets.Remove(directory);
             }
         }
+
+        public void ClearBeatmapCache() => _snapshot = BeatmapLibrarySnapshot.Empty;
+
+        public void ClearProperties() => _options.Clear();
     }
 }

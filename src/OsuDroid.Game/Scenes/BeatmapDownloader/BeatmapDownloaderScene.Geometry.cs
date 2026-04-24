@@ -14,9 +14,9 @@ public sealed partial class BeatmapDownloaderScene
 
     private BeatmapMirrorDefinition MirrorDefinition(BeatmapMirrorKind kind) => _mirrorClient.Mirrors.First(m => m.Kind == kind);
 
-    private static UiRect SearchBounds(VirtualViewport viewport)
+    private static UiRect SearchBounds(VirtualViewport viewport, bool isSearching = false)
     {
-        float left = DroidUiMetrics.AppBarHeight + 6f * Dp;
+        float left = DroidUiMetrics.AppBarHeight + 6f * Dp + (isSearching ? 40f * Dp : 0f);
         float right = viewport.VirtualWidth - 12f * Dp;
         float mirrorWidth = 150f * Dp;
         float filtersWidth = 112f * Dp;

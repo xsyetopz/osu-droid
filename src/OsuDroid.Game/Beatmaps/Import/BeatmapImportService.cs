@@ -6,7 +6,7 @@ namespace OsuDroid.Game.Beatmaps.Import;
 
 public interface IBeatmapImportService
 {
-    BeatmapImportResult ImportOsz(string oszPath, bool deleteArchiveAfterImport = true);
+    BeatmapImportResult ImportOsz(string oszPath, bool deleteArchiveAfterImport = true, BeatmapOnlineMetadata? onlineMetadata = null);
 }
 
 public sealed record BeatmapImportResult(bool IsSuccess, string? SetDirectory, string? ErrorMessage)
@@ -18,7 +18,7 @@ public sealed record BeatmapImportResult(bool IsSuccess, string? SetDirectory, s
 
 public sealed partial class BeatmapImportService(DroidGamePathLayout paths, IBeatmapLibrary library) : IBeatmapImportService
 {
-    public BeatmapImportResult ImportOsz(string oszPath, bool deleteArchiveAfterImport = true)
+    public BeatmapImportResult ImportOsz(string oszPath, bool deleteArchiveAfterImport = true, BeatmapOnlineMetadata? onlineMetadata = null)
     {
         if (!File.Exists(oszPath))
         {
@@ -44,6 +44,11 @@ public sealed partial class BeatmapImportService(DroidGamePathLayout paths, IBea
             }
 
             library.Scan(new HashSet<string>(StringComparer.Ordinal) { setDirectory });
+            if (onlineMetadata is not null)
+            {
+                library.ApplyOnlineMetadata(setDirectory, onlineMetadata);
+            }
+
             return BeatmapImportResult.Success(setDirectory);
         }
         catch (InvalidDataException)

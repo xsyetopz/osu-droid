@@ -46,6 +46,10 @@ public sealed partial class SongSelectScene
     private void AddScorePreview(List<UiElementSnapshot> elements, VirtualViewport viewport)
     {
         elements.Add(Sprite("songselect-scoring-switcher", DroidAssets.RankingDisabled, new UiRect(10f, 10f, 50f, 50f), s_white, 1f));
+        if (_onlinePanelState is null)
+        {
+            return;
+        }
 
         float panelX = BackButtonSize + SmallButtonSize * 3f + OnlinePanelGap;
         float panelY = viewport.VirtualHeight - OnlinePanelHeight;
@@ -54,7 +58,7 @@ public sealed partial class SongSelectScene
             "songselect-score",
             new UiRect(panelX, panelY, OnlinePanelWidth, OnlinePanelHeight),
             OnlineAvatarFooterSize,
-            _profile);
+            _onlinePanelState);
     }
 
     private void AddTopPanelText(List<UiElementSnapshot> elements, BeatmapInfo beatmap)

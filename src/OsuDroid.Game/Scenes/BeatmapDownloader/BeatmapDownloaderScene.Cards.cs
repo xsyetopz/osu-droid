@@ -8,8 +8,12 @@ public sealed partial class BeatmapDownloaderScene
     {
         if (_sets.Count == 0)
         {
-            string statusText = _isSearching ? _localizer.Format("BeatmapDownloader_Searching", MirrorDefinition(_mirror).Description) : _message ?? _localizer["BeatmapDownloader_NoBeatmapsFound"];
-            elements.Add(Text("downloader-status", statusText, 70f * Dp, BarHeight + 42f * Dp, viewport.VirtualWidth - 140f * Dp, 40f * Dp, 20f * Dp, s_white, UiTextAlignment.Center));
+            if (!_isSearching)
+            {
+                string statusText = _message ?? _localizer["BeatmapDownloader_NoBeatmapsFound"];
+                elements.Add(Text("downloader-status", statusText, 70f * Dp, BarHeight + 42f * Dp, viewport.VirtualWidth - 140f * Dp, 40f * Dp, 20f * Dp, s_white, UiTextAlignment.Center));
+            }
+
             return;
         }
 

@@ -25,7 +25,6 @@ public sealed partial class UiCompatibilityTests
         UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
 
         Assert.That(frame.Elements.Any(element => element.Id == "menu-background" && element.AssetName == DroidAssets.MenuBackground), Is.True);
-        Assert.That(frame.Elements.Any(element => element.Id == "profile-avatar-footer"), Is.True);
         Assert.That(frame.Elements.Any(element => element.Id == "version-pill"), Is.True);
         Assert.That(frame.Elements.Any(element => element.Id == "version-pill-text"), Is.True);
         Assert.That(frame.Elements.Any(element => element.Id == "beatmap-downloader" && element.AssetName == DroidAssets.BeatmapDownloader), Is.True);

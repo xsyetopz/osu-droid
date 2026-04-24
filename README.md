@@ -40,20 +40,6 @@ This repository is the active `.NET 9` mobile rewrite root for osu!droid.
 - Keep the local Room SQLite database shape import-compatible with current osu!droid data.
 - Do not add osu-framework, libGDX, Gradle, RoboVM, AndEngine, or desktop launchers.
 
-### iOS visual QA with Appium
+### Visual QA
 
-Start Appium in another shell:
-
-```sh
-appium
-```
-
-Then capture or tap the connected iPhone:
-
-```sh
-make appium-doctor
-make appium-ios-screenshot IOS_DEVICE_ID=<device-id>
-make appium-ios-tap IOS_DEVICE_ID=<device-id> X=<x> Y=<y>
-```
-
-Live screenshots are written to `screenshots/ios-live.png` and ignored by git. Android reference screenshots live in `screenshots/` and are documented in `screenshots/README.md`.
+Use manual device screenshots for iOS comparison. Android reference screenshots live in `screenshots/` and are documented in `screenshots/README.md`.

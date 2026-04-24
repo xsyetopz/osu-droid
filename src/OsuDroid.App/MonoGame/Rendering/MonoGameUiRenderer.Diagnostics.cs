@@ -33,6 +33,11 @@ internal sealed partial class MonoGameUiRenderer
                     _ = iconStore.GetIcon(element.MaterialIcon.Value, destination.Width, destination.Height, element.Color, element.Alpha, metrics);
                 break;
 
+            case UiElementKind.ProgressRing:
+                if (element.ProgressRing is not null)
+                    _ = shapeStore.GetProgressRing(destination.Width, destination.Height, element.ProgressRing.StrokeWidth * frame.Viewport.Scale, element.ProgressRing.SweepDegrees, ToXnaColor(element.Color, element.Alpha), metrics);
+                break;
+
             case UiElementKind.Text:
                 if (element.Text is not null && element.TextStyle is not null)
                     _ = textStore.GetTexture(element.Text, element.TextStyle, element.Color, element.Alpha, frame.Viewport.Scale, metrics);

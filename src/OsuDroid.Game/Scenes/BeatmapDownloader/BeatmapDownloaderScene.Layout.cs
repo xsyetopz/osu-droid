@@ -24,7 +24,7 @@ public sealed partial class BeatmapDownloaderScene
 
         if (_mirrorsOpen)
         {
-            AddMirrorPanel(elements, viewport);
+            AddMirrorDialog(elements, viewport);
         }
 
         if (_selectedSetIndex is not null)
@@ -42,8 +42,7 @@ public sealed partial class BeatmapDownloaderScene
         float right = viewport.VirtualWidth - 12f * Dp;
         float mirrorWidth = 150f * Dp;
         float filtersWidth = 112f * Dp;
-        float searchTrailingWidth = _hasSearchError || _isSearching ? 52f * Dp : 0f;
-        UiRect searchBounds = SearchBounds(viewport);
+        UiRect searchBounds = SearchBounds(viewport, _isSearching);
         float searchRight = searchBounds.Right;
         BeatmapMirrorDefinition currentMirror = MirrorDefinition(_mirror);
 
@@ -56,13 +55,13 @@ public sealed partial class BeatmapDownloaderScene
         elements.Add(Text("downloader-search-text", string.IsNullOrWhiteSpace(_query) ? _localizer["BeatmapDownloader_SearchPlaceholder"] : _query, searchBounds.X + 14f * Dp, searchBounds.Y + 7f * Dp, searchBounds.Width - 56f * Dp, 22f * Dp, 14f * Dp, string.IsNullOrWhiteSpace(_query) ? s_muted : s_white, UiTextAlignment.Left, UiAction.DownloaderSearchBox));
         elements.Add(MaterialIcon("downloader-search-icon", UiMaterialIcon.Search, new UiRect(searchBounds.Right - 36f * Dp, searchBounds.Y + 6f * Dp, 24f * Dp, 24f * Dp), s_muted, 1f, UiAction.DownloaderSearchBox));
 
-        float filtersX = searchRight + 6f * Dp;
         if (_isSearching)
         {
-            elements.Add(Text("downloader-searching-indicator", "◌", filtersX, 8f * Dp, 52f * Dp, 38f * Dp, 22f * Dp, s_white, UiTextAlignment.Center));
-            filtersX += 52f * Dp;
+            elements.Add(ProgressRing("downloader-searching-indicator", new UiRect(DroidUiMetrics.AppBarHeight + 14f * Dp, 18f * Dp, 20f * Dp, 20f * Dp), s_white, 3f * Dp, 96f, _loadingIndicatorRotationDegrees));
         }
-        else if (_hasSearchError)
+
+        float filtersX = searchRight + 6f * Dp;
+        if (!_isSearching && _hasSearchError)
         {
             elements.Add(MaterialIcon("downloader-refresh", UiMaterialIcon.Refresh, new UiRect(filtersX + 14f * Dp, 16f * Dp, 24f * Dp, 24f * Dp), s_white, 1f, UiAction.DownloaderRefresh));
             filtersX += 52f * Dp;

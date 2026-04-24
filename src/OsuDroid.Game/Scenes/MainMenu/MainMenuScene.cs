@@ -3,7 +3,7 @@ using OsuDroid.Game.Runtime;
 
 namespace OsuDroid.Game.Scenes.MainMenu;
 
-public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNowPlayingState? nowPlaying = null, OnlineProfileSnapshot? profile = null, bool isDevelopmentBuild = false, GameLocalizer? localizer = null)
+public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNowPlayingState? nowPlaying = null, OnlineProfilePanelState? onlinePanelState = null, bool isDevelopmentBuild = false, GameLocalizer? localizer = null)
 {
     private enum MenuVisibility
     {
@@ -60,6 +60,14 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
     private const float AboutButtonRowHeight = 104f;
     private const float AboutContentTop = 110f;
     private const float AboutLinkGap = 58f;
+    private const float ExitDialogPanelWidth = 610f;
+    private const float ExitDialogPanelHeight = 244f;
+    private const float ExitDialogPanelRadius = 10f;
+    private const float ExitDialogTitleBarHeight = 62f;
+    private const float ExitDialogButtonHeight = 58f;
+    private const float ExitDialogButtonGap = 12f;
+    private const float ExitDialogContentInset = 28f;
+    private const float ExitDialogTextSize = 24f;
     private const float MainMenuReferenceWidth = 2340f;
     private const float MainMenuReferenceToVirtualScale = MainMenuReferenceWidth / VirtualViewport.LegacyWidth;
     private const float PressTint = 0.7f;
@@ -83,7 +91,7 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
     private readonly GameLocalizer _localizer = localizer ?? new GameLocalizer();
     private readonly string _displayVersion = string.IsNullOrWhiteSpace(displayVersion) ? "1.0" : displayVersion;
     private readonly bool _isDevelopmentBuild = isDevelopmentBuild;
-    private readonly OnlineProfileSnapshot _profile = profile ?? OnlineProfileSnapshot.Guest;
+    private OnlineProfilePanelState? _onlinePanelState = onlinePanelState;
     private MenuNowPlayingState _nowPlaying = nowPlaying ?? new MenuNowPlayingState();
     private int _selectedIndex;
     private MenuVisibility _menuVisibility;
@@ -99,6 +107,7 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
     private bool _hasPendingExitRoute;
     private bool _exitRoutePublished;
     private bool _isAboutDialogOpen;
+    private bool _isExitDialogOpen;
     private UiAction _pressedAction;
     private readonly float[] _spectrumPeakLevel = new float[SpectrumBarCount];
     private readonly float[] _spectrumPeakDownRate = new float[SpectrumBarCount];
@@ -116,11 +125,15 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
 
     public bool IsAboutDialogOpen => _isAboutDialogOpen;
 
+    public bool IsExitDialogOpen => _isExitDialogOpen;
+
     public void SetNowPlaying(MenuNowPlayingState state)
     {
         _nowPlaying = state;
         _currentBeatMilliseconds = state.IsPlaying && state.Bpm > 0.01f ? Math.Clamp(60000d / state.Bpm, 260d, 2000d) : LogoBeatMilliseconds;
     }
+
+    public void SetOnlinePanelState(OnlineProfilePanelState? state) => _onlinePanelState = state;
 
     public void SetSpectrum(float[] spectrum1024, bool available)
     {
@@ -136,7 +149,7 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
 
     public MainMenuRoute Handle(MainMenuAction action)
     {
-        if (_isAboutDialogOpen || IsExitAnimating)
+        if (_isAboutDialogOpen || _isExitDialogOpen || IsExitAnimating)
         {
             return MainMenuRoute.None;
         }
@@ -171,7 +184,7 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
 
     public MainMenuRoute Tap(MainMenuButtonSlot slot)
     {
-        if (!IsMenuShown || _isAboutDialogOpen || IsExitAnimating || _menuVisibility == MenuVisibility.Collapsing)
+        if (!IsMenuShown || _isAboutDialogOpen || _isExitDialogOpen || IsExitAnimating || _menuVisibility == MenuVisibility.Collapsing)
         {
             return MainMenuRoute.None;
         }
@@ -190,7 +203,7 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
 
     public void ToggleCookie()
     {
-        if (_isAboutDialogOpen || IsExitAnimating)
+        if (_isAboutDialogOpen || _isExitDialogOpen || IsExitAnimating)
         {
             return;
         }
@@ -207,13 +220,30 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
 
     public void OpenAboutDialog()
     {
-        if (!IsExitAnimating)
+        if (!_isExitDialogOpen && !IsExitAnimating)
         {
             _isAboutDialogOpen = true;
         }
     }
 
     public void CloseAboutDialog() => _isAboutDialogOpen = false;
+
+    public void ConfirmExitDialog()
+    {
+        if (!_isExitDialogOpen)
+        {
+            return;
+        }
+
+        _isExitDialogOpen = false;
+        _ = BeginExitAnimation();
+    }
+
+    public void CancelExitDialog()
+    {
+        _isExitDialogOpen = false;
+        _pressedAction = UiAction.None;
+    }
 
     public void StartReturnTransition(string? backgroundPath = null)
     {
@@ -224,7 +254,7 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
 
     public void Press(UiAction action)
     {
-        if (_isAboutDialogOpen || IsExitAnimating)
+        if (_isAboutDialogOpen || _isExitDialogOpen || IsExitAnimating)
         {
             return;
         }
@@ -298,7 +328,7 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
             }
         }
 
-        if (_isAboutDialogOpen)
+        if (_isAboutDialogOpen || _isExitDialogOpen)
         {
             return;
         }

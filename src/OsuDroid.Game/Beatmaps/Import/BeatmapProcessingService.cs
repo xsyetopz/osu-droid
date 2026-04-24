@@ -12,7 +12,7 @@ public interface IBeatmapProcessingService
 {
     BeatmapProcessingState State { get; }
 
-    void EnqueueArchive(string archivePath);
+    void EnqueueArchive(string archivePath, BeatmapOnlineMetadata? metadata = null);
 
     bool HasPendingWork();
 
@@ -28,7 +28,7 @@ public sealed class BeatmapProcessingService(
     IGameSettingsStore? settingsStore = null) : IBeatmapProcessingService
 {
     private readonly object _gate = new();
-    private readonly HashSet<string> _queuedArchives = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, BeatmapOnlineMetadata?> _queuedArchives = new(StringComparer.OrdinalIgnoreCase);
     private Task? _task;
     private BeatmapProcessingState _state = new();
     private BeatmapLibrarySnapshot? _completedSnapshot;
@@ -46,7 +46,7 @@ public sealed class BeatmapProcessingService(
 
     public bool HasPendingWork() => EnumeratePendingArchives().Any() || library.NeedsScanRefresh();
 
-    public void EnqueueArchive(string archivePath)
+    public void EnqueueArchive(string archivePath, BeatmapOnlineMetadata? metadata = null)
     {
         if (string.IsNullOrWhiteSpace(archivePath))
         {
@@ -55,7 +55,7 @@ public sealed class BeatmapProcessingService(
 
         lock (_gate)
         {
-            _queuedArchives.Add(Path.GetFullPath(archivePath));
+            _queuedArchives[Path.GetFullPath(archivePath)] = metadata;
         }
     }
 
@@ -94,15 +94,15 @@ public sealed class BeatmapProcessingService(
     {
         try
         {
-            string[] archives = EnumeratePendingArchives().ToArray();
+            KeyValuePair<string, BeatmapOnlineMetadata?>[] archives = EnumeratePendingArchives().ToArray();
             bool needsScan = library.NeedsScanRefresh();
             int totalSteps = archives.Length + (needsScan ? 1 : 0);
             int completedSteps = 0;
 
-            foreach (string? archive in archives)
+            foreach ((string? archive, BeatmapOnlineMetadata? metadata) in archives)
             {
                 SetState(new BeatmapProcessingState(true, CalculatePercent(completedSteps, totalSteps), "Importing beatmaps..."));
-                _ = importService.ImportOsz(archive, DeleteImportedArchives());
+                _ = importService.ImportOsz(archive, DeleteImportedArchives(), metadata);
                 ClearQueuedArchive(archive);
                 completedSteps++;
                 SetState(new BeatmapProcessingState(true, CalculatePercent(completedSteps, totalSteps), "Importing beatmaps..."));
@@ -135,20 +135,20 @@ public sealed class BeatmapProcessingService(
         }
     }
 
-    private IEnumerable<string> EnumeratePendingArchives()
+    private IEnumerable<KeyValuePair<string, BeatmapOnlineMetadata?>> EnumeratePendingArchives()
     {
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        string[] queued;
+        KeyValuePair<string, BeatmapOnlineMetadata?>[] queued;
         lock (_gate)
         {
             queued = _queuedArchives.ToArray();
         }
 
-        foreach (string? archive in queued.OrderBy(path => path, StringComparer.OrdinalIgnoreCase))
+        foreach ((string? archive, BeatmapOnlineMetadata? metadata) in queued.OrderBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase))
         {
             if (File.Exists(archive) && seen.Add(archive))
             {
-                yield return archive;
+                yield return new KeyValuePair<string, BeatmapOnlineMetadata?>(archive, metadata);
             }
         }
 
@@ -156,7 +156,7 @@ public sealed class BeatmapProcessingService(
         {
             if (seen.Add(archive))
             {
-                yield return archive;
+                yield return new KeyValuePair<string, BeatmapOnlineMetadata?>(archive, null);
             }
         }
 
@@ -169,7 +169,7 @@ public sealed class BeatmapProcessingService(
         {
             if (seen.Add(archive))
             {
-                yield return archive;
+                yield return new KeyValuePair<string, BeatmapOnlineMetadata?>(archive, null);
             }
         }
     }

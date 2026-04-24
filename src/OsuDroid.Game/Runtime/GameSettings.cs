@@ -2,6 +2,30 @@ using System.Text.Json;
 
 namespace OsuDroid.Game.Runtime;
 
+public enum GameSettingValueKind
+{
+    Flag,
+    Number,
+    Text,
+}
+
+public readonly record struct GameSettingValue(GameSettingValueKind Kind, bool BoolValue, int IntValue, string TextValue)
+{
+    public static GameSettingValue FromBool(bool settingValue) => new(GameSettingValueKind.Flag, settingValue, 0, string.Empty);
+
+    public static GameSettingValue FromInt(int settingValue) => new(GameSettingValueKind.Number, false, settingValue, string.Empty);
+
+    public static GameSettingValue FromString(string settingValue) => new(GameSettingValueKind.Text, false, 0, settingValue);
+
+    public object ToJsonValue() => Kind switch
+    {
+        GameSettingValueKind.Flag => BoolValue,
+        GameSettingValueKind.Number => IntValue,
+        GameSettingValueKind.Text => TextValue,
+        _ => TextValue,
+    };
+}
+
 public interface IGameSettingsStore
 {
     bool GetBool(string key, bool defaultValue);
@@ -17,7 +41,14 @@ public interface IGameSettingsStore
     void SetString(string key, string value);
 }
 
-public sealed class JsonGameSettingsStore(string filePath) : IGameSettingsStore
+public interface IExportableGameSettingsStore : IGameSettingsStore
+{
+    IReadOnlyDictionary<string, GameSettingValue> GetAll();
+
+    void SetMany(IReadOnlyDictionary<string, GameSettingValue> settings);
+}
+
+public sealed class JsonGameSettingsStore(string filePath) : IExportableGameSettingsStore
 {
     private readonly object _gate = new();
     private Dictionary<string, JsonElement>? _values;
@@ -85,6 +116,38 @@ public sealed class JsonGameSettingsStore(string filePath) : IGameSettingsStore
         }
     }
 
+    public IReadOnlyDictionary<string, GameSettingValue> GetAll()
+    {
+        lock (_gate)
+        {
+            EnsureLoaded();
+            var settings = new Dictionary<string, GameSettingValue>(StringComparer.Ordinal);
+            foreach ((string key, JsonElement element) in _values!)
+            {
+                if (TryReadSettingValue(element, out GameSettingValue settingValue))
+                {
+                    settings[key] = settingValue;
+                }
+            }
+
+            return settings;
+        }
+    }
+
+    public void SetMany(IReadOnlyDictionary<string, GameSettingValue> settings)
+    {
+        lock (_gate)
+        {
+            EnsureLoaded();
+            foreach ((string key, GameSettingValue settingValue) in settings)
+            {
+                _values![key] = JsonDocument.Parse(JsonSerializer.Serialize(settingValue.ToJsonValue())).RootElement.Clone();
+            }
+
+            Save();
+        }
+    }
+
     private void EnsureLoaded()
     {
         if (_values is not null)
@@ -121,5 +184,35 @@ public sealed class JsonGameSettingsStore(string filePath) : IGameSettingsStore
 
         var payload = _values!.ToDictionary(pair => pair.Key, pair => pair.Value);
         File.WriteAllText(filePath, JsonSerializer.Serialize(payload));
+    }
+
+    public static bool TryReadSettingValue(JsonElement element, out GameSettingValue settingValue)
+    {
+        if (element.ValueKind == JsonValueKind.True)
+        {
+            settingValue = GameSettingValue.FromBool(true);
+            return true;
+        }
+
+        if (element.ValueKind == JsonValueKind.False)
+        {
+            settingValue = GameSettingValue.FromBool(false);
+            return true;
+        }
+
+        if (element.ValueKind == JsonValueKind.Number && element.TryGetInt32(out int intValue))
+        {
+            settingValue = GameSettingValue.FromInt(intValue);
+            return true;
+        }
+
+        if (element.ValueKind == JsonValueKind.String)
+        {
+            settingValue = GameSettingValue.FromString(element.GetString() ?? string.Empty);
+            return true;
+        }
+
+        settingValue = default;
+        return false;
     }
 }

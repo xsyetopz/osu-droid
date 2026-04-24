@@ -84,6 +84,26 @@ public static class UiElementFactory
             IsEnabled: isEnabled,
             Icon: icon);
 
+    public static UiElementSnapshot ProgressRing(
+        string id,
+        UiRect bounds,
+        UiColor color,
+        float strokeWidth,
+        float sweepDegrees,
+        float rotationDegrees = 0f,
+        float alpha = 1f,
+        UiAction action = UiAction.None,
+        bool isEnabled = true) => new(
+            id,
+            UiElementKind.ProgressRing,
+            bounds,
+            color,
+            alpha,
+            Action: action,
+            IsEnabled: isEnabled,
+            RotationDegrees: rotationDegrees,
+            ProgressRing: new UiProgressRing(strokeWidth, sweepDegrees));
+
     public static UiElementSnapshot Text(
         string id,
         string text,

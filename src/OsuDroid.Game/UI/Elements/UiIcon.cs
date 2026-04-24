@@ -11,6 +11,7 @@ public enum UiIcon
     Input,
     Gear,
     Check,
+    Close,
     CheckboxChecked,
     CheckboxUnchecked,
     ChevronRight,

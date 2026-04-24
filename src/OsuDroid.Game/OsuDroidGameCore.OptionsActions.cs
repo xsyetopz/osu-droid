@@ -42,11 +42,39 @@ public sealed partial class OsuDroidGameCore
             case "difficultyAlgorithm":
                 ApplyDifficultyAlgorithmSetting();
                 break;
+            case "stayOnline":
+                ApplyOnlinePanelSetting();
+                break;
             case "registerAcc":
                 PendingExternalUrl = $"https://{OsuDroidOnlineConstants.Hostname}/user/?action=register";
                 break;
             case "update":
                 PendingExternalUrl = OsuDroidOnlineConstants.UpdateEndpointPrefix + CurrentUpdateLanguageCode();
+                break;
+            case "backup":
+                _options.ShowStatusMessage(_settingsBackupService.Export()
+                    ? "LegacyLanguagePack_config_backup_info_success"
+                    : "LegacyLanguagePack_config_backup_info_fail");
+                break;
+            case "restore":
+                if (_settingsBackupService.Import())
+                {
+                    _options.ReloadValuesFromStore();
+                    ApplyRestoredOptionsSettings();
+                    _options.ShowStatusMessage("LegacyLanguagePack_config_backup_restore_info_success");
+                }
+                else
+                {
+                    _options.ShowStatusMessage("LegacyLanguagePack_config_backup_restore_info_fail");
+                }
+
+                break;
+            case "clear_beatmap_cache":
+                _beatmapLibrary.ClearBeatmapCache();
+                _options.ShowStatusMessage("LegacyLanguagePack_library_cleared");
+                break;
+            case "clear_properties":
+                _beatmapLibrary.ClearProperties();
                 break;
             case "preferNoVideoDownloads":
                 ApplyDownloadPreferenceSetting();
@@ -63,6 +91,16 @@ public sealed partial class OsuDroidGameCore
     {
         ApplyMusicVolumeSetting();
         ApplyEffectVolumeSetting();
+    }
+
+    private void ApplyRestoredOptionsSettings()
+    {
+        ApplyOptionAudioVolumes();
+        ApplyMusicPreviewSetting();
+        ApplyDifficultyAlgorithmSetting();
+        ApplyRomanizedPreferenceSetting();
+        ApplyDownloadPreferenceSetting();
+        ApplyOnlinePanelSetting();
     }
 
     private void ApplyMusicVolumeSetting() => _previewPlayer.SetVolume(_options.GetIntValue("bgmvolume") / 100f);
@@ -83,6 +121,13 @@ public sealed partial class OsuDroidGameCore
     }
 
     private void ApplyDownloadPreferenceSetting() => _beatmapDownloader.SetPreferNoVideoDownloads(_options.GetBoolValue("preferNoVideoDownloads"));
+
+    private void ApplyOnlinePanelSetting()
+    {
+        OnlineProfilePanelState? state = CreateOnlinePanelState(Services.OnlineProfile);
+        _mainMenu.SetOnlinePanelState(state);
+        _songSelect.SetOnlinePanelState(state);
+    }
 
     private void ApplyRoute(MainMenuRoute route)
     {
@@ -114,9 +159,27 @@ public sealed partial class OsuDroidGameCore
             return ActiveScene.BeatmapProcessing;
         }
 
+        return EnterSongSelectOrDownloader();
+    }
+
+    private ActiveScene EnterSongSelectOrDownloader()
+    {
+        if (_beatmapLibrary.Load().Sets.Count == 0)
+        {
+            ClearPendingSongSelectBeatmap();
+            PreserveDownloaderMusic();
+            _beatmapDownloader.Enter();
+            return ActiveScene.BeatmapDownloader;
+        }
+
         _songSelect.Enter(_pendingSongSelectBeatmapSetDirectory, _pendingSongSelectBeatmapFilename);
+        ClearPendingSongSelectBeatmap();
+        return ActiveScene.SongSelect;
+    }
+
+    private void ClearPendingSongSelectBeatmap()
+    {
         _pendingSongSelectBeatmapSetDirectory = null;
         _pendingSongSelectBeatmapFilename = null;
-        return ActiveScene.SongSelect;
     }
 }

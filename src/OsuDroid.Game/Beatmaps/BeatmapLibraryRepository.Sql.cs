@@ -69,6 +69,14 @@ public sealed partial class BeatmapLibraryRepository
         command.ExecuteNonQuery();
     }
 
+    private static void ExecuteDelete(SqliteConnection connection, SqliteTransaction transaction, string text)
+    {
+        using SqliteCommand command = connection.CreateCommand();
+        command.Transaction = transaction;
+        command.CommandText = text;
+        command.ExecuteNonQuery();
+    }
+
     private static void ExecuteCollectionDelete(SqliteConnection connection, SqliteTransaction transaction, string text, string name)
     {
         using SqliteCommand command = connection.CreateCommand();

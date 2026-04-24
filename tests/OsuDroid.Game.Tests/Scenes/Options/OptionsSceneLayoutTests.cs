@@ -45,7 +45,7 @@ public sealed partial class OptionsSceneTests
         Assert.That(frame.Elements.Single(element => element.Id == "options-section-6-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.Cogs));
     }
     [Test]
-    public void OptionsSceneDrawsAndroidRowsAndVisualOnlyControls()
+    public void OptionsSceneDrawsAndroidRowsAndInteractiveControls()
     {
         var scene = new OptionsScene(new GameLocalizer());
         UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
@@ -57,18 +57,18 @@ public sealed partial class OptionsSceneTests
         UiElementSnapshot secondCheckbox = frame.Elements.Single(element => element.Id == "options-row-1-checkbox");
         UiElementSnapshot selectDropdown = frame.Elements.Single(element => element.Id == "options-row-2-dropdown");
 
-        Assert.That(row.IsEnabled, Is.False);
-        Assert.That(row.Action, Is.EqualTo(UiAction.None));
+        Assert.That(row.IsEnabled, Is.True);
+        Assert.That(row.Action, Is.EqualTo(UiAction.OptionsToggleServerConnection));
         Assert.That(row.Color, Is.EqualTo(UiColor.Opaque(22, 22, 34)));
         Assert.That(rowLabel.Text, Is.EqualTo("Server Connection"));
         Assert.That(rowSummary.Text, Is.EqualTo("Connect to osu!droid server"));
         Assert.That(rowLabel.Bounds.Y, Is.GreaterThan(row.Bounds.Y));
         Assert.That(rowSummary.Bounds.Y, Is.GreaterThan(rowLabel.Bounds.Y));
-        Assert.That(frame.Elements.Single(element => element.Id == "options-row-0-lock").MaterialIcon, Is.EqualTo(UiMaterialIcon.Lock));
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-0-lock"), Is.False);
         Assert.That(firstCheckbox.Kind, Is.EqualTo(UiElementKind.MaterialIcon));
-        Assert.That(firstCheckbox.MaterialIcon, Is.EqualTo(UiMaterialIcon.Check));
-        Assert.That(firstCheckbox.Color, Is.EqualTo(UiColor.Opaque(32, 32, 46)));
-        Assert.That(secondCheckbox.MaterialIcon, Is.EqualTo(UiMaterialIcon.Check));
+        Assert.That(firstCheckbox.MaterialIcon, Is.EqualTo(UiMaterialIcon.CheckboxBlankOutline));
+        Assert.That(firstCheckbox.Color, Is.EqualTo(UiColor.Opaque(178, 178, 204)));
+        Assert.That(secondCheckbox.MaterialIcon, Is.EqualTo(UiMaterialIcon.CheckboxBlankOutline));
         Assert.That(selectDropdown.Kind, Is.EqualTo(UiElementKind.MaterialIcon));
         Assert.That(selectDropdown.MaterialIcon, Is.EqualTo(UiMaterialIcon.ArrowDropDown));
     }
@@ -79,12 +79,13 @@ public sealed partial class OptionsSceneTests
         var settings = new MemorySettingsStore();
         var scene = new OptionsScene(new GameLocalizer(), settings);
         var viewport = VirtualViewport.FromSurface(1280, 720);
-        bool initial = scene.GetBoolValue("stayOnline");
+        scene.HandleAction(UiAction.OptionsSectionGameplay, viewport);
+        bool initial = scene.GetBoolValue("showfirstapproachcircle");
 
         scene.HandleAction(UiAction.OptionsRow0, viewport);
         UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
 
-        Assert.That(scene.GetBoolValue("stayOnline"), Is.EqualTo(initial));
+        Assert.That(scene.GetBoolValue("showfirstapproachcircle"), Is.EqualTo(initial));
         Assert.That(frame.Elements.Single(element => element.Id == "options-row-0-lock").Kind, Is.EqualTo(UiElementKind.MaterialIcon));
         Assert.That(frame.Elements.Single(element => element.Id == "options-row-0").IsEnabled, Is.False);
     }
@@ -100,6 +101,8 @@ public sealed partial class OptionsSceneTests
 
         scene.HandleAction(UiAction.OptionsSectionGeneral, viewport);
         frame = scene.CreateSnapshot(viewport).UiFrame;
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-0-lock"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-1-lock"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "options-row-2-lock"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "options-row-5-lock"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "options-row-7-lock"), Is.False);
@@ -276,9 +279,14 @@ public sealed partial class OptionsSceneTests
     [Test]
     public void OptionsScenePathInputsEllipsizeIosContainerPathsForDisplayOnly()
     {
-        string corePath = "/var/mobile/Containers/Data/Application/79AEE6E3-E6B9-47A2-980F-055F26C2F8B7/Library/osu-droid";
-        var defaults = new OptionsPathDefaults(corePath, $"{corePath}/Skin", $"{corePath}/Songs");
-        var scene = new OptionsScene(new GameLocalizer(), pathDefaults: defaults);
+        string corePath = "/var/mobile/Containers/Data/Application/79AEE6E3-E6B9-47A2-980F-055F26C2F8B7/Library/osu!droid";
+        string legacyCorePath = corePath.Replace("/Library/osu!droid", "/Library/osu-droid", StringComparison.Ordinal);
+        var defaults = new OptionsPathDefaults(corePath, $"{corePath}/Skin", $"{corePath}/Songs", UsesNativeDefaultSummaries: true);
+        var settings = new MemorySettingsStore();
+        settings.SetString("corePath", legacyCorePath);
+        settings.SetString("skinTopPath", $"{legacyCorePath}/Skin");
+        settings.SetString("directory", $"{legacyCorePath}/Songs");
+        var scene = new OptionsScene(new GameLocalizer(), settings, pathDefaults: defaults);
         var viewport = VirtualViewport.FromSurface(1280, 720);
 
         scene.HandleAction(UiAction.OptionsSectionAdvanced, viewport);
@@ -288,16 +296,30 @@ public sealed partial class OptionsSceneTests
             .Select(element => element.Text)
             .ToArray();
 
-        Assert.That(values, Does.Contain("/var/mobile/…/Library/osu-droid"));
-        Assert.That(values, Does.Contain("/var/mobile/…/Library/osu-droid/Skin"));
-        Assert.That(values, Does.Contain("/var/mobile/…/Library/osu-droid/Songs"));
+        Assert.That(values, Does.Contain("/var/mobile/…/Library/osu!droid"));
+        Assert.That(values, Does.Contain("/var/mobile/…/Library/osu!droid/Skin"));
+        Assert.That(values, Does.Contain("/var/mobile/…/Library/osu!droid/Songs"));
         Assert.That(values, Does.Not.Contain(corePath));
+        Assert.That(values, Does.Not.Contain("/var/mobile/…/Library/osu-droid/Skin"));
         Assert.That(scene.GetStringValue("corePath"), Is.EqualTo(corePath));
+        Assert.That(settings.GetString("corePath", string.Empty), Is.EqualTo(corePath));
+        Assert.That(settings.GetString("skinTopPath", string.Empty), Is.EqualTo(defaults.SkinTopPath));
+        Assert.That(settings.GetString("directory", string.Empty), Is.EqualTo(defaults.SongsDirectory));
+
+        string?[] summaries = frame.Elements
+            .Where(element => element.Id.EndsWith("-summary", StringComparison.Ordinal))
+            .Select(element => element.Text)
+            .ToArray();
+
+        Assert.That(summaries, Does.Contain("Path to directory containing skin files. (default: /var/mobile/…/Library/osu!droid/Skin)"));
+        Assert.That(summaries, Does.Contain("Path to directory containing beatmaps (default: /var/mobile/…/Library/osu!droid/Songs)"));
+        Assert.That(summaries, Does.Not.Contain("Path to directory containing skin files. (default: /sdcard/osu!droid/Skin)"));
+        Assert.That(summaries, Does.Not.Contain("Path to directory containing beatmaps (default: /mnt/sdcard/osu!droid/Songs)"));
     }
     [Test]
     public void OptionsScenePathInputsMiddleEllipsizeCustomLongPaths()
     {
-        string path = "/very/long/custom/location/with/many/segments/that/does/not/match/ios/container/osu-droid/Songs";
+        string path = "/very/long/custom/location/with/many/segments/that/does/not/match/ios/container/osu!droid/Songs";
         var settings = new MemorySettingsStore();
         settings.SetString("directory", path);
         var scene = new OptionsScene(new GameLocalizer(), settings, pathDefaults: new OptionsPathDefaults("/core", "/core/Skin", "/core/Songs"));
@@ -310,7 +332,7 @@ public sealed partial class OptionsSceneTests
             .Select(element => element.Text)
             .ToArray();
 
-        Assert.That(values.Any(value => value is not null && value.Contains('…') && value.EndsWith("/container/osu-droid/Songs", StringComparison.Ordinal)), Is.True);
+        Assert.That(values.Any(value => value is not null && value.Contains('…') && value.EndsWith("/container/osu!droid/Songs", StringComparison.Ordinal)), Is.True);
         Assert.That(scene.GetStringValue("directory"), Is.EqualTo(path));
     }
 

@@ -100,6 +100,11 @@ public sealed class LegacyLocalizationParityTests
             Assert.That(localizer["BeatmapDownloader_WorkInProgress"], Is.EqualTo("Work in Progress"));
             Assert.That(localizer["BeatmapDownloader_Downloading"], Is.EqualTo("Downloading beatmap {0}..."));
             Assert.That(localizer["MainMenu_AboutDiscord"], Is.EqualTo("Join the official Discord server ↗"));
+            Assert.That(localizer["MainMenu_ExitInstruction"], Is.EqualTo("Done playing? Swipe this app away to close it."));
+            Assert.That(localizer["MainMenu_ExitDialogTitle"], Is.EqualTo("Exit"));
+            Assert.That(localizer["MainMenu_ExitDialogMessage"], Is.EqualTo("Are you sure you want to exit the game?"));
+            Assert.That(localizer["MainMenu_ExitDialogConfirm"], Is.EqualTo("Yes"));
+            Assert.That(localizer["MainMenu_ExitDialogCancel"], Is.EqualTo("No"));
             Assert.That(localizer["BeatmapDownloader_ConnectionFailed"], Is.EqualTo("Failed to connect to server, please check your internet connection."));
         });
     }

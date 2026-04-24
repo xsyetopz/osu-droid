@@ -22,10 +22,15 @@ public sealed record UiElementSnapshot(
     UiSpriteFit SpriteFit = UiSpriteFit.Stretch,
     bool ClipToBounds = false,
     UiRect? SpriteSource = null,
-    UiMeasuredTextAnchor? MeasuredTextAnchor = null);
+    UiMeasuredTextAnchor? MeasuredTextAnchor = null,
+    UiProgressRing? ProgressRing = null);
 
 public sealed record UiMeasuredTextAnchor(
     string Text,
     UiTextStyle TextStyle,
     float RightX,
     float LeftPadding);
+
+public sealed record UiProgressRing(
+    float StrokeWidth,
+    float SweepDegrees);

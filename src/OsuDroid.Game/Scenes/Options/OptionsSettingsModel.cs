@@ -40,12 +40,12 @@ internal sealed record SettingsCategory(string TitleKey, IReadOnlyList<SettingsR
 
 internal sealed record SettingsSection(OptionsSection Section, string Key, UiMaterialIcon Icon, UiAction Action, IReadOnlyList<SettingsCategory> Categories);
 
-public sealed record OptionsPathDefaults(string CorePath, string SkinTopPath, string SongsDirectory)
+public sealed record OptionsPathDefaults(string CorePath, string SkinTopPath, string SongsDirectory, bool UsesNativeDefaultSummaries = false)
 {
     public static OptionsPathDefaults Empty { get; } = new(string.Empty, string.Empty, string.Empty);
 
     public static OptionsPathDefaults FromPaths(DroidGamePathLayout paths) =>
-        new(paths.CoreRoot, paths.Skin, paths.Songs);
+        new(paths.CoreRoot, paths.Skin, paths.Songs, UsesNativeSummaryDefaults(paths.CoreRoot));
 
     public string GetDefaultValue(string key) => key switch
     {
@@ -54,4 +54,39 @@ public sealed record OptionsPathDefaults(string CorePath, string SkinTopPath, st
         "directory" => SongsDirectory,
         _ => string.Empty,
     };
+
+    public string NormalizePathValue(string value)
+    {
+        string legacyCorePath = GetLegacyCorePath();
+        if (string.IsNullOrEmpty(legacyCorePath))
+        {
+            return value;
+        }
+
+        string normalizedValue = value.Replace('\\', '/');
+        string normalizedLegacyCorePath = legacyCorePath.Replace('\\', '/');
+        if (string.Equals(normalizedValue, normalizedLegacyCorePath, StringComparison.Ordinal))
+        {
+            return CorePath;
+        }
+
+        string legacyChildPrefix = $"{normalizedLegacyCorePath}/";
+        return normalizedValue.StartsWith(legacyChildPrefix, StringComparison.Ordinal)
+            ? CorePath + normalizedValue[normalizedLegacyCorePath.Length..]
+            : value;
+    }
+
+    private static bool UsesNativeSummaryDefaults(string corePath)
+    {
+        string normalized = corePath.Replace('\\', '/');
+        return normalized.Contains("/Library/osu!droid", StringComparison.Ordinal);
+    }
+
+    private string GetLegacyCorePath()
+    {
+        string? parent = Path.GetDirectoryName(CorePath);
+        return string.IsNullOrWhiteSpace(parent)
+            ? string.Empty
+            : Path.Combine(parent, DroidPathRoots.LegacyCoreDirectoryName);
+    }
 }

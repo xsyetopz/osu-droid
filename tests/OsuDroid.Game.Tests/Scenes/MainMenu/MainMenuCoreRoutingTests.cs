@@ -34,11 +34,33 @@ public sealed partial class UiCompatibilityTests
         core.HandleUiAction(UiAction.MainMenuThird);
 
         Assert.That(core.LastRoute, Is.EqualTo(MainMenuRoute.None));
+        Assert.That(core.CreateFrame(VirtualViewport.FromSurface(1280, 720)).UiFrame.Elements.Any(element => element.Id == "exit-dialog-panel"), Is.True);
+
+        core.HandleUiAction(UiAction.MainMenuExitConfirm);
 
         core.Update(TimeSpan.FromMilliseconds(MainMenuScene.ExitAnimationMilliseconds));
 
         Assert.That(core.LastRoute, Is.EqualTo(MainMenuRoute.Exit));
         Assert.That(music.LastCommand, Is.EqualTo(MenuMusicCommand.Stop));
+    }
+
+    [Test]
+    public void GameCoreCanCancelMainMenuExitDialog()
+    {
+        var database = new DroidDatabase(Path.Combine(TestContext.CurrentContext.WorkDirectory, $"main-menu-exit-cancel-{Guid.NewGuid():N}.db"));
+        database.EnsureCreated();
+        var core = new OsuDroidGameCore(new GameServices(database, new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(TestContext.CurrentContext.WorkDirectory)), "test", "1.0"));
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+
+        core.HandleUiAction(UiAction.MainMenuCookie);
+        core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
+        core.HandleUiAction(UiAction.MainMenuThird);
+        core.HandleUiAction(UiAction.MainMenuExitCancel);
+        core.Update(TimeSpan.FromMilliseconds(MainMenuScene.ExitAnimationMilliseconds));
+
+        Assert.That(core.LastRoute, Is.EqualTo(MainMenuRoute.None));
+        Assert.That(core.CreateFrame(viewport).UiFrame.Elements.Any(element => element.Id == "exit-dialog-panel"), Is.False);
+        Assert.That(core.CreateFrame(viewport).UiFrame.Elements.Any(element => element.Id == "menu-0"), Is.True);
     }
     [Test]
     public void MainMenuReturnTransitionFadesPreviousBackgroundLikeAndroidSongMenuBack()
@@ -72,11 +94,9 @@ public sealed partial class UiCompatibilityTests
         int backgroundIndex = elements.FindIndex(element => element.Id == "menu-background");
         int fadeIndex = elements.FindIndex(element => element.Id == "return-background-fade");
         int logoIndex = elements.FindIndex(element => element.Id == "logo");
-        int profileIndex = elements.FindIndex(element => element.Id == "profile-panel");
 
         Assert.That(fadeIndex, Is.GreaterThan(backgroundIndex));
         Assert.That(fadeIndex, Is.LessThan(logoIndex));
-        Assert.That(fadeIndex, Is.LessThan(profileIndex));
     }
     [Test]
     public void GameCoreCanStartSongSelectBackReturnTransition()
@@ -200,7 +220,7 @@ public sealed partial class UiCompatibilityTests
         var database = new DroidDatabase(Path.Combine(root, "test.db"));
         database.EnsureCreated();
         var processing = new FakeBeatmapProcessingService();
-        var core = new OsuDroidGameCore(new GameServices(database, paths, "test", "1.0", BeatmapProcessingService: processing));
+        var core = new OsuDroidGameCore(new GameServices(database, paths, "test", "1.0", BeatmapLibrary: new StartupMusicLibrary(), BeatmapProcessingService: processing));
 
         core.HandleUiAction(UiAction.MainMenuCookie);
         core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
@@ -216,6 +236,44 @@ public sealed partial class UiCompatibilityTests
         core.Update(TimeSpan.Zero);
 
         Assert.That(core.CreateFrame(VirtualViewport.FromSurface(1280, 720)).Scene, Is.EqualTo("SongSelect"));
+    }
+
+    [Test]
+    public void SoloRouteOpensBeatmapDownloaderWhenLibraryIsEmpty()
+    {
+        string root = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"empty-library-route-{Guid.NewGuid():N}");
+        var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(root));
+        paths.EnsureDirectories();
+        var database = new DroidDatabase(Path.Combine(root, "test.db"));
+        database.EnsureCreated();
+        var core = new OsuDroidGameCore(new GameServices(database, paths, "test", "1.0", BeatmapProcessingService: new NoPendingBeatmapProcessingService()));
+
+        OpenSoloRoute(core);
+
+        Assert.That(core.CreateFrame(VirtualViewport.FromSurface(1280, 720)).Scene, Is.EqualTo("BeatmapDownloader"));
+    }
+
+    [Test]
+    public void SoloRouteOpensSongSelectWhenLibraryHasBeatmaps()
+    {
+        string root = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"nonempty-library-route-{Guid.NewGuid():N}");
+        var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(root));
+        paths.EnsureDirectories();
+        var database = new DroidDatabase(Path.Combine(root, "test.db"));
+        database.EnsureCreated();
+        var core = new OsuDroidGameCore(new GameServices(database, paths, "test", "1.0", BeatmapLibrary: new StartupMusicLibrary(), BeatmapProcessingService: new NoPendingBeatmapProcessingService()));
+
+        OpenSoloRoute(core);
+
+        Assert.That(core.CreateFrame(VirtualViewport.FromSurface(1280, 720)).Scene, Is.EqualTo("SongSelect"));
+    }
+
+    private static void OpenSoloRoute(OsuDroidGameCore core)
+    {
+        core.HandleUiAction(UiAction.MainMenuCookie);
+        core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
+        core.HandleUiAction(UiAction.MainMenuFirst);
+        core.HandleUiAction(UiAction.MainMenuFirst);
     }
 
     [Test]
@@ -265,7 +323,7 @@ public sealed partial class UiCompatibilityTests
 
         public bool HasPendingWork() => _completedSnapshot is null;
 
-        public void EnqueueArchive(string archivePath)
+        public void EnqueueArchive(string archivePath, BeatmapOnlineMetadata? metadata = null)
         {
         }
 
@@ -289,6 +347,27 @@ public sealed partial class UiCompatibilityTests
         {
             _completedSnapshot = BeatmapLibrarySnapshot.Empty;
             State = new BeatmapProcessingState(false, 100, "Processing beatmaps...");
+        }
+    }
+
+    private sealed class NoPendingBeatmapProcessingService : IBeatmapProcessingService
+    {
+        public BeatmapProcessingState State { get; } = new();
+
+        public bool HasPendingWork() => false;
+
+        public void EnqueueArchive(string archivePath, BeatmapOnlineMetadata? metadata = null)
+        {
+        }
+
+        public void Start()
+        {
+        }
+
+        public bool TryConsumeCompletedSnapshot(out BeatmapLibrarySnapshot snapshot)
+        {
+            snapshot = BeatmapLibrarySnapshot.Empty;
+            return false;
         }
     }
 
@@ -380,6 +459,10 @@ public sealed partial class UiCompatibilityTests
 
         public BeatmapLibrarySnapshot Scan(IReadOnlySet<string>? forceUpdateDirectories = null) => _snapshot;
 
+        public void ApplyOnlineMetadata(string setDirectory, BeatmapOnlineMetadata metadata)
+        {
+        }
+
         public bool NeedsScanRefresh() => false;
 
         public BeatmapOptions GetOptions(string setDirectory) => new(setDirectory);
@@ -403,6 +486,14 @@ public sealed partial class UiCompatibilityTests
         }
 
         public void DeleteBeatmapSet(string directory)
+        {
+        }
+
+        public void ClearBeatmapCache()
+        {
+        }
+
+        public void ClearProperties()
         {
         }
     }

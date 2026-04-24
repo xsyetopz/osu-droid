@@ -62,7 +62,7 @@ public sealed partial class MainMenuScene
             {
                 0 => ShowSecondMenu(),
                 1 => MainMenuRoute.Settings,
-                2 => BeginExitAnimation(),
+                2 => OpenExitDialog(),
                 _ => MainMenuRoute.None,
             }
             : _selectedIndex switch
@@ -77,12 +77,20 @@ public sealed partial class MainMenuScene
     private MainMenuRoute BeginExitAnimation()
     {
         ShowFirstMenu();
+        _isExitDialogOpen = false;
         _menuVisibility = MenuVisibility.Exiting;
         _transitionMilliseconds = 0d;
         _shownMilliseconds = 0d;
         _exitMilliseconds = 0d;
         _hasPendingExitRoute = false;
         _exitRoutePublished = false;
+        _pressedAction = UiAction.None;
+        return MainMenuRoute.None;
+    }
+
+    private MainMenuRoute OpenExitDialog()
+    {
+        _isExitDialogOpen = true;
         _pressedAction = UiAction.None;
         return MainMenuRoute.None;
     }
@@ -151,6 +159,11 @@ public sealed partial class MainMenuScene
             AddAboutDialog(elements, viewport, _displayVersion);
         }
 
+        if (_isExitDialogOpen)
+        {
+            AddExitDialog(elements, viewport);
+        }
+
         return new UiFrameSnapshot(viewport, elements, DroidAssets.MainMenuManifest);
     }
 
@@ -171,12 +184,17 @@ public sealed partial class MainMenuScene
 
     private void AddProfileShell(List<UiElementSnapshot> elements)
     {
+        if (_onlinePanelState is null)
+        {
+            return;
+        }
+
         OnlineProfilePanelSnapshots.Add(
             elements,
             "profile",
             new UiRect(OnlinePanelX, OnlinePanelY, OnlinePanelWidth, OnlinePanelHeight),
             OnlinePanelAvatarFooterSize,
-            _profile);
+            _onlinePanelState);
     }
 
     private void AddVersionPill(List<UiElementSnapshot> elements, VirtualViewport viewport)

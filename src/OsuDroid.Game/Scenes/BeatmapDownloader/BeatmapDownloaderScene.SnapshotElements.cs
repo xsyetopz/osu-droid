@@ -36,14 +36,28 @@ public sealed partial class BeatmapDownloaderScene
     private static void AddButton(List<UiElementSnapshot> elements, string id, UiRect bounds, string text, UiAction action)
     {
         elements.Add(Fill(id + "-bg", bounds, s_field, 1f, action, Radius));
-        elements.Add(TextMiddle(id + "-text", text, bounds.X + 4f * Dp, bounds.Y, bounds.Width - 8f * Dp, bounds.Height, MathF.Min(14f * Dp, bounds.Height * 0.45f), s_white, UiTextAlignment.Center, action));
+        elements.Add(TextMiddle(id + "-text", text, bounds.X + 16f * Dp, bounds.Y, bounds.Width - 32f * Dp, bounds.Height, MathF.Min(14f * Dp, bounds.Height * 0.45f), s_white, UiTextAlignment.Left, action));
+    }
+
+    private static void AddDropdownOption(List<UiElementSnapshot> elements, string id, UiRect bounds, string text, UiAction action, bool isSelected)
+    {
+        if (isSelected)
+        {
+            elements.Add(Fill(id + "-selected", bounds, s_dropdownSelected, 1f, action, Radius));
+        }
+
+        elements.Add(TextMiddle(id + "-text", text, bounds.X + 12f * Dp, bounds.Y, Math.Max(1f, bounds.Width - 48f * Dp), bounds.Height, 14f * Dp, s_white, UiTextAlignment.Left, action));
+        if (isSelected)
+        {
+            elements.Add(MaterialIcon(id + "-check", UiMaterialIcon.Check, new UiRect(bounds.Right - 34f * Dp, bounds.Y + 9f * Dp, 24f * Dp, 24f * Dp), s_accent, 1f, action));
+        }
     }
 
     private static void AddDropdownButton(List<UiElementSnapshot> elements, string id, UiRect bounds, string text, UiAction action)
     {
         elements.Add(Fill(id + "-bg", bounds, s_field, 1f, action, Radius));
-        float textWidth = MathF.Min(bounds.Width - 48f * Dp, MathF.Max(40f * Dp, EstimateTextWidth(text, 14f * Dp)));
-        elements.Add(TextMiddle(id + "-text", text, bounds.X + (bounds.Width - textWidth) / 2f - 8f * Dp, bounds.Y, textWidth, bounds.Height, 14f * Dp, s_white, UiTextAlignment.Center, action));
+        float textWidth = MathF.Min(bounds.Width - 56f * Dp, MathF.Max(24f * Dp, EstimateTextWidth(text, 14f * Dp)));
+        elements.Add(TextMiddle(id + "-text", text, bounds.X + 16f * Dp, bounds.Y, textWidth, bounds.Height, 14f * Dp, s_white, UiTextAlignment.Left, action));
         elements.Add(MaterialIcon(id + "-caret", UiMaterialIcon.ArrowDropDown, new UiRect(bounds.Right - 34f * Dp, bounds.Y + 9f * Dp, 24f * Dp, 24f * Dp), s_white, 1f, action));
     }
 
@@ -76,12 +90,24 @@ public sealed partial class BeatmapDownloaderScene
         float width = StatusPillWidth(_status);
         var bounds = new UiRect(x, y, width, 20f * Dp);
         elements.Add(Fill(id + "-bg", bounds, StatusPillColor(), 1f, action, Radius));
-        elements.Add(TextMiddle(id, RankedStatusText(_status), bounds.X + 12f * Dp, bounds.Y, bounds.Width - 24f * Dp, bounds.Height, 10f * Dp, s_white, UiTextAlignment.Center, action));
+        elements.Add(TextMiddle(id, RankedStatusText(_status), bounds.X + 12f * Dp, bounds.Y, bounds.Width - 24f * Dp, bounds.Height, 10f * Dp, RankedStatusColor(_status), UiTextAlignment.Center, action));
     }
 
     private float StatusPillWidth(BeatmapRankedStatus _status) => Math.Max(58f * Dp, EstimateTextWidth(RankedStatusText(_status), 10f * Dp) + 24f * Dp);
 
     private static UiColor StatusPillColor() => s_panel;
+
+    private static UiColor RankedStatusColor(BeatmapRankedStatus status) => status switch
+    {
+        BeatmapRankedStatus.Ranked => UiColor.Opaque(65, 255, 100),
+        BeatmapRankedStatus.Approved => UiColor.Opaque(65, 255, 100),
+        BeatmapRankedStatus.Qualified => UiColor.Opaque(100, 242, 255),
+        BeatmapRankedStatus.Loved => UiColor.Opaque(250, 100, 255),
+        BeatmapRankedStatus.Pending => UiColor.Opaque(255, 172, 100),
+        BeatmapRankedStatus.WorkInProgress => UiColor.Opaque(255, 172, 100),
+        BeatmapRankedStatus.Graveyard => s_white,
+        _ => s_white,
+    };
 
     private static void AddDifficultyDots(
         List<UiElementSnapshot> elements,
@@ -94,7 +120,6 @@ public sealed partial class BeatmapDownloaderScene
         bool isCentered,
         UiAction fallbackAction)
     {
-        const string glyph = "⦿";
         const float cardCellWidth = 32f * Dp;
         const float detailsCellWidth = 56f * Dp;
         const float rowHeight = DifficultyGlyphRowHeight;
@@ -124,17 +149,7 @@ public sealed partial class BeatmapDownloaderScene
                 elements.Add(Fill($"{id}-{i}-selected", hitBounds, s_field, 1f, dotAction, Radius));
             }
 
-            elements.Add(TextMiddle(
-                $"{id}-{i}",
-                glyph,
-                hitBounds.X,
-                hitBounds.Y,
-                hitBounds.Width,
-                hitBounds.Height,
-                glyphSize,
-                StarRatingColor(beatmaps[i].StarRating),
-                UiTextAlignment.Center,
-                dotAction));
+            elements.Add(TextMiddle($"{id}-{i}", "⦿", hitBounds.X, hitBounds.Y, hitBounds.Width, hitBounds.Height, glyphSize, StarRatingColor(beatmaps[i].StarRating), UiTextAlignment.Center, dotAction));
             cursorX += cellWidth + gap;
         }
     }
@@ -195,7 +210,8 @@ public sealed partial class BeatmapDownloaderScene
     private static UiElementSnapshot MaterialIcon(string id, UiMaterialIcon icon, UiRect bounds, UiColor color, float alpha = 1f, UiAction action = UiAction.None) =>
         UiElementFactory.MaterialIcon(id, icon, bounds, color, alpha, action);
 
-    private static string DifficultyDots(BeatmapMirrorSet set) => string.Join(' ', set.Beatmaps.Select(_ => "⦿"));
+    private static UiElementSnapshot ProgressRing(string id, UiRect bounds, UiColor color, float strokeWidth, float sweepDegrees, float rotationDegrees = 0f) =>
+        UiElementFactory.ProgressRing(id, bounds, color, strokeWidth, sweepDegrees, rotationDegrees);
 
     private string RankedStatusText(BeatmapRankedStatus rankedStatus) => rankedStatus switch
     {
@@ -236,9 +252,21 @@ public sealed partial class BeatmapDownloaderScene
             return string.Empty;
         }
 
-        string percent = progress.Percent is double p ? $" ({p:0}%)" : string.Empty;
-        string speed = progress.SpeedBytesPerSecond > 0 ? $"\n{progress.SpeedBytesPerSecond / 1024d / 1024d:0.###} mb/s{percent}" : percent;
+        string percent = progress.Percent is double p ? FormattableString.Invariant($" ({p:0}%)") : string.Empty;
+        string speed = progress.SpeedBytesPerSecond > 0 ? FormattableString.Invariant($"\n{progress.SpeedBytesPerSecond / 1024d / 1024d:0.###} mb/s") + percent : percent;
         return speed;
+    }
+
+    private string FormatDownloadText(BeatmapDownloadState state)
+    {
+        string key = state.Progress?.Phase == BeatmapDownloadPhase.Importing
+            ? "BeatmapDownloader_Importing"
+            : "BeatmapDownloader_Downloading";
+        return !string.IsNullOrWhiteSpace(state.Filename)
+            ? _localizer.Format(key, state.Filename)
+            : _localizer[key]
+                .Replace(" {0}", string.Empty, StringComparison.Ordinal)
+                .Replace("{0}", string.Empty, StringComparison.Ordinal);
     }
 
     private static void TryDelete(string path)

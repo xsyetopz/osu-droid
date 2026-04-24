@@ -1,6 +1,7 @@
 using System.IO.Compression;
 using OsuDroid.Game.Beatmaps;
 using OsuDroid.Game.Beatmaps.Import;
+using OsuDroid.Game.Beatmaps.Online;
 using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Runtime.Paths;
 
@@ -69,6 +70,32 @@ public sealed class BeatmapImportTests
         Assert.That(Directory.Exists(Path.Combine(roots.Songs, "123 Artist - Title")), Is.True);
         Assert.That(snapshot.Sets, Has.Count.EqualTo(1));
         Assert.That(snapshot.Sets[0].Beatmaps[0].Title, Is.EqualTo("Title"));
+    }
+
+    [Test]
+    public void ImportAppliesOnlineMetadataToDownloadedDifficulties()
+    {
+        DroidGamePathLayout roots = CreatePathLayout();
+        var database = new DroidDatabase(roots.GetDatabasePath("debug"));
+        database.EnsureCreated();
+        var repository = new BeatmapLibraryRepository(database);
+        var library = new BeatmapLibrary(roots, repository);
+        var importer = new BeatmapImportService(roots, library);
+        string archive = Path.Combine(roots.Downloads, "123 Artist - Title.osz");
+        Directory.CreateDirectory(roots.Downloads);
+        CreateOsz(archive, "map.osu", SampleOsu());
+        var metadata = new BeatmapOnlineMetadata(
+            123,
+            BeatmapRankedStatus.Ranked,
+            [new BeatmapOnlineDifficultyMetadata(456, "Hard", 3.96f)]);
+
+        BeatmapImportResult importResult = importer.ImportOsz(archive, onlineMetadata: metadata);
+        BeatmapInfo beatmap = repository.LoadLibrary().Sets.Single().Beatmaps.Single();
+
+        Assert.That(importResult.IsSuccess, Is.True);
+        Assert.That(beatmap.Status, Is.EqualTo((int)BeatmapRankedStatus.Ranked));
+        Assert.That(beatmap.DroidStarRating, Is.EqualTo(3.96f));
+        Assert.That(beatmap.StandardStarRating, Is.EqualTo(3.96f));
     }
 
     [Test]

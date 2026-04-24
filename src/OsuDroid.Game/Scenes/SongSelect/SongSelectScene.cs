@@ -17,7 +17,7 @@ internal enum SongSelectSortMode
     Length,
 }
 
-public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicController musicController, IBeatmapDifficultyService difficultyService, string songsPath, OnlineProfileSnapshot? profile = null, ITextInputService? textInputService = null, Func<int, int>? randomIndexProvider = null, GameLocalizer? localizer = null)
+public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicController musicController, IBeatmapDifficultyService difficultyService, string songsPath, OnlineProfilePanelState? onlinePanelState = null, ITextInputService? textInputService = null, Func<int, int>? randomIndexProvider = null, GameLocalizer? localizer = null)
 {
     private const float RowWidth = 724f;
     private const float RowHeight = 127f;
@@ -82,7 +82,7 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
     private readonly SelectionState _selectionState = new();
     private readonly QueryState _queryState = new();
     private readonly BackgroundState _backgroundState = new();
-    private readonly OnlineProfileSnapshot _profile = profile ?? OnlineProfileSnapshot.Guest;
+    private OnlineProfilePanelState? _onlinePanelState = onlinePanelState;
     private readonly Func<int, int> _randomIndexProvider = randomIndexProvider ?? Random.Shared.Next;
     private readonly GameLocalizer _localizer = localizer ?? new GameLocalizer();
     private readonly object _difficultyGate = new();
@@ -187,6 +187,8 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
     public void SetPreviewPlayer(IBeatmapPreviewPlayer player) => musicController.SetPreviewPlayer(player);
 
     public void SetTextInputService(ITextInputService service) => _textInputService = service;
+
+    public void SetOnlinePanelState(OnlineProfilePanelState? state) => _onlinePanelState = state;
 
     public void SetDisplayAlgorithm(DifficultyAlgorithm algorithm)
     {

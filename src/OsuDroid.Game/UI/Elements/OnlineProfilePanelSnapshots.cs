@@ -6,12 +6,21 @@ public sealed record OnlineProfileSnapshot(
     string Username,
     string? AvatarAssetName = null,
     string? AvatarPath = null,
+    int? Rank = null,
     int? PerformancePoints = null,
-    float? Accuracy = null)
-{
-    public static OnlineProfileSnapshot Guest { get; } = new("Guest", DroidAssets.EmptyAvatar);
+    float? Accuracy = null);
 
-    public bool IsGuest => PerformancePoints is null && Accuracy is null;
+public sealed record OnlineProfilePanelState(
+    OnlineProfileSnapshot? Profile = null,
+    string Message = "Logging in...",
+    string Submessage = "Connecting to server...")
+{
+    public static OnlineProfilePanelState Connecting { get; } = new();
+
+    public static OnlineProfilePanelState? FromOptionalProfile(OnlineProfileSnapshot? profile) =>
+        profile is not null && !string.IsNullOrWhiteSpace(profile.Username)
+            ? new OnlineProfilePanelState(profile)
+            : Connecting;
 }
 
 public static class OnlineProfilePanelSnapshots
@@ -19,13 +28,14 @@ public static class OnlineProfilePanelSnapshots
     private static readonly UiColor s_panel = new(51, 51, 51, 128);
     private static readonly UiColor s_footer = new(51, 51, 51, 204);
     private static readonly UiColor s_white = UiColor.Opaque(255, 255, 255);
+    private static readonly UiColor s_secondary = UiColor.Opaque(217, 217, 230);
 
     public static void Add(
         List<UiElementSnapshot> elements,
         string idPrefix,
         UiRect bounds,
         float avatarSize,
-        OnlineProfileSnapshot profile,
+        OnlineProfilePanelState state,
         float panelAlpha = 1f,
         float footerAlpha = 1f)
     {
@@ -44,6 +54,29 @@ public static class OnlineProfilePanelSnapshots
             s_footer,
             footerAlpha));
 
+        OnlineProfileSnapshot? profile = state.Profile;
+        if (profile is null)
+        {
+            elements.Add(new UiElementSnapshot(
+                idPrefix + "-message",
+                UiElementKind.Text,
+                new UiRect(bounds.X + avatarSize + 10f, bounds.Y + 5f, bounds.Width - avatarSize - 20f, 28f),
+                s_white,
+                1f,
+                Text: state.Message,
+                TextStyle: new UiTextStyle(16f)));
+
+            elements.Add(new UiElementSnapshot(
+                idPrefix + "-submessage",
+                UiElementKind.Text,
+                new UiRect(bounds.X + avatarSize + 10f, bounds.Y + 60f, bounds.Width - avatarSize - 20f, 40f),
+                s_white,
+                1f,
+                Text: state.Submessage,
+                TextStyle: new UiTextStyle(14f)));
+            return;
+        }
+
         elements.Add(new UiElementSnapshot(
             idPrefix + "-avatar",
             UiElementKind.Sprite,
@@ -59,12 +92,19 @@ public static class OnlineProfilePanelSnapshots
             new UiRect(bounds.X + avatarSize + 10f, bounds.Y + 5f, bounds.Width - avatarSize - 20f, 28f),
             s_white,
             1f,
-            Text: string.IsNullOrWhiteSpace(profile.Username) ? "Guest" : profile.Username,
-            TextStyle: new UiTextStyle(20f)));
+            Text: profile.Username,
+            TextStyle: new UiTextStyle(16f)));
 
-        if (profile.IsGuest)
+        if (profile.Rank is int rank)
         {
-            return;
+            elements.Add(new UiElementSnapshot(
+                idPrefix + "-rank",
+                UiElementKind.Text,
+                new UiRect(bounds.Right - 86f, bounds.Y + 55f, 76f, 24f),
+                s_secondary,
+                1f,
+                Text: "#" + rank.ToString("N0", CultureInfo.InvariantCulture),
+                TextStyle: new UiTextStyle(20f, Alignment: UiTextAlignment.Right)));
         }
 
         if (profile.PerformancePoints is int pp)
@@ -73,9 +113,9 @@ public static class OnlineProfilePanelSnapshots
                 idPrefix + "-pp",
                 UiElementKind.Text,
                 new UiRect(bounds.X + avatarSize + 10f, bounds.Y + 38f, bounds.Width - avatarSize - 20f, 24f),
-                s_white,
+                s_secondary,
                 1f,
-                Text: pp.ToString("N0", CultureInfo.InvariantCulture) + "pp",
+                Text: "Performance: " + pp.ToString("N0", CultureInfo.InvariantCulture) + "pp",
                 TextStyle: new UiTextStyle(18f)));
         }
 
@@ -85,9 +125,9 @@ public static class OnlineProfilePanelSnapshots
                 idPrefix + "-acc",
                 UiElementKind.Text,
                 new UiRect(bounds.X + avatarSize + 10f, bounds.Y + 64f, bounds.Width - avatarSize - 20f, 24f),
-                s_white,
+                s_secondary,
                 1f,
-                Text: accuracy.ToString("0.00", CultureInfo.InvariantCulture) + "%",
+                Text: "Accuracy: " + accuracy.ToString("0.00", CultureInfo.InvariantCulture) + "%",
                 TextStyle: new UiTextStyle(18f)));
         }
     }

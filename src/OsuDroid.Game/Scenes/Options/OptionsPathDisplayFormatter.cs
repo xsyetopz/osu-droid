@@ -4,7 +4,7 @@ internal static class OptionsPathDisplayFormatter
 {
     private const int MaxDisplayCharacters = 72;
     private const string Ellipsis = "…";
-    private const string OsuDroidLibrarySegment = "/Library/osu-droid";
+    private const string OsuDroidLibrarySegment = "/Library/osu!droid";
     private const string MobileContainerPrefix = "/var/mobile/";
     private const string MobileContainerDisplayPrefix = "/var/mobile/…";
 

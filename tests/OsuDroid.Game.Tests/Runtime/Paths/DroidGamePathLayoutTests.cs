@@ -54,4 +54,22 @@ public sealed class DroidGamePathLayoutTests
         Directory.Delete(layout.CoreRoot, true);
         Directory.Delete(layout.CacheRoot, true);
     }
+
+    [Test]
+    public void AppDataRootsUseOsuDroidDirectoryNameAndMigrateOldName()
+    {
+        string parent = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"path-roots-{Guid.NewGuid():N}");
+        string oldRoot = Path.Combine(parent, DroidPathRoots.LegacyCoreDirectoryName);
+        string cache = Path.Combine(parent, "Caches");
+        Directory.CreateDirectory(oldRoot);
+        File.WriteAllText(Path.Combine(oldRoot, "marker.txt"), "legacy");
+
+        var roots = DroidPathRoots.FromAppDataDirectory(parent, cache);
+
+        Assert.That(roots.CoreRoot, Is.EqualTo(Path.Combine(parent, DroidPathRoots.CoreDirectoryName)));
+        Assert.That(Directory.Exists(oldRoot), Is.False);
+        Assert.That(File.Exists(Path.Combine(roots.CoreRoot, "marker.txt")), Is.True);
+
+        Directory.Delete(parent, true);
+    }
 }

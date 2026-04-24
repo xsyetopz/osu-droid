@@ -101,6 +101,18 @@ public sealed partial class UiCompatibilityTests
         UiElementSnapshot expanded = ExpandedFrame(scene, viewport).Elements.Single(element => element.Id == "logo");
 
         Assert.That(scene.Tap(MainMenuButtonSlot.Third), Is.EqualTo(MainMenuRoute.None));
+        Assert.That(scene.IsExitDialogOpen, Is.True);
+        Assert.That(scene.IsExitAnimating, Is.False);
+        Assert.That(scene.ConsumePendingRoute(), Is.EqualTo(MainMenuRoute.None));
+
+        UiFrameSnapshot prompt = scene.CreateSnapshot(viewport).UiFrame;
+        Assert.That(prompt.Elements.Any(element => element.Id == "exit-dialog-title" && element.Text == "Exit"), Is.True);
+        Assert.That(prompt.Elements.Any(element => element.Id == "exit-dialog-message" && element.Text == "Are you sure you want to exit the game?"), Is.True);
+        Assert.That(prompt.Elements.Single(element => element.Id == "exit-dialog-confirm").Action, Is.EqualTo(UiAction.MainMenuExitConfirm));
+        Assert.That(prompt.Elements.Single(element => element.Id == "exit-dialog-cancel").Action, Is.EqualTo(UiAction.MainMenuExitCancel));
+
+        scene.ConfirmExitDialog();
+        Assert.That(scene.IsExitDialogOpen, Is.False);
         Assert.That(scene.IsExitAnimating, Is.True);
         Assert.That(scene.ConsumePendingRoute(), Is.EqualTo(MainMenuRoute.None));
 
@@ -120,8 +132,28 @@ public sealed partial class UiCompatibilityTests
         scene.Update(TimeSpan.FromMilliseconds(MainMenuScene.ExitAnimationMilliseconds / 2d));
 
         UiFrameSnapshot completed = scene.CreateSnapshot(viewport).UiFrame;
-        Assert.That(completed.Elements.Any(element => element.Id == "exit-instruction" && element.Text == "Are you sure you want to exit the game?"), Is.True);
+        Assert.That(completed.Elements.Any(element => element.Id == "exit-instruction" && element.Text == "Done playing? Swipe this app away to close it."), Is.True);
         Assert.That(scene.ConsumePendingRoute(), Is.EqualTo(MainMenuRoute.Exit));
         Assert.That(scene.ConsumePendingRoute(), Is.EqualTo(MainMenuRoute.None));
+    }
+
+    [Test]
+    public void MainMenuExitCancelDismissesDialogWithoutAnimation()
+    {
+        var scene = new MainMenuScene();
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+        _ = ExpandedFrame(scene, viewport);
+
+        Assert.That(scene.Tap(MainMenuButtonSlot.Third), Is.EqualTo(MainMenuRoute.None));
+        Assert.That(scene.IsExitDialogOpen, Is.True);
+
+        scene.CancelExitDialog();
+        UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
+
+        Assert.That(scene.IsExitDialogOpen, Is.False);
+        Assert.That(scene.IsExitAnimating, Is.False);
+        Assert.That(scene.ConsumePendingRoute(), Is.EqualTo(MainMenuRoute.None));
+        Assert.That(frame.Elements.Any(element => element.Id == "exit-dialog-panel"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "menu-0"), Is.True);
     }
 }

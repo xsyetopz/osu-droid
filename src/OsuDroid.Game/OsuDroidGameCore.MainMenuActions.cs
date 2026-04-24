@@ -35,6 +35,14 @@ public sealed partial class OsuDroidGameCore
             case UiAction.MainMenuAboutDiscord:
                 PendingExternalUrl = "https://discord.gg/nyD92cE";
                 return true;
+            case UiAction.MainMenuExitDialogPanel:
+                return true;
+            case UiAction.MainMenuExitConfirm:
+                _mainMenu.ConfirmExitDialog();
+                return true;
+            case UiAction.MainMenuExitCancel:
+                _mainMenu.CancelExitDialog();
+                return true;
             case UiAction.MainMenuBeatmapDownloader:
                 PreserveDownloaderMusic();
                 _activeScene = ActiveScene.BeatmapDownloader;

@@ -7,4 +7,5 @@ public enum UiElementKind
     Text,
     Icon,
     MaterialIcon,
+    ProgressRing,
 }

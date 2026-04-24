@@ -734,6 +734,10 @@ A lower limit increases the frequency of the syncing attempt. If constant offset
           xml:space="preserve">
         <value>osu!droid main directory</value>
     </data>
+    <data name="Options_CorePathSummaryIos"
+          xml:space="preserve">
+        <value>osu!droid main directory</value>
+    </data>
     <data name="Options_SkinTopPathTitle"
           xml:space="preserve">
         <value>Skin directory</value>
@@ -742,6 +746,10 @@ A lower limit increases the frequency of the syncing attempt. If constant offset
           xml:space="preserve">
         <value>Path to directory containing skin files. (default: /sdcard/osu!droid/Skin)</value>
     </data>
+    <data name="Options_SkinTopPathSummaryIos"
+          xml:space="preserve">
+        <value>Path to directory containing skin files. (default: {0})</value>
+    </data>
     <data name="Options_DirectoryTitle"
           xml:space="preserve">
         <value>Beatmap location</value>
@@ -749,6 +757,10 @@ A lower limit increases the frequency of the syncing attempt. If constant offset
     <data name="Options_DirectorySummary"
           xml:space="preserve">
         <value>Path to directory containing beatmaps (default: /mnt/sdcard/osu!droid/Songs)</value>
+    </data>
+    <data name="Options_DirectorySummaryIos"
+          xml:space="preserve">
+        <value>Path to directory containing beatmaps (default: {0})</value>
     </data>
     <data name="Options_DirectoryValue"
           xml:space="preserve">
@@ -873,6 +885,10 @@ A lower limit increases the frequency of the syncing attempt. If constant offset
     <data name="BeatmapDownloader_Status"
           xml:space="preserve">
         <value>Status</value>
+    </data>
+    <data name="BeatmapDownloader_SelectMirror"
+          xml:space="preserve">
+        <value>Select a beatmap mirror</value>
     </data>
     <data name="BeatmapDownloader_Ascending"
           xml:space="preserve">
@@ -1052,7 +1068,23 @@ A lower limit increases the frequency of the syncing attempt. If constant offset
     </data>
     <data name="MainMenu_ExitInstruction"
           xml:space="preserve">
+        <value>Done playing? Swipe this app away to close it.</value>
+    </data>
+    <data name="MainMenu_ExitDialogTitle"
+          xml:space="preserve">
+        <value>Exit</value>
+    </data>
+    <data name="MainMenu_ExitDialogMessage"
+          xml:space="preserve">
         <value>Are you sure you want to exit the game?</value>
+    </data>
+    <data name="MainMenu_ExitDialogConfirm"
+          xml:space="preserve">
+        <value>Yes</value>
+    </data>
+    <data name="MainMenu_ExitDialogCancel"
+          xml:space="preserve">
+        <value>No</value>
     </data>
     <data name="MainMenu_DevelopmentBuild"
           xml:space="preserve">

@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Runtime.Paths;
 
 namespace OsuDroid.Game.Beatmaps;
@@ -11,6 +12,8 @@ public interface IBeatmapLibrary
     BeatmapLibrarySnapshot Load();
 
     BeatmapLibrarySnapshot Scan(IReadOnlySet<string>? forceUpdateDirectories = null);
+
+    void ApplyOnlineMetadata(string setDirectory, BeatmapOnlineMetadata metadata);
 
     bool NeedsScanRefresh();
 
@@ -29,6 +32,10 @@ public interface IBeatmapLibrary
     void ToggleCollectionMembership(string name, string setDirectory);
 
     void DeleteBeatmapSet(string directory);
+
+    void ClearBeatmapCache();
+
+    void ClearProperties();
 }
 
 public sealed class BeatmapLibrary(
@@ -115,6 +122,22 @@ public sealed class BeatmapLibrary(
         return Load();
     }
 
+    public void ApplyOnlineMetadata(string setDirectory, BeatmapOnlineMetadata metadata)
+    {
+        foreach (BeatmapOnlineDifficultyMetadata beatmap in metadata.Beatmaps)
+        {
+            repository.UpdateOnlineMetadata(
+                setDirectory,
+                beatmap.Id,
+                beatmap.Version,
+                (int)metadata.Status,
+                beatmap.StarRating,
+                beatmap.StarRating);
+        }
+
+        _snapshot = Load();
+    }
+
     public BeatmapOptions GetOptions(string setDirectory) => repository.GetBeatmapOptions(setDirectory);
 
     public void SaveOptions(BeatmapOptions options) => repository.UpsertBeatmapOptions(options);
@@ -161,6 +184,14 @@ public sealed class BeatmapLibrary(
 
         _snapshot = Load();
     }
+
+    public void ClearBeatmapCache()
+    {
+        repository.ClearBeatmapCache();
+        _snapshot = BeatmapLibrarySnapshot.Empty;
+    }
+
+    public void ClearProperties() => repository.ClearBeatmapOptions();
 
     private IEnumerable<BeatmapInfo> ParseBeatmapSet(string directory)
     {

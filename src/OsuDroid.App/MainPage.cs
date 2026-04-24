@@ -35,6 +35,7 @@ public sealed class MainPage : ContentPage
         if (monoGame is not null)
             return;
 
+        CrashLogInstaller.Install(platformPaths.Roots);
         runtimeServices = new PlatformRuntimeServices(Path.Combine(AppContext.BaseDirectory, "assets", "droid", "sfx"));
         var bootstrapper = new GameBootstrapper(
             () => OsuDroidGameCore.Create(

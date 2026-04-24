@@ -10,6 +10,8 @@ ANDROID_APK := src/OsuDroid.App/bin/Debug/net9.0-android/moe.osudroid-Signed.apk
 IOS_BUNDLE_ID := moe.osudroid
 IOS_BUILD_SCRIPT := scripts/build-ios-device.sh
 IOS_VERIFY_BUNDLE_SCRIPT := scripts/verify-ios-bundle.sh
+IOS_VERIFY_INSTALL_SCRIPT := scripts/verify-ios-install.sh
+IOS_UNINSTALL_SCRIPT := scripts/uninstall-ios-device.sh
 IOS_DOCTOR_SCRIPT := scripts/doctor-ios-device.sh
 IOS_XCODE_SCRIPT := scripts/xcode-ios-device.sh
 IOS_APP_PATH_SCRIPT := $(IOS_BUILD_SCRIPT) --print-app-path
@@ -17,12 +19,6 @@ IOS_DEVELOPER_DIR ?= /Applications/Xcode_26.3.app/Contents/Developer
 IOS_PROVISIONING_PROFILE ?=
 IOS_CODESIGN_KEY ?=
 IOS_TEAM_ID ?=
-APPIUM_URL ?= http://127.0.0.1:4723
-IOS_WDA_TEAM_ID ?= 9PQP6CDMQT
-IOS_WDA_BUNDLE_ID ?= $(IOS_BUNDLE_ID).WebDriverAgentRunner
-IOS_SCREENSHOT_PATH ?= screenshots/ios-live.png
-APPIUM_IOS_SCRIPT := scripts/dev/appium-ios.mjs
-APPIUM_DOCTOR_SCRIPT := scripts/dev/appium-doctor.sh
 
 ifdef ANDROID_SERIAL
 ADB := adb -s $(ANDROID_SERIAL)
@@ -35,9 +31,8 @@ endif
 	test-no-build \
 	build-android build-ios verify-android-bass \
 	verify-ios-bundle \
-	install-android launch-android \
-	install-ios launch-ios doctor-ios xcode-ios \
-	appium-doctor appium-ios-screenshot appium-ios-tap appium-ios-refresh \
+	install-android uninstall-android reinstall-android launch-android \
+	install-ios uninstall-ios reinstall-ios launch-ios doctor-ios xcode-ios \
 	run-android run-ios
 
 require-ios-signing:
@@ -90,6 +85,15 @@ install-android: build-android verify-android-bass
 	test -f "$(ANDROID_APK)"
 	$(ADB) install -r "$(ANDROID_APK)"
 
+uninstall-android:
+	@output="$$( $(ADB) uninstall $(ANDROID_PACKAGE) 2>&1 )" && status=0 || status=$$?; \
+	printf '%s\n' "$$output"; \
+	if [ "$$status" -ne 0 ] && ! printf '%s\n' "$$output" | grep -E "Unknown package|not installed" >/dev/null; then \
+		exit "$$status"; \
+	fi
+
+reinstall-android: uninstall-android install-android
+
 launch-android:
 	$(ADB) shell monkey -p $(ANDROID_PACKAGE) -c android.intent.category.LAUNCHER 1
 
@@ -99,12 +103,19 @@ install-ios: build-ios verify-ios-bundle
 	@[ -n "$(IOS_DEVICE_ID)" ] || (echo "IOS_DEVICE_ID is required. Example: make install-ios IOS_DEVICE_ID=<device-id>"; exit 1)
 	@IOS_APP_PATH=$$(IOS_DEVELOPER_DIR="$(IOS_DEVELOPER_DIR)" IOS_PROVISIONING_PROFILE="$(IOS_PROVISIONING_PROFILE)" IOS_CODESIGN_KEY="$(IOS_CODESIGN_KEY)" IOS_TEAM_ID="$(IOS_TEAM_ID)" $(IOS_APP_PATH_SCRIPT)); \
 	test -d "$$IOS_APP_PATH"; \
-	DEVELOPER_DIR="$(IOS_DEVELOPER_DIR)" xcrun devicectl device install app --device "$(IOS_DEVICE_ID)" "$$IOS_APP_PATH"
+	DEVELOPER_DIR="$(IOS_DEVELOPER_DIR)" xcrun devicectl device install app --device "$(IOS_DEVICE_ID)" "$$IOS_APP_PATH" --timeout 60 --json-output /tmp/osudroid-devicectl-install.json --log-output /tmp/osudroid-devicectl-install.log; \
+	IOS_DEVELOPER_DIR="$(IOS_DEVELOPER_DIR)" IOS_DEVICE_ID="$(IOS_DEVICE_ID)" IOS_BUNDLE_ID="$(IOS_BUNDLE_ID)" ./$(IOS_VERIFY_INSTALL_SCRIPT) "$$IOS_APP_PATH"
+
+uninstall-ios:
+	@[ -n "$(IOS_DEVICE_ID)" ] || (echo "IOS_DEVICE_ID is required. Example: make uninstall-ios IOS_DEVICE_ID=<device-id>"; exit 1)
+	@IOS_DEVELOPER_DIR="$(IOS_DEVELOPER_DIR)" IOS_DEVICE_ID="$(IOS_DEVICE_ID)" IOS_BUNDLE_ID="$(IOS_BUNDLE_ID)" ./$(IOS_UNINSTALL_SCRIPT)
+
+reinstall-ios: uninstall-ios install-ios
 
 launch-ios:
 	@[ -n "$(IOS_DEVICE_ID)" ] || (echo "IOS_DEVICE_ID is required. Example: make launch-ios IOS_DEVICE_ID=<device-id>"; exit 1)
 	@if IOS_DEVELOPER_DIR="$(IOS_DEVELOPER_DIR)" IOS_DEVICE_ID="$(IOS_DEVICE_ID)" ./$(IOS_DOCTOR_SCRIPT); then \
-		DEVELOPER_DIR="$(IOS_DEVELOPER_DIR)" xcrun devicectl device process launch --device "$(IOS_DEVICE_ID)" --terminate-existing "$(IOS_BUNDLE_ID)"; \
+		DEVELOPER_DIR="$(IOS_DEVELOPER_DIR)" xcrun devicectl device process launch --device "$(IOS_DEVICE_ID)" --terminate-existing "$(IOS_BUNDLE_ID)" --timeout 60 --json-output /tmp/osudroid-devicectl-launch.json --log-output /tmp/osudroid-devicectl-launch.log; \
 	else \
 		echo "CoreDevice is unhealthy on this machine. Falling back to the supported Xcode workflow."; \
 		IOS_DEVELOPER_DIR="$(IOS_DEVELOPER_DIR)" IOS_DEVICE_ID="$(IOS_DEVICE_ID)" IOS_BUNDLE_ID="$(IOS_BUNDLE_ID)" ./$(IOS_XCODE_SCRIPT); \
@@ -116,20 +127,5 @@ doctor-ios:
 
 xcode-ios:
 	@IOS_DEVELOPER_DIR="$(IOS_DEVELOPER_DIR)" IOS_DEVICE_ID="$(IOS_DEVICE_ID)" IOS_BUNDLE_ID="$(IOS_BUNDLE_ID)" ./$(IOS_XCODE_SCRIPT)
-
-appium-doctor:
-	@./$(APPIUM_DOCTOR_SCRIPT)
-
-appium-ios-screenshot:
-	@[ -n "$(IOS_DEVICE_ID)" ] || (echo "IOS_DEVICE_ID is required. Example: make appium-ios-screenshot IOS_DEVICE_ID=<device-id>"; exit 1)
-	@APPIUM_URL="$(APPIUM_URL)" IOS_DEVICE_ID="$(IOS_DEVICE_ID)" IOS_BUNDLE_ID="$(IOS_BUNDLE_ID)" IOS_TEAM_ID="$(IOS_WDA_TEAM_ID)" IOS_WDA_BUNDLE_ID="$(IOS_WDA_BUNDLE_ID)" IOS_SCREENSHOT_PATH="$(IOS_SCREENSHOT_PATH)" node $(APPIUM_IOS_SCRIPT) screenshot
-
-appium-ios-tap:
-	@[ -n "$(IOS_DEVICE_ID)" ] || (echo "IOS_DEVICE_ID is required. Example: make appium-ios-tap IOS_DEVICE_ID=<device-id> X=640 Y=360"; exit 1)
-	@[ -n "$(X)" ] || (echo "X is required."; exit 1)
-	@[ -n "$(Y)" ] || (echo "Y is required."; exit 1)
-	@APPIUM_URL="$(APPIUM_URL)" IOS_DEVICE_ID="$(IOS_DEVICE_ID)" IOS_BUNDLE_ID="$(IOS_BUNDLE_ID)" IOS_TEAM_ID="$(IOS_WDA_TEAM_ID)" IOS_WDA_BUNDLE_ID="$(IOS_WDA_BUNDLE_ID)" IOS_SCREENSHOT_PATH="$(IOS_SCREENSHOT_PATH)" X="$(X)" Y="$(Y)" node $(APPIUM_IOS_SCRIPT) tap
-
-appium-ios-refresh: appium-ios-screenshot
 
 run-ios: install-ios launch-ios

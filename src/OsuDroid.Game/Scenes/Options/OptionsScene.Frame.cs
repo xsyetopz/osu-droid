@@ -14,6 +14,7 @@ public sealed partial class OptionsScene
         AddActiveList(elements, viewport, sectionData, activeContentScrollOffset);
         AddSections(elements, viewport, sectionData.Section, activeSectionScrollOffset);
         AddAppBar(elements, viewport);
+        AddStatusMessage(elements, viewport);
 
         return new UiFrameSnapshot(viewport, elements, DroidAssets.MainMenuManifest);
     }
@@ -122,9 +123,10 @@ public sealed partial class OptionsScene
             : Math.Max(80f * DpScale, bounds.Width - RowPadding * 3f - reservedControlWidth);
         UiColor textColor = row.IsEnabled ? s_disabledWhite : s_secondaryText;
         elements.Add(Text($"options-row-{index}-label", _localizer[row.TitleKey], bounds.X + RowPadding, textTop, textWidth, titleHeight, RowTitleSize, textColor, rowAlpha * 0.94f, true, rowAction, isInteractive));
-        if (!string.IsNullOrEmpty(_localizer[row.SummaryKey]))
+        string summaryText = GetSummaryText(row);
+        if (!string.IsNullOrEmpty(summaryText))
         {
-            elements.Add(Text($"options-row-{index}-summary", _localizer[row.SummaryKey], bounds.X + RowPadding, textTop + titleHeight + 6f * DpScale, textWidth, summaryHeight, RowSummarySize, s_secondaryText, rowAlpha * 0.86f, false, rowAction, isInteractive));
+            elements.Add(Text($"options-row-{index}-summary", summaryText, bounds.X + RowPadding, textTop + titleHeight + 6f * DpScale, textWidth, summaryHeight, RowSummarySize, s_secondaryText, rowAlpha * 0.86f, false, rowAction, isInteractive));
         }
 
         if (row.Kind == SettingsRowKind.Checkbox)
@@ -219,9 +221,10 @@ public sealed partial class OptionsScene
         bool isInteractive = IsInteractive(row);
         UiAction rowAction = isInteractive ? RowAction(row, index) : UiAction.None;
         elements.Add(Text($"options-row-{index}-label", _localizer[row.TitleKey], containerX, textTop, textWidth, titleHeight, RowTitleSize, s_disabledWhite, textAlpha * 0.94f, true, rowAction, isInteractive));
-        if (!string.IsNullOrEmpty(_localizer[row.SummaryKey]))
+        string summaryText = GetSummaryText(row);
+        if (!string.IsNullOrEmpty(summaryText))
         {
-            AddSliderSummary(elements, $"options-row-{index}-summary", _localizer[row.SummaryKey], containerX, summaryTop, textWidth, row, textAlpha * 0.86f, rowAction, isInteractive);
+            AddSliderSummary(elements, $"options-row-{index}-summary", summaryText, containerX, summaryTop, textWidth, row, textAlpha * 0.86f, rowAction, isInteractive);
         }
 
         elements.Add(Text($"options-row-{index}-value", value.ToString(CultureInfo.InvariantCulture), containerX + containerWidth - valueWidth, valueTop, valueWidth, titleHeight, RowTitleSize, s_secondaryText, 0.9f * textAlpha, false, rowAction, isInteractive, UiTextAlignment.Right));
@@ -301,6 +304,20 @@ public sealed partial class OptionsScene
         float lockSize = 18f * DpScale;
         var lockBounds = new UiRect(bounds.Right - RowPadding - lockSize, bounds.Y + 10f * DpScale, lockSize, lockSize);
         elements.Add(MaterialIcon($"options-row-{index}-lock", UiMaterialIcon.Lock, lockBounds, s_secondaryText, 0.82f, UiAction.None, false));
+    }
+
+    private void AddStatusMessage(List<UiElementSnapshot> elements, VirtualViewport viewport)
+    {
+        if (_statusMessageKey is null)
+        {
+            return;
+        }
+
+        string message = _localizer[_statusMessageKey];
+        float width = Math.Min(520f * DpScale, viewport.VirtualWidth - ContentPaddingX * 2f);
+        var bounds = new UiRect((viewport.VirtualWidth - width) / 2f, viewport.VirtualHeight - 72f * DpScale, width, 44f * DpScale);
+        elements.Add(Fill("options-status-message-bg", bounds, s_selectedSection, 0.96f, UiAction.None, AndroidRoundedRectRadius));
+        elements.Add(Text("options-status-message", message, bounds.X + 18f * DpScale, bounds.Y + 10f * DpScale, bounds.Width - 36f * DpScale, RowTitleSize + 4f, RowTitleSize, s_white, 1f, true, UiAction.None, true, UiTextAlignment.Center));
     }
 
     private static float CalculateContentHeight(IReadOnlyList<SettingsCategory> categories) => categories.Sum(category => CategoryTopMargin + CalculateCategoryHeight(category));

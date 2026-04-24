@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using OsuDroid.Game.Beatmaps.Online;
 using OsuDroid.Game.Localization;
 using OsuDroid.Game.Runtime;
@@ -28,8 +29,12 @@ public sealed partial class BeatmapDownloaderScene
     private static readonly UiColor s_white = UiColor.Opaque(255, 255, 255);
     private static readonly UiColor s_secondary = UiColor.Opaque(178, 178, 204);
     private static readonly UiColor s_muted = UiColor.Opaque(130, 130, 168);
+    private static readonly UiColor s_filterLabel = new(255, 255, 255, 191);
+    private static readonly UiColor s_dropdownSelected = new(242, 114, 114, 41);
     private static readonly UiColor s_coverFallback = UiColor.Opaque(75, 75, 128);
     private static readonly UiColor s_filterPanel = UiColor.Opaque(33, 33, 51);
+    private static readonly UiColor s_dropdownPanel = UiColor.Opaque(40, 40, 61);
+    private static readonly UiColor s_dialogScrim = new(0, 0, 0, 128);
     private static readonly UiColor s_modalShade = new(19, 19, 26, 190);
 
     private static readonly HttpClient s_coverClient = new();
@@ -39,6 +44,8 @@ public sealed partial class BeatmapDownloaderScene
     private readonly GameLocalizer _localizer;
     private IBeatmapPreviewPlayer _previewPlayer;
     private readonly string _coverCacheDirectory;
+    private readonly string? _downloadTracePath;
+    private readonly ConcurrentQueue<BeatmapDownloadCompletion> _downloadCompletions = new();
     private ITextInputService _textInputService;
     private CancellationTokenSource _searchCancellation = new();
     private IReadOnlyList<BeatmapMirrorSet> _sets = [];
@@ -67,6 +74,7 @@ public sealed partial class BeatmapDownloaderScene
     private string _query = string.Empty;
     private string? _message;
     private string? _lastImportedSetDirectory;
+    private float _loadingIndicatorRotationDegrees;
     private BeatmapMirrorKind _mirror = BeatmapMirrorKind.OsuDirect;
     private BeatmapMirrorSort _sort = BeatmapMirrorSort.RankedDate;
     private BeatmapMirrorOrder _order = BeatmapMirrorOrder.Descending;
@@ -78,13 +86,15 @@ public sealed partial class BeatmapDownloaderScene
         ITextInputService _textInputService,
         IBeatmapPreviewPlayer _previewPlayer,
         string _coverCacheDirectory,
-        GameLocalizer? _localizer = null)
+        GameLocalizer? _localizer = null,
+        string? _downloadTracePath = null)
     {
         this._mirrorClient = _mirrorClient;
         this._downloadService = _downloadService;
         this._textInputService = _textInputService;
         this._previewPlayer = _previewPlayer;
         this._coverCacheDirectory = _coverCacheDirectory;
+        this._downloadTracePath = _downloadTracePath;
         this._localizer = _localizer ?? new GameLocalizer();
         _message = this._localizer["BeatmapDownloader_SearchInitial"];
         Directory.CreateDirectory(_coverCacheDirectory);
@@ -153,6 +163,17 @@ public sealed partial class BeatmapDownloaderScene
 
     public GameFrameSnapshot CreateSnapshot(VirtualViewport viewport) => new("BeatmapDownloader", "Beatmap Downloader", string.Empty, Array.Empty<string>(), 0, false, CreateFrame(viewport));
 
+    public void Update(TimeSpan elapsed)
+    {
+        _loadingIndicatorRotationDegrees -= (float)(360d * elapsed.TotalSeconds);
+        if (_loadingIndicatorRotationDegrees <= -360f)
+        {
+            _loadingIndicatorRotationDegrees %= 360f;
+        }
+
+        ApplyQueuedDownloadCompletions();
+    }
+
     private string DisplayTitle(BeatmapMirrorSet set) => _forceRomanizedMetadata || string.IsNullOrWhiteSpace(set.TitleUnicode) ? set.Title : set.TitleUnicode;
 
     private string DisplayArtist(BeatmapMirrorSet set) => _forceRomanizedMetadata || string.IsNullOrWhiteSpace(set.ArtistUnicode) ? set.Artist : set.ArtistUnicode;
@@ -165,4 +186,5 @@ public sealed partial class BeatmapDownloaderScene
 
 
 
+    private sealed record BeatmapDownloadCompletion(bool IsSuccess, string? ArchivePath, string? ErrorMessage);
 }

@@ -5,8 +5,8 @@ public sealed partial class OptionsScene
     private static readonly SettingsCategory[] s_generalCategories =
     [
         new("Options_CategoryOnline", [
-            new("stayOnline", "Options_ServerConnectionTitle", "Options_ServerConnectionSummary", SettingsRowKind.Checkbox, true, Action: UiAction.OptionsToggleServerConnection, Availability: SettingsRowAvailability.Locked),
-            new("loadAvatar", "Options_LoadAvatarTitle", "Options_LoadAvatarSummary", SettingsRowKind.Checkbox, true, Action: UiAction.OptionsToggleLoadAvatar, Availability: SettingsRowAvailability.Locked),
+            new("stayOnline", "Options_ServerConnectionTitle", "Options_ServerConnectionSummary", SettingsRowKind.Checkbox, false, Action: UiAction.OptionsToggleServerConnection),
+            new("loadAvatar", "Options_LoadAvatarTitle", "Options_LoadAvatarSummary", SettingsRowKind.Checkbox, false, Action: UiAction.OptionsToggleLoadAvatar),
             new("difficultyAlgorithm", "Options_DifficultyAlgorithmTitle", "Options_DifficultyAlgorithmSummary", SettingsRowKind.Select, IsBottom: true, ValueKeys: ["Options_DifficultyAlgorithmDroid", "Options_DifficultyAlgorithmStandard"]),
         ]),
         new("Options_CategoryAccount", [
@@ -15,14 +15,14 @@ public sealed partial class OptionsScene
             new("registerAcc", "Options_RegisterTitle", "Options_RegisterSummary", SettingsRowKind.Button, IsBottom: true),
         ]),
         new("Options_CategoryCommunity", [
-            new("receiveAnnouncements", "Options_ReceiveAnnouncementsTitle", "Options_ReceiveAnnouncementsSummary", SettingsRowKind.Checkbox, true, Action: UiAction.OptionsToggleAnnouncements, IsBottom: true, Availability: SettingsRowAvailability.Locked),
+            new("receiveAnnouncements", "Options_ReceiveAnnouncementsTitle", "Options_ReceiveAnnouncementsSummary", SettingsRowKind.Checkbox, true, Action: UiAction.OptionsToggleAnnouncements, IsBottom: true),
         ]),
         new("Options_CategoryUpdates", [
             new("update", "Options_UpdateTitle", "Options_UpdateSummary", SettingsRowKind.Button, IsBottom: true),
         ]),
         new("Options_CategoryConfigBackup", [
-            new("backup", "Options_BackupTitle", "Options_BackupSummary", SettingsRowKind.Button, Availability: SettingsRowAvailability.Locked),
-            new("restore", "Options_RestoreTitle", "Options_RestoreSummary", SettingsRowKind.Button, IsBottom: true, Availability: SettingsRowAvailability.Locked),
+            new("backup", "Options_BackupTitle", "Options_BackupSummary", SettingsRowKind.Button),
+            new("restore", "Options_RestoreTitle", "Options_RestoreSummary", SettingsRowKind.Button, IsBottom: true),
         ]),
         new("Options_CategoryLocalization", [
             new("language", "Options_LanguageTitle", "Options_LanguageSummary", SettingsRowKind.Select, IsBottom: true, ValueKeys: ["Options_LanguageSystemDefault"], Availability: SettingsRowAvailability.Locked),
@@ -107,8 +107,8 @@ public sealed partial class OptionsScene
                 new("forceromanized", "Options_ForceRomanizedTitle", "Options_ForceRomanizedSummary", SettingsRowKind.Checkbox, false),
             ]),
             new("Options_CategoryStorage", [
-                new("clear_beatmap_cache", "Options_ClearBeatmapCacheTitle", "Options_ClearBeatmapCacheSummary", SettingsRowKind.Button, Availability: SettingsRowAvailability.Locked),
-                new("clear_properties", "Options_ClearPropertiesTitle", "Options_ClearPropertiesSummary", SettingsRowKind.Button, Availability: SettingsRowAvailability.Locked),
+                new("clear_beatmap_cache", "Options_ClearBeatmapCacheTitle", "Options_ClearBeatmapCacheSummary", SettingsRowKind.Button),
+                new("clear_properties", "Options_ClearPropertiesTitle", "Options_ClearPropertiesSummary", SettingsRowKind.Button),
             ]),
         ]),
         new(OptionsSection.Input, "Options_Input", UiMaterialIcon.GestureTapButton, UiAction.OptionsSectionInput, [

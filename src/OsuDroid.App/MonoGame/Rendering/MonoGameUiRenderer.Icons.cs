@@ -23,6 +23,11 @@ internal sealed partial class MonoGameUiRenderer
                 DrawLine(spriteBatch, bounds.X + bounds.Width * 0.42f, bounds.Bottom - bounds.Height * 0.22f, bounds.Right - bounds.Width * 0.14f, bounds.Y + bounds.Height * 0.2f, color, bounds.Width * 0.11f);
                 break;
 
+            case UiIcon.Close:
+                DrawLine(spriteBatch, bounds.X + bounds.Width * 0.2f, bounds.Y + bounds.Height * 0.2f, bounds.Right - bounds.Width * 0.2f, bounds.Bottom - bounds.Height * 0.2f, color, bounds.Width * 0.11f);
+                DrawLine(spriteBatch, bounds.Right - bounds.Width * 0.2f, bounds.Y + bounds.Height * 0.2f, bounds.X + bounds.Width * 0.2f, bounds.Bottom - bounds.Height * 0.2f, color, bounds.Width * 0.11f);
+                break;
+
             case UiIcon.CheckboxChecked:
                 DrawFill(spriteBatch, bounds, color, bounds.Width * 0.08f);
                 DrawIcon(spriteBatch, Inset(bounds, bounds.Width * 0.12f), XnaColor.Black * 0.75f, UiIcon.Check);

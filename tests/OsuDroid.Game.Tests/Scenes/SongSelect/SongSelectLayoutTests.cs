@@ -47,13 +47,26 @@ public sealed partial class SongSelectSceneTests
         Assert.That(frame.Elements.Any(element => element.Text is "Mods" or "Beatmap Options" or "Random"), Is.False);
     }
     [Test]
-    public void OnlineScorePanelUsesLegacyBoundsAndOfflineDefaults()
+    public void OnlineScorePanelIsHiddenUntilServerConnectionIsOn()
     {
         var scene = new SongSelectScene(new FakeLibrary(CreateSnapshot()), new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"));
 
         scene.Enter();
         UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
-        UiFrameSnapshot mainMenuFrame = new MainMenuScene().CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+
+        Assert.That(frame.Elements.Any(element => element.Id == "songselect-scoring-switcher"), Is.True);
+        Assert.That(frame.Elements.Any(element => element.Id == "songselect-score-panel"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "songselect-score-player"), Is.False);
+    }
+
+    [Test]
+    public void OnlineScorePanelUsesLegacyBoundsWhenServerConnectionIsOn()
+    {
+        var scene = new SongSelectScene(new FakeLibrary(CreateSnapshot()), new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"), OnlineProfilePanelState.Connecting);
+
+        scene.Enter();
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot mainMenuFrame = new MainMenuScene(onlinePanelState: OnlineProfilePanelState.Connecting).CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
         UiElementSnapshot mainMenuPanel = mainMenuFrame.Elements.Single(element => element.Id == "profile-panel");
         UiElementSnapshot mainMenuAvatarFooter = mainMenuFrame.Elements.Single(element => element.Id == "profile-avatar-footer");
         UiElementSnapshot scorePanel = frame.Elements.Single(element => element.Id == "songselect-score-panel");
@@ -65,23 +78,27 @@ public sealed partial class SongSelectSceneTests
         Assert.That(scoreAvatarFooter.Bounds, Is.EqualTo(new UiRect(540.5f, 610f, 110f, 110f)));
         Assert.That(scoreAvatarFooter.Alpha, Is.EqualTo(mainMenuAvatarFooter.Alpha));
         Assert.That(scoreAvatarFooter.Color, Is.EqualTo(mainMenuAvatarFooter.Color));
-        Assert.That(frame.Elements.Single(element => element.Id == "songselect-score-player").Text, Is.EqualTo("Guest"));
-        Assert.That(frame.Elements.Single(element => element.Id == "songselect-score-avatar").AssetName, Is.EqualTo(DroidAssets.EmptyAvatar));
+        Assert.That(frame.Elements.Single(element => element.Id == "songselect-score-message").Text, Is.EqualTo("Logging in..."));
+        Assert.That(frame.Elements.Single(element => element.Id == "songselect-score-submessage").Text, Is.EqualTo("Connecting to server..."));
+        Assert.That(frame.Elements.Any(element => element.Id == "songselect-score-avatar"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "songselect-score-player"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "songselect-score-pp"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "songselect-score-acc"), Is.False);
     }
+
     [Test]
     public void LoggedInScorePanelShowsPerformanceAndAccuracy()
     {
-        var profile = new OnlineProfileSnapshot("Player", DroidAssets.EmptyAvatar, PerformancePoints: 12345, Accuracy: 98.76f);
-        var scene = new SongSelectScene(new FakeLibrary(CreateSnapshot()), new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"), profile);
+        var state = new OnlineProfilePanelState(new OnlineProfileSnapshot("Player", DroidAssets.EmptyAvatar, Rank: 42, PerformancePoints: 12345, Accuracy: 98.76f));
+        var scene = new SongSelectScene(new FakeLibrary(CreateSnapshot()), new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"), state);
 
         scene.Enter();
         UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
 
         Assert.That(frame.Elements.Single(element => element.Id == "songselect-score-player").Text, Is.EqualTo("Player"));
-        Assert.That(frame.Elements.Single(element => element.Id == "songselect-score-pp").Text, Does.Contain("12,345pp"));
-        Assert.That(frame.Elements.Single(element => element.Id == "songselect-score-acc").Text, Is.EqualTo("98.76%"));
+        Assert.That(frame.Elements.Single(element => element.Id == "songselect-score-rank").Text, Is.EqualTo("#42"));
+        Assert.That(frame.Elements.Single(element => element.Id == "songselect-score-pp").Text, Is.EqualTo("Performance: 12,345pp"));
+        Assert.That(frame.Elements.Single(element => element.Id == "songselect-score-acc").Text, Is.EqualTo("Accuracy: 98.76%"));
     }
     [Test]
     public void ScoringSwitcherStaysDisabledUntilOnlineScoringIsEnabled()

@@ -17,10 +17,12 @@ public sealed class AppDelegate : UIApplicationDelegate
     public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
     {
         application.IdleTimerDisabled = true;
+        DroidPathRoots pathRoots = GetPathRoots();
+        CrashLogInstaller.Install(pathRoots);
         runtimeServices = new PlatformRuntimeServices(Path.Combine(NSBundle.MainBundle.ResourcePath!, "assets", "droid", "sfx"));
 
         var bootstrapper = new GameBootstrapper(
-            () => OsuDroidGameCore.Create(GetPathRoots(), BuildType, DisplayVersion, showStartupScene: true),
+            () => OsuDroidGameCore.Create(pathRoots, BuildType, DisplayVersion, showStartupScene: true),
             runtimeServices.AttachTo);
 
         game = new OsuDroidMonoGame(bootstrapper);
@@ -59,6 +61,6 @@ public sealed class AppDelegate : UIApplicationDelegate
     {
         var libraryPath = NSSearchPath.GetDirectories(NSSearchPathDirectory.LibraryDirectory, NSSearchPathDomain.User)[0];
         var cachePath = NSSearchPath.GetDirectories(NSSearchPathDirectory.CachesDirectory, NSSearchPathDomain.User)[0];
-        return new DroidPathRoots(Path.Combine(libraryPath, "osu-droid"), cachePath);
+        return DroidPathRoots.FromAppDataDirectory(libraryPath, cachePath);
     }
 }

@@ -29,6 +29,8 @@ public sealed partial class OptionsScene
     private float _sectionScrollOffset;
     private string? _pendingSfxKey;
     private string? _changedSettingKey;
+    private string? _statusMessageKey;
+    private TimeSpan _statusMessageRemaining;
     private int? _activeSliderRowIndex;
 
     public OptionsScene(GameLocalizer localizer, IGameSettingsStore? settingsStore = null, ITextInputService? textInputService = null, OptionsPathDefaults? pathDefaults = null)
@@ -37,25 +39,7 @@ public sealed partial class OptionsScene
         _settingsStore = settingsStore;
         _pathDefaults = pathDefaults ?? OptionsPathDefaults.Empty;
         _textInputService = textInputService ?? new NoOpTextInputService();
-        foreach (SettingsRow? row in s_sections.SelectMany(section => section.Categories).SelectMany(category => category.Rows))
-        {
-            if (row.Kind == SettingsRowKind.Checkbox)
-            {
-                _boolValues[row.Key] = _settingsStore?.GetBool(row.Key, row.DefaultChecked) ?? row.DefaultChecked;
-            }
-            else if (row.Kind == SettingsRowKind.Slider)
-            {
-                _intValues[row.Key] = ClampSliderValue(row, _settingsStore?.GetInt(row.Key, row.DefaultValue) ?? row.DefaultValue);
-            }
-            else if (row.Kind == SettingsRowKind.Select)
-            {
-                _intValues[row.Key] = ClampSelectValue(row, _settingsStore?.GetInt(row.Key, row.DefaultValue) ?? row.DefaultValue);
-            }
-            else if (row.Kind == SettingsRowKind.Input)
-            {
-                _stringValues[row.Key] = NormalizeInputValue(row, _settingsStore?.GetString(row.Key, InputDefaultValue(row)) ?? InputDefaultValue(row));
-            }
-        }
+        ReloadValuesFromStore();
     }
 
     public OptionsSection ActiveSection => _activeSection;
@@ -79,6 +63,58 @@ public sealed partial class OptionsScene
     public IReadOnlyList<string> ActiveCategories => ActiveSectionData.Categories.Select(category => _localizer.Get(category.TitleKey)).ToArray();
 
     public void SetTextInputService(ITextInputService service) => _textInputService = service;
+
+    public void ReloadValuesFromStore()
+    {
+        _boolValues.Clear();
+        _intValues.Clear();
+        _stringValues.Clear();
+        foreach (SettingsRow? row in AllRows())
+        {
+            if (row.Kind == SettingsRowKind.Checkbox)
+            {
+                _boolValues[row.Key] = _settingsStore?.GetBool(row.Key, row.DefaultChecked) ?? row.DefaultChecked;
+            }
+            else if (row.Kind == SettingsRowKind.Slider)
+            {
+                _intValues[row.Key] = ClampSliderValue(row, _settingsStore?.GetInt(row.Key, row.DefaultValue) ?? row.DefaultValue);
+            }
+            else if (row.Kind == SettingsRowKind.Select)
+            {
+                _intValues[row.Key] = ClampSelectValue(row, _settingsStore?.GetInt(row.Key, row.DefaultValue) ?? row.DefaultValue);
+            }
+            else if (row.Kind == SettingsRowKind.Input)
+            {
+                string storedValue = _settingsStore?.GetString(row.Key, InputDefaultValue(row)) ?? InputDefaultValue(row);
+                string normalizedValue = NormalizeInputValue(row, storedValue);
+                _stringValues[row.Key] = normalizedValue;
+                if (_settingsStore is not null && !string.Equals(storedValue, normalizedValue, StringComparison.Ordinal))
+                {
+                    _settingsStore.SetString(row.Key, normalizedValue);
+                }
+            }
+        }
+    }
+
+    public void ShowStatusMessage(string key)
+    {
+        _statusMessageKey = key;
+        _statusMessageRemaining = TimeSpan.FromSeconds(3);
+    }
+
+    public void Update(TimeSpan elapsed)
+    {
+        if (_statusMessageKey is null)
+        {
+            return;
+        }
+
+        _statusMessageRemaining -= elapsed;
+        if (_statusMessageRemaining <= TimeSpan.Zero)
+        {
+            _statusMessageKey = null;
+        }
+    }
 
     public string? ConsumePendingSfxKey()
     {
@@ -179,7 +215,7 @@ public sealed partial class OptionsScene
 
     public void SetIntValue(string key, int value)
     {
-        SettingsRow? row = s_sections.SelectMany(section => section.Categories).SelectMany(category => category.Rows).FirstOrDefault(candidate => candidate.Key == key);
+        SettingsRow? row = AllRows().FirstOrDefault(candidate => candidate.Key == key);
         if (row is null)
         {
             return;
@@ -194,7 +230,7 @@ public sealed partial class OptionsScene
 
     private static bool IsInteractive(string key)
     {
-        SettingsRow? row = s_sections.SelectMany(section => section.Categories).SelectMany(category => category.Rows).FirstOrDefault(candidate => candidate.Key == key);
+        SettingsRow? row = AllRows().FirstOrDefault(candidate => candidate.Key == key);
         return row is not null && IsInteractive(row);
     }
 
@@ -208,6 +244,15 @@ public sealed partial class OptionsScene
 
         return IsPathInput(row.Key) ? OptionsPathDisplayFormatter.Format(value) : value;
     }
+
+    private string GetSummaryText(SettingsRow row)
+        => _pathDefaults.UsesNativeDefaultSummaries ? row.Key switch
+        {
+            "corePath" => _localizer["Options_CorePathSummaryIos"],
+            "skinTopPath" => _localizer.Format("Options_SkinTopPathSummaryIos", OptionsPathDisplayFormatter.Format(_pathDefaults.SkinTopPath)),
+            "directory" => _localizer.Format("Options_DirectorySummaryIos", OptionsPathDisplayFormatter.Format(_pathDefaults.SongsDirectory)),
+            _ => _localizer[row.SummaryKey],
+        } : _localizer[row.SummaryKey];
 
     public void Scroll(float deltaY, VirtualViewport viewport) => Scroll(deltaY, new UiPoint(ContentPaddingX + SectionRailWidth + ListGap, ContentTop), viewport);
 
@@ -302,6 +347,8 @@ public sealed partial class OptionsScene
     }
 
     private SettingsSection ActiveSectionData => s_sections.Single(section => section.Section == _activeSection);
+
+    private static IEnumerable<SettingsRow> AllRows() => s_sections.SelectMany(section => section.Categories).SelectMany(category => category.Rows);
 
     private void Toggle(string key)
     {
@@ -419,7 +466,12 @@ public sealed partial class OptionsScene
             rowBounds));
     }
 
-    private string NormalizeInputValue(SettingsRow row, string? value) => !IsPathInput(row.Key) ? value ?? string.Empty : string.IsNullOrWhiteSpace(value) ? InputDefaultValue(row) : value.Trim();
+    private string NormalizeInputValue(SettingsRow row, string? value)
+        => !IsPathInput(row.Key)
+            ? value ?? string.Empty
+            : string.IsNullOrWhiteSpace(value)
+                ? InputDefaultValue(row)
+                : _pathDefaults.NormalizePathValue(value.Trim());
 
     private string InputDefaultValue(SettingsRow row) =>
         IsPathInput(row.Key) ? _pathDefaults.GetDefaultValue(row.Key) : string.Empty;

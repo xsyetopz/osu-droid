@@ -41,6 +41,8 @@ public sealed partial class OsuDroidGameCore
                 UiAction.SongSelectPropertiesDeleteConfirm or UiAction.SongSelectCollectionDeleteConfirm => "menuhit",
                 UiAction.SongSelectPropertiesDeleteCancel or UiAction.SongSelectCollectionDeleteCancel => "menuback",
                 UiAction.SongSelectPropertiesDismiss or UiAction.SongSelectCollectionsClose => "menuback",
+                UiAction.MainMenuExitConfirm => "menuhit",
+                UiAction.MainMenuExitCancel => "menuback",
                 UiAction.MainMenuVersionPill or UiAction.MainMenuAboutClose or UiAction.MainMenuAboutChangelog => "menuclick",
                 UiAction.MainMenuAboutOsuWebsite or UiAction.MainMenuAboutOsuDroidWebsite or UiAction.MainMenuAboutDiscord => "menuclick",
                 UiAction.MainMenuMusicPrevious or UiAction.MainMenuMusicPlay or UiAction.MainMenuMusicPause => "menuclick",

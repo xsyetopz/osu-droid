@@ -61,6 +61,22 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
                 continue;
             }
 
+            if (element.Kind == UiElementKind.ProgressRing)
+            {
+                if (element.ProgressRing is not null)
+                {
+                    var ringTexture = shapeStore.GetProgressRing(
+                        destination.Width,
+                        destination.Height,
+                        element.ProgressRing.StrokeWidth * frame.Viewport.Scale,
+                        element.ProgressRing.SweepDegrees,
+                        color,
+                        metrics);
+                    DrawSprite(spriteBatch, ringTexture, destination, XnaColor.White, element.RotationDegrees, UiSpriteFit.Stretch, element.RotationOriginX, element.RotationOriginY, null);
+                }
+                continue;
+            }
+
             if (element.Kind == UiElementKind.Text)
             {
                 if (element.Text is null || element.TextStyle is null)
