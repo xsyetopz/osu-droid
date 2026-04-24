@@ -84,7 +84,7 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
                 }
 
                 if (isTouchDragging)
-                    core.ScrollActiveScene(previousTouch.Y - virtualPoint.Y, touchStart, currentFrame.Viewport);
+                    core.ScrollActiveScene(previousTouch.X - virtualPoint.X, previousTouch.Y - virtualPoint.Y, touchStart, currentFrame.Viewport);
 
                 previousTouch = virtualPoint;
                 continue;

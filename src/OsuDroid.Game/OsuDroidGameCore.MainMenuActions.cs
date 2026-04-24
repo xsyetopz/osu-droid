@@ -518,6 +518,78 @@ public sealed partial class OsuDroidGameCore
                 break;
             case UiAction.SongSelectCollectionDeleteCancel:
                 break;
+            case UiAction.ModSelectBack:
+                break;
+            case UiAction.ModSelectClear:
+                break;
+            case UiAction.ModSelectCustomize:
+                break;
+            case UiAction.ModSelectSearchBox:
+                break;
+            case UiAction.ModSelectToggle0:
+                break;
+            case UiAction.ModSelectToggle1:
+                break;
+            case UiAction.ModSelectToggle2:
+                break;
+            case UiAction.ModSelectToggle3:
+                break;
+            case UiAction.ModSelectToggle4:
+                break;
+            case UiAction.ModSelectToggle5:
+                break;
+            case UiAction.ModSelectToggle6:
+                break;
+            case UiAction.ModSelectToggle7:
+                break;
+            case UiAction.ModSelectToggle8:
+                break;
+            case UiAction.ModSelectToggle9:
+                break;
+            case UiAction.ModSelectToggle10:
+                break;
+            case UiAction.ModSelectToggle11:
+                break;
+            case UiAction.ModSelectToggle12:
+                break;
+            case UiAction.ModSelectToggle13:
+                break;
+            case UiAction.ModSelectToggle14:
+                break;
+            case UiAction.ModSelectToggle15:
+                break;
+            case UiAction.ModSelectToggle16:
+                break;
+            case UiAction.ModSelectToggle17:
+                break;
+            case UiAction.ModSelectToggle18:
+                break;
+            case UiAction.ModSelectToggle19:
+                break;
+            case UiAction.ModSelectToggle20:
+                break;
+            case UiAction.ModSelectToggle21:
+                break;
+            case UiAction.ModSelectToggle22:
+                break;
+            case UiAction.ModSelectToggle23:
+                break;
+            case UiAction.ModSelectToggle24:
+                break;
+            case UiAction.ModSelectToggle25:
+                break;
+            case UiAction.ModSelectToggle26:
+                break;
+            case UiAction.ModSelectToggle27:
+                break;
+            case UiAction.ModSelectToggle28:
+                break;
+            case UiAction.ModSelectToggle29:
+                break;
+            case UiAction.ModSelectToggle30:
+                break;
+            case UiAction.ModSelectToggle31:
+                break;
             default:
                 return false;
         }

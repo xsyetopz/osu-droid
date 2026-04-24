@@ -17,6 +17,7 @@ public sealed partial class OsuDroidGameCore
         _ = HandleMainMenuUiAction(action) ||
             HandleDownloaderUiAction(action, viewport) ||
             HandleSongSelectUiAction(action, viewport) ||
+            HandleModSelectUiAction(action, viewport) ||
             HandleOptionsUiAction(action, viewport);
 
         PerfDiagnostics.Log("core.handleUiAction", start, $"action={action} scene={_activeScene}");
@@ -89,6 +90,12 @@ public sealed partial class OsuDroidGameCore
         {
             _options.HandleAction(action, viewport);
             ApplyChangedOptionsSetting(_options.ConsumeChangedSettingKey());
+            return true;
+        }
+
+        if (UiActionGroups.TryGetModSelectToggleIndex(action, out int modSelectToggleIndex) && _activeScene == ActiveScene.ModSelect)
+        {
+            _activeMenuSfxPlayer.Play(_modSelect.ToggleMod(modSelectToggleIndex) ? "check-on" : "check-off");
             return true;
         }
 

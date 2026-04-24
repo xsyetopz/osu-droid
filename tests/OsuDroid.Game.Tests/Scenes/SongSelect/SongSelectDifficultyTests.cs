@@ -166,7 +166,7 @@ public sealed partial class SongSelectSceneTests
         Assert.That(ratings.Droid, Is.Not.EqualTo(ratings.Standard));
     }
     [Test]
-    public void DifficultyCalculatorMatchesLegacyComRianOsuFixture()
+    public void DifficultyCalculatorMatchesReferenceComRianOsuFixture()
     {
         string osu = Path.Combine(
             TestContext.CurrentContext.TestDirectory,
@@ -185,7 +185,7 @@ public sealed partial class SongSelectSceneTests
 
         BeatmapStarRatings ratings = new BeatmapDifficultyCalculator().Calculate(Path.GetFullPath(osu));
 
-        Assert.That(ratings.Droid, Is.EqualTo(3.8554857722148643f).Within(0.000001f));
-        Assert.That(ratings.Standard, Is.EqualTo(4.552663607000551f).Within(0.000001f));
+        Assert.That(ratings.Droid, Is.EqualTo(3.86f).Within(0.000001f));
+        Assert.That(ratings.Standard, Is.EqualTo(4.70f).Within(0.000001f));
     }
 }

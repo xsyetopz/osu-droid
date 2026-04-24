@@ -131,7 +131,7 @@ public sealed class BeatmapLibrary(
                 beatmap.Id,
                 beatmap.Version,
                 (int)metadata.Status,
-                beatmap.StarRating,
+                null,
                 beatmap.StarRating);
         }
 

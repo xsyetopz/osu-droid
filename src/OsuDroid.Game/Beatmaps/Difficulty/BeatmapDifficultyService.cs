@@ -12,7 +12,12 @@ public interface IBeatmapDifficultyService
 
     BeatmapInfo EnsureCalculated(BeatmapInfo beatmap);
 
-    void EnsureCalculatorVersions();
+    DifficultyVersionState EnsureCalculatorVersions();
+}
+
+public readonly record struct DifficultyVersionState(bool DroidReset, bool StandardReset)
+{
+    public bool AnyReset => DroidReset || StandardReset;
 }
 
 public sealed class BeatmapDifficultyService(
@@ -21,8 +26,8 @@ public sealed class BeatmapDifficultyService(
     IBeatmapDifficultyCalculator? calculator = null,
     DifficultyAlgorithm algorithm = DifficultyAlgorithm.Droid) : IBeatmapDifficultyService
 {
-    public const long DroidCalculatorVersion = BeatmapDifficultyCalculator.DroidLegacyVersion + 2;
-    public const long StandardCalculatorVersion = BeatmapDifficultyCalculator.StandardLegacyVersion + 2;
+    public const long DroidCalculatorVersion = BeatmapDifficultyCalculator.DroidReferenceVersion;
+    public const long StandardCalculatorVersion = BeatmapDifficultyCalculator.StandardReferenceVersion;
     private const string DroidVersionKey = "droidStarRatingVersion";
     private const string StandardVersionKey = "standardStarRatingVersion";
     private readonly IBeatmapDifficultyCalculator _calculator = calculator ?? new BeatmapDifficultyCalculator();
@@ -31,8 +36,11 @@ public sealed class BeatmapDifficultyService(
 
     public BeatmapInfo EnsureCalculated(BeatmapInfo beatmap)
     {
-        EnsureCalculatorVersions();
-        if (beatmap.DroidStarRating is not null && beatmap.StandardStarRating is not null)
+        DifficultyVersionState versionState = EnsureCalculatorVersions();
+        bool needsDroidRating = versionState.DroidReset || beatmap.DroidStarRating is null;
+        bool needsStandardRating = versionState.StandardReset || beatmap.StandardStarRating is null;
+
+        if (!needsDroidRating && !needsStandardRating)
         {
             return beatmap;
         }
@@ -60,8 +68,8 @@ public sealed class BeatmapDifficultyService(
 
         BeatmapInfo updated = beatmap with
         {
-            DroidStarRating = beatmap.DroidStarRating ?? ratings.Droid,
-            StandardStarRating = beatmap.StandardStarRating ?? ratings.Standard,
+            DroidStarRating = needsDroidRating ? ratings.Droid : beatmap.DroidStarRating,
+            StandardStarRating = needsStandardRating ? ratings.Standard : beatmap.StandardStarRating,
         };
         repository.UpdateStarRatings(
             updated.Md5,
@@ -72,18 +80,25 @@ public sealed class BeatmapDifficultyService(
         return updated;
     }
 
-    public void EnsureCalculatorVersions()
+    public DifficultyVersionState EnsureCalculatorVersions()
     {
+        bool droidReset = false;
+        bool standardReset = false;
+
         if (repository.GetDifficultyMetadata(DroidVersionKey) < DroidCalculatorVersion)
         {
             repository.ResetDroidStarRatings();
             repository.SetDifficultyMetadata(DroidVersionKey, DroidCalculatorVersion);
+            droidReset = true;
         }
 
         if (repository.GetDifficultyMetadata(StandardVersionKey) < StandardCalculatorVersion)
         {
             repository.ResetStandardStarRatings();
             repository.SetDifficultyMetadata(StandardVersionKey, StandardCalculatorVersion);
+            standardReset = true;
         }
+
+        return new DifficultyVersionState(droidReset, standardReset);
     }
 }

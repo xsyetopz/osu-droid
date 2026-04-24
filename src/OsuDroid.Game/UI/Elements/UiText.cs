@@ -18,4 +18,10 @@ public sealed record UiTextStyle(
     bool Bold = false,
     UiTextAlignment Alignment = UiTextAlignment.Left,
     bool Underline = false,
-    UiTextVerticalAlignment VerticalAlignment = UiTextVerticalAlignment.Top);
+    UiTextVerticalAlignment VerticalAlignment = UiTextVerticalAlignment.Top,
+    UiTextAutoScroll? AutoScroll = null);
+
+public sealed record UiTextAutoScroll(
+    double ElapsedSeconds,
+    float Speed = 15f,
+    float TimeoutSeconds = 3f);

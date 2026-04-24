@@ -106,6 +106,13 @@ public sealed class LegacyLocalizationParityTests
             Assert.That(localizer["MainMenu_ExitDialogConfirm"], Is.EqualTo("Yes"));
             Assert.That(localizer["MainMenu_ExitDialogCancel"], Is.EqualTo("No"));
             Assert.That(localizer["BeatmapDownloader_ConnectionFailed"], Is.EqualTo("Failed to connect to server, please check your internet connection."));
+            Assert.That(localizer["LegacyLanguagePack_menu_mod_back"], Is.EqualTo("Back"));
+            Assert.That(localizer["LegacyLanguagePack_menu_mod_reset"], Is.EqualTo("Reset all mods"));
+            Assert.That(localizer["LegacyLanguagePack_mod_section_difficulty_reduction"], Is.EqualTo("Difficulty Reduction"));
+            Assert.That(localizer["LegacyLanguagePack_mod_section_difficulty_increase"], Is.EqualTo("Difficulty Increase"));
+            Assert.That(localizer["LegacyLanguagePack_mod_section_difficulty_automation"], Is.EqualTo("Automation"));
+            Assert.That(localizer["LegacyLanguagePack_mod_section_difficulty_conversion"], Is.EqualTo("Conversion"));
+            Assert.That(localizer["LegacyLanguagePack_mod_section_fun"], Is.EqualTo("Fun"));
         });
     }
 

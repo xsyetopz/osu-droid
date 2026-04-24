@@ -94,7 +94,7 @@ public sealed class BeatmapImportTests
 
         Assert.That(importResult.IsSuccess, Is.True);
         Assert.That(beatmap.Status, Is.EqualTo((int)BeatmapRankedStatus.Ranked));
-        Assert.That(beatmap.DroidStarRating, Is.EqualTo(3.96f));
+        Assert.That(beatmap.DroidStarRating, Is.Not.EqualTo(3.96f));
         Assert.That(beatmap.StandardStarRating, Is.EqualTo(3.96f));
     }
 

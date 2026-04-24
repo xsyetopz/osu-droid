@@ -50,7 +50,8 @@ public sealed partial class OsuDroidGameCore
                 UiAction.SongSelectMods or UiAction.SongSelectBeatmapOptions or UiAction.SongSelectBeatmapOptionsSearch or UiAction.SongSelectBeatmapOptionsFavorite or UiAction.SongSelectBeatmapOptionsAlgorithm or UiAction.SongSelectBeatmapOptionsSort or UiAction.SongSelectBeatmapOptionsFolder or UiAction.SongSelectRandom => "menuclick",
                 UiAction.DownloaderSearchSubmit or UiAction.DownloaderRefresh or UiAction.DownloaderMirrorOsuDirect or UiAction.DownloaderMirrorCatboy => "menuclick",
                 UiAction.DownloaderFilters or UiAction.DownloaderMirror or UiAction.DownloaderSort or UiAction.DownloaderOrder or UiAction.DownloaderStatus => "menuhit",
-                UiAction.OptionsBack or UiAction.DownloaderBack or UiAction.SongSelectBack => "menuback",
+                UiAction.ModSelectClear or UiAction.ModSelectCustomize or UiAction.ModSelectSearchBox => "menuclick",
+                UiAction.OptionsBack or UiAction.DownloaderBack or UiAction.SongSelectBack or UiAction.ModSelectBack => "menuback",
                 UiAction.DownloaderDetailsClose or UiAction.DownloaderDownloadCancel => "menuback",
                 _ => null,
             };

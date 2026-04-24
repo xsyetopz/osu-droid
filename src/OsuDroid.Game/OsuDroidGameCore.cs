@@ -20,6 +20,7 @@ public sealed partial class OsuDroidGameCore
         BeatmapDownloader,
         BeatmapProcessing,
         SongSelect,
+        ModSelect,
     }
 
     private readonly StartupScene _startup;
@@ -27,6 +28,7 @@ public sealed partial class OsuDroidGameCore
     private readonly OptionsScene _options;
     private readonly BeatmapDownloaderScene _beatmapDownloader;
     private readonly SongSelectScene _songSelect;
+    private readonly ModSelectScene _modSelect;
     private readonly IBeatmapLibrary _beatmapLibrary;
     private readonly IBeatmapProcessingService _beatmapProcessingService;
     private readonly IMenuMusicController _musicController;
@@ -75,6 +77,7 @@ public sealed partial class OsuDroidGameCore
         _activeMenuSfxPlayer = services.MenuSfxPlayer ?? new NoOpMenuSfxPlayer();
         ApplyOptionAudioVolumes();
         _songSelect = new SongSelectScene(_beatmapLibrary, _musicController, difficultyService, services.Paths.Songs, onlinePanelState, _textInputService, localizer: localizer);
+        _modSelect = new ModSelectScene(_settingsStore, _textInputService, localizer);
         ApplyOptionsRuntimeSettings();
         _activeScene = services.ShowStartupScene ? ActiveScene.Startup : ActiveScene.MainMenu;
         QueueStartupPlaylist(_beatmapLibrary, _activeScene != ActiveScene.Startup);
@@ -139,6 +142,7 @@ public sealed partial class OsuDroidGameCore
         ActiveScene.BeatmapDownloader => _beatmapDownloader.CreateSnapshot(viewport),
         ActiveScene.BeatmapProcessing => BootstrapLoadingScene.CreateSnapshot(viewport, CreateBeatmapProcessingProgress(), TimeSpan.Zero),
         ActiveScene.SongSelect => _songSelect.CreateSnapshot(viewport),
+        ActiveScene.ModSelect => _modSelect.CreateSnapshot(viewport),
         _ => throw new InvalidOperationException($"Unknown scene: {_activeScene}"),
     };
 
@@ -209,6 +213,12 @@ public sealed partial class OsuDroidGameCore
         if (_activeScene == ActiveScene.Options)
         {
             _options.Update(elapsed);
+            return;
+        }
+
+        if (_activeScene == ActiveScene.ModSelect)
+        {
+            _modSelect.Update(elapsed);
             return;
         }
 
@@ -314,7 +324,9 @@ public sealed partial class OsuDroidGameCore
         ApplyChangedOptionsSetting(_options.ConsumeChangedSettingKey());
     }
 
-    public void ScrollActiveScene(float deltaY, UiPoint point, VirtualViewport viewport)
+    public void ScrollActiveScene(float deltaY, UiPoint point, VirtualViewport viewport) => ScrollActiveScene(0f, deltaY, point, viewport);
+
+    public void ScrollActiveScene(float deltaX, float deltaY, UiPoint point, VirtualViewport viewport)
     {
         if (_activeScene == ActiveScene.Options)
         {
@@ -327,6 +339,10 @@ public sealed partial class OsuDroidGameCore
         else if (_activeScene == ActiveScene.SongSelect)
         {
             _songSelect.Scroll(deltaY, point, viewport);
+        }
+        else if (_activeScene == ActiveScene.ModSelect)
+        {
+            _modSelect.Scroll(deltaX, deltaY, point, viewport);
         }
     }
 
@@ -343,6 +359,10 @@ public sealed partial class OsuDroidGameCore
         else if (_activeScene == ActiveScene.SongSelect)
         {
             _songSelect.Scroll(deltaY, viewport);
+        }
+        else if (_activeScene == ActiveScene.ModSelect)
+        {
+            _modSelect.Scroll(0f, deltaY, new UiPoint(VirtualViewport.LegacyLandscape.VirtualWidth / 2f, VirtualViewport.LegacyLandscape.VirtualHeight / 2f), viewport);
         }
     }
 
@@ -431,6 +451,7 @@ public sealed partial class OsuDroidGameCore
         _options.SetTextInputService(service);
         _beatmapDownloader.SetTextInputService(service);
         _songSelect.SetTextInputService(service);
+        _modSelect.SetTextInputService(service);
     }
 
     private void AttachPreviewPlayer(IBeatmapPreviewPlayer player)

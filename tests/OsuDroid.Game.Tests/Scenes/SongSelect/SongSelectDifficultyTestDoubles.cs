@@ -11,9 +11,7 @@ public sealed partial class SongSelectSceneTests
 
         public BeatmapInfo EnsureCalculated(BeatmapInfo beatmap) => beatmap;
 
-        public void EnsureCalculatorVersions()
-        {
-        }
+        public DifficultyVersionState EnsureCalculatorVersions() => default;
     }
 
     private sealed class UpdatingDifficultyService : IBeatmapDifficultyService
@@ -26,8 +24,6 @@ public sealed partial class SongSelectSceneTests
             StandardStarRating = beatmap.StandardStarRating ?? 6.6f,
         };
 
-        public void EnsureCalculatorVersions()
-        {
-        }
+        public DifficultyVersionState EnsureCalculatorVersions() => default;
     }
 }

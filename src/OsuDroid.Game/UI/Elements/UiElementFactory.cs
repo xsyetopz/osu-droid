@@ -116,7 +116,9 @@ public static class UiElementFactory
         UiTextAlignment alignment = UiTextAlignment.Left,
         bool underline = false,
         UiTextVerticalAlignment verticalAlignment = UiTextVerticalAlignment.Top,
-        float alpha = 1f) => new(
+        float alpha = 1f,
+        bool clipToBounds = false,
+        UiTextAutoScroll? autoScroll = null) => new(
             id,
             UiElementKind.Text,
             bounds,
@@ -124,6 +126,7 @@ public static class UiElementFactory
             alpha,
             Action: action,
             Text: text,
-            TextStyle: new UiTextStyle(size, bold, alignment, underline, verticalAlignment),
-            IsEnabled: isEnabled);
+            TextStyle: new UiTextStyle(size, bold, alignment, underline, verticalAlignment, autoScroll),
+            IsEnabled: isEnabled,
+            ClipToBounds: clipToBounds || autoScroll is not null);
 }

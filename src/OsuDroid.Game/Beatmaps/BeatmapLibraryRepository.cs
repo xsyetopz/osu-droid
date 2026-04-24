@@ -112,8 +112,8 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
         command.CommandText = """
             UPDATE BeatmapInfo
             SET status = $status,
-                droidStarRating = $droidStarRating,
-                standardStarRating = $standardStarRating
+                droidStarRating = COALESCE($droidStarRating, droidStarRating),
+                standardStarRating = COALESCE($standardStarRating, standardStarRating)
             WHERE setDirectory = $setDirectory
               AND (
                     id = $beatmapId

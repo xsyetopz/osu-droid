@@ -8,6 +8,7 @@ public sealed partial class OsuDroidGameCore
     private bool HandleSongSelectUiAction(UiAction action, VirtualViewport viewport) => action switch
     {
         UiAction.SongSelectBack => Do(() => BackToMainMenu(MainMenuReturnTransition.SongSelectBack)),
+        UiAction.SongSelectMods => Do(OpenModSelect),
         UiAction.SongSelectBeatmapOptions => Do(_songSelect.OpenBeatmapOptions),
         UiAction.SongSelectBeatmapOptionsSearch => Do(() => _songSelect.FocusBeatmapOptionsSearch(viewport)),
         UiAction.SongSelectBeatmapOptionsFavorite => Do(_songSelect.ToggleBeatmapOptionsFavoriteOnly),
@@ -38,5 +39,11 @@ public sealed partial class OsuDroidGameCore
         int storedValue = algorithm == Beatmaps.Difficulty.DifficultyAlgorithm.Standard ? 1 : 0;
         _settingsStore.SetInt("difficultyAlgorithm", storedValue);
         _options.SetIntValue("difficultyAlgorithm", storedValue);
+    }
+
+    private void OpenModSelect()
+    {
+        _textInputService.HideTextInput();
+        _activeScene = ActiveScene.ModSelect;
     }
 }
