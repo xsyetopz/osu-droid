@@ -49,7 +49,7 @@ public sealed partial class ModSelectScene
         UiRect search = SearchBounds(viewport);
         elements.Add(Fill("modselect-search", search, s_search, 1f, UiAction.ModSelectSearchBox, 12f));
         elements.Add(Text("modselect-search-text", string.IsNullOrWhiteSpace(_searchInputText) ? "Search..." : _searchInputText, new UiRect(search.X + 18f, search.Y + 15f, search.Width - 74f, 28f), 24f, string.IsNullOrWhiteSpace(_searchInputText) ? s_searchPlaceholder : s_accent, UiAction.ModSelectSearchBox, clipToBounds: true));
-        elements.Add(UiElementFactory.Sprite("modselect-search-icon", DroidAssets.CommonSearchSmall, new UiRect(search.Right - 46f, search.Y + 12f, 34f, 34f), s_accent, 1f, UiAction.ModSelectSearchBox, spriteFit: UiSpriteFit.Contain));
+        elements.Add(UiElementFactory.Sprite("modselect-search-icon", DroidAssets.CommonSearchSmall, new UiRect(search.Right - 64f, search.Y + 15f, 52f, 28f), s_accent, 1f, UiAction.ModSelectSearchBox, spriteFit: UiSpriteFit.Contain));
     }
 
 

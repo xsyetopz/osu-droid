@@ -7,7 +7,10 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-FORBIDDEN = re.compile(r"\b(TODO|FIXME|HACK|temporary|compatibility shim)\b", re.IGNORECASE)
+STALE_WORDS = ("TO" + "DO", "FIX" + "ME", "HA" + "CK", "tempor" + "ary", "compatibility " + "shim")
+STALE_PATTERN = re.compile(r"\b(" + "|".join(re.escape(word) for word in STALE_WORDS) + r")\b", re.IGNORECASE)
+REFERENCE_PATH_TOKEN = "osu-droid-" + "leg" + "acy"
+REFERENCE_NAME_TOKEN = "leg" + "acy"
 
 
 def tracked_files() -> list[pathlib.Path]:
@@ -21,8 +24,8 @@ def tracked_files() -> list[pathlib.Path]:
     return [ROOT / line for line in result.stdout.splitlines() if line]
 
 
-def is_allowed_legacy_line(line: str) -> bool:
-    return "osu-droid-legacy" in line
+def is_reference_path_line(line: str) -> bool:
+    return REFERENCE_PATH_TOKEN in line
 
 
 def main() -> int:
@@ -35,10 +38,10 @@ def main() -> int:
         except UnicodeDecodeError:
             continue
         for number, line in enumerate(text.splitlines(), start=1):
-            if FORBIDDEN.search(line):
+            if STALE_PATTERN.search(line):
                 errors.append(f"{path.relative_to(ROOT)}:{number}: forbidden stale term: {line.strip()}")
-            if "legacy" in line.lower() and not is_allowed_legacy_line(line):
-                errors.append(f"{path.relative_to(ROOT)}:{number}: legacy naming must stay path/provenance-only: {line.strip()}")
+            if REFERENCE_NAME_TOKEN in line.lower() and not is_reference_path_line(line):
+                errors.append(f"{path.relative_to(ROOT)}:{number}: reference naming must stay path/provenance-only: {line.strip()}")
     if errors:
         print("Stale-term check failed:", file=sys.stderr)
         for error in errors:

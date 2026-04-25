@@ -83,7 +83,8 @@ public sealed partial class ModSelectSceneTests
         Assert.That(frame.Elements.Single(element => element.Id == "modselect-search-text").Color, Is.EqualTo(DroidUiTheme.ModMenu.SearchPlaceholder));
         UiElementSnapshot icon = frame.Elements.Single(element => element.Id == "modselect-search-icon");
         Assert.That(icon.SpriteFit, Is.EqualTo(UiSpriteFit.Contain));
-        Assert.That(icon.Bounds.Width, Is.EqualTo(icon.Bounds.Height));
+        Assert.That(icon.Bounds.Width, Is.EqualTo(52f));
+        Assert.That(icon.Bounds.Height, Is.EqualTo(28f));
     }
 
     [Test]
