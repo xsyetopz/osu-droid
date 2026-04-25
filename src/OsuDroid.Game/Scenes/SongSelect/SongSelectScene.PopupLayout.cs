@@ -205,7 +205,7 @@ public sealed partial class SongSelectScene
 
     private void AddConfirmPanel(List<UiElementSnapshot> elements, VirtualViewport viewport, string id, string title, string message, UiAction confirmAction, UiAction cancelAction)
     {
-        elements.Add(Fill(id + "-shade", new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), new UiColor(0, 0, 0, 96), 1f, cancelAction));
+        elements.Add(Fill(id + "-shade", new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), DroidUiColors.ModalShadeLight, 1f, cancelAction));
         float width = 300f * Dp;
         float height = 150f * Dp;
         var panel = new UiRect((viewport.VirtualWidth - width) / 2f, (viewport.VirtualHeight - height) / 2f, width, height);

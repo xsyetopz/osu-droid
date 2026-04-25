@@ -44,7 +44,7 @@ public sealed partial class OptionsScene
             }
             else
             {
-                elements.Add(Fill($"options-section-{i}-hit", bounds, UiColor.Opaque(0, 0, 0), 0f, section.Action));
+                elements.Add(Fill($"options-section-{i}-hit", bounds, DroidUiColors.Black, 0f, section.Action));
             }
 
             UiColor textColor = isSelected ? s_white : s_disabledWhite;
@@ -159,7 +159,7 @@ public sealed partial class OptionsScene
         if (isChecked)
         {
             elements.Add(Fill($"options-row-{index}-checkbox-box", checkbox, s_checkboxAccent, alpha, rowAction, 2f * DpScale, isInteractive));
-            elements.Add(MaterialIcon($"options-row-{index}-checkbox", UiMaterialIcon.Check, checkbox, UiColor.Opaque(32, 32, 46), alpha, rowAction, isInteractive));
+            elements.Add(MaterialIcon($"options-row-{index}-checkbox", UiMaterialIcon.Check, checkbox, DroidUiColors.DarkText, alpha, rowAction, isInteractive));
         }
         else
         {
@@ -193,7 +193,7 @@ public sealed partial class OptionsScene
         string value = GetInputDisplayValue(row);
         if (!string.IsNullOrEmpty(value))
         {
-            elements.Add(Text($"options-row-{index}-input-value", value, inputBounds.X + 14f * DpScale, inputBounds.Y + 8f * DpScale, inputBounds.Width - 28f * DpScale, RowTitleSize + 4f, RowTitleSize, UiColor.Opaque(235, 235, 245), 0.85f * alpha, false, rowAction, isInteractive));
+            elements.Add(Text($"options-row-{index}-input-value", value, inputBounds.X + 14f * DpScale, inputBounds.Y + 8f * DpScale, inputBounds.Width - 28f * DpScale, RowTitleSize + 4f, RowTitleSize, DroidUiColors.TextDisabled, 0.85f * alpha, false, rowAction, isInteractive));
         }
     }
 

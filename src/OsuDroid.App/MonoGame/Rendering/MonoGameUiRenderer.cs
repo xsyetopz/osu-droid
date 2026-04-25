@@ -27,13 +27,15 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
         {
             var destination = ToSurfaceRect(frame, element);
             destination = ApplyMeasuredTextAnchor(frame, element, destination);
+            var clip = ToSurfaceClipRect(frame, element);
             var color = ToXnaColor(element.Color, element.Alpha);
 
             if (element.Kind == UiElementKind.Fill)
             {
-                DrawFill(
+                DrawFillClipped(
                     spriteBatch,
                     destination,
+                    clip,
                     color,
                     element.CornerRadius * frame.Viewport.Scale,
                     element.CornerMode,
@@ -82,6 +84,13 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
                 if (element.Text is null || element.TextStyle is null)
                     continue;
 
+                if (clip is { } textClip)
+                {
+                    destination = Intersect(destination, textClip);
+                    if (destination.Width <= 0 || destination.Height <= 0)
+                        continue;
+                }
+
                 var texture = textStore.GetTexture(element.Text, element.TextStyle, element.Color, element.Alpha, frame.Viewport.Scale, metrics);
                 var textDestination = element.ClipToBounds
                     ? DrawClippedTextTexture(spriteBatch, texture, destination, element.TextStyle, frame.Viewport.Scale)
@@ -97,7 +106,7 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
                 ? assetStore.TryGetExternalTexture(element.ExternalAssetPath)
                 : element.AssetName is null ? null : assetStore.GetTexture(frame.AssetManifest, element.AssetName, metrics);
             if (textureAsset is not null)
-                DrawSprite(spriteBatch, textureAsset, destination, color, element.RotationDegrees, element.SpriteFit, element.RotationOriginX, element.RotationOriginY, element.SpriteSource);
+                DrawSpriteClipped(spriteBatch, textureAsset, destination, clip, color, element.RotationDegrees, element.SpriteFit, element.RotationOriginX, element.RotationOriginY, element.SpriteSource);
         }
     }
 
@@ -148,6 +157,75 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
         var origin = new Vector2(sourceWidth * rotationOriginX, sourceHeight * rotationOriginY);
         var scale = new Vector2(destination.Width / (float)sourceWidth, destination.Height / (float)sourceHeight);
         spriteBatch.Draw(texture, position, source, color, MathHelper.ToRadians(rotationDegrees), origin, scale, SpriteEffects.None, 0f);
+    }
+
+    private void DrawFillClipped(
+        SpriteBatch spriteBatch,
+        XnaRect bounds,
+        XnaRect? clip,
+        XnaColor color,
+        float radius,
+        UiCornerMode cornerMode = UiCornerMode.All,
+        RenderCacheMetrics? metrics = null,
+        float rotationDegrees = 0f,
+        float rotationOriginX = 0.5f,
+        float rotationOriginY = 0.5f)
+    {
+        if (clip is null || Math.Abs(rotationDegrees) > 0.001f)
+        {
+            DrawFill(spriteBatch, bounds, color, radius, cornerMode, metrics, rotationDegrees, rotationOriginX, rotationOriginY);
+            return;
+        }
+
+        var clipped = Intersect(bounds, clip.Value);
+        if (pixel is null || clipped.Width <= 0 || clipped.Height <= 0 || color.A == 0)
+            return;
+
+        if (radius <= 1f || cornerMode == UiCornerMode.None)
+        {
+            spriteBatch.Draw(pixel, clipped, color);
+            return;
+        }
+
+        var texture = shapeStore.GetRoundedFill(bounds.Width, bounds.Height, radius, cornerMode, color, metrics);
+        var source = new XnaRect(clipped.X - bounds.X, clipped.Y - bounds.Y, clipped.Width, clipped.Height);
+        spriteBatch.Draw(texture, clipped, source, XnaColor.White);
+    }
+
+    private static void DrawSpriteClipped(SpriteBatch spriteBatch, Texture2D texture, XnaRect destination, XnaRect? clip, XnaColor color, float rotationDegrees, UiSpriteFit fit, float rotationOriginX, float rotationOriginY, UiRect? explicitSource)
+    {
+        if (clip is null || Math.Abs(rotationDegrees) > 0.001f)
+        {
+            DrawSprite(spriteBatch, texture, destination, color, rotationDegrees, fit, rotationOriginX, rotationOriginY, explicitSource);
+            return;
+        }
+
+        var clipped = Intersect(destination, clip.Value);
+        if (clipped.Width <= 0 || clipped.Height <= 0)
+            return;
+
+        var source = explicitSource is null
+            ? fit == UiSpriteFit.Stretch ? new XnaRect(0, 0, texture.Width, texture.Height) : CalculateSourceRect(texture, destination, fit) ?? new XnaRect(0, 0, texture.Width, texture.Height)
+            : new XnaRect(
+                (int)MathF.Round(explicitSource.Value.X),
+                (int)MathF.Round(explicitSource.Value.Y),
+                Math.Max(1, (int)MathF.Round(explicitSource.Value.Width)),
+                Math.Max(1, (int)MathF.Round(explicitSource.Value.Height)));
+
+        var left = (clipped.X - destination.X) / (float)destination.Width;
+        var top = (clipped.Y - destination.Y) / (float)destination.Height;
+        var right = (destination.Right - clipped.Right) / (float)destination.Width;
+        var bottom = (destination.Bottom - clipped.Bottom) / (float)destination.Height;
+        var sourceLeft = (int)MathF.Round(source.Width * left);
+        var sourceTop = (int)MathF.Round(source.Height * top);
+        var sourceRight = (int)MathF.Round(source.Width * right);
+        var sourceBottom = (int)MathF.Round(source.Height * bottom);
+        var clippedSource = new XnaRect(
+            source.X + sourceLeft,
+            source.Y + sourceTop,
+            Math.Max(1, source.Width - sourceLeft - sourceRight),
+            Math.Max(1, source.Height - sourceTop - sourceBottom));
+        spriteBatch.Draw(texture, clipped, clippedSource, color);
     }
 
     private static XnaRect? CalculateSourceRect(Texture2D texture, XnaRect destination, UiSpriteFit fit)
@@ -288,6 +366,28 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
             (int)MathF.Round(bounds.Y),
             (int)MathF.Round(bounds.Width),
             (int)MathF.Round(bounds.Height));
+    }
+
+    private static XnaRect? ToSurfaceClipRect(UiFrameSnapshot frame, UiElementSnapshot element)
+    {
+        if (element.ClipBounds is null)
+            return null;
+
+        var bounds = frame.Viewport.ToSurface(element.ClipBounds.Value);
+        return new XnaRect(
+            (int)MathF.Round(bounds.X),
+            (int)MathF.Round(bounds.Y),
+            Math.Max(0, (int)MathF.Round(bounds.Width)),
+            Math.Max(0, (int)MathF.Round(bounds.Height)));
+    }
+
+    private static XnaRect Intersect(XnaRect a, XnaRect b)
+    {
+        var x = Math.Max(a.X, b.X);
+        var y = Math.Max(a.Y, b.Y);
+        var right = Math.Min(a.Right, b.Right);
+        var bottom = Math.Min(a.Bottom, b.Bottom);
+        return new XnaRect(x, y, Math.Max(0, right - x), Math.Max(0, bottom - y));
     }
 
     private static XnaColor ToXnaColor(UiColor color, float alpha)

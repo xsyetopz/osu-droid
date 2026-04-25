@@ -103,7 +103,7 @@ public sealed partial class BeatmapDownloaderScene
         elements.Add(Fill("downloader-download-cancel-hit", new UiRect(x, cancelY, width, cancelHeight), s_field, 1f, UiAction.DownloaderDownloadCancel, Radius));
         float cancelContentWidth = 90f * Dp;
         float cancelContentX = x + (width - cancelContentWidth) / 2f;
-        elements.Add(UiElementFactory.Icon("downloader-download-cancel-icon", UiIcon.Close, new UiRect(cancelContentX, cancelY + 9f * Dp, 24f * Dp, 24f * Dp), UiColor.Opaque(255, 191, 191), 1f, UiAction.DownloaderDownloadCancel));
-        elements.Add(TextMiddle("downloader-download-cancel-text", _localizer["BeatmapDownloader_Cancel"], cancelContentX + 30f * Dp, cancelY, cancelContentWidth - 30f * Dp, cancelHeight, 14f * Dp, UiColor.Opaque(255, 191, 191), UiTextAlignment.Left, UiAction.DownloaderDownloadCancel));
+        elements.Add(UiElementFactory.Icon("downloader-download-cancel-icon", UiIcon.Close, new UiRect(cancelContentX, cancelY + 9f * Dp, 24f * Dp, 24f * Dp), DroidUiTheme.Controls.Danger, 1f, UiAction.DownloaderDownloadCancel));
+        elements.Add(TextMiddle("downloader-download-cancel-text", _localizer["BeatmapDownloader_Cancel"], cancelContentX + 30f * Dp, cancelY, cancelContentWidth - 30f * Dp, cancelHeight, 14f * Dp, DroidUiTheme.Controls.Danger, UiTextAlignment.Left, UiAction.DownloaderDownloadCancel));
     }
 }

@@ -102,7 +102,7 @@ public sealed partial class BeatmapDownloaderTests
         UiElementSnapshot title = frame.Elements.Single(element => element.Id == "downloader-mirror-title");
 
         Assert.That(frame.Elements.Any(element => element.Id == "downloader-mirror-panel"), Is.False);
-        Assert.That(frame.Elements.Single(element => element.Id == "downloader-mirror-scrim").Color, Is.EqualTo(new UiColor(0, 0, 0, 128)));
+        Assert.That(frame.Elements.Single(element => element.Id == "downloader-mirror-scrim").Color, Is.EqualTo(DroidUiColors.ModalShade));
         Assert.That(dialog.Bounds.X + dialog.Bounds.Width / 2f, Is.EqualTo(VirtualViewport.LegacyLandscape.VirtualWidth / 2f).Within(0.001f));
         Assert.That(dialog.Bounds.Y + dialog.Bounds.Height / 2f, Is.EqualTo(VirtualViewport.LegacyLandscape.VirtualHeight / 2f).Within(0.001f));
         Assert.That(title.Text, Is.EqualTo("Select a beatmap mirror"));
@@ -114,13 +114,13 @@ public sealed partial class BeatmapDownloaderTests
     [Test]
     public void StatusPillsUseLegacyLanguagePackColors()
     {
-        AssertStatusColor(BeatmapRankedStatus.Ranked, UiColor.Opaque(65, 255, 100));
-        AssertStatusColor(BeatmapRankedStatus.Approved, UiColor.Opaque(65, 255, 100));
-        AssertStatusColor(BeatmapRankedStatus.Qualified, UiColor.Opaque(100, 242, 255));
-        AssertStatusColor(BeatmapRankedStatus.Loved, UiColor.Opaque(250, 100, 255));
-        AssertStatusColor(BeatmapRankedStatus.Pending, UiColor.Opaque(255, 172, 100));
-        AssertStatusColor(BeatmapRankedStatus.WorkInProgress, UiColor.Opaque(255, 172, 100));
-        AssertStatusColor(BeatmapRankedStatus.Graveyard, UiColor.Opaque(255, 255, 255));
+        AssertStatusColor(BeatmapRankedStatus.Ranked, DroidUiTheme.BeatmapStatus.Ranked);
+        AssertStatusColor(BeatmapRankedStatus.Approved, DroidUiTheme.BeatmapStatus.Ranked);
+        AssertStatusColor(BeatmapRankedStatus.Qualified, DroidUiTheme.BeatmapStatus.Qualified);
+        AssertStatusColor(BeatmapRankedStatus.Loved, DroidUiTheme.BeatmapStatus.Loved);
+        AssertStatusColor(BeatmapRankedStatus.Pending, DroidUiTheme.BeatmapStatus.Pending);
+        AssertStatusColor(BeatmapRankedStatus.WorkInProgress, DroidUiTheme.BeatmapStatus.Pending);
+        AssertStatusColor(BeatmapRankedStatus.Graveyard, DroidUiColors.TextPrimary);
     }
     [Test]
     public void DownloaderCardsUseColoredDifficultyDotsAndMaterialButtons()
@@ -199,6 +199,27 @@ public sealed partial class BeatmapDownloaderTests
         Assert.That(cardIndex, Is.LessThan(backIndex));
         Assert.That(frame.HitTest(new UiPoint(20f * DroidUiMetrics.DpScale, 20f * DroidUiMetrics.DpScale))!.Action, Is.EqualTo(UiAction.DownloaderBack));
     }
+
+    [Test]
+    public void DownloaderDragContinuesAfterRelease()
+    {
+        BeatmapDownloaderScene scene = CreateScene();
+        SetSets(scene, Enumerable.Range(0, 20).Select(_ => CreateSet()).ToArray());
+        VirtualViewport viewport = VirtualViewport.LegacyLandscape;
+        UiPoint start = new(640f, 620f);
+
+        Assert.That(scene.TryBeginScrollDrag(start, viewport), Is.True);
+        Assert.That(scene.UpdateScrollDrag(new UiPoint(640f, 520f), viewport), Is.True);
+        UiFrameSnapshot afterDrag = scene.CreateSnapshot(viewport).UiFrame;
+        float cardY = afterDrag.Elements.Single(element => element.Id == "downloader-card-0").Bounds.Y;
+        scene.EndScrollDrag(new UiPoint(640f, 500f), viewport);
+
+        scene.Update(TimeSpan.FromSeconds(1d / 60d));
+        UiFrameSnapshot afterInertia = scene.CreateSnapshot(viewport).UiFrame;
+
+        Assert.That(afterInertia.Elements.Single(element => element.Id == "downloader-card-0").Bounds.Y, Is.LessThan(cardY));
+    }
+
     [Test]
     public void StatusPillUsesAndroidPanelColorAndCenteredText()
     {
@@ -209,8 +230,8 @@ public sealed partial class BeatmapDownloaderTests
         UiElementSnapshot statusBackground = frame.Elements.Single(element => element.Id == "downloader-card-0-status-bg");
         UiElementSnapshot statusText = frame.Elements.Single(element => element.Id == "downloader-card-0-status");
 
-        Assert.That(statusBackground.Color, Is.EqualTo(UiColor.Opaque(22, 22, 34)));
-        Assert.That(statusText.Color, Is.EqualTo(UiColor.Opaque(65, 255, 100)));
+        Assert.That(statusBackground.Color, Is.EqualTo(DroidUiColors.SurfaceRow));
+        Assert.That(statusText.Color, Is.EqualTo(DroidUiTheme.BeatmapStatus.Ranked));
         Assert.That(statusText.TextStyle!.Alignment, Is.EqualTo(UiTextAlignment.Center));
         Assert.That(statusText.TextStyle.VerticalAlignment, Is.EqualTo(UiTextVerticalAlignment.Middle));
     }

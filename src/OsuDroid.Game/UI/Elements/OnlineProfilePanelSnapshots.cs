@@ -25,10 +25,10 @@ public sealed record OnlineProfilePanelState(
 
 public static class OnlineProfilePanelSnapshots
 {
-    private static readonly UiColor s_panel = new(51, 51, 51, 128);
-    private static readonly UiColor s_footer = new(51, 51, 51, 204);
-    private static readonly UiColor s_white = UiColor.Opaque(255, 255, 255);
-    private static readonly UiColor s_secondary = UiColor.Opaque(217, 217, 230);
+    private static readonly UiColor s_panel = DroidUiColors.OnlineProfilePanel;
+    private static readonly UiColor s_footer = DroidUiColors.OnlineProfileFooter;
+    private static readonly UiColor s_white = DroidUiColors.TextPrimary;
+    private static readonly UiColor s_secondary = DroidUiColors.OnlineProfileSecondaryText;
 
     public static void Add(
         List<UiElementSnapshot> elements,

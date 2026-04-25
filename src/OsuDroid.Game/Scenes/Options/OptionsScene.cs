@@ -4,18 +4,24 @@ using OsuDroid.Game.Runtime;
 
 namespace OsuDroid.Game.Scenes.Options;
 
+internal enum OptionsScrollTarget
+{
+    Sections,
+    Content,
+}
+
 public sealed partial class OptionsScene
 {
-    private static readonly UiColor s_rootBackground = UiColor.Opaque(19, 19, 26);
-    private static readonly UiColor s_appBarBackground = UiColor.Opaque(30, 30, 46);
-    private static readonly UiColor s_selectedSection = UiColor.Opaque(54, 54, 83);
-    private static readonly UiColor s_rowBackground = UiColor.Opaque(22, 22, 34);
-    private static readonly UiColor s_inputBackground = UiColor.Opaque(54, 54, 83);
-    private static readonly UiColor s_white = UiColor.Opaque(255, 255, 255);
-    private static readonly UiColor s_secondaryText = UiColor.Opaque(178, 178, 204);
-    private static readonly UiColor s_disabledWhite = UiColor.Opaque(235, 235, 245);
-    private static readonly UiColor s_checkboxAccent = UiColor.Opaque(243, 115, 115);
-    private static readonly UiColor s_sliderTrack = UiColor.Opaque(54, 54, 83);
+    private static readonly UiColor s_rootBackground = DroidUiColors.Surface;
+    private static readonly UiColor s_appBarBackground = DroidUiColors.SurfaceAppBar;
+    private static readonly UiColor s_selectedSection = DroidUiColors.SurfaceSelected;
+    private static readonly UiColor s_rowBackground = DroidUiColors.SurfaceRow;
+    private static readonly UiColor s_inputBackground = DroidUiColors.SurfaceInput;
+    private static readonly UiColor s_white = DroidUiColors.TextPrimary;
+    private static readonly UiColor s_secondaryText = DroidUiColors.TextSecondary;
+    private static readonly UiColor s_disabledWhite = DroidUiColors.TextDisabled;
+    private static readonly UiColor s_checkboxAccent = DroidUiColors.Accent;
+    private static readonly UiColor s_sliderTrack = DroidUiColors.Track;
 
     private readonly Dictionary<string, bool> _boolValues = new(StringComparer.Ordinal);
     private readonly Dictionary<string, int> _intValues = new(StringComparer.Ordinal);
@@ -32,6 +38,10 @@ public sealed partial class OptionsScene
     private string? _statusMessageKey;
     private TimeSpan _statusMessageRemaining;
     private int? _activeSliderRowIndex;
+    private double _elapsedSeconds;
+    private OptionsScrollTarget? _activeScrollTarget;
+    private readonly KineticScrollState _contentScroll = new(KineticScrollAxis.Vertical);
+    private readonly KineticScrollState _sectionScroll = new(KineticScrollAxis.Vertical);
 
     public OptionsScene(GameLocalizer localizer, IGameSettingsStore? settingsStore = null, ITextInputService? textInputService = null, OptionsPathDefaults? pathDefaults = null)
     {
@@ -104,15 +114,18 @@ public sealed partial class OptionsScene
 
     public void Update(TimeSpan elapsed)
     {
-        if (_statusMessageKey is null)
-        {
-            return;
-        }
+        float elapsedSeconds = (float)elapsed.TotalSeconds;
+        _elapsedSeconds += elapsedSeconds;
+        _contentScroll.Update(elapsedSeconds, () => _contentScrollOffset, value => _contentScrollOffset = value, 0f, MaxActiveContentScrollOffset(VirtualViewport.LegacyLandscape));
+        _sectionScroll.Update(elapsedSeconds, () => _sectionScrollOffset, value => _sectionScrollOffset = value, 0f, MaxSectionScrollOffset(VirtualViewport.LegacyLandscape));
 
-        _statusMessageRemaining -= elapsed;
-        if (_statusMessageRemaining <= TimeSpan.Zero)
+        if (_statusMessageKey is not null)
         {
-            _statusMessageKey = null;
+            _statusMessageRemaining -= elapsed;
+            if (_statusMessageRemaining <= TimeSpan.Zero)
+            {
+                _statusMessageKey = null;
+            }
         }
     }
 
@@ -271,6 +284,64 @@ public sealed partial class OptionsScene
         {
             _contentScrollOffset = Math.Clamp(_contentScrollOffset + deltaY, 0f, MaxActiveContentScrollOffset(viewport));
         }
+    }
+
+    public bool TryBeginScrollDrag(UiPoint point, VirtualViewport viewport, double? timestampSeconds = null)
+    {
+        if (_activeSliderRowIndex is not null)
+        {
+            return false;
+        }
+
+        if (IsSectionScrollPoint(point) && MaxSectionScrollOffset(viewport) > 0f)
+        {
+            _activeScrollTarget = OptionsScrollTarget.Sections;
+            _sectionScroll.Begin(point, timestampSeconds ?? _elapsedSeconds);
+            return true;
+        }
+
+        if (!IsSectionScrollPoint(point) && MaxActiveContentScrollOffset(viewport) > 0f)
+        {
+            _activeScrollTarget = OptionsScrollTarget.Content;
+            _contentScroll.Begin(point, timestampSeconds ?? _elapsedSeconds);
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool UpdateScrollDrag(UiPoint point, VirtualViewport viewport, double? timestampSeconds = null)
+    {
+        double timestamp = timestampSeconds ?? _elapsedSeconds;
+        return _activeScrollTarget switch
+        {
+            OptionsScrollTarget.Sections => _sectionScroll.Drag(point, timestamp, () => _sectionScrollOffset, value => _sectionScrollOffset = value, 0f, MaxSectionScrollOffset(viewport)),
+            OptionsScrollTarget.Content => _contentScroll.Drag(point, timestamp, () => _contentScrollOffset, value => _contentScrollOffset = value, 0f, MaxActiveContentScrollOffset(viewport)),
+            _ => false,
+        };
+    }
+
+    public void EndScrollDrag(UiPoint point, VirtualViewport viewport, double? timestampSeconds = null)
+    {
+        double timestamp = timestampSeconds ?? _elapsedSeconds;
+        switch (_activeScrollTarget)
+        {
+            case OptionsScrollTarget.Sections:
+                _sectionScroll.End(point, timestamp, () => _sectionScrollOffset, value => _sectionScrollOffset = value, 0f, MaxSectionScrollOffset(viewport));
+                _contentScroll.End();
+                break;
+            case OptionsScrollTarget.Content:
+                _contentScroll.End(point, timestamp, () => _contentScrollOffset, value => _contentScrollOffset = value, 0f, MaxActiveContentScrollOffset(viewport));
+                _sectionScroll.End();
+                break;
+            default:
+                _sectionScroll.End();
+                _contentScroll.End();
+                break;
+        }
+
+        _activeScrollTarget = null;
+        ClampScroll(viewport);
     }
 
     public bool TryBeginSliderDrag(string elementId, UiPoint point, VirtualViewport viewport)

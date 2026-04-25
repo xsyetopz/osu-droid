@@ -1,4 +1,5 @@
 #if ANDROID || IOS
+using System.Diagnostics;
 using Microsoft.Xna.Framework.Input.Touch;
 using OsuDroid.Game;
 using OsuDroid.Game.Runtime;
@@ -19,6 +20,7 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
     private bool isTouchDragging;
     private bool longPressFired;
     private bool isUiDragCaptured;
+    private bool isSceneScrollCandidate;
 
     public bool IsPointerActive => activeTouchId is not null || isTouchDragging;
 
@@ -36,6 +38,7 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
         foreach (var touch in TouchPanel.GetState())
         {
             var virtualPoint = currentFrame.Viewport.ToVirtual(touch.Position.X, touch.Position.Y);
+            double timestampSeconds = TimestampSeconds();
             if (touch.State == TouchLocationState.Pressed)
             {
                 activeTouchId = touch.Id;
@@ -45,6 +48,7 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
                 var pressedElement = currentFrame.HitTest(virtualPoint);
                 pressedAction = pressedElement?.Action ?? UiAction.None;
                 isUiDragCaptured = false;
+                isSceneScrollCandidate = false;
                 if (pressedElement is not null && core.TryBeginUiDrag(pressedElement.Id, virtualPoint, currentFrame.Viewport))
                 {
                     pressedAction = UiAction.None;
@@ -54,6 +58,7 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
                     continue;
                 }
 
+                isSceneScrollCandidate = core.TryBeginSceneScrollDrag(virtualPoint, currentFrame.Viewport, timestampSeconds);
                 touchStartedUtc = DateTime.UtcNow;
                 longPressFired = false;
                 core.PressUiAction(pressedAction);
@@ -83,8 +88,14 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
                     core.ReleaseUiAction();
                 }
 
-                if (isTouchDragging)
+                if (isTouchDragging && isSceneScrollCandidate)
+                {
+                    core.UpdateSceneScrollDrag(virtualPoint, currentFrame.Viewport, timestampSeconds);
+                }
+                else if (isTouchDragging)
+                {
                     core.ScrollActiveScene(previousTouch.X - virtualPoint.X, previousTouch.Y - virtualPoint.Y, touchStart, currentFrame.Viewport);
+                }
 
                 previousTouch = virtualPoint;
                 continue;
@@ -106,9 +117,21 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
 
             if (isTouchDragging || longPressFired)
             {
+                if (isSceneScrollCandidate)
+                {
+                    core.EndSceneScrollDrag(virtualPoint, currentFrame.Viewport, timestampSeconds);
+                }
+
+                isSceneScrollCandidate = false;
                 isTouchDragging = false;
                 longPressFired = false;
                 continue;
+            }
+
+            if (isSceneScrollCandidate)
+            {
+                core.EndSceneScrollDrag(virtualPoint, currentFrame.Viewport, timestampSeconds);
+                isSceneScrollCandidate = false;
             }
 
             var element = currentFrame.HitTest(virtualPoint);
@@ -121,5 +144,7 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
             break;
         }
     }
+
+    private static double TimestampSeconds() => Stopwatch.GetTimestamp() / (double)Stopwatch.Frequency;
 }
 #endif

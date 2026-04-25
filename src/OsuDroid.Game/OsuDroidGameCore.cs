@@ -142,7 +142,7 @@ public sealed partial class OsuDroidGameCore
         ActiveScene.BeatmapDownloader => _beatmapDownloader.CreateSnapshot(viewport),
         ActiveScene.BeatmapProcessing => BootstrapLoadingScene.CreateSnapshot(viewport, CreateBeatmapProcessingProgress(), TimeSpan.Zero),
         ActiveScene.SongSelect => _songSelect.CreateSnapshot(viewport),
-        ActiveScene.ModSelect => _modSelect.CreateSnapshot(viewport),
+        ActiveScene.ModSelect => _modSelect.CreateSnapshot(viewport, _songSelect.CreateSnapshot(viewport).UiFrame),
         _ => throw new InvalidOperationException($"Unknown scene: {_activeScene}"),
     };
 
@@ -296,6 +296,55 @@ public sealed partial class OsuDroidGameCore
         }
 
         return captured;
+    }
+
+    public bool TryBeginSceneScrollDrag(UiPoint point, VirtualViewport viewport, double timestampSeconds) => _activeScene switch
+    {
+        ActiveScene.Options => _options.TryBeginScrollDrag(point, viewport, timestampSeconds),
+        ActiveScene.BeatmapDownloader => _beatmapDownloader.TryBeginScrollDrag(point, viewport, timestampSeconds),
+        ActiveScene.SongSelect => _songSelect.TryBeginScrollDrag(point, viewport, timestampSeconds),
+        ActiveScene.ModSelect => _modSelect.TryBeginScrollDrag(point, viewport, timestampSeconds),
+        ActiveScene.Startup or ActiveScene.MainMenu or ActiveScene.BeatmapProcessing => false,
+#pragma warning disable IDE0072 // ActiveScene is internal; keep invalid enum values inert.
+        _ => false,
+#pragma warning restore IDE0072
+    };
+
+    public bool UpdateSceneScrollDrag(UiPoint point, VirtualViewport viewport, double timestampSeconds) => _activeScene switch
+    {
+        ActiveScene.Options => _options.UpdateScrollDrag(point, viewport, timestampSeconds),
+        ActiveScene.BeatmapDownloader => _beatmapDownloader.UpdateScrollDrag(point, viewport, timestampSeconds),
+        ActiveScene.SongSelect => _songSelect.UpdateScrollDrag(point, viewport, timestampSeconds),
+        ActiveScene.ModSelect => _modSelect.UpdateScrollDrag(point, viewport, timestampSeconds),
+        ActiveScene.Startup or ActiveScene.MainMenu or ActiveScene.BeatmapProcessing => false,
+#pragma warning disable IDE0072 // ActiveScene is internal; keep invalid enum values inert.
+        _ => false,
+#pragma warning restore IDE0072
+    };
+
+    public void EndSceneScrollDrag(UiPoint point, VirtualViewport viewport, double timestampSeconds)
+    {
+        switch (_activeScene)
+        {
+            case ActiveScene.Startup:
+            case ActiveScene.MainMenu:
+            case ActiveScene.BeatmapProcessing:
+                break;
+            case ActiveScene.Options:
+                _options.EndScrollDrag(point, viewport, timestampSeconds);
+                break;
+            case ActiveScene.BeatmapDownloader:
+                _beatmapDownloader.EndScrollDrag(point, viewport, timestampSeconds);
+                break;
+            case ActiveScene.SongSelect:
+                _songSelect.EndScrollDrag(point, viewport, timestampSeconds);
+                break;
+            case ActiveScene.ModSelect:
+                _modSelect.EndScrollDrag(point, viewport, timestampSeconds);
+                break;
+            default:
+                break;
+        }
     }
 
     public void UpdateUiDrag(UiPoint point, VirtualViewport viewport)

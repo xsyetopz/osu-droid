@@ -44,6 +44,7 @@ public sealed partial class OsuDroidGameCore
     private void OpenModSelect()
     {
         _textInputService.HideTextInput();
+        _modSelect.SetSelectedBeatmap(_songSelect.SelectedBeatmap);
         _activeScene = ActiveScene.ModSelect;
     }
 }

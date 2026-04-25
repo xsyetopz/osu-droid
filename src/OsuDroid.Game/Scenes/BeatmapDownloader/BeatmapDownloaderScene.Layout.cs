@@ -67,7 +67,7 @@ public sealed partial class BeatmapDownloaderScene
             filtersX += 52f * Dp;
         }
 
-        AddCompoundButton(elements, "downloader-filters", new UiRect(filtersX, 4f * Dp, filtersWidth, 48f * Dp), _localizer["BeatmapDownloader_Filters"], UiAction.DownloaderFilters, UiMaterialIcon.Tune, null, _filtersOpen ? new UiColor(242, 114, 114, 41) : s_appBar, _filtersOpen ? 15f * Dp : 0f);
+        AddCompoundButton(elements, "downloader-filters", new UiRect(filtersX, 4f * Dp, filtersWidth, 48f * Dp), _localizer["BeatmapDownloader_Filters"], UiAction.DownloaderFilters, UiMaterialIcon.Tune, null, _filtersOpen ? DroidUiTheme.Controls.DropdownSelected : s_appBar, _filtersOpen ? 15f * Dp : 0f);
 
         float mirrorX = filtersX + filtersWidth;
         AddCompoundSpriteButton(elements, "downloader-mirror", new UiRect(mirrorX, 4f * Dp, mirrorWidth, 48f * Dp), currentMirror.Description, currentMirror.LogoAssetName, UiAction.DownloaderMirror, UiMaterialIcon.ArrowDropDown);

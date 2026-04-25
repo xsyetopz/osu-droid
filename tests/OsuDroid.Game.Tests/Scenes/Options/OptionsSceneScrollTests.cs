@@ -84,4 +84,21 @@ public sealed partial class OptionsSceneTests
         scene.Scroll(-10_000f, sectionPoint, viewport);
         Assert.That(scene.SectionScrollOffset, Is.Zero);
     }
+
+    [Test]
+    public void OptionsSceneContentDragContinuesAfterRelease()
+    {
+        var scene = new OptionsScene(new GameLocalizer());
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+        var start = new UiPoint(DroidUiMetrics.ContentPaddingX + DroidUiMetrics.SectionRailWidth + DroidUiMetrics.ListGap + 10f, 500f);
+
+        Assert.That(scene.TryBeginScrollDrag(start, viewport), Is.True);
+        Assert.That(scene.UpdateScrollDrag(new UiPoint(start.X, 420f), viewport), Is.True);
+        float afterDrag = scene.ContentScrollOffset;
+        scene.EndScrollDrag(new UiPoint(start.X, 400f), viewport);
+
+        scene.Update(TimeSpan.FromSeconds(1d / 60d));
+
+        Assert.That(scene.ContentScrollOffset, Is.GreaterThan(afterDrag));
+    }
 }

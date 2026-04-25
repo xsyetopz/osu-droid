@@ -49,4 +49,68 @@ public static class OsuDroidColors
 
         return points[^1].Item2;
     }
+
+    public static UiColor StarRatingText(float starRating) =>
+        Interpolate(MathF.Ceiling(starRating), [
+            (9.0f, UiColor.Opaque(246, 240, 92)),
+            (9.9f, UiColor.Opaque(255, 128, 104)),
+            (10.6f, UiColor.Opaque(255, 78, 111)),
+            (11.5f, UiColor.Opaque(198, 69, 184)),
+            (12.4f, UiColor.Opaque(101, 99, 222)),
+        ]);
+
+    public static UiColor StarRatingBucket(float starRating)
+    {
+        float rounded = MathF.Ceiling(starRating);
+        return rounded < 0.1f
+            ? DroidUiColors.StarNeutral
+            : Interpolate(rounded, [
+                (0.1f, UiColor.Opaque(66, 144, 251)),
+                (1.25f, UiColor.Opaque(79, 192, 255)),
+                (2.0f, UiColor.Opaque(79, 255, 213)),
+                (2.5f, UiColor.Opaque(124, 255, 79)),
+                (3.3f, UiColor.Opaque(246, 240, 92)),
+                (4.2f, UiColor.Opaque(255, 128, 104)),
+                (4.9f, UiColor.Opaque(255, 78, 111)),
+                (5.8f, UiColor.Opaque(198, 69, 184)),
+                (6.7f, UiColor.Opaque(101, 99, 222)),
+                (7.7f, UiColor.Opaque(24, 21, 142)),
+                (9.0f, DroidUiColors.Black),
+            ]);
+    }
+
+    public static UiColor Interpolate(float value, ReadOnlySpan<(float Domain, UiColor Color)> gradient)
+    {
+        if (value <= gradient[0].Domain)
+        {
+            return gradient[0].Color;
+        }
+
+        if (value >= gradient[^1].Domain)
+        {
+            return gradient[^1].Color;
+        }
+
+        for (int index = 0; index < gradient.Length - 1; index++)
+        {
+            (float startDomain, UiColor startColor) = gradient[index];
+            (float endDomain, UiColor endColor) = gradient[index + 1];
+            if (value >= endDomain)
+            {
+                continue;
+            }
+
+            float t = (value - startDomain) / (endDomain - startDomain);
+            return new UiColor(
+                LerpByte(startColor.Red, endColor.Red, t),
+                LerpByte(startColor.Green, endColor.Green, t),
+                LerpByte(startColor.Blue, endColor.Blue, t),
+                LerpByte(startColor.Alpha, endColor.Alpha, t));
+        }
+
+        return gradient[^1].Color;
+    }
+
+    private static byte LerpByte(byte start, byte end, float t) =>
+        (byte)Math.Clamp(MathF.Round(start + (end - start) * t), 0f, 255f);
 }

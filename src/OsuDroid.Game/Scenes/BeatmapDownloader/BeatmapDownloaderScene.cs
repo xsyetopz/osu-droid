@@ -5,6 +5,13 @@ using OsuDroid.Game.Runtime;
 
 namespace OsuDroid.Game.Scenes.BeatmapDownloader;
 
+internal enum BeatmapDownloaderScrollTarget
+{
+    Results,
+    SortDropdown,
+    StatusDropdown,
+}
+
 public sealed partial class BeatmapDownloaderScene
 {
     private const int PageSize = 50;
@@ -20,22 +27,22 @@ public sealed partial class BeatmapDownloaderScene
     private const float CardHeight = CardTopHeight + CardDifficultyHeight + CardFooterHeight;
     private const float Radius = 14f * Dp;
 
-    private static readonly UiColor s_background = UiColor.Opaque(19, 19, 26);
-    private static readonly UiColor s_appBar = UiColor.Opaque(30, 30, 46);
-    private static readonly UiColor s_panel = UiColor.Opaque(22, 22, 34);
-    private static readonly UiColor s_footer = UiColor.Opaque(30, 30, 46);
-    private static readonly UiColor s_field = UiColor.Opaque(54, 54, 83);
-    private static readonly UiColor s_accent = UiColor.Opaque(243, 115, 115);
-    private static readonly UiColor s_white = UiColor.Opaque(255, 255, 255);
-    private static readonly UiColor s_secondary = UiColor.Opaque(178, 178, 204);
-    private static readonly UiColor s_muted = UiColor.Opaque(130, 130, 168);
-    private static readonly UiColor s_filterLabel = new(255, 255, 255, 191);
-    private static readonly UiColor s_dropdownSelected = new(242, 114, 114, 41);
-    private static readonly UiColor s_coverFallback = UiColor.Opaque(75, 75, 128);
-    private static readonly UiColor s_filterPanel = UiColor.Opaque(33, 33, 51);
-    private static readonly UiColor s_dropdownPanel = UiColor.Opaque(40, 40, 61);
-    private static readonly UiColor s_dialogScrim = new(0, 0, 0, 128);
-    private static readonly UiColor s_modalShade = new(19, 19, 26, 190);
+    private static readonly UiColor s_background = DroidUiColors.Surface;
+    private static readonly UiColor s_appBar = DroidUiColors.SurfaceAppBar;
+    private static readonly UiColor s_panel = DroidUiColors.SurfaceRow;
+    private static readonly UiColor s_footer = DroidUiColors.SurfaceAppBar;
+    private static readonly UiColor s_field = DroidUiColors.SurfaceInput;
+    private static readonly UiColor s_accent = DroidUiColors.Accent;
+    private static readonly UiColor s_white = DroidUiColors.TextPrimary;
+    private static readonly UiColor s_secondary = DroidUiColors.TextSecondary;
+    private static readonly UiColor s_muted = DroidUiColors.MutedText;
+    private static readonly UiColor s_filterLabel = DroidUiColors.FilterLabel;
+    private static readonly UiColor s_dropdownSelected = DroidUiColors.DropdownSelected;
+    private static readonly UiColor s_coverFallback = DroidUiColors.CoverFallback;
+    private static readonly UiColor s_filterPanel = DroidUiColors.FilterPanel;
+    private static readonly UiColor s_dropdownPanel = DroidUiColors.DropdownPanel;
+    private static readonly UiColor s_dialogScrim = DroidUiColors.ModalShade;
+    private static readonly UiColor s_modalShade = DroidUiColors.ModalShadeStrong;
 
     private static readonly HttpClient s_coverClient = new();
 
@@ -71,6 +78,11 @@ public sealed partial class BeatmapDownloaderScene
     private bool _preferNoVideoDownloads;
     private bool _forceRomanizedMetadata;
     private float _scrollOffset;
+    private double _elapsedSeconds;
+    private BeatmapDownloaderScrollTarget? _activeScrollTarget;
+    private readonly KineticScrollState _resultsScroll = new(KineticScrollAxis.Vertical);
+    private readonly KineticScrollState _sortDropdownKineticScroll = new(KineticScrollAxis.Vertical);
+    private readonly KineticScrollState _statusDropdownKineticScroll = new(KineticScrollAxis.Vertical);
     private string _query = string.Empty;
     private string? _message;
     private string? _lastImportedSetDirectory;
@@ -165,6 +177,17 @@ public sealed partial class BeatmapDownloaderScene
 
     public void Update(TimeSpan elapsed)
     {
+        float elapsedSeconds = (float)elapsed.TotalSeconds;
+        _elapsedSeconds += elapsedSeconds;
+        _resultsScroll.Update(elapsedSeconds, () => _scrollOffset, value => _scrollOffset = value, 0f, MaxScrollOffset(VirtualViewport.LegacyLandscape));
+        _sortDropdownKineticScroll.Update(elapsedSeconds, () => _sortDropdownScroll, value => _sortDropdownScroll = value, 0f, MaxDropdownScroll(SortOptions().Length, VirtualViewport.LegacyLandscape));
+        _statusDropdownKineticScroll.Update(elapsedSeconds, () => _statusDropdownScroll, value => _statusDropdownScroll = value, 0f, MaxDropdownScroll(StatusOptions().Length, VirtualViewport.LegacyLandscape));
+        float maxScroll = MaxScrollOffset(VirtualViewport.LegacyLandscape);
+        if (maxScroll > 0f && _hasMore && !_isSearching && _scrollOffset >= maxScroll - 40f * Dp)
+        {
+            _ = SearchAsync(true);
+        }
+
         _loadingIndicatorRotationDegrees -= (float)(360d * elapsed.TotalSeconds);
         if (_loadingIndicatorRotationDegrees <= -360f)
         {

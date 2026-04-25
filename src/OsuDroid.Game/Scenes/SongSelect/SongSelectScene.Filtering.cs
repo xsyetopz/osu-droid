@@ -203,11 +203,8 @@ public sealed partial class SongSelectScene
         return preferred >= 0 ? preferred : 0;
     }
 
-    private float ClampScroll(float value)
-    {
-        float max = Math.Max(0f, RowBaseY + CalculateTotalScrollHeight() - VirtualViewport.LegacyLandscape.VirtualHeight * 0.5f);
-        return Math.Clamp(value, -VirtualViewport.LegacyLandscape.VirtualHeight * 0.5f, max);
-    }
+    private float ClampScroll(float value) =>
+        Math.Clamp(value, MinSetScroll(VirtualViewport.LegacyLandscape), MaxSetScroll());
 
     private float CalculateSelectedSetScroll(int setIndex)
     {

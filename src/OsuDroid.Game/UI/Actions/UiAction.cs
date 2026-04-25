@@ -255,6 +255,7 @@ public enum UiAction
     ModSelectClear,
     ModSelectCustomize,
     ModSelectSearchBox,
+    ModSelectPresetAdd,
     ModSelectToggle0,
     ModSelectToggle1,
     ModSelectToggle2,

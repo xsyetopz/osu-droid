@@ -10,6 +10,7 @@ public sealed partial class OsuDroidGameCore
             UiAction.ModSelectClear => Do(_modSelect.Clear),
             UiAction.ModSelectCustomize => true,
             UiAction.ModSelectSearchBox => Do(() => _modSelect.FocusSearch(viewport)),
+            UiAction.ModSelectPresetAdd => Do(() => _modSelect.FocusPresetName(viewport)),
             _ => false,
         };
 #pragma warning restore IDE0072

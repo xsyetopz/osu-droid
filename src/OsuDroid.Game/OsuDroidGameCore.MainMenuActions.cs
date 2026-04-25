@@ -526,6 +526,8 @@ public sealed partial class OsuDroidGameCore
                 break;
             case UiAction.ModSelectSearchBox:
                 break;
+            case UiAction.ModSelectPresetAdd:
+                break;
             case UiAction.ModSelectToggle0:
                 break;
             case UiAction.ModSelectToggle1:

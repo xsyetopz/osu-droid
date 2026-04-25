@@ -99,13 +99,13 @@ public sealed partial class BeatmapDownloaderScene
 
     private static UiColor RankedStatusColor(BeatmapRankedStatus status) => status switch
     {
-        BeatmapRankedStatus.Ranked => UiColor.Opaque(65, 255, 100),
-        BeatmapRankedStatus.Approved => UiColor.Opaque(65, 255, 100),
-        BeatmapRankedStatus.Qualified => UiColor.Opaque(100, 242, 255),
-        BeatmapRankedStatus.Loved => UiColor.Opaque(250, 100, 255),
-        BeatmapRankedStatus.Pending => UiColor.Opaque(255, 172, 100),
-        BeatmapRankedStatus.WorkInProgress => UiColor.Opaque(255, 172, 100),
-        BeatmapRankedStatus.Graveyard => s_white,
+        BeatmapRankedStatus.Ranked => DroidUiTheme.BeatmapStatus.Ranked,
+        BeatmapRankedStatus.Approved => DroidUiTheme.BeatmapStatus.Ranked,
+        BeatmapRankedStatus.Qualified => DroidUiTheme.BeatmapStatus.Qualified,
+        BeatmapRankedStatus.Loved => DroidUiTheme.BeatmapStatus.Loved,
+        BeatmapRankedStatus.Pending => DroidUiTheme.BeatmapStatus.Pending,
+        BeatmapRankedStatus.WorkInProgress => DroidUiTheme.BeatmapStatus.Pending,
+        BeatmapRankedStatus.Graveyard => DroidUiTheme.BeatmapStatus.Graveyard,
         _ => s_white,
     };
 
@@ -154,47 +154,7 @@ public sealed partial class BeatmapDownloaderScene
         }
     }
 
-    private static UiColor StarRatingColor(float starRating)
-    {
-        var points = new (float Rating, UiColor Color)[]
-        {
-            (0.1f, UiColor.Opaque(170, 170, 170)),
-            (0.1f, UiColor.Opaque(66, 144, 251)),
-            (1.25f, UiColor.Opaque(79, 192, 255)),
-            (2.0f, UiColor.Opaque(79, 255, 213)),
-            (2.5f, UiColor.Opaque(124, 255, 79)),
-            (3.3f, UiColor.Opaque(246, 240, 92)),
-            (4.2f, UiColor.Opaque(255, 128, 104)),
-            (4.9f, UiColor.Opaque(255, 78, 111)),
-            (5.8f, UiColor.Opaque(198, 69, 184)),
-            (6.7f, UiColor.Opaque(101, 99, 222)),
-            (7.7f, UiColor.Opaque(24, 21, 142)),
-            (9.0f, UiColor.Opaque(0, 0, 0)),
-        };
-        float rounded = MathF.Ceiling(starRating * 100f) / 100f;
-        if (rounded < 0.1f)
-        {
-            return UiColor.Opaque(170, 170, 170);
-        }
-
-        for (int i = 0; i < points.Length - 1; i++)
-        {
-            (float Rating, UiColor Color) = points[i];
-            (float Rating, UiColor Color) next = points[i + 1];
-            if (rounded > next.Rating)
-            {
-                continue;
-            }
-
-            float amount = Math.Clamp((rounded - Rating) / Math.Max(0.001f, next.Rating - Rating), 0f, 1f);
-            return new UiColor(
-                (byte)MathF.Round(Color.Red + (next.Color.Red - Color.Red) * amount),
-                (byte)MathF.Round(Color.Green + (next.Color.Green - Color.Green) * amount),
-                (byte)MathF.Round(Color.Blue + (next.Color.Blue - Color.Blue) * amount),
-                255);
-        }
-        return points[^1].Color;
-    }
+    private static UiColor StarRatingColor(float starRating) => OsuDroidColors.StarRating(starRating);
 
     private static float EstimateTextWidth(string text, float size) => MathF.Max(1f, text.Length * size * 0.55f);
 

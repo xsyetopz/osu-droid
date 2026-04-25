@@ -23,7 +23,8 @@ public sealed record UiElementSnapshot(
     bool ClipToBounds = false,
     UiRect? SpriteSource = null,
     UiMeasuredTextAnchor? MeasuredTextAnchor = null,
-    UiProgressRing? ProgressRing = null);
+    UiProgressRing? ProgressRing = null,
+    UiRect? ClipBounds = null);
 
 public sealed record UiMeasuredTextAnchor(
     string Text,

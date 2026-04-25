@@ -213,6 +213,31 @@ public sealed partial class SongSelectSceneTests
     }
 
     [Test]
+    public void SongSelectDragContinuesAfterRelease()
+    {
+        BeatmapSetInfo[] sets = Enumerable.Range(0, 16)
+            .Select(index => new BeatmapSetInfo(index + 1, $"{index + 1} Set", [
+                CreateBeatmap("Easy", null, 1.5f, setId: index + 1, setDirectory: $"{index + 1} Set"),
+            ]))
+            .ToArray();
+        var scene = new SongSelectScene(new FakeLibrary(new BeatmapLibrarySnapshot(sets)), new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"));
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+        var start = new UiPoint(1100f, 620f);
+
+        scene.Enter();
+        Assert.That(scene.TryBeginScrollDrag(start, viewport), Is.True);
+        Assert.That(scene.UpdateScrollDrag(new UiPoint(1100f, 520f), viewport), Is.True);
+        UiFrameSnapshot afterDrag = scene.CreateSnapshot(viewport).UiFrame;
+        float firstRowY = afterDrag.Elements.Single(element => element.Id == "songselect-set-0").Bounds.Y;
+        scene.EndScrollDrag(new UiPoint(1100f, 500f), viewport);
+
+        scene.Update(TimeSpan.FromSeconds(1d / 60d));
+        UiFrameSnapshot afterInertia = scene.CreateSnapshot(viewport).UiFrame;
+
+        Assert.That(afterInertia.Elements.Single(element => element.Id == "songselect-set-0").Bounds.Y, Is.LessThan(firstRowY));
+    }
+
+    [Test]
     public void DifficultyBackgroundSwitchesImmediatelyLikeLegacySongMenu()
     {
         string songs = CreateSongsRoot("audio.mp3", "easy.jpg", "hard.jpg");

@@ -178,4 +178,83 @@ public sealed partial class BeatmapDownloaderScene
             _ = SearchAsync(true);
         }
     }
+
+    public bool TryBeginScrollDrag(UiPoint point, VirtualViewport viewport, double? timestampSeconds = null)
+    {
+        double timestamp = timestampSeconds ?? _elapsedSeconds;
+        if (_sortDropdownOpen && MaxDropdownScroll(SortOptions().Length, viewport) > 0f)
+        {
+            _activeScrollTarget = BeatmapDownloaderScrollTarget.SortDropdown;
+            _sortDropdownKineticScroll.Begin(point, timestamp);
+            return true;
+        }
+
+        if (_statusDropdownOpen && MaxDropdownScroll(StatusOptions().Length, viewport) > 0f)
+        {
+            _activeScrollTarget = BeatmapDownloaderScrollTarget.StatusDropdown;
+            _statusDropdownKineticScroll.Begin(point, timestamp);
+            return true;
+        }
+
+        if (_selectedSetIndex is not null || _filtersOpen || _mirrorsOpen || MaxScrollOffset(viewport) <= 0f)
+        {
+            return false;
+        }
+
+        _activeScrollTarget = BeatmapDownloaderScrollTarget.Results;
+        _resultsScroll.Begin(point, timestamp);
+        return true;
+    }
+
+    public bool UpdateScrollDrag(UiPoint point, VirtualViewport viewport, double? timestampSeconds = null)
+    {
+        double timestamp = timestampSeconds ?? _elapsedSeconds;
+        bool moved = _activeScrollTarget switch
+        {
+            BeatmapDownloaderScrollTarget.SortDropdown => _sortDropdownKineticScroll.Drag(point, timestamp, () => _sortDropdownScroll, value => _sortDropdownScroll = value, 0f, MaxDropdownScroll(SortOptions().Length, viewport)),
+            BeatmapDownloaderScrollTarget.StatusDropdown => _statusDropdownKineticScroll.Drag(point, timestamp, () => _statusDropdownScroll, value => _statusDropdownScroll = value, 0f, MaxDropdownScroll(StatusOptions().Length, viewport)),
+            BeatmapDownloaderScrollTarget.Results => _resultsScroll.Drag(point, timestamp, () => _scrollOffset, value => _scrollOffset = value, 0f, MaxScrollOffset(viewport)),
+            _ => false,
+        };
+
+        if (moved && _activeScrollTarget == BeatmapDownloaderScrollTarget.Results && _hasMore && !_isSearching && _scrollOffset >= MaxScrollOffset(viewport) - 40f * Dp)
+        {
+            _ = SearchAsync(true);
+        }
+
+        return moved;
+    }
+
+    public void EndScrollDrag(UiPoint point, VirtualViewport viewport, double? timestampSeconds = null)
+    {
+        double timestamp = timestampSeconds ?? _elapsedSeconds;
+        switch (_activeScrollTarget)
+        {
+            case BeatmapDownloaderScrollTarget.SortDropdown:
+                _sortDropdownKineticScroll.End(point, timestamp, () => _sortDropdownScroll, value => _sortDropdownScroll = value, 0f, MaxDropdownScroll(SortOptions().Length, viewport));
+                _resultsScroll.End();
+                _statusDropdownKineticScroll.End();
+                break;
+            case BeatmapDownloaderScrollTarget.StatusDropdown:
+                _statusDropdownKineticScroll.End(point, timestamp, () => _statusDropdownScroll, value => _statusDropdownScroll = value, 0f, MaxDropdownScroll(StatusOptions().Length, viewport));
+                _resultsScroll.End();
+                _sortDropdownKineticScroll.End();
+                break;
+            case BeatmapDownloaderScrollTarget.Results:
+                _resultsScroll.End(point, timestamp, () => _scrollOffset, value => _scrollOffset = value, 0f, MaxScrollOffset(viewport));
+                _sortDropdownKineticScroll.End();
+                _statusDropdownKineticScroll.End();
+                break;
+            default:
+                _resultsScroll.End();
+                _sortDropdownKineticScroll.End();
+                _statusDropdownKineticScroll.End();
+                break;
+        }
+
+        _activeScrollTarget = null;
+        _scrollOffset = Math.Clamp(_scrollOffset, 0f, MaxScrollOffset(viewport));
+        _sortDropdownScroll = Math.Clamp(_sortDropdownScroll, 0f, MaxDropdownScroll(SortOptions().Length, viewport));
+        _statusDropdownScroll = Math.Clamp(_statusDropdownScroll, 0f, MaxDropdownScroll(StatusOptions().Length, viewport));
+    }
 }

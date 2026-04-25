@@ -36,6 +36,7 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
     private const float OnlineAvatarFooterSize = 110f;
     private const float OnlinePanelGap = 20f;
     private const float ScrollTouchMinimumXRatio = 0.4f;
+    private const float SongMenuScrollDecelerationPerSecond = 1000f;
     private const float Dp = DroidUiMetrics.DpScale;
     private const float PropertiesWidth = 320f * Dp;
     private const float PropertiesRowHeight = 52f * Dp;
@@ -57,24 +58,24 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
     private const int VisibleDifficultySlots = 16;
     private const int VisibleCollectionSlots = 8;
 
-    private static readonly UiColor s_white = UiColor.Opaque(255, 255, 255);
-    private static readonly UiColor s_black = UiColor.Opaque(0, 0, 0);
-    private static readonly UiColor s_backgroundShade = new(0, 0, 0, 132);
-    private static readonly UiColor s_setRowTint = UiColor.Opaque(240, 150, 0);
-    private static readonly UiColor s_difficultyRowTint = UiColor.Opaque(25, 25, 240);
+    private static readonly UiColor s_white = DroidUiColors.TextPrimary;
+    private static readonly UiColor s_black = DroidUiColors.Black;
+    private static readonly UiColor s_backgroundShade = DroidUiColors.SongSelectShade;
+    private static readonly UiColor s_setRowTint = DroidUiColors.SetRowTint;
+    private static readonly UiColor s_difficultyRowTint = DroidUiColors.DifficultyRowTint;
     private static readonly UiColor s_selectedRowTint = s_white;
-    private static readonly UiColor s_onlinePanelTint = UiColor.Opaque(51, 51, 51);
-    private static readonly UiColor s_modalShade = new(0, 0, 0, 128);
-    private static readonly UiColor s_propertiesPanel = UiColor.Opaque(30, 30, 46);
-    private static readonly UiColor s_propertiesPanelDark = UiColor.Opaque(19, 19, 26);
-    private static readonly UiColor s_collectionsPanelDark = UiColor.Opaque(19, 19, 26);
-    private static readonly UiColor s_propertiesDivider = new(19, 19, 26, 115);
-    private static readonly UiColor s_propertiesSecondary = UiColor.Opaque(130, 130, 168);
-    private static readonly UiColor s_propertiesDanger = UiColor.Opaque(255, 191, 191);
-    private static readonly UiColor s_beatmapOptionsSearchPanel = UiColor.Opaque(54, 54, 83);
-    private static readonly UiColor s_beatmapOptionsDivider = new(255, 255, 255, 10);
-    private static readonly UiColor s_beatmapOptionsAccent = UiColor.Opaque(243, 115, 115);
-    private static readonly UiColor s_beatmapOptionsInactiveCheckbox = UiColor.Opaque(54, 54, 83);
+    private static readonly UiColor s_onlinePanelTint = DroidUiColors.OnlinePanel;
+    private static readonly UiColor s_modalShade = DroidUiColors.ModalShade;
+    private static readonly UiColor s_propertiesPanel = DroidUiColors.SurfaceAppBar;
+    private static readonly UiColor s_propertiesPanelDark = DroidUiColors.Surface;
+    private static readonly UiColor s_collectionsPanelDark = DroidUiColors.Surface;
+    private static readonly UiColor s_propertiesDivider = DroidUiColors.SurfaceDivider;
+    private static readonly UiColor s_propertiesSecondary = DroidUiColors.MutedText;
+    private static readonly UiColor s_propertiesDanger = DroidUiColors.DangerText;
+    private static readonly UiColor s_beatmapOptionsSearchPanel = DroidUiColors.SurfaceInput;
+    private static readonly UiColor s_beatmapOptionsDivider = DroidUiColors.DividerSubtle;
+    private static readonly UiColor s_beatmapOptionsAccent = DroidUiColors.Accent;
+    private static readonly UiColor s_beatmapOptionsInactiveCheckbox = DroidUiColors.SurfaceInput;
 
     private readonly int[] _visibleSetIndices = Enumerable.Repeat(-1, VisibleSetSlots).ToArray();
     private readonly int[] _visibleDifficultyIndices = Enumerable.Repeat(-1, VisibleDifficultySlots).ToArray();
@@ -103,6 +104,10 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
     private string? _collectionPendingDelete;
     private bool _forceRomanizedMetadata;
     private DifficultyAlgorithm _displayAlgorithm = difficultyService.Algorithm;
+    private double _elapsedSeconds;
+    private SongSelectScrollTarget? _activeScrollTarget;
+    private readonly KineticScrollState _setListScroll = new(KineticScrollAxis.Vertical);
+    private readonly KineticScrollState _collectionListScroll = new(KineticScrollAxis.Vertical);
 
     private int selectedSetIndex
     {
@@ -264,6 +269,9 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
     public void Update(TimeSpan elapsed)
     {
         float elapsedSeconds = (float)elapsed.TotalSeconds;
+        _elapsedSeconds += elapsedSeconds;
+        _setListScroll.UpdateLinear(elapsedSeconds, SongMenuScrollDecelerationPerSecond, () => scrollY, value => scrollY = value, MinSetScroll(VirtualViewport.LegacyLandscape), MaxSetScroll());
+        _collectionListScroll.Update(elapsedSeconds, () => collectionScrollY, value => collectionScrollY = value, 0f, MaxCollectionScroll(VirtualViewport.LegacyLandscape));
         selectedSetExpansion = Math.Clamp(selectedSetExpansion + elapsedSeconds * 2f, 0f, 1f);
         selectedBackgroundLuminance += elapsedSeconds * BackgroundLuminancePerSecond;
         ApplyCompletedLibraryRefresh();
@@ -307,4 +315,74 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
         scrollY = ClampScroll(scrollY + deltaY);
     }
 
+    public bool TryBeginScrollDrag(UiPoint point, VirtualViewport viewport, double? timestampSeconds = null)
+    {
+        double timestamp = timestampSeconds ?? _elapsedSeconds;
+        if (_collectionsOpen && MaxCollectionScroll(viewport) > 0f)
+        {
+            _activeScrollTarget = SongSelectScrollTarget.Collections;
+            _collectionListScroll.Begin(point, timestamp);
+            return true;
+        }
+
+        if (_propertiesOpen || _beatmapOptionsOpen || point.X < viewport.VirtualWidth * ScrollTouchMinimumXRatio)
+        {
+            return false;
+        }
+
+        if (MaxSetScroll() <= MinSetScroll(viewport))
+        {
+            return false;
+        }
+
+        _activeScrollTarget = SongSelectScrollTarget.Sets;
+        _setListScroll.Begin(point, timestamp);
+        return true;
+    }
+
+    public bool UpdateScrollDrag(UiPoint point, VirtualViewport viewport, double? timestampSeconds = null)
+    {
+        double timestamp = timestampSeconds ?? _elapsedSeconds;
+        return _activeScrollTarget switch
+        {
+            SongSelectScrollTarget.Collections => _collectionListScroll.Drag(point, timestamp, () => collectionScrollY, value => collectionScrollY = value, 0f, MaxCollectionScroll(viewport)),
+            SongSelectScrollTarget.Sets => _setListScroll.Drag(point, timestamp, () => scrollY, value => scrollY = value, MinSetScroll(viewport), MaxSetScroll()),
+            _ => false,
+        };
+    }
+
+    public void EndScrollDrag(UiPoint point, VirtualViewport viewport, double? timestampSeconds = null)
+    {
+        double timestamp = timestampSeconds ?? _elapsedSeconds;
+        switch (_activeScrollTarget)
+        {
+            case SongSelectScrollTarget.Collections:
+                _collectionListScroll.End(point, timestamp, () => collectionScrollY, value => collectionScrollY = value, 0f, MaxCollectionScroll(viewport));
+                _setListScroll.End();
+                break;
+            case SongSelectScrollTarget.Sets:
+                _setListScroll.End(point, timestamp, () => scrollY, value => scrollY = value, MinSetScroll(viewport), MaxSetScroll());
+                _collectionListScroll.End();
+                break;
+            default:
+                _setListScroll.End();
+                _collectionListScroll.End();
+                break;
+        }
+
+        _activeScrollTarget = null;
+        scrollY = ClampScroll(scrollY);
+        collectionScrollY = Math.Clamp(collectionScrollY, 0f, MaxCollectionScroll(viewport));
+    }
+
+    private static float MinSetScroll(VirtualViewport viewport) => -viewport.VirtualHeight * 0.5f;
+
+    private float MaxSetScroll() => Math.Max(0f, RowBaseY + CalculateTotalScrollHeight() - VirtualViewport.LegacyLandscape.VirtualHeight * 0.5f);
+
+}
+
+internal enum SongSelectScrollTarget
+{
+    Sets,
+    Collections,
 }

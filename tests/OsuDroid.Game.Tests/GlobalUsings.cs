@@ -8,4 +8,5 @@ global using OsuDroid.Game.UI.Actions;
 global using OsuDroid.Game.UI.Assets;
 global using OsuDroid.Game.UI.Elements;
 global using OsuDroid.Game.UI.Geometry;
+global using OsuDroid.Game.UI.Scrolling;
 global using OsuDroid.Game.UI.Style;
