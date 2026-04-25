@@ -26,6 +26,7 @@ public sealed partial class ModSelectScene
     private const float ToggleIconSize = 38f;
     private const float SelectedModIconSize = 42f;
     private const float SelectedModIconSpacing = -5f;
+    private const int VisiblePresetActionLimit = 16;
     private const float SearchDebounceSeconds = 0.2f;
     private static readonly UiColor s_accent = DroidUiTheme.ModMenu.Accent;
     private static readonly UiColor s_panel = DroidUiTheme.ModMenu.Panel;
@@ -64,6 +65,10 @@ public sealed partial class ModSelectScene
     private ScrollDragTarget? _dragTarget;
     private BeatmapInfo? _selectedBeatmap;
     private VirtualViewport _lastViewport = VirtualViewport.AndroidReferenceLandscape;
+    private bool _isPresetFormOpen;
+    private bool _isPresetDeleteDialogOpen;
+    private string _presetNameInput = string.Empty;
+    private int _pendingPresetDeleteIndex = -1;
 
     public ModSelectScene(IGameSettingsStore settingsStore, ITextInputService textInputService, GameLocalizer? localizer = null)
     {
@@ -83,6 +88,8 @@ public sealed partial class ModSelectScene
     public bool IsRanked => _selectedAcronyms.Count == 0 || ModCatalog.Entries
         .Where(entry => _selectedAcronyms.Contains(entry.Acronym))
         .All(entry => entry.IsRanked);
+
+    public bool IsPresetDialogOpen => _isPresetFormOpen || _isPresetDeleteDialogOpen;
 
     public void SetTextInputService(ITextInputService service) => _textInputService = service;
 

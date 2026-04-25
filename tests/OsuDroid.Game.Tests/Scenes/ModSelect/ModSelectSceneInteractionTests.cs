@@ -216,12 +216,77 @@ public sealed partial class ModSelectSceneTests
         scene.ToggleMod(2);
 
         scene.FocusPresetName(VirtualViewport.FromSurface(1280, 720));
-        textInput.LastRequest!.OnSubmitted("Safe");
+        UiFrameSnapshot dialog = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        textInput.LastRequest!.OnTextChanged("Safe");
+        scene.SavePresetDialog();
         var restoredScene = new ModSelectScene(settings, new NoOpTextInputService());
         UiFrameSnapshot frame = restoredScene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
 
+        Assert.That(dialog.Elements.Any(element => element.Id == "modselect-preset-dialog-title" && element.Text == "New mod preset"), Is.True);
+        Assert.That(dialog.Elements.Any(element => element.Id == "modselect-preset-dialog-name-label" && element.Text == "Name"), Is.True);
+        Assert.That(dialog.Elements.Any(element => element.Id == "modselect-preset-dialog-mod-NF" && element.AssetName == DroidAssets.ModNoFail), Is.True);
+        Assert.That(dialog.Elements.Single(element => element.Id == "modselect-preset-dialog-save").Color, Is.EqualTo(DroidUiTheme.ModMenu.Accent));
         Assert.That(frame.Elements.Any(element => element.Id == "modselect-preset-Safe-name" && element.Text == "Safe"), Is.True);
         Assert.That(frame.Elements.Any(element => element.Id == "modselect-preset-Safe-NF" && element.AssetName == DroidAssets.ModNoFail), Is.True);
+    }
+
+    [Test]
+    public void PresetRowsToggleSelectionAndLongPressDeletesWithConfirmation()
+    {
+        var settings = new MemorySettingsStore();
+        var textInput = new RecordingTextInputService();
+        var scene = new ModSelectScene(settings, textInput);
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+        scene.ToggleMod(4);
+        scene.FocusPresetName(viewport);
+        textInput.LastRequest!.OnTextChanged("Fast");
+        scene.SavePresetDialog();
+        scene.Clear();
+
+        scene.ActivatePreset(0);
+        UiFrameSnapshot selected = scene.CreateSnapshot(viewport).UiFrame;
+        bool deleteOpened = scene.OpenPresetDeleteDialog(0);
+        UiFrameSnapshot deleteDialog = scene.CreateSnapshot(viewport).UiFrame;
+        scene.ConfirmPresetDelete();
+        UiFrameSnapshot deleted = scene.CreateSnapshot(viewport).UiFrame;
+
+        Assert.That(scene.SelectedAcronyms, Does.Contain("DT"));
+        Assert.That(selected.Elements.Single(element => element.Id == "modselect-preset-Fast").Color, Is.EqualTo(DroidUiTheme.ModMenu.Accent));
+        Assert.That(deleteOpened, Is.True);
+        Assert.That(deleteDialog.Elements.Any(element => element.Id == "modselect-preset-delete-title" && element.Text == "Delete preset"), Is.True);
+        Assert.That(deleteDialog.Elements.Any(element => element.Id == "modselect-preset-delete-message" && element.Text == "Delete preset \"Fast\"?"), Is.True);
+        Assert.That(deleted.Elements.Any(element => element.Id == "modselect-preset-Fast"), Is.False);
+    }
+
+    [Test]
+    public void PresetDialogBackdropConsumesTouchesWithoutClosing()
+    {
+        var scene = new ModSelectScene(new MemorySettingsStore(), new RecordingTextInputService());
+        scene.ToggleMod(2);
+
+        scene.FocusPresetName(VirtualViewport.FromSurface(1280, 720));
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiElementSnapshot? backdrop = frame.HitTest(new UiPoint(10f, 10f));
+
+        Assert.That(backdrop?.Id, Is.EqualTo("modselect-preset-dialog-backdrop"));
+        Assert.That(backdrop?.Action, Is.EqualTo(UiAction.ModSelectPresetBackdrop));
+        Assert.That(scene.IsPresetDialogOpen, Is.True);
+    }
+
+    [Test]
+    public void SelectedModsIndicatorClipsIconsToScrollableStrip()
+    {
+        var scene = new ModSelectScene(new MemorySettingsStore(), new NoOpTextInputService());
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+        for (int index = 0; index < ModCatalog.Entries.Count; index++)
+        {
+            scene.ToggleMod(index);
+        }
+
+        scene.Scroll(800f, 0f, new UiPoint(540f, 40f), viewport);
+        UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
+
+        Assert.That(frame.Elements.Where(element => element.Id.StartsWith("modselect-selected-", StringComparison.Ordinal)).All(element => element.ClipBounds == new UiRect(506f, 12f, 340f, 58f)), Is.True);
     }
 
     [Test]

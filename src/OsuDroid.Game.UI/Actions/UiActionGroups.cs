@@ -14,6 +14,7 @@ public static class UiActionGroups
     private static readonly UiIndexedActionMap s_optionsToggles = new(UiAction.OptionsToggleServerConnection, UiAction.OptionsToggleBeatmapSounds);
     private static readonly UiIndexedActionMap s_downloaderSortChoices = new(UiAction.DownloaderSortTitle, UiAction.DownloaderSortSubmittedDate);
     private static readonly UiIndexedActionMap s_downloaderStatusChoices = new(UiAction.DownloaderStatusAll, UiAction.DownloaderStatusGraveyard);
+    private static readonly UiIndexedActionMap s_modSelectPresets = new(UiAction.ModSelectPreset0, UiAction.ModSelectPreset15);
     private static readonly UiIndexedActionMap s_modSelectToggles = new(UiAction.ModSelectToggle0, UiAction.ModSelectToggle31);
 
     public static bool TryGetDownloaderCardIndex(UiAction action, out int index) => s_downloaderCards.TryGetIndex(action, out index);
@@ -57,6 +58,10 @@ public static class UiActionGroups
     public static bool IsDownloaderSortChoice(UiAction action) => s_downloaderSortChoices.Contains(action);
 
     public static bool IsDownloaderStatusChoice(UiAction action) => s_downloaderStatusChoices.Contains(action);
+
+    public static bool TryGetModSelectPresetIndex(UiAction action, out int index) => s_modSelectPresets.TryGetIndex(action, out index);
+
+    public static bool TryGetModSelectPresetAction(int index, out UiAction action) => s_modSelectPresets.TryGetAction(index, out action);
 
     public static bool TryGetModSelectToggleIndex(UiAction action, out int index) => s_modSelectToggles.TryGetIndex(action, out index);
 

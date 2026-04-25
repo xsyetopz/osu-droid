@@ -69,6 +69,17 @@ public sealed partial class OsuDroidGameCore
 
     public bool HandleUiLongPress(UiAction action, VirtualViewport _)
     {
+        if (_activeScene == ActiveScene.ModSelect && UiActionGroups.TryGetModSelectPresetIndex(action, out int presetIndex))
+        {
+            bool opened = _modSelect.OpenPresetDeleteDialog(presetIndex);
+            if (opened)
+            {
+                PlayMenuSfx(UiAction.SongSelectBeatmapOptions);
+            }
+
+            return opened;
+        }
+
         if (_activeScene != ActiveScene.SongSelect || !UiActionGroups.TryGetSongSelectDifficultyIndex(action, out int index))
         {
             return false;

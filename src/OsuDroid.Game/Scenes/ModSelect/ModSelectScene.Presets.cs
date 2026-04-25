@@ -16,14 +16,118 @@ public sealed partial class ModSelectScene
             return;
         }
 
-        UiRect bounds = PresetAddBounds();
+        _lastViewport = viewport;
+        _isPresetFormOpen = true;
+        _isPresetDeleteDialogOpen = false;
+        _pendingPresetDeleteIndex = -1;
+        _presetNameInput = string.Empty;
+        FocusPresetDialogName(viewport);
+    }
+
+
+
+    public void FocusPresetDialogName(VirtualViewport viewport)
+    {
+        if (!_isPresetFormOpen)
+        {
+            return;
+        }
+
+        UiRect bounds = PresetNameInputBounds(viewport);
         _textInputService.RequestTextInput(new TextInputRequest(
-            string.Empty,
-            _ => { },
-            AddPreset,
+            _presetNameInput,
+            value => _presetNameInput = value,
+            value => _presetNameInput = value,
             viewport.ToSurface(bounds),
             () => { },
-            "Preset name"));
+            "Name"));
+    }
+
+
+
+    public void SavePresetDialog()
+    {
+        if (!_isPresetFormOpen)
+        {
+            return;
+        }
+
+        AddPreset(_presetNameInput);
+        ClosePresetDialog();
+    }
+
+
+
+    public void CancelPresetDialog() => ClosePresetDialog();
+
+
+
+    public void ActivatePreset(int visibleIndex)
+    {
+        ModPreset? preset = VisiblePresetAt(visibleIndex);
+        if (preset is null)
+        {
+            return;
+        }
+
+        if (preset.Acronyms.Count == _selectedAcronyms.Count && preset.Acronyms.All(_selectedAcronyms.Contains))
+        {
+            Clear();
+            return;
+        }
+
+        _selectedAcronyms.Clear();
+        foreach (string acronym in preset.Acronyms)
+        {
+            if (EntryByAcronym(acronym) is not null)
+            {
+                _selectedAcronyms.Add(acronym);
+            }
+        }
+
+        SaveSelectedMods();
+        _selectedModsScrollX = Math.Clamp(_selectedModsScrollX, 0f, MaxSelectedModsScroll());
+    }
+
+
+
+    public bool OpenPresetDeleteDialog(int visibleIndex)
+    {
+        if (VisiblePresetAt(visibleIndex) is null)
+        {
+            return false;
+        }
+
+        _isPresetFormOpen = false;
+        _isPresetDeleteDialogOpen = true;
+        _pendingPresetDeleteIndex = visibleIndex;
+        _textInputService.HideTextInput();
+        return true;
+    }
+
+
+
+    public void ConfirmPresetDelete()
+    {
+        ModPreset? preset = VisiblePresetAt(_pendingPresetDeleteIndex);
+        if (preset is not null)
+        {
+            _presets.Remove(preset);
+            SavePresets();
+        }
+
+        ClosePresetDialog();
+    }
+
+
+
+    public void ClosePresetDialog()
+    {
+        _isPresetFormOpen = false;
+        _isPresetDeleteDialogOpen = false;
+        _pendingPresetDeleteIndex = -1;
+        _presetNameInput = string.Empty;
+        _textInputService.HideTextInput();
     }
 
 
@@ -47,6 +151,13 @@ public sealed partial class ModSelectScene
             string.IsNullOrWhiteSpace(_appliedSearchTerm)
                 ? _presets
                 : _presets.Where(preset => SearchContiguously(preset.Name, _appliedSearchTerm));
+
+
+
+    private ModPreset? VisiblePresetAt(int visibleIndex) =>
+            (uint)visibleIndex < VisiblePresetActionLimit
+                ? VisiblePresets().Skip(visibleIndex).FirstOrDefault()
+                : null;
 
 
 
@@ -82,7 +193,20 @@ public sealed partial class ModSelectScene
 
 
 
-    private static UiRect PresetAddBounds() => new(SidePadding + 12f, TopBarHeight + SectionHeaderHeight, PresetSectionWidth - 24f, ToggleHeight * 0.62f);
+    private static UiRect PresetNameInputBounds(VirtualViewport viewport)
+    {
+        UiRect panel = PresetDialogPanelBounds(viewport);
+        return new UiRect(panel.X + 24f, panel.Y + 126f, panel.Width - 48f, 48f);
+    }
+
+
+
+    private static UiRect PresetDialogPanelBounds(VirtualViewport viewport)
+    {
+        float width = viewport.VirtualWidth * 0.5f;
+        const float height = 286f;
+        return new UiRect((viewport.VirtualWidth - width) / 2f, (viewport.VirtualHeight - height) / 2f, width, height);
+    }
 
 
 }
