@@ -32,6 +32,7 @@ public static class OnlineProfilePanelSnapshots
     private static readonly UiColor s_footer = DroidUiColors.OnlineProfileFooter;
     private static readonly UiColor s_white = DroidUiColors.TextPrimary;
     private static readonly UiColor s_secondary = DroidUiColors.OnlineProfileSecondaryText;
+    private static readonly UiColor s_rank = DroidUiColors.OnlineProfileRankText;
 
     public static void Add(
         List<UiElementSnapshot> elements,
@@ -63,7 +64,7 @@ public static class OnlineProfilePanelSnapshots
             elements.Add(new UiElementSnapshot(
                 idPrefix + "-message",
                 UiElementKind.Text,
-                new UiRect(bounds.X + avatarSize + 10f, bounds.Y + 5f, bounds.Width - avatarSize - 20f, 28f),
+                new UiRect(bounds.X + 110f, bounds.Y + 5f, bounds.Width - 120f, 28f),
                 s_white,
                 1f,
                 Text: state.Message,
@@ -72,7 +73,7 @@ public static class OnlineProfilePanelSnapshots
             elements.Add(new UiElementSnapshot(
                 idPrefix + "-submessage",
                 UiElementKind.Text,
-                new UiRect(bounds.X + avatarSize + 10f, bounds.Y + 60f, bounds.Width - avatarSize - 20f, 40f),
+                new UiRect(bounds.X + 110f, bounds.Y + 60f, bounds.Width - 120f, 40f),
                 s_white,
                 1f,
                 Text: state.Submessage,
@@ -104,7 +105,7 @@ public static class OnlineProfilePanelSnapshots
                 idPrefix + "-rank",
                 UiElementKind.Text,
                 new UiRect(bounds.Right - 86f, bounds.Y + 55f, 76f, 24f),
-                s_secondary,
+                s_rank,
                 1f,
                 Text: "#" + rank.ToString("N0", CultureInfo.InvariantCulture),
                 TextStyle: new UiTextStyle(20f, Alignment: UiTextAlignment.Right)));
@@ -115,7 +116,7 @@ public static class OnlineProfilePanelSnapshots
             elements.Add(new UiElementSnapshot(
                 idPrefix + "-pp",
                 UiElementKind.Text,
-                new UiRect(bounds.X + avatarSize + 10f, bounds.Y + 38f, bounds.Width - avatarSize - 20f, 24f),
+                new UiRect(bounds.X + avatarSize + 10f, bounds.Y + 50f, bounds.Width - avatarSize - 20f, 24f),
                 s_secondary,
                 1f,
                 Text: "Performance: " + pp.ToString("N0", CultureInfo.InvariantCulture) + "pp",
@@ -127,7 +128,7 @@ public static class OnlineProfilePanelSnapshots
             elements.Add(new UiElementSnapshot(
                 idPrefix + "-acc",
                 UiElementKind.Text,
-                new UiRect(bounds.X + avatarSize + 10f, bounds.Y + 64f, bounds.Width - avatarSize - 20f, 24f),
+                new UiRect(bounds.X + avatarSize + 10f, bounds.Y + 75f, bounds.Width - avatarSize - 20f, 24f),
                 s_secondary,
                 1f,
                 Text: "Accuracy: " + accuracy.ToString("0.00", CultureInfo.InvariantCulture) + "%",

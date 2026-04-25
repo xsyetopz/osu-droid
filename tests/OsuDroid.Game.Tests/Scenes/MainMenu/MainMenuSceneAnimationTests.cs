@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using OsuDroid.Game.Runtime.Audio;
 using OsuDroid.Game.Scenes.MainMenu;
 using OsuDroid.Game.UI.Actions;
 using OsuDroid.Game.UI.Elements;
@@ -160,5 +161,27 @@ public sealed partial class UiCompatibilityTests
         Assert.That(scene.ConsumePendingRoute(), Is.EqualTo(MainMenuRoute.None));
         Assert.That(frame.Elements.Any(element => element.Id == "exit-dialog-panel"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "menu-0"), Is.True);
+    }
+
+    [Test]
+    public void MainMenuExitAnimationSuppressesSpectrumBarsLikeAndroid()
+    {
+        var scene = new MainMenuScene(nowPlaying: new MenuNowPlayingState("artist - title", true));
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+        float[] spectrum = new float[512];
+        Array.Fill(spectrum, 1f);
+        scene.SetSpectrum(spectrum, true);
+        scene.Update(TimeSpan.FromMilliseconds(16d));
+
+        Assert.That(scene.CreateSnapshot(viewport).UiFrame.Elements.Any(element => element.Id.StartsWith("logo-spectrum-", StringComparison.Ordinal)), Is.True);
+
+        _ = ExpandedFrame(scene, viewport);
+        scene.Tap(MainMenuButtonSlot.Third);
+        scene.ConfirmExitDialog();
+        scene.Update(TimeSpan.FromMilliseconds(16d));
+
+        UiFrameSnapshot exiting = scene.CreateSnapshot(viewport).UiFrame;
+        Assert.That(exiting.Elements.Any(element => element.Id.StartsWith("logo-spectrum-", StringComparison.Ordinal)), Is.False);
+        Assert.That(exiting.Elements.Any(element => element.Id == "exit-blackout"), Is.True);
     }
 }

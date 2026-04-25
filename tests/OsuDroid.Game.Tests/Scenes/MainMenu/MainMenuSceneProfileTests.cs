@@ -43,8 +43,17 @@ public sealed partial class UiCompatibilityTests
 
         Assert.That(panel.Bounds, Is.EqualTo(new UiRect(MainMenuScene.OnlinePanelX, MainMenuScene.OnlinePanelY, MainMenuScene.OnlinePanelWidth, MainMenuScene.OnlinePanelHeight)));
         Assert.That(avatarFooter.Bounds, Is.EqualTo(new UiRect(MainMenuScene.OnlinePanelX, MainMenuScene.OnlinePanelY, MainMenuScene.OnlinePanelAvatarFooterSize, MainMenuScene.OnlinePanelAvatarFooterSize)));
-        Assert.That(frame.Elements.Single(element => element.Id == "profile-message").Text, Is.EqualTo("Logging in..."));
-        Assert.That(frame.Elements.Single(element => element.Id == "profile-submessage").Text, Is.EqualTo("Connecting to server..."));
+        UiElementSnapshot message = frame.Elements.Single(element => element.Id == "profile-message");
+        UiElementSnapshot submessage = frame.Elements.Single(element => element.Id == "profile-submessage");
+
+        Assert.That(panel.Color, Is.EqualTo(new UiColor(51, 51, 51, 128)));
+        Assert.That(avatarFooter.Color, Is.EqualTo(new UiColor(51, 51, 51, 204)));
+        Assert.That(message.Text, Is.EqualTo("Logging in..."));
+        Assert.That(message.Bounds.X, Is.EqualTo(115f));
+        Assert.That(message.Bounds.Y, Is.EqualTo(10f));
+        Assert.That(submessage.Text, Is.EqualTo("Connecting to server..."));
+        Assert.That(submessage.Bounds.X, Is.EqualTo(115f));
+        Assert.That(submessage.Bounds.Y, Is.EqualTo(65f));
         Assert.That(frame.Elements.Any(element => element.Id == "profile-avatar"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "profile-player"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "profile-pp"), Is.False);
@@ -58,9 +67,20 @@ public sealed partial class UiCompatibilityTests
         UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
 
         Assert.That(frame.Elements.Single(element => element.Id == "profile-player").Text, Is.EqualTo("Player"));
-        Assert.That(frame.Elements.Single(element => element.Id == "profile-rank").Text, Is.EqualTo("#42"));
-        Assert.That(frame.Elements.Single(element => element.Id == "profile-pp").Text, Is.EqualTo("Performance: 12,345pp"));
-        Assert.That(frame.Elements.Single(element => element.Id == "profile-acc").Text, Is.EqualTo("Accuracy: 98.76%"));
+        UiElementSnapshot rank = frame.Elements.Single(element => element.Id == "profile-rank");
+        UiElementSnapshot performance = frame.Elements.Single(element => element.Id == "profile-pp");
+        UiElementSnapshot accuracy = frame.Elements.Single(element => element.Id == "profile-acc");
+
+        Assert.That(rank.Text, Is.EqualTo("#42"));
+        Assert.That(rank.Bounds.Y, Is.EqualTo(60f));
+        Assert.That(rank.Color, Is.EqualTo(new UiColor(153, 153, 153, 230)));
+        Assert.That(rank.TextStyle?.Alignment, Is.EqualTo(UiTextAlignment.Right));
+        Assert.That(performance.Text, Is.EqualTo("Performance: 12,345pp"));
+        Assert.That(performance.Bounds.X, Is.EqualTo(125f));
+        Assert.That(performance.Bounds.Y, Is.EqualTo(55f));
+        Assert.That(accuracy.Text, Is.EqualTo("Accuracy: 98.76%"));
+        Assert.That(accuracy.Bounds.X, Is.EqualTo(125f));
+        Assert.That(accuracy.Bounds.Y, Is.EqualTo(80f));
     }
 
     [Test]

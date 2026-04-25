@@ -25,6 +25,7 @@ public static class DroidUiColors
     public static readonly UiColor OnlineProfilePanel = new(51, 51, 51, 128);
     public static readonly UiColor OnlineProfileFooter = new(51, 51, 51, 204);
     public static readonly UiColor OnlineProfileSecondaryText = UiColor.Opaque(217, 217, 230);
+    public static readonly UiColor OnlineProfileRankText = new(153, 153, 153, 230);
     public static readonly UiColor SetRowTint = UiColor.Opaque(240, 150, 0);
     public static readonly UiColor DifficultyRowTint = UiColor.Opaque(25, 25, 240);
 

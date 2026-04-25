@@ -103,6 +103,26 @@ public sealed partial class UiCompatibilityTests
         Assert.That(fadeIndex, Is.GreaterThan(backgroundIndex));
         Assert.That(fadeIndex, Is.LessThan(logoIndex));
     }
+
+    [Test]
+    public void MainMenuExitDialogStaysAboveBeatmapBackgroundReturnFade()
+    {
+        var scene = new MainMenuScene();
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+
+        scene.StartReturnTransition("beatmap-bg.png");
+        _ = ExpandedFrame(scene, viewport);
+        scene.Tap(MainMenuButtonSlot.Third);
+
+        var elements = scene.CreateSnapshot(viewport).UiFrame.Elements.ToList();
+        int fadeIndex = elements.FindIndex(element => element.Id == "return-background-fade");
+        int scrimIndex = elements.FindIndex(element => element.Id == "exit-dialog-scrim");
+        int panelIndex = elements.FindIndex(element => element.Id == "exit-dialog-panel");
+
+        Assert.That(fadeIndex, Is.GreaterThanOrEqualTo(0));
+        Assert.That(scrimIndex, Is.GreaterThan(fadeIndex));
+        Assert.That(panelIndex, Is.GreaterThan(scrimIndex));
+    }
     [Test]
     public void GameCoreCanStartSongSelectBackReturnTransition()
     {

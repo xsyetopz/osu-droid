@@ -262,7 +262,7 @@ public sealed partial class MainMenuScene
 
     private void AddLogoSpectrumBars(List<UiElementSnapshot> elements, UiRect baseLogoBounds)
     {
-        if (!_nowPlaying.IsPlaying || !_hasRawSpectrum)
+        if (_menuVisibility == MenuVisibility.Exiting || !_nowPlaying.IsPlaying || !_hasRawSpectrum)
         {
             return;
         }
