@@ -9,6 +9,5 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\OsuDroid.Game.Runtime\OsuDroid.Game.Runtime.csproj" />
-        <ProjectReference Include="..\OsuDroid.Game.Compatibility\OsuDroid.Game.Compatibility.csproj" />
     </ItemGroup>
 </Project>

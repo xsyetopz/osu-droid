@@ -157,6 +157,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Audit C# source layout for god-file and ownership smells.")
     parser.add_argument("--format", choices=("markdown",), default="markdown")
     parser.add_argument("--write", type=pathlib.Path, help="Write report to this path.")
+    parser.add_argument("--fail-on-findings", action="store_true", help="return non-zero when the audit reports findings")
     args = parser.parse_args()
 
     findings = [audit_file(path) for path in sorted(iter_csharp_files(DEFAULT_ROOTS))]
@@ -165,7 +166,7 @@ def main() -> int:
         args.write.parent.mkdir(parents=True, exist_ok=True)
         args.write.write_text(report, encoding="utf-8")
     print(report, end="")
-    return 0
+    return 1 if args.fail_on_findings and any(finding.flags for finding in findings) else 0
 
 
 if __name__ == "__main__":

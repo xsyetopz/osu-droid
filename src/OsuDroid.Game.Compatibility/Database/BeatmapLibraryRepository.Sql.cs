@@ -1,6 +1,7 @@
 using Microsoft.Data.Sqlite;
+using OsuDroid.Game.Beatmaps;
 
-namespace OsuDroid.Game.Beatmaps;
+namespace OsuDroid.Game.Compatibility.Database;
 
 public sealed partial class BeatmapLibraryRepository
 {

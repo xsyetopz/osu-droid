@@ -8,6 +8,7 @@
         <AssemblyName>OsuDroid.Game.Compatibility</AssemblyName>
     </PropertyGroup>
     <ItemGroup>
+        <ProjectReference Include="..\OsuDroid.Game.Beatmaps\OsuDroid.Game.Beatmaps.csproj" />
         <ProjectReference Include="..\OsuDroid.Game.Runtime\OsuDroid.Game.Runtime.csproj" />
     </ItemGroup>
     <ItemGroup>

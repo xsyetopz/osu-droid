@@ -2,6 +2,7 @@ using OsuDroid.Game.Beatmaps;
 using OsuDroid.Game.Beatmaps.Difficulty;
 using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Beatmaps.Online;
+using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Composition;
 using OsuDroid.Game.Localization;
 using OsuDroid.Game.Runtime.Audio;

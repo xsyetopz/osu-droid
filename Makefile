@@ -27,7 +27,7 @@ ADB := adb
 endif
 
 .PHONY: \
-	bootstrap restore build test format check clean \
+	bootstrap restore build test format check architecture-check boundary-check localization-check stale-term-check clean \
 	test-no-build \
 	build-android build-ios verify-android-bass \
 	verify-ios-bundle \
@@ -58,7 +58,19 @@ test-no-build:
 format:
 	dotnet format $(SOLUTION)
 
-check:
+architecture-check:
+	python3 scripts/dev/architecture_audit.py --fail-on-findings >/dev/null
+
+boundary-check:
+	python3 scripts/dev/check-boundaries.py
+
+localization-check:
+	python3 scripts/dev/generate-osudroid-localization.py --check
+
+stale-term-check:
+	python3 scripts/dev/check-stale-terms.py
+
+check: architecture-check boundary-check localization-check stale-term-check
 	dotnet format $(SOLUTION) --verify-no-changes --verbosity diagnostic
 
 clean:
