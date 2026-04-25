@@ -21,6 +21,22 @@ public sealed partial class BeatmapDownloaderTests
         }
     }
 
+    private sealed class ConnectingDownloadService : IBeatmapDownloadService
+    {
+        public BeatmapDownloadState State { get; } = new(
+            2524875,
+            "2524875 LaXal - Dam Dadi Doo",
+            new BeatmapDownloadProgress(0, null, BeatmapDownloadPhase.Connecting),
+            IsActive: true);
+
+        public Task<BeatmapDownloadResult> DownloadAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken) =>
+            Task.FromResult(BeatmapDownloadResult.Failed("Not used."));
+
+        public void CancelActiveDownload()
+        {
+        }
+    }
+
     private sealed class ActiveDownloadServiceWithoutFilename : IBeatmapDownloadService
     {
         public BeatmapDownloadState State { get; } = new(

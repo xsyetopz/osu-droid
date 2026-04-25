@@ -223,9 +223,13 @@ public sealed partial class BeatmapDownloaderScene
 
     private string FormatDownloadText(BeatmapDownloadState state)
     {
-        string key = state.Progress?.Phase == BeatmapDownloadPhase.Importing
-            ? "BeatmapDownloader_Importing"
-            : "BeatmapDownloader_Downloading";
+        string key = state.Progress?.Phase switch
+        {
+            BeatmapDownloadPhase.Connecting => "BeatmapDownloader_Connecting",
+            BeatmapDownloadPhase.Importing => "BeatmapDownloader_Importing",
+            _ => "BeatmapDownloader_Downloading",
+        };
+
         return !string.IsNullOrWhiteSpace(state.Filename)
             ? _localizer.Format(key, state.Filename)
             : _localizer[key]

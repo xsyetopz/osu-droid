@@ -59,6 +59,23 @@ public sealed partial class BeatmapDownloaderTests
         UiElementSnapshot text = frame.Elements.Single(element => element.Id == "downloader-download-text");
 
         Assert.That(text.Text, Is.EqualTo("Importing beatmap 2524875 LaXal - Dam Dadi Doo..."));
+        Assert.That(frame.Elements.Any(element => element.Id == "downloader-download-cancel-hit"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "downloader-download-cancel-icon"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "downloader-download-cancel-text"), Is.False);
+    }
+
+    [Test]
+    public void DownloadOverlayUsesConnectingCopyBeforeFirstDownloadUpdate()
+    {
+        BeatmapDownloaderScene scene = CreateScene(downloadService: new ConnectingDownloadService());
+
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.AndroidReferenceLandscape).UiFrame;
+        UiElementSnapshot text = frame.Elements.Single(element => element.Id == "downloader-download-text");
+        UiElementSnapshot spinner = frame.Elements.Single(element => element.Id == "downloader-download-spinner");
+
+        Assert.That(text.Text, Is.EqualTo("Connecting to server..."));
+        Assert.That(spinner.ProgressRing!.SweepDegrees, Is.EqualTo(96f).Within(0.001f));
+        Assert.That(frame.Elements.Any(element => element.Id == "downloader-download-cancel-hit"), Is.True);
     }
 
     [Test]

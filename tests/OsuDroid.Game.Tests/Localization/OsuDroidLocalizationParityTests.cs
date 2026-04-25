@@ -99,6 +99,7 @@ public sealed class OsuDroidLocalizationParityTests
             Assert.That(localizer["Options_OffsetCalibrationTitle"], Is.EqualTo("Offset Calibration"));
             Assert.That(localizer["SongSelect_ManageFavorites"], Is.EqualTo("Manage Beatmap folder"));
             Assert.That(localizer["BeatmapDownloader_WorkInProgress"], Is.EqualTo("Work in Progress"));
+            Assert.That(localizer["BeatmapDownloader_Connecting"], Is.EqualTo("Connecting to server..."));
             Assert.That(localizer["BeatmapDownloader_Downloading"], Is.EqualTo("Downloading beatmap {0}..."));
             Assert.That(localizer["MainMenu_AboutDiscord"], Is.EqualTo("Join the official Discord server ↗"));
             Assert.That(localizer["MainMenu_ExitInstruction"], Is.EqualTo("Done playing? Swipe this app away to close it."));

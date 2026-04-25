@@ -85,7 +85,8 @@ public sealed partial class BeatmapDownloaderScene
         float width = Math.Clamp(textWidth + 112f * Dp, 300f * Dp, Math.Min(500f * Dp, viewport.VirtualWidth - 80f * Dp));
         float titleHeight = 44f * Dp;
         float bodyHeight = 64f * Dp;
-        float cancelHeight = 42f * Dp;
+        bool isImporting = progress?.Phase == BeatmapDownloadPhase.Importing;
+        float cancelHeight = isImporting ? 0f : 42f * Dp;
         float height = titleHeight + bodyHeight + cancelHeight;
         float x = (viewport.VirtualWidth - width) / 2f;
         float y = viewport.VirtualHeight - height - 20f * Dp;
@@ -101,6 +102,11 @@ public sealed partial class BeatmapDownloaderScene
         float rotationDegrees = progress?.Percent is double ? 0f : _loadingIndicatorRotationDegrees;
         elements.Add(ProgressRing("downloader-download-spinner", new UiRect(contentX + 9f * Dp, bodyY + (bodyHeight - 24f * Dp) / 2f, 24f * Dp, 24f * Dp), s_accent, 3f * Dp, sweepDegrees, rotationDegrees));
         elements.Add(TextMiddle("downloader-download-text", text, contentX + 46f * Dp, bodyY, contentWidth - 46f * Dp, bodyHeight, 13f * Dp, s_white, UiTextAlignment.Left));
+        if (isImporting)
+        {
+            return;
+        }
+
         elements.Add(Fill("downloader-download-divider-cancel", new UiRect(x, bodyY + bodyHeight, width, 1f * Dp), s_background, 0.45f));
 
         float cancelY = y + titleHeight + bodyHeight;

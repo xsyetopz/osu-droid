@@ -926,6 +926,10 @@ A lower limit increases the frequency of the syncing attempt. If constant offset
           xml:space="preserve">
         <value>Mapped by {0}</value>
     </data>
+    <data name="BeatmapDownloader_Connecting"
+          xml:space="preserve">
+        <value>Connecting to server...</value>
+    </data>
     <data name="BeatmapDownloader_Downloading"
           xml:space="preserve">
         <value>Downloading beatmap {0}...</value>

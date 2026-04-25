@@ -248,6 +248,7 @@ APP_ALIASES: "OrderedDict[str, tuple[str, str]]" = OrderedDict([
     ("BeatmapDownloader_NoBeatmapsFound", (LITERAL_KEY, "No beatmaps found")),
     ("BeatmapDownloader_Searching", (LITERAL_KEY, "Searching {0}...")),
     ("BeatmapDownloader_MappedBy", (LITERAL_KEY, "Mapped by {0}")),
+    ("BeatmapDownloader_Connecting", (LANGUAGE_PACK_KEY, "beatmap_downloader_connecting")),
     ("BeatmapDownloader_Downloading", (LANGUAGE_PACK_KEY, "beatmap_downloader_downloading")),
     ("BeatmapDownloader_Importing", (LANGUAGE_PACK_KEY, "beatmap_downloader_importing")),
     ("BeatmapDownloader_Beatmap", (LITERAL_KEY, "beatmap")),
