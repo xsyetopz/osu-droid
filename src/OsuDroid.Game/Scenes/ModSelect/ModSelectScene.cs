@@ -38,6 +38,7 @@ public sealed partial class ModSelectScene
     private static readonly UiColor s_selectedText = DroidUiTheme.ModMenu.SelectedText;
     private static readonly UiColor s_clearButton = DroidUiTheme.ModMenu.ClearButton;
     private static readonly UiColor s_ranked = DroidUiTheme.ModMenu.Ranked;
+    private static readonly UiColor s_rankedText = DroidUiTheme.ModMenu.RankedText;
     private static readonly UiColor s_text = DroidUiTheme.TextPrimary;
     private static readonly UiColor s_dimText = DroidUiTheme.TextSecondary;
     private static readonly UiColor s_black = DroidUiTheme.Black;

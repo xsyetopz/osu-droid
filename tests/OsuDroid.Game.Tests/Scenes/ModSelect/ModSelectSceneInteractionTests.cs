@@ -189,6 +189,9 @@ public sealed partial class ModSelectSceneTests
         Assert.That(frame.Elements.Single(element => element.Id == "modselect-stat-hp-value").Text, Is.EqualTo("7.00"));
         Assert.That(frame.Elements.Single(element => element.Id == "modselect-stat-bpm-value").Text, Is.EqualTo("130"));
         Assert.That(frame.Elements.Single(element => element.Id == "modselect-star-value").Text, Is.EqualTo("3.96"));
+        Assert.That(frame.Elements.Single(element => element.Id == "modselect-ranked-badge").Alpha, Is.EqualTo(1f));
+        Assert.That(frame.Elements.Single(element => element.Id == "modselect-ranked-badge").Color, Is.EqualTo(DroidUiTheme.ModMenu.Ranked));
+        Assert.That(frame.Elements.Single(element => element.Id == "modselect-ranked-badge-text").Color, Is.EqualTo(DroidUiTheme.ModMenu.RankedText));
         Assert.That(frame.Elements.Single(element => element.Id == "modselect-star-badge").Bounds.Right, Is.LessThan(frame.Elements.Single(element => element.Id == "modselect-ranked-badge").Bounds.X));
         Assert.That(frame.Elements.Single(element => element.Id == "modselect-ranked-badge").Bounds.Right, Is.LessThan(frame.Elements.Single(element => element.Id == "modselect-stat-score").Bounds.X));
     }

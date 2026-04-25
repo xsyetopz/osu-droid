@@ -33,6 +33,7 @@ public static class DroidUiTheme
         public static readonly UiColor SelectedText = Accent.MultiplyRgb(0.1f);
         public static readonly UiColor ClearButton = new(52, 33, 33, 255);
         public static readonly UiColor Ranked = new(131, 223, 107, 255);
+        public static readonly UiColor RankedText = new(22, 22, 34, 255);
     }
 
     public static class Scroll

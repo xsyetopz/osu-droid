@@ -92,7 +92,8 @@ public sealed partial class ModSelectSceneTests
         Assert.That(frame.Elements.Single(element => element.Id == "modselect-section-OsuDroidLanguagePack_mod_section_difficulty_reduction").Bounds.Width, Is.EqualTo(340f));
         Assert.That(frame.Elements.Single(element => element.Id == "modselect-toggle-NF").Bounds.Height, Is.EqualTo(82f));
         Assert.That(frame.Elements.Single(element => element.Id == "modselect-toggle-description-NF").TextStyle!.Size, Is.EqualTo(16f));
-        Assert.That(frame.Elements.Single(element => element.Id == "modselect-section-presets").Alpha, Is.EqualTo(0.9f));
+        Assert.That(frame.Elements.Single(element => element.Id == "modselect-section-presets").Alpha, Is.EqualTo(1f));
+        Assert.That(frame.Elements.Single(element => element.Id == "modselect-section-OsuDroidLanguagePack_mod_section_difficulty_reduction").Alpha, Is.EqualTo(1f));
         Assert.That(frame.Elements.Any(element => element.Id == "modselect-section-OsuDroidLanguagePack_mod_section_fun"), Is.False);
     }
 

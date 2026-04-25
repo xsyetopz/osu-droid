@@ -106,7 +106,7 @@ public sealed partial class ModSelectScene
 
     private void AddPresetsSection(List<UiElementSnapshot> elements, UiRect bounds, VirtualViewport viewport)
     {
-        elements.Add(Fill("modselect-section-presets", bounds, s_panel, 0.9f, radius: 16f));
+        elements.Add(Fill("modselect-section-presets", bounds, s_panel, 1f, radius: 16f));
         elements.Add(Text("modselect-section-title-presets", "Presets", new UiRect(bounds.X + 12f, bounds.Y + 12f, bounds.Width - 24f, 30f), 21f, s_accent, bold: true, alignment: UiTextAlignment.Center, alpha: 0.75f));
 
         UiRect addBounds = new(bounds.X + 12f, bounds.Y + SectionHeaderHeight, bounds.Width - 24f, ToggleHeight * 0.62f);
@@ -144,7 +144,7 @@ public sealed partial class ModSelectScene
 
     private void AddSection(List<UiElementSnapshot> elements, string sectionKey, IReadOnlyList<ModCatalogEntry> entries, UiRect bounds, VirtualViewport viewport)
     {
-        elements.Add(Fill($"modselect-section-{sectionKey}", bounds, s_panel, 0.9f, radius: 16f));
+        elements.Add(Fill($"modselect-section-{sectionKey}", bounds, s_panel, 1f, radius: 16f));
         elements.Add(Text($"modselect-section-title-{sectionKey}", _localizer[sectionKey], new UiRect(bounds.X + 12f, bounds.Y + 12f, bounds.Width - 24f, 30f), 21f, s_accent, bold: true, alignment: UiTextAlignment.Center, alpha: 0.75f));
 
         float y = bounds.Y + SectionHeaderHeight - SectionScroll(sectionKey);
@@ -203,11 +203,11 @@ public sealed partial class ModSelectScene
         float scoreX = viewport.VirtualWidth - SidePadding - scoreWidth;
         AddLabeledBadge(elements, "score", "Score", scoreValue, scoreX, y);
         UiColor rankedFill = IsRanked ? s_ranked : s_button;
-        UiColor rankedText = IsRanked ? s_black : s_accent;
+        UiColor rankedText = IsRanked ? s_rankedText : s_accent;
         string rankedTextValue = IsRanked ? "Ranked" : "Unranked";
         float rankedWidth = BadgeWidth(rankedTextValue);
         float rankedX = scoreX - 10f - rankedWidth;
-        elements.Add(Fill("modselect-ranked-badge", new UiRect(rankedX, y, rankedWidth, 44f), rankedFill, IsRanked ? 0.75f : 1f, radius: 12f));
+        elements.Add(Fill("modselect-ranked-badge", new UiRect(rankedX, y, rankedWidth, 44f), rankedFill, 1f, radius: 12f));
         elements.Add(Text("modselect-ranked-badge-text", rankedTextValue, new UiRect(rankedX + 12f, y + 8f, rankedWidth - 24f, 28f), 18f, rankedText, bold: true, alignment: UiTextAlignment.Center));
 
         float starValue = _selectedBeatmap?.DroidStarRating ?? _selectedBeatmap?.StandardStarRating ?? 0f;
