@@ -1,6 +1,8 @@
 using System.Globalization;
 using OsuDroid.Game.Beatmaps;
-using OsuDroid.Game.Runtime;
+using OsuDroid.Game.Runtime.Diagnostics;
+using OsuDroid.Game.UI.Geometry;
+using OsuDroid.Game.UI.Input;
 
 namespace OsuDroid.Game.Scenes.SongSelect;
 

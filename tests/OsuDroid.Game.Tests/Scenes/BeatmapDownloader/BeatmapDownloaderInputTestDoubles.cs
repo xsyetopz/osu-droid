@@ -1,4 +1,4 @@
-using OsuDroid.Game.Runtime;
+using OsuDroid.Game.UI.Input;
 
 namespace OsuDroid.Game.Tests;
 

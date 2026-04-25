@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using OsuDroid.Game.Compatibility.Online;
 
 namespace OsuDroid.Game.Tests;
@@ -6,7 +7,7 @@ namespace OsuDroid.Game.Tests;
 public sealed class OnlineProtocolTests
 {
     [Test]
-    public void LoginRequestMatchesLegacyEndpointAndFields()
+    public void LoginRequestMatchesOsuDroidEndpointAndFields()
     {
         OnlineRequest request = OnlineProtocol.CreateLoginRequest("player", "password");
 
@@ -18,7 +19,7 @@ public sealed class OnlineProtocolTests
     }
 
     [Test]
-    public void ResponseParserKeepsLegacySuccessContract()
+    public void ResponseParserKeepsOsuDroidSuccessContract()
     {
         OnlineResponse response = OnlineResponseParser.ParseLines([
             "SUCCESS",
@@ -34,7 +35,7 @@ public sealed class OnlineProtocolTests
     }
 
     [Test]
-    public void ReplayUrlsMatchLegacyLeaderboardMode()
+    public void ReplayUrlsMatchOsuDroidLeaderboardMode()
     {
         Assert.That(OnlineProtocol.GetReplayUrl(42, BeatmapLeaderboardScoringMode.Score), Is.EqualTo("https://osudroid.moe/api/upload/42.odr"));
         Assert.That(OnlineProtocol.GetReplayUrl(42, BeatmapLeaderboardScoringMode.PerformancePoints), Is.EqualTo("https://osudroid.moe/api/bestpp/42.odr"));

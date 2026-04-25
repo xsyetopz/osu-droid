@@ -1,7 +1,12 @@
 using System.Collections.Concurrent;
 using OsuDroid.Game.Beatmaps.Online;
 using OsuDroid.Game.Localization;
-using OsuDroid.Game.Runtime;
+using OsuDroid.Game.Runtime.Audio;
+using OsuDroid.Game.UI.Frames;
+using OsuDroid.Game.UI.Geometry;
+using OsuDroid.Game.UI.Input;
+using OsuDroid.Game.UI.Scrolling;
+using OsuDroid.Game.UI.Style;
 
 namespace OsuDroid.Game.Scenes.BeatmapDownloader;
 
@@ -179,10 +184,10 @@ public sealed partial class BeatmapDownloaderScene
     {
         float elapsedSeconds = (float)elapsed.TotalSeconds;
         _elapsedSeconds += elapsedSeconds;
-        _resultsScroll.Update(elapsedSeconds, () => _scrollOffset, value => _scrollOffset = value, 0f, MaxScrollOffset(VirtualViewport.LegacyLandscape));
-        _sortDropdownKineticScroll.Update(elapsedSeconds, () => _sortDropdownScroll, value => _sortDropdownScroll = value, 0f, MaxDropdownScroll(SortOptions().Length, VirtualViewport.LegacyLandscape));
-        _statusDropdownKineticScroll.Update(elapsedSeconds, () => _statusDropdownScroll, value => _statusDropdownScroll = value, 0f, MaxDropdownScroll(StatusOptions().Length, VirtualViewport.LegacyLandscape));
-        float maxScroll = MaxScrollOffset(VirtualViewport.LegacyLandscape);
+        _resultsScroll.Update(elapsedSeconds, () => _scrollOffset, value => _scrollOffset = value, 0f, MaxScrollOffset(VirtualViewport.AndroidReferenceLandscape));
+        _sortDropdownKineticScroll.Update(elapsedSeconds, () => _sortDropdownScroll, value => _sortDropdownScroll = value, 0f, MaxDropdownScroll(SortOptions().Length, VirtualViewport.AndroidReferenceLandscape));
+        _statusDropdownKineticScroll.Update(elapsedSeconds, () => _statusDropdownScroll, value => _statusDropdownScroll = value, 0f, MaxDropdownScroll(StatusOptions().Length, VirtualViewport.AndroidReferenceLandscape));
+        float maxScroll = MaxScrollOffset(VirtualViewport.AndroidReferenceLandscape);
         if (maxScroll > 0f && _hasMore && !_isSearching && _scrollOffset >= maxScroll - 40f * Dp)
         {
             _ = SearchAsync(true);

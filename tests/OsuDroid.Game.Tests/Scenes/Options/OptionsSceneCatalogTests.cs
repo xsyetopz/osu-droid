@@ -1,4 +1,6 @@
+using NUnit.Framework;
 using OsuDroid.Game.Localization;
+using OsuDroid.Game.Scenes.Options;
 
 namespace OsuDroid.Game.Tests;
 

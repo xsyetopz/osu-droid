@@ -1,3 +1,5 @@
+using NUnit.Framework;
+using OsuDroid.Game.UI.Actions;
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests

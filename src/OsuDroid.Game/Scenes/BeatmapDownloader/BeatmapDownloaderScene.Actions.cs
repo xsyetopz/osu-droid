@@ -1,5 +1,6 @@
 using OsuDroid.Game.Beatmaps.Online;
-using OsuDroid.Game.Runtime;
+using OsuDroid.Game.UI.Geometry;
+using OsuDroid.Game.UI.Input;
 
 namespace OsuDroid.Game.Scenes.BeatmapDownloader;
 

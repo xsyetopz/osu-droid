@@ -1,3 +1,4 @@
+using NUnit.Framework;
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
@@ -21,12 +22,12 @@ public sealed partial class UiCompatibilityTests
     {
         string repositoryRoot = FindRepositoryRoot();
         byte[] appIcon = File.ReadAllBytes(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Resources", "AppIcon", "appicon.png"));
-        byte[] legacyIcon = File.ReadAllBytes(Path.Combine(repositoryRoot, "third_party", "osu-droid-legacy", "res", "drawable-xxxhdpi", "ic_launcher.png"));
+        byte[] referenceIcon = File.ReadAllBytes(Path.Combine(repositoryRoot, "third_party", "osu-droid-legacy", "res", "drawable-xxxhdpi", "ic_launcher.png"));
 
-        Assert.That(appIcon, Is.EqualTo(legacyIcon));
+        Assert.That(appIcon, Is.EqualTo(referenceIcon));
     }
     [Test]
-    public void AndroidPlatformDeclaresLegacyLauncherIcon()
+    public void AndroidPlatformDeclaresOsuDroidLauncherIcon()
     {
         string repositoryRoot = FindRepositoryRoot();
         string mainActivity = File.ReadAllText(Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "Android", "MainActivity.cs"));
@@ -38,10 +39,10 @@ public sealed partial class UiCompatibilityTests
         foreach (string? density in densities)
         {
             string androidIcon = Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Platforms", "Android", "Resources", $"drawable-{density}", "ic_launcher.png");
-            string legacyIcon = Path.Combine(repositoryRoot, "third_party", "osu-droid-legacy", "res", $"drawable-{density}", "ic_launcher.png");
+            string referenceIcon = Path.Combine(repositoryRoot, "third_party", "osu-droid-legacy", "res", $"drawable-{density}", "ic_launcher.png");
 
             Assert.That(File.Exists(androidIcon), Is.True, density);
-            Assert.That(File.ReadAllBytes(androidIcon), Is.EqualTo(File.ReadAllBytes(legacyIcon)), density);
+            Assert.That(File.ReadAllBytes(androidIcon), Is.EqualTo(File.ReadAllBytes(referenceIcon)), density);
         }
     }
     [Test]

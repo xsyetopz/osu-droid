@@ -1,15 +1,19 @@
-using OsuDroid.Game.Runtime;
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Assets;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Frames;
+using OsuDroid.Game.UI.Geometry;
 
 namespace OsuDroid.Game.Scenes.MainMenu;
 
 public sealed partial class MainMenuScene
 {
-    public GameFrameSnapshot Snapshot => CreateSnapshot(VirtualViewport.LegacyLandscape);
+    public GameFrameSnapshot Snapshot => CreateSnapshot(VirtualViewport.AndroidReferenceLandscape);
 
     public GameFrameSnapshot CreateSnapshot(VirtualViewport viewport) => new(
         "MainMenu",
         "osu!droid",
-        IsSecondMenu ? "legacy second menu" : "legacy first menu",
+        IsSecondMenu ? "osu!droid second menu" : "osu!droid first menu",
         CurrentEntries,
         _selectedIndex,
         IsSecondMenu,
@@ -18,7 +22,7 @@ public sealed partial class MainMenuScene
     public GameFrameSnapshot CreateAboutDialogSnapshot(VirtualViewport viewport) => new(
         "MainMenu",
         "osu!droid",
-        IsSecondMenu ? "legacy second menu" : "legacy first menu",
+        IsSecondMenu ? "osu!droid second menu" : "osu!droid first menu",
         CurrentEntries,
         _selectedIndex,
         IsSecondMenu,
@@ -40,8 +44,8 @@ public sealed partial class MainMenuScene
         _ => throw new ArgumentOutOfRangeException(nameof(index), index, null),
     };
 
-    public static UiRect GetAndroidMusicControlBounds(float legacyIndex) => new(
-        VirtualViewport.LegacyWidth - MusicControlStep * legacyIndex + MusicControlRightOffset,
+    public static UiRect GetAndroidMusicControlBounds(float androidIndex) => new(
+        VirtualViewport.AndroidReferenceWidth - MusicControlStep * androidIndex + MusicControlRightOffset,
         MusicControlY,
         MusicControlSize,
         MusicControlSize);
@@ -50,7 +54,7 @@ public sealed partial class MainMenuScene
     {
         UiAssetEntry nowPlayingAsset = DroidAssets.MainMenuManifest.Get(DroidAssets.MusicNowPlaying);
         float width = MusicNowPlayingHeight * nowPlayingAsset.NativeSize.Width / nowPlayingAsset.NativeSize.Height;
-        return new UiRect(VirtualViewport.LegacyWidth - MusicNowPlayingXOffset, 0f, width, MusicNowPlayingHeight);
+        return new UiRect(VirtualViewport.AndroidReferenceWidth - MusicNowPlayingXOffset, 0f, width, MusicNowPlayingHeight);
     }
 
     public UiRect GetVersionPillBounds(VirtualViewport viewport) => CreateVersionPillBounds(viewport, GetVersionText());

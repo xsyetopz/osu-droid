@@ -1,4 +1,5 @@
 using System.Text.Json;
+using NUnit.Framework;
 using OsuDroid.Game.Compatibility.Multiplayer;
 
 namespace OsuDroid.Game.Tests;
@@ -7,7 +8,7 @@ namespace OsuDroid.Game.Tests;
 public sealed class MultiplayerProtocolTests
 {
     [Test]
-    public void RoomListUriMatchesLegacyHostAndQueryKeys()
+    public void RoomListUriMatchesOsuDroidHostAndQueryKeys()
     {
         Uri uri = MultiplayerProtocol.BuildRoomListUri(new RoomListQuery("abc", 12, "ssid", "sig"));
 
@@ -19,7 +20,7 @@ public sealed class MultiplayerProtocolTests
     }
 
     [Test]
-    public void CreateRoomPayloadUsesLegacyKeysAndApiVersion()
+    public void CreateRoomPayloadUsesOsuDroidKeysAndApiVersion()
     {
         CreateRoomRequestDto request = MultiplayerProtocol.CreateRoomRequest(
             "room",
@@ -41,7 +42,7 @@ public sealed class MultiplayerProtocolTests
     }
 
     [Test]
-    public void SocketEventNamesMatchLegacyRoomApi()
+    public void SocketEventNamesMatchOsuDroidRoomApi()
     {
         Assert.That(RoomSocketEvents.InitialConnection, Is.EqualTo("initialConnection"));
         Assert.That(RoomSocketEvents.EmitBeatmapLoadComplete, Is.EqualTo("beatmapLoadComplete"));

@@ -3,13 +3,13 @@
 ## Source split
 - MonoGame supplies rendering, input, and the game loop.
 - .NET MAUI supplies Android/iOS lifecycle, permissions, paths, and native services.
-- `osu-droid-legacy` supplies behavior, assets, online protocols, database schema, filesystem layout, and UI flow references.
+- `third_party/osu-droid-legacy` supplies behavior, assets, online protocols, database schema, filesystem layout, and UI flow references.
 
 ## Product boundaries
 - Android and iOS only.
 - No desktop launcher.
 - No osu-framework runtime dependency.
-- Shared game behavior lives in `src/OsuDroid.Game`; platform APIs stay in `src/OsuDroid.App`.
+- Scene orchestration lives in `src/OsuDroid.Game`; bounded shared subsystems live in `src/OsuDroid.Game.{Beatmaps,Compatibility,Runtime,UI}`; platform APIs stay in `src/OsuDroid.App`.
 
 ## Runtime data layout
 - `DroidGamePathLayout` owns osu!droid-compatible game folders.
@@ -20,13 +20,21 @@
 ## Source ownership map
 - `Scenes/MainMenu*`: main-menu state, Android timing, frame composition, controls, about dialog, and animation math.
 - `Scenes/Options*`: settings catalog, selected section state, row rendering, and Android settings metrics.
-- `UI/Actions`: rendering-independent UI actions, action routing, and scene-stack primitives.
-- `UI/Assets`: droid asset manifest entries, provenance, and logical asset names.
-- `UI/Elements`: frame snapshots, element snapshots, icon/text/corner element types.
-- `UI/Geometry`: virtual viewport, points, sizes, rects, and colors.
-- `UI/Style`: droid design tokens: colors, metrics, and reusable style records.
-- `Runtime/*`: orchestration services, snapshots, path layout, and music-controller contracts.
-- `Compatibility/*`: database, online, and multiplayer wire/schema compatibility.
+- `OsuDroid.Game.UI/Actions`: rendering-independent UI actions, action routing, and scene-stack primitives.
+- `OsuDroid.Game.UI/Assets`: droid asset manifest entries, provenance, and logical asset names.
+- `OsuDroid.Game.UI/Elements`: element snapshots, icon/text/corner element types.
+- `OsuDroid.Game.UI/Frames`: rendering-independent frame snapshots.
+- `OsuDroid.Game.UI/Geometry`: virtual viewport, points, sizes, rects, and colors.
+- `OsuDroid.Game.UI/Input`: platform-neutral text-input requests.
+- `OsuDroid.Game.UI/Scrolling`: reusable scroll and fling state.
+- `OsuDroid.Game.UI/Style`: droid design tokens: colors, metrics, and reusable style records.
+- `OsuDroid.Game.Runtime/Audio`: beatmap preview, menu music, and menu sound contracts/state.
+- `OsuDroid.Game.Runtime/Settings`: setting values, stores, backups, and runtime settings.
+- `OsuDroid.Game.Runtime/Timing`: shared game-clock state.
+- `OsuDroid.Game.Runtime/Paths`: osu!droid-compatible path layout and native root records.
+- `OsuDroid.Game.Runtime/Diagnostics`: diagnostics shared by runtime callers.
+- `OsuDroid.Game.Beatmaps/*`: beatmap parsing, library storage, import, online download, and difficulty math.
+- `OsuDroid.Game.Compatibility/*`: database, online, and multiplayer wire/schema compatibility.
 - `OsuDroid.App/MonoGame/Input`: MonoGame input routing.
 - `OsuDroid.App/MonoGame/Rendering`: MonoGame texture, icon, text, shape, diagnostics, and cache prewarm adapters.
 
@@ -35,7 +43,7 @@
 - The audit is advisory. Fix source god files before adding SongSelect, BeatmapDownloader, gameplay, or import subsystems.
 
 ## UI porting
-- Follow [`docs/ui-porting-guidelines.md`](ui-porting-guidelines.md) when translating legacy Android screens to shared MonoGame UI.
+- Follow [`docs/ui-porting-guidelines.md`](ui-porting-guidelines.md) when translating Android reference screens to shared MonoGame UI.
 
 ## iOS platform services
 - iOS currently uses a direct MonoGame `UIApplicationDelegate` host, so shared-game platform services must be attached in `Platforms/iOS/AppDelegate.cs`.

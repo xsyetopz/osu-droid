@@ -1,3 +1,9 @@
+using NUnit.Framework;
+using OsuDroid.Game.Scenes.MainMenu;
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Assets;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Geometry;
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
@@ -31,7 +37,7 @@ public sealed partial class UiCompatibilityTests
         Assert.That(frame.Elements.Any(element => element.Id == "music-now-playing" && element.AssetName == DroidAssets.MusicNowPlaying), Is.True);
     }
     [Test]
-    public void DebugMainMenuShowsLegacyDevelopmentBuildOverlay()
+    public void DebugMainMenuShowsOsuDroidDevelopmentBuildOverlay()
     {
         var scene = new MainMenuScene(isDevelopmentBuild: true);
         UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;

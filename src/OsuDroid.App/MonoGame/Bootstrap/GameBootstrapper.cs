@@ -1,6 +1,5 @@
 #if ANDROID || IOS
 using OsuDroid.Game;
-using OsuDroid.Game.Runtime;
 using OsuDroid.Game.Scenes;
 
 namespace OsuDroid.App.MonoGame.Bootstrap;

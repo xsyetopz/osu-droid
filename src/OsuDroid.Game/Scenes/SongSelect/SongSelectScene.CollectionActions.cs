@@ -1,6 +1,7 @@
 using OsuDroid.Game.Beatmaps;
 using OsuDroid.Game.Beatmaps.Difficulty;
-using OsuDroid.Game.Runtime;
+using OsuDroid.Game.UI.Geometry;
+using OsuDroid.Game.UI.Input;
 
 namespace OsuDroid.Game.Scenes.SongSelect;
 
@@ -170,7 +171,7 @@ public sealed partial class SongSelectScene
 
         library.DeleteCollection(_collectionPendingDelete);
         _collectionPendingDelete = null;
-        collectionScrollY = Math.Clamp(collectionScrollY, 0f, MaxCollectionScroll(VirtualViewport.LegacyLandscape));
+        collectionScrollY = Math.Clamp(collectionScrollY, 0f, MaxCollectionScroll(VirtualViewport.AndroidReferenceLandscape));
     }
 
     public void CancelDeleteCollection() => _collectionPendingDelete = null;

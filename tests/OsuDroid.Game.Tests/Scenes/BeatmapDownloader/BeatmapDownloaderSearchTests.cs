@@ -1,6 +1,11 @@
+using NUnit.Framework;
 using OsuDroid.Game.Compatibility.Database;
-using OsuDroid.Game.Runtime;
+using OsuDroid.Game.Composition;
 using OsuDroid.Game.Runtime.Paths;
+using OsuDroid.Game.Scenes.BeatmapDownloader;
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Geometry;
 
 namespace OsuDroid.Game.Tests;
 
@@ -13,7 +18,7 @@ public sealed partial class BeatmapDownloaderTests
         var textInput = new CapturingTextInputService();
         BeatmapDownloaderScene scene = CreateScene(textInput);
 
-        scene.FocusSearch(VirtualViewport.LegacyLandscape);
+        scene.FocusSearch(VirtualViewport.AndroidReferenceLandscape);
         textInput.ActiveRequest!.OnTextChanged("camellia");
 
         Assert.That(textInput.ActiveRequest, Is.Not.Null);
@@ -23,7 +28,7 @@ public sealed partial class BeatmapDownloaderTests
     public void SearchBarAndIconHitTestFocusInput()
     {
         BeatmapDownloaderScene scene = CreateScene();
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.AndroidReferenceLandscape).UiFrame;
         UiElementSnapshot search = frame.Elements.Single(element => element.Id == "downloader-search");
         UiElementSnapshot icon = frame.Elements.Single(element => element.Id == "downloader-search-icon");
 
@@ -36,9 +41,9 @@ public sealed partial class BeatmapDownloaderTests
         var textInput = new CapturingTextInputService();
         BeatmapDownloaderScene scene = CreateScene(textInput);
 
-        scene.FocusSearch(VirtualViewport.LegacyLandscape);
+        scene.FocusSearch(VirtualViewport.AndroidReferenceLandscape);
 
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.AndroidReferenceLandscape).UiFrame;
         Assert.That(frame.Elements.Any(element => element.Id == "downloader-search-focus"), Is.True);
     }
     [Test]
@@ -47,10 +52,10 @@ public sealed partial class BeatmapDownloaderTests
         var textInput = new CapturingTextInputService();
         BeatmapDownloaderScene scene = CreateScene(textInput);
 
-        scene.FocusSearch(VirtualViewport.LegacyLandscape);
+        scene.FocusSearch(VirtualViewport.AndroidReferenceLandscape);
         textInput.ActiveRequest!.OnCanceled?.Invoke();
 
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.AndroidReferenceLandscape).UiFrame;
         Assert.That(frame.Elements.Any(element => element.Id == "downloader-search-focus"), Is.False);
     }
     [Test]
@@ -66,7 +71,7 @@ public sealed partial class BeatmapDownloaderTests
             TextInputService: textInput));
 
         core.HandleUiAction(UiAction.MainMenuBeatmapDownloader);
-        core.HandleUiAction(UiAction.DownloaderSearchBox, VirtualViewport.LegacyLandscape);
+        core.HandleUiAction(UiAction.DownloaderSearchBox, VirtualViewport.AndroidReferenceLandscape);
 
         Assert.That(textInput.ActiveRequest, Is.Not.Null);
         Assert.That(textInput.ActiveRequest!.SurfaceBounds, Is.Not.Null);
@@ -77,7 +82,7 @@ public sealed partial class BeatmapDownloaderTests
         var textInput = new CapturingTextInputService();
         BeatmapDownloaderScene scene = CreateScene(textInput);
 
-        scene.FocusSearch(VirtualViewport.LegacyLandscape);
+        scene.FocusSearch(VirtualViewport.AndroidReferenceLandscape);
 
         Assert.That(textInput.ActiveRequest?.SurfaceBounds, Is.Not.Null);
         Assert.That(textInput.ActiveRequest!.SurfaceBounds!.Value.Width, Is.GreaterThan(200));

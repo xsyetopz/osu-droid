@@ -8,7 +8,7 @@
 ## Architecture Defaults
 - Android and iOS only. Do not add a desktop target.
 - Keep platform-specific APIs in the MAUI mobile host or thin adapters.
-- Keep shared game code in `src/OsuDroid.Game`.
+- Keep scenes and orchestration in `src/OsuDroid.Game`; keep bounded shared subsystems in `src/OsuDroid.Game.{Beatmaps,Compatibility,Runtime,UI}`.
 - Do not add osu-framework, libGDX, Gradle, RoboVM, AndEngine, or the old Android app architecture.
 - Follow `.editorconfig` for C# style and [`docs/csharp-guidelines.md`](docs/csharp-guidelines.md) for repo structure.
 
@@ -31,5 +31,5 @@ Prepare them with `scripts/bootstrap-third-party.sh`.
 ## Architecture Notes
 - Architecture audit: run `python3 scripts/dev/architecture_audit.py --write docs/architecture-audit.md` before adding new large scenes/subsystems.
 - Runtime folder layout is owned by `DroidGamePathLayout`; platform code supplies only native roots.
-- Shared UI primitives are grouped by concern under `src/OsuDroid.Game/UI/{Actions,Assets,Elements,Geometry,Style}`.
+- Shared UI primitives are grouped by concern under `src/OsuDroid.Game.UI/{Actions,Assets,Elements,Frames,Geometry,Input,Scrolling,Style}`.
 - iOS uses a direct MonoGame `UIApplicationDelegate` host; platform services must be wired in `Platforms/iOS/AppDelegate.cs`, not only `MainPage`. See [`docs/ios-monogame-input.md`](docs/ios-monogame-input.md).

@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using OsuDroid.Game.Beatmaps;
 
 namespace OsuDroid.Game.Tests;

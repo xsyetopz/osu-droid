@@ -1,4 +1,9 @@
 using OsuDroid.Game.Beatmaps;
+using OsuDroid.Game.Runtime.Diagnostics;
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Assets;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Geometry;
 
 namespace OsuDroid.Game.Scenes.SongSelect;
 

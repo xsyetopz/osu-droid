@@ -1,4 +1,7 @@
 using OsuDroid.Game.Beatmaps.Online;
+using OsuDroid.Game.UI.Assets;
+using OsuDroid.Game.UI.Geometry;
+using OsuDroid.Game.UI.Style;
 
 namespace OsuDroid.Game.Scenes.BeatmapDownloader;
 
@@ -13,6 +16,13 @@ public sealed partial class BeatmapDownloaderScene
     }
 
     private BeatmapMirrorDefinition MirrorDefinition(BeatmapMirrorKind kind) => _mirrorClient.Mirrors.First(m => m.Kind == kind);
+
+    private static string MirrorLogoAsset(BeatmapMirrorKind kind) => kind switch
+    {
+        BeatmapMirrorKind.OsuDirect => DroidAssets.BeatmapDownloaderOsuDirect,
+        BeatmapMirrorKind.Catboy => DroidAssets.BeatmapDownloaderCatboy,
+        _ => DroidAssets.BeatmapDownloaderOsuDirect,
+    };
 
     private static UiRect SearchBounds(VirtualViewport viewport, bool isSearching = false)
     {

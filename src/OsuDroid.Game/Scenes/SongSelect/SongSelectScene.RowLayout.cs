@@ -1,4 +1,9 @@
 using OsuDroid.Game.Beatmaps;
+using OsuDroid.Game.Runtime.Diagnostics;
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Assets;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Geometry;
 
 namespace OsuDroid.Game.Scenes.SongSelect;
 
@@ -114,7 +119,7 @@ public sealed partial class SongSelectScene
         elements.Add(Sprite(id, DroidAssets.SongSelectButtonBackground, bounds, tint, 0.8f, action));
         elements.Add(Text($"{id}-title", $"{beatmap.Version} ({beatmap.Creator})", bounds.X + 32f, bounds.Y + 22f, 540f, 34f, 24f, textColor, UiTextAlignment.Left, action));
 
-        // Legacy source: third_party/osu-droid-legacy/.../menu/BeatmapItem.java.
+        // Android source: menu/BeatmapItem.java.
         // Fractional stars are scaled around AndEngine's default center, not cropped.
         float stars = Math.Clamp(CurrentStarRating(beatmap) ?? 0f, 0f, 10f);
         int fullStars = Math.Min(10, (int)MathF.Floor(stars));

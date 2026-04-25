@@ -1,7 +1,6 @@
 #if ANDROID || IOS
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using OsuDroid.Game.Runtime;
 using OsuDroid.Game.UI;
 
 namespace OsuDroid.App.MonoGame.Rendering;

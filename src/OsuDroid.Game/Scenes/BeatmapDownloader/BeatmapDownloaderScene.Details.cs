@@ -1,5 +1,9 @@
 using System.Globalization;
 using OsuDroid.Game.Beatmaps.Online;
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Geometry;
+using OsuDroid.Game.UI.Style;
 
 namespace OsuDroid.Game.Scenes.BeatmapDownloader;
 

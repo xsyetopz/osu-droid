@@ -1,3 +1,4 @@
+using OsuDroid.Game.UI.Actions;
 namespace OsuDroid.Game.Scenes.BeatmapDownloader;
 
 public sealed partial class BeatmapDownloaderScene

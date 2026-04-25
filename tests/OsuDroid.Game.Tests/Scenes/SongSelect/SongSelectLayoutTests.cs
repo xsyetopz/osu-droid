@@ -1,5 +1,11 @@
+using NUnit.Framework;
 using OsuDroid.Game.Beatmaps;
-using OsuDroid.Game.Runtime;
+using OsuDroid.Game.Runtime.Audio;
+using OsuDroid.Game.Scenes.MainMenu;
+using OsuDroid.Game.Scenes.SongSelect;
+using OsuDroid.Game.UI.Assets;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Geometry;
 
 namespace OsuDroid.Game.Tests;
 
@@ -60,7 +66,7 @@ public sealed partial class SongSelectSceneTests
     }
 
     [Test]
-    public void OnlineScorePanelUsesLegacyBoundsWhenServerConnectionIsOn()
+    public void OnlineScorePanelUsesOsuDroidBoundsWhenServerConnectionIsOn()
     {
         var scene = new SongSelectScene(new FakeLibrary(CreateSnapshot()), new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"), OnlineProfilePanelState.Connecting);
 
@@ -113,7 +119,7 @@ public sealed partial class SongSelectSceneTests
         Assert.That(frame.Elements.Single(element => element.Id == "songselect-scoring-switcher").AssetName, Is.EqualTo(DroidAssets.RankingDisabled));
     }
     [Test]
-    public void SelectedSetUsesLegacyExpandedRowSpacingAndCentering()
+    public void SelectedSetUsesOsuDroidExpandedRowSpacingAndCentering()
     {
         var firstSet = new BeatmapSetInfo(1, "1 First", [CreateBeatmap("Easy", null, 1.5f)]);
         var secondSet = new BeatmapSetInfo(2, "2 Second", [
@@ -180,7 +186,7 @@ public sealed partial class SongSelectSceneTests
     }
 
     [Test]
-    public void CollapsedRowsUseVisiblePositionForLegacyWheelStaircase()
+    public void CollapsedRowsUseVisiblePositionForOsuDroidWheelStaircase()
     {
         BeatmapSetInfo[] sets = Enumerable.Range(0, 9)
             .Select(index => new BeatmapSetInfo(index + 1, $"{index + 1} Set", [
@@ -238,7 +244,7 @@ public sealed partial class SongSelectSceneTests
     }
 
     [Test]
-    public void DifficultyBackgroundSwitchesImmediatelyLikeLegacySongMenu()
+    public void DifficultyBackgroundSwitchesImmediatelyLikeOsuDroidSongMenu()
     {
         string songs = CreateSongsRoot("audio.mp3", "easy.jpg", "hard.jpg");
         BeatmapInfo easy = CreateBeatmap("Easy", "easy.jpg", 1.5f);

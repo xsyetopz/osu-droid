@@ -1,3 +1,8 @@
+using NUnit.Framework;
+using OsuDroid.Game.Scenes.MainMenu;
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Geometry;
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
@@ -67,11 +72,11 @@ public sealed partial class UiCompatibilityTests
 
 
 
-    private static void AssertMusicControl(UiElementSnapshot element, string assetName, UiAction action, float legacyIndex)
+    private static void AssertMusicControl(UiElementSnapshot element, string assetName, UiAction action, float androidIndex)
     {
         Assert.That(element.Kind, Is.EqualTo(UiElementKind.Sprite));
         Assert.That(element.AssetName, Is.EqualTo(assetName));
-        AssertRectClose(element.Bounds, MainMenuScene.GetAndroidMusicControlBounds(legacyIndex));
+        AssertRectClose(element.Bounds, MainMenuScene.GetAndroidMusicControlBounds(androidIndex));
         Assert.That(element.Action, Is.EqualTo(action));
         Assert.That(element.Alpha, Is.EqualTo(1f));
     }

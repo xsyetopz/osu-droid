@@ -1,3 +1,5 @@
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Elements;
 namespace OsuDroid.Game.Scenes.Options;
 
 public sealed partial class OptionsScene

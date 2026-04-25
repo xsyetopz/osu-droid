@@ -1,3 +1,4 @@
+using NUnit.Framework;
 namespace OsuDroid.Game.Tests.UI;
 
 public sealed class DroidUiCentralizationTests

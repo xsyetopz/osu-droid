@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using OsuDroid.Game.Beatmaps;
 using OsuDroid.Game.Beatmaps.Difficulty;
 using OsuDroid.Game.Compatibility.Database;

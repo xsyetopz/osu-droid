@@ -1,5 +1,10 @@
+using NUnit.Framework;
 using OsuDroid.Game.Beatmaps;
-using OsuDroid.Game.Runtime;
+using OsuDroid.Game.Runtime.Audio;
+using OsuDroid.Game.Scenes.SongSelect;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Geometry;
+using OsuDroid.Game.UI.Style;
 
 namespace OsuDroid.Game.Tests;
 
@@ -31,7 +36,7 @@ public sealed partial class SongSelectSceneTests
     }
 
     [Test]
-    public void BeatmapOptionsUsesLegacyRoundedContainerGraphics()
+    public void BeatmapOptionsUsesOsuDroidRoundedContainerGraphics()
     {
         var scene = new SongSelectScene(new FakeLibrary(CreateSnapshot()), new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"));
         float radius = 14f * DroidUiMetrics.DpScale;
@@ -98,7 +103,7 @@ public sealed partial class SongSelectSceneTests
         Assert.That(favoriteIcon.Color, Is.EqualTo(UiColor.Opaque(243, 115, 115)));
     }
     [Test]
-    public void FolderFilterPopupUsesLegacyBottomAnchoredCollectionsPanel()
+    public void FolderFilterPopupUsesOsuDroidBottomAnchoredCollectionsPanel()
     {
         var library = new FakeLibrary(CreateSnapshot());
         var scene = new SongSelectScene(library, new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"));

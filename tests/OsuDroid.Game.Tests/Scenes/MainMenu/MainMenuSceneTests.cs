@@ -1,4 +1,6 @@
+using NUnit.Framework;
 using OsuDroid.Game.Compatibility.Database;
+using OsuDroid.Game.Scenes.MainMenu;
 
 namespace OsuDroid.Game.Tests;
 
@@ -6,7 +8,7 @@ namespace OsuDroid.Game.Tests;
 public sealed class MainMenuSceneTests
 {
     [Test]
-    public void MainMenuSwitchesToLegacySecondMenu()
+    public void MainMenuSwitchesToOsuDroidSecondMenu()
     {
         var scene = new MainMenuScene();
         scene.ToggleCookie();

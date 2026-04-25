@@ -2,7 +2,6 @@
 using OsuDroid.App.Platform.Audio;
 using OsuDroid.App.Platform.Input;
 using OsuDroid.Game;
-using OsuDroid.Game.Runtime;
 
 namespace OsuDroid.App.Platform;
 

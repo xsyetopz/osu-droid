@@ -1,8 +1,17 @@
+using NUnit.Framework;
 using OsuDroid.Game.Beatmaps;
 using OsuDroid.Game.Compatibility.Database;
+using OsuDroid.Game.Composition;
 using OsuDroid.Game.Localization;
-using OsuDroid.Game.Runtime;
 using OsuDroid.Game.Runtime.Paths;
+using OsuDroid.Game.Runtime.Settings;
+using OsuDroid.Game.Scenes.MainMenu;
+using OsuDroid.Game.Scenes.Options;
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Frames;
+using OsuDroid.Game.UI.Geometry;
+using OsuDroid.Game.UI.Style;
 
 namespace OsuDroid.Game.Tests;
 
@@ -284,49 +293,5 @@ public sealed partial class OptionsSceneTests
         1,
         false);
 
-    private sealed class RecordingPreviewPlayer : IBeatmapPreviewPlayer
-    {
-        public float Volume { get; private set; } = 1f;
 
-        public bool IsPlaying => false;
-
-        public int PositionMilliseconds => 0;
-
-        public BeatmapPreviewPlaybackSnapshot PlaybackSnapshot { get; } = new();
-
-        public void Play(string audioPath, int previewTimeMilliseconds)
-        {
-        }
-
-        public void Play(Uri previewUri)
-        {
-        }
-
-        public void PausePreview()
-        {
-        }
-
-        public void ResumePreview()
-        {
-        }
-
-        public void StopPreview()
-        {
-        }
-
-        public void SetVolume(float normalizedVolume) => Volume = normalizedVolume;
-
-        public bool TryReadSpectrum1024(float[] destination) => false;
-    }
-
-    private sealed class RecordingMenuSfxPlayer : IMenuSfxPlayer
-    {
-        public float Volume { get; private set; } = 1f;
-
-        public void Play(string key)
-        {
-        }
-
-        public void SetVolume(float normalizedVolume) => Volume = normalizedVolume;
-    }
 }

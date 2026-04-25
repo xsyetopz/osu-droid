@@ -1,10 +1,12 @@
+using NUnit.Framework;
+using OsuDroid.Game.UI.Geometry;
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
 {
 
     [Test]
-    public void ViewportPreservesLegacyWidthAndDeviceAspect()
+    public void ViewportPreservesAndroidReferenceWidthAndDeviceAspect()
     {
         var viewport = VirtualViewport.FromSurface(2532, 1170);
 

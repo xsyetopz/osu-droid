@@ -1,4 +1,10 @@
-using OsuDroid.Game.Runtime;
+using NUnit.Framework;
+using OsuDroid.Game.Runtime.Audio;
+using OsuDroid.Game.Scenes.MainMenu;
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Assets;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Geometry;
 
 namespace OsuDroid.Game.Tests;
 
@@ -44,7 +50,7 @@ public sealed partial class UiCompatibilityTests
         Assert.That(title.ClipToBounds, Is.False);
         Assert.That(title.Bounds.X, Is.Zero);
         Assert.That(title.Bounds.Right, Is.EqualTo(MainMenuScene.MusicNowPlayingTextRight));
-        Assert.That(title.Bounds.Right, Is.LessThanOrEqualTo(VirtualViewport.LegacyWidth));
+        Assert.That(title.Bounds.Right, Is.LessThanOrEqualTo(VirtualViewport.AndroidReferenceWidth));
 
         UiElementSnapshot panel = populatedFrame.Elements.Single(element => element.Id == "music-now-playing");
         Assert.That(panel.MeasuredTextAnchor, Is.Not.Null);
@@ -56,15 +62,15 @@ public sealed partial class UiCompatibilityTests
     [Test]
     public void MainMenuNowPlayingTitleUsesAndroidCharacterEllipsis()
     {
-        const string legacyTitle = "UNDEAD CORPORATION - Embraced by the Flame";
+        const string referenceTitle = "UNDEAD CORPORATION - Embraced by the Flame";
         const string expectedTitle = "UNDEAD CORPORATION - Embraced by...";
         var viewport = VirtualViewport.FromSurface(1280, 720);
-        UiFrameSnapshot frame = new MainMenuScene(nowPlaying: new MenuNowPlayingState(legacyTitle, false)).CreateSnapshot(viewport).UiFrame;
+        UiFrameSnapshot frame = new MainMenuScene(nowPlaying: new MenuNowPlayingState(referenceTitle, false)).CreateSnapshot(viewport).UiFrame;
         UiElementSnapshot title = frame.Elements.Single(element => element.Id == "music-title");
         UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "music-now-playing");
 
         Assert.That(MainMenuScene.MusicNowPlayingCharactersMaximum, Is.EqualTo(35));
-        Assert.That(MainMenuScene.TruncateNowPlayingTitle(legacyTitle), Is.EqualTo(expectedTitle));
+        Assert.That(MainMenuScene.TruncateNowPlayingTitle(referenceTitle), Is.EqualTo(expectedTitle));
         Assert.That(title.Text, Is.EqualTo(expectedTitle));
         Assert.That(panel.MeasuredTextAnchor!.Text, Is.EqualTo(expectedTitle));
     }

@@ -1,4 +1,7 @@
 using OsuDroid.Game.Beatmaps.Online;
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Geometry;
 
 namespace OsuDroid.Game.Scenes.BeatmapDownloader;
 
@@ -157,7 +160,7 @@ public sealed partial class BeatmapDownloaderScene
             elements.Add(Fill($"downloader-mirror-{kind}-selected", bounds, s_dropdownSelected, 1f, action, Radius));
         }
 
-        elements.Add(new UiElementSnapshot($"downloader-mirror-{kind}-logo", UiElementKind.Sprite, new UiRect(bounds.X + 12f * Dp, bounds.Y + 17f * Dp, 24f * Dp, 24f * Dp), s_white, 1f, definition.LogoAssetName, action));
+        elements.Add(new UiElementSnapshot($"downloader-mirror-{kind}-logo", UiElementKind.Sprite, new UiRect(bounds.X + 12f * Dp, bounds.Y + 17f * Dp, 24f * Dp, 24f * Dp), s_white, 1f, MirrorLogoAsset(kind), action));
         elements.Add(Text($"downloader-mirror-{kind}-text", definition.Description, bounds.X + 54f * Dp, bounds.Y + 12f * Dp, bounds.Width - 102f * Dp, 20f * Dp, 14f * Dp, s_white, UiTextAlignment.Left, action));
         elements.Add(Text($"downloader-mirror-{kind}-url", definition.HomeUrl, bounds.X + 54f * Dp, bounds.Y + 34f * Dp, bounds.Width - 102f * Dp, 18f * Dp, 13f * Dp, s_filterLabel, UiTextAlignment.Left, action));
         if (kind == _mirror)

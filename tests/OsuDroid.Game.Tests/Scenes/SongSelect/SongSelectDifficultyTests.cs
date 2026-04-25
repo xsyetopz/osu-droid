@@ -1,7 +1,10 @@
 using System.Globalization;
+using NUnit.Framework;
 using OsuDroid.Game.Beatmaps;
 using OsuDroid.Game.Beatmaps.Difficulty;
-using OsuDroid.Game.Runtime;
+using OsuDroid.Game.Runtime.Audio;
+using OsuDroid.Game.Scenes.SongSelect;
+using OsuDroid.Game.UI.Geometry;
 
 namespace OsuDroid.Game.Tests;
 

@@ -1105,1782 +1105,1782 @@ AR: {1} - OD: {2} - CS: {3} - HP: {4}
 Circles: {5} - Sliders: {6} - Spinners: {7}
 Length: {8} - BPM: {9}</value>
     </data>
-    <data name="Legacy_app_name"
+    <data name="OsuDroid_app_name"
           xml:space="preserve">
         <value>LibBASS</value>
     </data>
-    <data name="Legacy_multiplayer_room_head_to_head"
+    <data name="OsuDroid_multiplayer_room_head_to_head"
           xml:space="preserve">
         <value>Head to head</value>
     </data>
-    <data name="Legacy_multiplayer_room_team_versus"
+    <data name="OsuDroid_multiplayer_room_team_versus"
           xml:space="preserve">
         <value>Team versus</value>
     </data>
-    <data name="Legacy_multiplayer_room_players"
+    <data name="OsuDroid_multiplayer_room_players"
           xml:space="preserve">
         <value>Players</value>
     </data>
-    <data name="Legacy_multiplayer_room_beatmap"
+    <data name="OsuDroid_multiplayer_room_beatmap"
           xml:space="preserve">
         <value>Beatmap</value>
     </data>
-    <data name="Legacy_multiplayer_room_change_beatmap"
+    <data name="OsuDroid_multiplayer_room_change_beatmap"
           xml:space="preserve">
         <value>Change beatmap</value>
     </data>
-    <data name="Legacy_multiplayer_room_score_v1"
+    <data name="OsuDroid_multiplayer_room_score_v1"
           xml:space="preserve">
         <value>Score V1</value>
     </data>
-    <data name="Legacy_multiplayer_room_score_v2"
+    <data name="OsuDroid_multiplayer_room_score_v2"
           xml:space="preserve">
         <value>Score V2</value>
     </data>
-    <data name="Legacy_multiplayer_room_status_idle"
+    <data name="OsuDroid_multiplayer_room_status_idle"
           xml:space="preserve">
         <value>Idle</value>
     </data>
-    <data name="Legacy_multiplayer_room_status_changing_beatmap"
+    <data name="OsuDroid_multiplayer_room_status_changing_beatmap"
           xml:space="preserve">
         <value>Changing beatmap</value>
     </data>
-    <data name="Legacy_multiplayer_room_status_playing"
+    <data name="OsuDroid_multiplayer_room_status_playing"
           xml:space="preserve">
         <value>Playing</value>
     </data>
-    <data name="Legacy_multiplayer_room_highest_accuracy"
+    <data name="OsuDroid_multiplayer_room_highest_accuracy"
           xml:space="preserve">
         <value>Highest accuracy</value>
     </data>
-    <data name="Legacy_multiplayer_room_maximum_combo"
+    <data name="OsuDroid_multiplayer_room_maximum_combo"
           xml:space="preserve">
         <value>Maximum combo</value>
     </data>
-    <data name="Legacy_multiplayer_room_no_players"
+    <data name="OsuDroid_multiplayer_room_no_players"
           xml:space="preserve">
         <value>No players</value>
     </data>
-    <data name="Legacy_multiplayer_room_free_mods"
+    <data name="OsuDroid_multiplayer_room_free_mods"
           xml:space="preserve">
         <value>Free mods</value>
     </data>
-    <data name="Legacy_multiplayer_room_mods"
+    <data name="OsuDroid_multiplayer_room_mods"
           xml:space="preserve">
         <value>Mods</value>
     </data>
-    <data name="Legacy_multiplayer_room_leave"
+    <data name="OsuDroid_multiplayer_room_leave"
           xml:space="preserve">
         <value>Leave</value>
     </data>
-    <data name="Legacy_multiplayer_room_ready"
+    <data name="OsuDroid_multiplayer_room_ready"
           xml:space="preserve">
         <value>Ready</value>
     </data>
-    <data name="Legacy_multiplayer_room_not_ready"
+    <data name="OsuDroid_multiplayer_room_not_ready"
           xml:space="preserve">
         <value>Not ready</value>
     </data>
-    <data name="Legacy_multiplayer_room_unable_status"
+    <data name="OsuDroid_multiplayer_room_unable_status"
           xml:space="preserve">
         <value>Cannot set ready!</value>
     </data>
-    <data name="Legacy_multiplayer_room_no_beatmap_selected"
+    <data name="OsuDroid_multiplayer_room_no_beatmap_selected"
           xml:space="preserve">
         <value>No beatmap selected.</value>
     </data>
-    <data name="Legacy_multiplayer_room_changing_beatmap"
+    <data name="OsuDroid_multiplayer_room_changing_beatmap"
           xml:space="preserve">
         <value>Room is changing beatmap...</value>
     </data>
-    <data name="Legacy_multiplayer_room_download_beatmap"
+    <data name="OsuDroid_multiplayer_room_download_beatmap"
           xml:space="preserve">
         <value>Download</value>
     </data>
-    <data name="Legacy_multiplayer_room_not_available_beatmap"
+    <data name="OsuDroid_multiplayer_room_not_available_beatmap"
           xml:space="preserve">
         <value>Not available</value>
     </data>
-    <data name="Legacy_multiplayer_room_start_game"
+    <data name="OsuDroid_multiplayer_room_start_game"
           xml:space="preserve">
         <value>Start game!</value>
     </data>
-    <data name="Legacy_multiplayer_room_force_start_game"
+    <data name="OsuDroid_multiplayer_room_force_start_game"
           xml:space="preserve">
         <value>Force start game! ({0}/{1})</value>
     </data>
-    <data name="Legacy_multiplayer_room_must_select_beatmap"
+    <data name="OsuDroid_multiplayer_room_must_select_beatmap"
           xml:space="preserve">
         <value>You must select a beatmap first.</value>
     </data>
-    <data name="Legacy_multiplayer_room_at_least_one_player_per_team"
+    <data name="OsuDroid_multiplayer_room_at_least_one_player_per_team"
           xml:space="preserve">
         <value>At least 1 player per team is needed to start a match!</value>
     </data>
-    <data name="Legacy_multiplayer_room_at_least_two_players_beatmap"
+    <data name="OsuDroid_multiplayer_room_at_least_two_players_beatmap"
           xml:space="preserve">
         <value>At least 2 players need to have the beatmap!</value>
     </data>
-    <data name="Legacy_multiplayer_room_settings"
+    <data name="OsuDroid_multiplayer_room_settings"
           xml:space="preserve">
         <value>Settings</value>
     </data>
-    <data name="Legacy_multiplayer_room_cannot_ready_changing_beatmap"
+    <data name="OsuDroid_multiplayer_room_cannot_ready_changing_beatmap"
           xml:space="preserve">
         <value>Cannot set ready when room is changing beatmap!</value>
     </data>
-    <data name="Legacy_multiplayer_room_cannot_ready_no_team"
+    <data name="OsuDroid_multiplayer_room_cannot_ready_no_team"
           xml:space="preserve">
         <value>You must select a team first!</value>
     </data>
-    <data name="Legacy_multiplayer_room_cannot_ready_missing_beatmap"
+    <data name="OsuDroid_multiplayer_room_cannot_ready_missing_beatmap"
           xml:space="preserve">
         <value>Cannot set ready, missing beatmap!</value>
     </data>
-    <data name="Legacy_multiplayer_room_unable_download"
+    <data name="OsuDroid_multiplayer_room_unable_download"
           xml:space="preserve">
         <value>Unable to download beatmap: {0}</value>
     </data>
-    <data name="Legacy_multiplayer_room_beatmap_unavailable"
+    <data name="OsuDroid_multiplayer_room_beatmap_unavailable"
           xml:space="preserve">
         <value>This beatmap isn't available in the download mirror servers.</value>
     </data>
-    <data name="Legacy_multiplayer_room_welcome"
+    <data name="OsuDroid_multiplayer_room_welcome"
           xml:space="preserve">
         <value>Welcome to osu!droid multiplayer!</value>
     </data>
-    <data name="Legacy_multiplayer_room_reconnecting"
+    <data name="OsuDroid_multiplayer_room_reconnecting"
           xml:space="preserve">
         <value>Connection lost, trying to reconnect...</value>
     </data>
-    <data name="Legacy_multiplayer_room_new_host"
+    <data name="OsuDroid_multiplayer_room_new_host"
           xml:space="preserve">
         <value>Player {0} is now the room host.</value>
     </data>
-    <data name="Legacy_multiplayer_room_player_joined"
+    <data name="OsuDroid_multiplayer_room_player_joined"
           xml:space="preserve">
         <value>Player {0} joined (UID: {1}).</value>
     </data>
-    <data name="Legacy_multiplayer_room_player_left"
+    <data name="OsuDroid_multiplayer_room_player_left"
           xml:space="preserve">
         <value>Player {0} left (UID: {1}).</value>
     </data>
-    <data name="Legacy_multiplayer_room_player_kicked"
+    <data name="OsuDroid_multiplayer_room_player_kicked"
           xml:space="preserve">
         <value>Player {0} was kicked (UID: {1}).</value>
     </data>
-    <data name="Legacy_multiplayer_room_kicked_gameplay"
+    <data name="OsuDroid_multiplayer_room_kicked_gameplay"
           xml:space="preserve">
         <value>You were kicked by the room host, but you can continue playing.</value>
     </data>
-    <data name="Legacy_multiplayer_room_kicked_title"
+    <data name="OsuDroid_multiplayer_room_kicked_title"
           xml:space="preserve">
         <value>Kicked</value>
     </data>
-    <data name="Legacy_multiplayer_room_kicked_message"
+    <data name="OsuDroid_multiplayer_room_kicked_message"
           xml:space="preserve">
         <value>You've been kicked by room host.</value>
     </data>
-    <data name="Legacy_multiplayer_room_kicked_close"
+    <data name="OsuDroid_multiplayer_room_kicked_close"
           xml:space="preserve">
         <value>Close</value>
     </data>
-    <data name="Legacy_multiplayer_room_player_menu_view_profile"
+    <data name="OsuDroid_multiplayer_room_player_menu_view_profile"
           xml:space="preserve">
         <value>View profile</value>
     </data>
-    <data name="Legacy_multiplayer_room_player_menu_mute"
+    <data name="OsuDroid_multiplayer_room_player_menu_mute"
           xml:space="preserve">
         <value>Mute</value>
     </data>
-    <data name="Legacy_multiplayer_room_player_menu_unmute"
+    <data name="OsuDroid_multiplayer_room_player_menu_unmute"
           xml:space="preserve">
         <value>Unmute</value>
     </data>
-    <data name="Legacy_multiplayer_room_player_menu_transfer_host"
+    <data name="OsuDroid_multiplayer_room_player_menu_transfer_host"
           xml:space="preserve">
         <value>Transfer host</value>
     </data>
-    <data name="Legacy_multiplayer_room_player_menu_kick"
+    <data name="OsuDroid_multiplayer_room_player_menu_kick"
           xml:space="preserve">
         <value>Kick</value>
     </data>
-    <data name="Legacy_multiplayer_room_player_kick_dialog_title"
+    <data name="OsuDroid_multiplayer_room_player_kick_dialog_title"
           xml:space="preserve">
         <value>Kick player {0}</value>
     </data>
-    <data name="Legacy_multiplayer_room_player_kick_dialog_message"
+    <data name="OsuDroid_multiplayer_room_player_kick_dialog_message"
           xml:space="preserve">
         <value>Are you sure?</value>
     </data>
-    <data name="Legacy_multiplayer_room_player_transfer_dialog_title"
+    <data name="OsuDroid_multiplayer_room_player_transfer_dialog_title"
           xml:space="preserve">
         <value>Transfer host to {0}</value>
     </data>
-    <data name="Legacy_multiplayer_room_player_transfer_dialog_message"
+    <data name="OsuDroid_multiplayer_room_player_transfer_dialog_message"
           xml:space="preserve">
         <value>Are you sure?</value>
     </data>
-    <data name="Legacy_multiplayer_room_chat"
+    <data name="OsuDroid_multiplayer_room_chat"
           xml:space="preserve">
         <value>Chat</value>
     </data>
-    <data name="Legacy_multiplayer_room_chat_system"
+    <data name="OsuDroid_multiplayer_room_chat_system"
           xml:space="preserve">
         <value>System</value>
     </data>
-    <data name="Legacy_multiplayer_room_chat_send"
+    <data name="OsuDroid_multiplayer_room_chat_send"
           xml:space="preserve">
         <value>Send</value>
     </data>
-    <data name="Legacy_multiplayer_room_chat_error"
+    <data name="OsuDroid_multiplayer_room_chat_error"
           xml:space="preserve">
         <value>Error to send message: {0}</value>
     </data>
-    <data name="Legacy_opt_category_localization"
+    <data name="OsuDroid_opt_category_localization"
           xml:space="preserve">
         <value>Localization</value>
     </data>
-    <data name="Legacy_opt_language_title"
+    <data name="OsuDroid_opt_language_title"
           xml:space="preserve">
         <value>Language</value>
     </data>
-    <data name="Legacy_opt_language_summary"
+    <data name="OsuDroid_opt_language_summary"
           xml:space="preserve">
         <value>Change the language of the game. Requires a restart.</value>
     </data>
-    <data name="Legacy_multiplayer_lobby_search_rooms"
+    <data name="OsuDroid_multiplayer_lobby_search_rooms"
           xml:space="preserve">
         <value>Search rooms...</value>
     </data>
-    <data name="Legacy_opt_remove_sliderlock_spinnerlock_title"
+    <data name="OsuDroid_opt_remove_sliderlock_spinnerlock_title"
           xml:space="preserve">
         <value>Remove slider and spinner lock</value>
     </data>
-    <data name="Legacy_opt_remove_sliderlock_spinnerlock_summary"
+    <data name="OsuDroid_opt_remove_sliderlock_spinnerlock_summary"
           xml:space="preserve">
         <value>[UNRANKED] Allow circles and sliders to be hittable when another slider or spinner is currently active.</value>
     </data>
-    <data name="Legacy_mp_room_category_lobby"
+    <data name="OsuDroid_mp_room_category_lobby"
           xml:space="preserve">
         <value>Lobby</value>
     </data>
-    <data name="Legacy_mp_room_prefer_mod_acronym_title"
+    <data name="OsuDroid_mp_room_prefer_mod_acronym_title"
           xml:space="preserve">
         <value>Prefer mod acronyms over icons</value>
     </data>
-    <data name="Legacy_mp_room_prefer_mod_acronym_summary"
+    <data name="OsuDroid_mp_room_prefer_mod_acronym_summary"
           xml:space="preserve">
         <value>Replace mod icons in player cards with mod acronyms</value>
     </data>
-    <data name="Legacy_opt_prefer_no_video_downloads_title"
+    <data name="OsuDroid_opt_prefer_no_video_downloads_title"
           xml:space="preserve">
         <value>Prefer downloads without video</value>
     </data>
-    <data name="Legacy_opt_prefer_no_video_downloads_summary"
+    <data name="OsuDroid_opt_prefer_no_video_downloads_summary"
           xml:space="preserve">
         <value>Prefer downloading beatmaps without video in beatmap downloader if the selected beatmap mirror supports it</value>
     </data>
-    <data name="Legacy_opt_highPrecisionInput_title"
+    <data name="OsuDroid_opt_highPrecisionInput_title"
           xml:space="preserve">
         <value>High precision input</value>
     </data>
-    <data name="Legacy_opt_highPrecisionInput_summary"
+    <data name="OsuDroid_opt_highPrecisionInput_summary"
           xml:space="preserve">
         <value>Use more touch samples for more accurate hit timing and cursor movement. May increase battery usage and reduce performance on low-end devices</value>
     </data>
-    <data name="Legacy_multi_mode_window_alert_title"
+    <data name="OsuDroid_multi_mode_window_alert_title"
           xml:space="preserve">
         <value>Multi-window Mode</value>
     </data>
-    <data name="Legacy_multi_mode_window_alert_message"
+    <data name="OsuDroid_multi_mode_window_alert_message"
           xml:space="preserve">
         <value>osu!droid does not support multi-window mode. Please switch back to single-window mode to continue playing.</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_title"
+    <data name="OsuDroid_opt_offset_calibration_title"
           xml:space="preserve">
         <value>Offset Calibration</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_summary"
+    <data name="OsuDroid_opt_offset_calibration_summary"
           xml:space="preserve">
         <value>Tap along with a metronome to measure your device's audio latency</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_tap_hint"
+    <data name="OsuDroid_opt_offset_calibration_tap_hint"
           xml:space="preserve">
         <value>TAP ALONG WITH THE BEAT</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_calibration"
+    <data name="OsuDroid_opt_offset_calibration_calibration"
           xml:space="preserve">
         <value>CALIBRATION</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_offset"
+    <data name="OsuDroid_opt_offset_calibration_offset"
           xml:space="preserve">
         <value>OFFSET</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_reset"
+    <data name="OsuDroid_opt_offset_calibration_reset"
           xml:space="preserve">
         <value>RESET</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_set"
+    <data name="OsuDroid_opt_offset_calibration_set"
           xml:space="preserve">
         <value>SET</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_settings"
+    <data name="OsuDroid_opt_offset_calibration_settings"
           xml:space="preserve">
         <value>SETTINGS</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_judgement_perfect"
+    <data name="OsuDroid_opt_offset_calibration_judgement_perfect"
           xml:space="preserve">
         <value>PERFECT</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_judgement_good"
+    <data name="OsuDroid_opt_offset_calibration_judgement_good"
           xml:space="preserve">
         <value>GOOD</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_judgement_meh"
+    <data name="OsuDroid_opt_offset_calibration_judgement_meh"
           xml:space="preserve">
         <value>MEH</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_judgement_miss"
+    <data name="OsuDroid_opt_offset_calibration_judgement_miss"
           xml:space="preserve">
         <value>MISS</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_streak"
+    <data name="OsuDroid_opt_offset_calibration_streak"
           xml:space="preserve">
         <value>Keep going! {0}x combo</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_streak_combo"
+    <data name="OsuDroid_opt_offset_calibration_streak_combo"
           xml:space="preserve">
         <value>{0}x combo</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_feedback_perfect"
+    <data name="OsuDroid_opt_offset_calibration_feedback_perfect"
           xml:space="preserve">
         <value>Perfect!</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_feedback_late"
+    <data name="OsuDroid_opt_offset_calibration_feedback_late"
           xml:space="preserve">
         <value>Late</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_feedback_early"
+    <data name="OsuDroid_opt_offset_calibration_feedback_early"
           xml:space="preserve">
         <value>Early</value>
     </data>
-    <data name="Legacy_opt_offset_calibration_feedback_tap_count"
+    <data name="OsuDroid_opt_offset_calibration_feedback_tap_count"
           xml:space="preserve">
         <value>taps</value>
     </data>
-    <data name="LegacyLanguagePack_dialog_exit_yes"
+    <data name="OsuDroidLanguagePack_dialog_exit_yes"
           xml:space="preserve">
         <value>Yes</value>
     </data>
-    <data name="LegacyLanguagePack_dialog_exit_no"
+    <data name="OsuDroidLanguagePack_dialog_exit_no"
           xml:space="preserve">
         <value>No</value>
     </data>
-    <data name="LegacyLanguagePack_dialog_exit_message"
+    <data name="OsuDroidLanguagePack_dialog_exit_message"
           xml:space="preserve">
         <value>Are you sure you want to exit the game?</value>
     </data>
-    <data name="LegacyLanguagePack_dialog_visit_osu_website"
+    <data name="OsuDroidLanguagePack_dialog_visit_osu_website"
           xml:space="preserve">
         <value>Do you want to visit the official osu! website?</value>
     </data>
-    <data name="LegacyLanguagePack_dialog_visit_osudroid_profile_page"
+    <data name="OsuDroidLanguagePack_dialog_visit_osudroid_profile_page"
           xml:space="preserve">
         <value>Do you want to visit your profile page?</value>
     </data>
-    <data name="LegacyLanguagePack_dialog_visit_osudroid_website"
+    <data name="OsuDroidLanguagePack_dialog_visit_osudroid_website"
           xml:space="preserve">
         <value>Do you want to visit the official osu!droid website?</value>
     </data>
-    <data name="LegacyLanguagePack_hudEditor_modal_title"
+    <data name="OsuDroidLanguagePack_hudEditor_modal_title"
           xml:space="preserve">
         <value>HUD Editor</value>
     </data>
-    <data name="LegacyLanguagePack_hudEditor_modal_save"
+    <data name="OsuDroidLanguagePack_hudEditor_modal_save"
           xml:space="preserve">
         <value>Exit and save changes</value>
     </data>
-    <data name="LegacyLanguagePack_hudEditor_modal_discard"
+    <data name="OsuDroidLanguagePack_hudEditor_modal_discard"
           xml:space="preserve">
         <value>Discard changes</value>
     </data>
-    <data name="LegacyLanguagePack_hudEditor_modal_reset"
+    <data name="OsuDroidLanguagePack_hudEditor_modal_reset"
           xml:space="preserve">
         <value>Reset to default</value>
     </data>
-    <data name="LegacyLanguagePack_hudEditor_modal_cancel"
+    <data name="OsuDroidLanguagePack_hudEditor_modal_cancel"
           xml:space="preserve">
         <value>Cancel</value>
     </data>
-    <data name="LegacyLanguagePack_hudEditor_back_for_menu"
+    <data name="OsuDroidLanguagePack_hudEditor_back_for_menu"
           xml:space="preserve">
         <value>Press back to show HUD editor menu.</value>
     </data>
-    <data name="LegacyLanguagePack_hudEditor_saving"
+    <data name="OsuDroidLanguagePack_hudEditor_saving"
           xml:space="preserve">
         <value>Saving changes...</value>
     </data>
-    <data name="LegacyLanguagePack_hudEditor_saved"
+    <data name="OsuDroidLanguagePack_hudEditor_saved"
           xml:space="preserve">
         <value>Changes saved!</value>
     </data>
-    <data name="LegacyLanguagePack_hudEditor_discarded"
+    <data name="OsuDroidLanguagePack_hudEditor_discarded"
           xml:space="preserve">
         <value>Changes discarded!</value>
     </data>
-    <data name="LegacyLanguagePack_hudEditor_reset"
+    <data name="OsuDroidLanguagePack_hudEditor_reset"
           xml:space="preserve">
         <value>HUD set to default!</value>
     </data>
-    <data name="LegacyLanguagePack_config_backup_info_success"
+    <data name="OsuDroidLanguagePack_config_backup_info_success"
           xml:space="preserve">
         <value>Successfully exported the options file</value>
     </data>
-    <data name="LegacyLanguagePack_config_backup_info_fail"
+    <data name="OsuDroidLanguagePack_config_backup_info_fail"
           xml:space="preserve">
         <value>Failed to export the options file</value>
     </data>
-    <data name="LegacyLanguagePack_config_backup_restore_info_success"
+    <data name="OsuDroidLanguagePack_config_backup_restore_info_success"
           xml:space="preserve">
         <value>Successfully imported the options file</value>
     </data>
-    <data name="LegacyLanguagePack_config_backup_restore_info_fail"
+    <data name="OsuDroidLanguagePack_config_backup_restore_info_fail"
           xml:space="preserve">
         <value>Failed to import the options file</value>
     </data>
-    <data name="LegacyLanguagePack_markdown_title"
+    <data name="OsuDroidLanguagePack_markdown_title"
           xml:space="preserve">
         <value>Markdown Title</value>
     </data>
-    <data name="LegacyLanguagePack_changelog_title"
+    <data name="OsuDroidLanguagePack_changelog_title"
           xml:space="preserve">
         <value>Changelog</value>
     </data>
-    <data name="LegacyLanguagePack_message_info_multitouch"
+    <data name="OsuDroidLanguagePack_message_info_multitouch"
           xml:space="preserve">
         <value>Multitouch may not be supported by your device</value>
     </data>
-    <data name="LegacyLanguagePack_message_low_storage_space"
+    <data name="OsuDroidLanguagePack_message_low_storage_space"
           xml:space="preserve">
         <value>Storage space is low. Free Storage: {0} GB. This may cause replay/score submission bugs.</value>
     </data>
-    <data name="LegacyLanguagePack_message_error"
+    <data name="OsuDroidLanguagePack_message_error"
           xml:space="preserve">
         <value>Error: {0}</value>
     </data>
-    <data name="LegacyLanguagePack_message_error_open"
+    <data name="OsuDroidLanguagePack_message_error_open"
           xml:space="preserve">
         <value>Cannot open {0}</value>
     </data>
-    <data name="LegacyLanguagePack_message_error_createdir"
+    <data name="OsuDroidLanguagePack_message_error_createdir"
           xml:space="preserve">
         <value>Cannot create {0}</value>
     </data>
-    <data name="LegacyLanguagePack_message_error_sdcard"
+    <data name="OsuDroidLanguagePack_message_error_sdcard"
           xml:space="preserve">
         <value>External storage is not mounted</value>
     </data>
-    <data name="LegacyLanguagePack_message_error_sdcardread"
+    <data name="OsuDroidLanguagePack_message_error_sdcardread"
           xml:space="preserve">
         <value>External storage is read only</value>
     </data>
-    <data name="LegacyLanguagePack_message_video_custom_speed_unsupported"
+    <data name="OsuDroidLanguagePack_message_video_custom_speed_unsupported"
           xml:space="preserve">
         <value>Custom video playback speed is not supported in this device</value>
     </data>
-    <data name="LegacyLanguagePack_crash"
+    <data name="OsuDroidLanguagePack_crash"
           xml:space="preserve">
         <value>Sorry, the game encountered an unexpected error and needs to close.</value>
     </data>
-    <data name="LegacyLanguagePack_accessibility_detector_title"
+    <data name="OsuDroidLanguagePack_accessibility_detector_title"
           xml:space="preserve">
         <value>Disable Accessibility Services</value>
     </data>
-    <data name="LegacyLanguagePack_accessibility_detector_message"
+    <data name="OsuDroidLanguagePack_accessibility_detector_message"
           xml:space="preserve">
         <value>The following accessibility services must be disabled in order to play:</value>
     </data>
-    <data name="LegacyLanguagePack_accessibility_detector_settings"
+    <data name="OsuDroidLanguagePack_accessibility_detector_settings"
           xml:space="preserve">
         <value>Go to accessibility settings</value>
     </data>
-    <data name="LegacyLanguagePack_accessibility_detector_exit"
+    <data name="OsuDroidLanguagePack_accessibility_detector_exit"
           xml:space="preserve">
         <value>Exit game</value>
     </data>
-    <data name="LegacyLanguagePack_online_loadrecord"
+    <data name="OsuDroidLanguagePack_online_loadrecord"
           xml:space="preserve">
         <value>Loading record details...</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_not_online"
+    <data name="OsuDroidLanguagePack_multiplayer_not_online"
           xml:space="preserve">
         <value>You must be logged in to the server to play multiplayer!</value>
     </data>
-    <data name="LegacyLanguagePack_press_color_to_apply"
+    <data name="OsuDroidLanguagePack_press_color_to_apply"
           xml:space="preserve">
         <value>Press on Color to apply</value>
     </data>
-    <data name="LegacyLanguagePack_beatmap_downloader_cancel"
+    <data name="OsuDroidLanguagePack_beatmap_downloader_cancel"
           xml:space="preserve">
         <value>Cancel</value>
     </data>
-    <data name="LegacyLanguagePack_beatmap_downloader_connecting"
+    <data name="OsuDroidLanguagePack_beatmap_downloader_connecting"
           xml:space="preserve">
         <value>Connecting to server...</value>
     </data>
-    <data name="LegacyLanguagePack_beatmap_downloader_downloading"
+    <data name="OsuDroidLanguagePack_beatmap_downloader_downloading"
           xml:space="preserve">
         <value>Downloading beatmap {0}...</value>
     </data>
-    <data name="LegacyLanguagePack_beatmap_downloader_importing"
+    <data name="OsuDroidLanguagePack_beatmap_downloader_importing"
           xml:space="preserve">
         <value>Importing beatmap {0}...</value>
     </data>
-    <data name="LegacyLanguagePack_ranked_status_ranked"
+    <data name="OsuDroidLanguagePack_ranked_status_ranked"
           xml:space="preserve">
         <value>Ranked</value>
     </data>
-    <data name="LegacyLanguagePack_ranked_status_approved"
+    <data name="OsuDroidLanguagePack_ranked_status_approved"
           xml:space="preserve">
         <value>Approved</value>
     </data>
-    <data name="LegacyLanguagePack_ranked_status_qualified"
+    <data name="OsuDroidLanguagePack_ranked_status_qualified"
           xml:space="preserve">
         <value>Qualified</value>
     </data>
-    <data name="LegacyLanguagePack_ranked_status_loved"
+    <data name="OsuDroidLanguagePack_ranked_status_loved"
           xml:space="preserve">
         <value>Loved</value>
     </data>
-    <data name="LegacyLanguagePack_ranked_status_pending"
+    <data name="OsuDroidLanguagePack_ranked_status_pending"
           xml:space="preserve">
         <value>Pending</value>
     </data>
-    <data name="LegacyLanguagePack_ranked_status_wip"
+    <data name="OsuDroidLanguagePack_ranked_status_wip"
           xml:space="preserve">
         <value>Work in Progress</value>
     </data>
-    <data name="LegacyLanguagePack_ranked_status_graveyard"
+    <data name="OsuDroidLanguagePack_ranked_status_graveyard"
           xml:space="preserve">
         <value>Graveyard</value>
     </data>
-    <data name="LegacyLanguagePack_library_cleared"
+    <data name="OsuDroidLanguagePack_library_cleared"
           xml:space="preserve">
         <value>Cache cleared</value>
     </data>
-    <data name="LegacyLanguagePack_library_importing"
+    <data name="OsuDroidLanguagePack_library_importing"
           xml:space="preserve">
         <value>Importing beatmap...</value>
     </data>
-    <data name="LegacyLanguagePack_library_importing_several"
+    <data name="OsuDroidLanguagePack_library_importing_several"
           xml:space="preserve">
         <value>Found {0} archived beatmaps. Importing...</value>
     </data>
-    <data name="LegacyLanguagePack_library_skin_importing_several"
+    <data name="OsuDroidLanguagePack_library_skin_importing_several"
           xml:space="preserve">
         <value>Found {0} archived skins. Importing...</value>
     </data>
-    <data name="LegacyLanguagePack_library_imported"
+    <data name="OsuDroidLanguagePack_library_imported"
           xml:space="preserve">
         <value>"{0}" has been imported!</value>
     </data>
-    <data name="LegacyLanguagePack_message_loaded_skin"
+    <data name="OsuDroidLanguagePack_message_loaded_skin"
           xml:space="preserve">
         <value>Successfully applied new skin!</value>
     </data>
-    <data name="LegacyLanguagePack_message_error_dir_not_found"
+    <data name="OsuDroidLanguagePack_message_error_dir_not_found"
           xml:space="preserve">
         <value>Directory is not found</value>
     </data>
-    <data name="LegacyLanguagePack_file_integrity_tampered"
+    <data name="OsuDroidLanguagePack_file_integrity_tampered"
           xml:space="preserve">
         <value>File integrity check failed. Aborting gameplay.</value>
     </data>
-    <data name="LegacyLanguagePack_beatmap_parser_cannot_open_file"
+    <data name="OsuDroidLanguagePack_beatmap_parser_cannot_open_file"
           xml:space="preserve">
         <value>Failed loading {0}: Could not open beatmap file</value>
     </data>
-    <data name="LegacyLanguagePack_block_area_editor_fragment_add"
+    <data name="OsuDroidLanguagePack_block_area_editor_fragment_add"
           xml:space="preserve">
         <value>Add area</value>
     </data>
-    <data name="LegacyLanguagePack_block_area_editor_fragment_reset"
+    <data name="OsuDroidLanguagePack_block_area_editor_fragment_reset"
           xml:space="preserve">
         <value>Reset</value>
     </data>
-    <data name="LegacyLanguagePack_block_area_editor_fragment_done"
+    <data name="OsuDroidLanguagePack_block_area_editor_fragment_done"
           xml:space="preserve">
         <value>Done</value>
     </data>
-    <data name="LegacyLanguagePack_update_dialog_message"
+    <data name="OsuDroidLanguagePack_update_dialog_message"
           xml:space="preserve">
         <value>There is a new update available</value>
     </data>
-    <data name="LegacyLanguagePack_update_dialog_button_update"
+    <data name="OsuDroidLanguagePack_update_dialog_button_update"
           xml:space="preserve">
         <value>Update Now</value>
     </data>
-    <data name="LegacyLanguagePack_update_info_checking"
+    <data name="OsuDroidLanguagePack_update_info_checking"
           xml:space="preserve">
         <value>Checking for new updates...</value>
     </data>
-    <data name="LegacyLanguagePack_update_info_check_failed"
+    <data name="OsuDroidLanguagePack_update_info_check_failed"
           xml:space="preserve">
         <value>Failed to check for updates. The server or your internet connection may not be available.</value>
     </data>
-    <data name="LegacyLanguagePack_update_info_downloading"
+    <data name="OsuDroidLanguagePack_update_info_downloading"
           xml:space="preserve">
         <value>Downloading updates... {0}%%</value>
     </data>
-    <data name="LegacyLanguagePack_update_info_download_canceled"
+    <data name="OsuDroidLanguagePack_update_info_download_canceled"
           xml:space="preserve">
         <value>Download cancelled.</value>
     </data>
-    <data name="LegacyLanguagePack_update_info_download_failed"
+    <data name="OsuDroidLanguagePack_update_info_download_failed"
           xml:space="preserve">
         <value>Download failed, check your internet connection.</value>
     </data>
-    <data name="LegacyLanguagePack_update_info_updated"
+    <data name="OsuDroidLanguagePack_update_info_updated"
           xml:space="preserve">
         <value>Update successfully installed!</value>
     </data>
-    <data name="LegacyLanguagePack_update_info_latest"
+    <data name="OsuDroidLanguagePack_update_info_latest"
           xml:space="preserve">
         <value>No new updates available</value>
     </data>
-    <data name="LegacyLanguagePack_menu_score"
+    <data name="OsuDroidLanguagePack_menu_score"
           xml:space="preserve">
         <value>Score: {0} ({1}x)</value>
     </data>
-    <data name="LegacyLanguagePack_menu_performance"
+    <data name="OsuDroidLanguagePack_menu_performance"
           xml:space="preserve">
         <value>Performance: {0}pp ({1}x)</value>
     </data>
-    <data name="LegacyLanguagePack_menu_creator"
+    <data name="OsuDroidLanguagePack_menu_creator"
           xml:space="preserve">
         <value>Creator: {0}</value>
     </data>
-    <data name="LegacyLanguagePack_menu_mod_back"
+    <data name="OsuDroidLanguagePack_menu_mod_back"
           xml:space="preserve">
         <value>Back</value>
     </data>
-    <data name="LegacyLanguagePack_menu_mod_multiplier"
+    <data name="OsuDroidLanguagePack_menu_mod_multiplier"
           xml:space="preserve">
         <value>Score %.2fx</value>
     </data>
-    <data name="LegacyLanguagePack_menu_mod_reset"
+    <data name="OsuDroidLanguagePack_menu_mod_reset"
           xml:space="preserve">
         <value>Reset all mods</value>
     </data>
-    <data name="LegacyLanguagePack_menu_properties_title"
+    <data name="OsuDroidLanguagePack_menu_properties_title"
           xml:space="preserve">
         <value>Song properties</value>
     </data>
-    <data name="LegacyLanguagePack_menu_properties_offset"
+    <data name="OsuDroidLanguagePack_menu_properties_offset"
           xml:space="preserve">
         <value>Song offset:</value>
     </data>
-    <data name="LegacyLanguagePack_menu_properties_tofavs"
+    <data name="OsuDroidLanguagePack_menu_properties_tofavs"
           xml:space="preserve">
         <value>Add to favorites</value>
     </data>
-    <data name="LegacyLanguagePack_menu_properties_delete"
+    <data name="OsuDroidLanguagePack_menu_properties_delete"
           xml:space="preserve">
         <value>Delete beatmap</value>
     </data>
-    <data name="LegacyLanguagePack_menu_deletescore_delete"
+    <data name="OsuDroidLanguagePack_menu_deletescore_delete"
           xml:space="preserve">
         <value>Delete</value>
     </data>
-    <data name="LegacyLanguagePack_menu_deletescore_delete_success"
+    <data name="OsuDroidLanguagePack_menu_deletescore_delete_success"
           xml:space="preserve">
         <value>Delete score success!</value>
     </data>
-    <data name="LegacyLanguagePack_menu_search_filter"
+    <data name="OsuDroidLanguagePack_menu_search_filter"
           xml:space="preserve">
         <value>Search for...</value>
     </data>
-    <data name="LegacyLanguagePack_menu_search_sort_title"
+    <data name="OsuDroidLanguagePack_menu_search_sort_title"
           xml:space="preserve">
         <value>Title</value>
     </data>
-    <data name="LegacyLanguagePack_menu_search_sort_date"
+    <data name="OsuDroidLanguagePack_menu_search_sort_date"
           xml:space="preserve">
         <value>Date</value>
     </data>
-    <data name="LegacyLanguagePack_menu_search_sort_creator"
+    <data name="OsuDroidLanguagePack_menu_search_sort_creator"
           xml:space="preserve">
         <value>Creator</value>
     </data>
-    <data name="LegacyLanguagePack_menu_search_sort_artist"
+    <data name="OsuDroidLanguagePack_menu_search_sort_artist"
           xml:space="preserve">
         <value>Artist</value>
     </data>
-    <data name="LegacyLanguagePack_menu_search_sort_bpm"
+    <data name="OsuDroidLanguagePack_menu_search_sort_bpm"
           xml:space="preserve">
         <value>Bpm</value>
     </data>
-    <data name="LegacyLanguagePack_menu_search_sort_droid_stars"
+    <data name="OsuDroidLanguagePack_menu_search_sort_droid_stars"
           xml:space="preserve">
         <value>osu!droid Stars</value>
     </data>
-    <data name="LegacyLanguagePack_menu_search_sort_standard_stars"
+    <data name="OsuDroidLanguagePack_menu_search_sort_standard_stars"
           xml:space="preserve">
         <value>osu!standard Stars</value>
     </data>
-    <data name="LegacyLanguagePack_menu_search_sort_length"
+    <data name="OsuDroidLanguagePack_menu_search_sort_length"
           xml:space="preserve">
         <value>Length</value>
     </data>
-    <data name="LegacyLanguagePack_binfoStr1"
+    <data name="OsuDroidLanguagePack_binfoStr1"
           xml:space="preserve">
         <value>Length: {0} BPM: {1} Combo: {2}</value>
     </data>
-    <data name="LegacyLanguagePack_binfoStr2"
+    <data name="OsuDroidLanguagePack_binfoStr2"
           xml:space="preserve">
         <value>Circles: {0} Sliders: {1} Spinners: {2} (MapId: {3})</value>
     </data>
-    <data name="LegacyLanguagePack_favorite_default"
+    <data name="OsuDroidLanguagePack_favorite_default"
           xml:space="preserve">
         <value>Default</value>
     </data>
-    <data name="LegacyLanguagePack_favorite_new_folder"
+    <data name="OsuDroidLanguagePack_favorite_new_folder"
           xml:space="preserve">
         <value>Create new folder</value>
     </data>
-    <data name="LegacyLanguagePack_favorite_ensure"
+    <data name="OsuDroidLanguagePack_favorite_ensure"
           xml:space="preserve">
         <value>Are you sure?</value>
     </data>
-    <data name="LegacyLanguagePack_favorite_manage"
+    <data name="OsuDroidLanguagePack_favorite_manage"
           xml:space="preserve">
         <value>Manage Beatmap folder</value>
     </data>
-    <data name="LegacyLanguagePack_frg_score_menu_title"
+    <data name="OsuDroidLanguagePack_frg_score_menu_title"
           xml:space="preserve">
         <value>Score</value>
     </data>
-    <data name="LegacyLanguagePack_frg_score_menu_export_score"
+    <data name="OsuDroidLanguagePack_frg_score_menu_export_score"
           xml:space="preserve">
         <value>Export Score</value>
     </data>
-    <data name="LegacyLanguagePack_frg_score_menu_export_failed"
+    <data name="OsuDroidLanguagePack_frg_score_menu_export_failed"
           xml:space="preserve">
         <value>Failed to export replay!</value>
     </data>
-    <data name="LegacyLanguagePack_frg_score_menu_export_succeed"
+    <data name="OsuDroidLanguagePack_frg_score_menu_export_succeed"
           xml:space="preserve">
         <value>Replay is saved to {0}</value>
     </data>
-    <data name="LegacyLanguagePack_mod_section_difficulty_reduction"
+    <data name="OsuDroidLanguagePack_mod_section_difficulty_reduction"
           xml:space="preserve">
         <value>Difficulty Reduction</value>
     </data>
-    <data name="LegacyLanguagePack_mod_section_difficulty_increase"
+    <data name="OsuDroidLanguagePack_mod_section_difficulty_increase"
           xml:space="preserve">
         <value>Difficulty Increase</value>
     </data>
-    <data name="LegacyLanguagePack_mod_section_difficulty_automation"
+    <data name="OsuDroidLanguagePack_mod_section_difficulty_automation"
           xml:space="preserve">
         <value>Automation</value>
     </data>
-    <data name="LegacyLanguagePack_mod_section_difficulty_conversion"
+    <data name="OsuDroidLanguagePack_mod_section_difficulty_conversion"
           xml:space="preserve">
         <value>Conversion</value>
     </data>
-    <data name="LegacyLanguagePack_mod_section_fun"
+    <data name="OsuDroidLanguagePack_mod_section_fun"
           xml:space="preserve">
         <value>Fun</value>
     </data>
-    <data name="LegacyLanguagePack_mod_section_system"
+    <data name="OsuDroidLanguagePack_mod_section_system"
           xml:space="preserve">
         <value>System</value>
     </data>
-    <data name="LegacyLanguagePack_opt_show_scoreboard_title"
+    <data name="OsuDroidLanguagePack_opt_show_scoreboard_title"
           xml:space="preserve">
         <value>Show Scoreboard</value>
     </data>
-    <data name="LegacyLanguagePack_epilepsy_warning"
+    <data name="OsuDroidLanguagePack_epilepsy_warning"
           xml:space="preserve">
         <value>This beatmap contains scenes with rapidly flashing colors.
 Please take caution if you are affected by epilepsy.</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_category_details"
+    <data name="OsuDroidLanguagePack_mp_room_category_details"
           xml:space="preserve">
         <value>Details</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_name_title"
+    <data name="OsuDroidLanguagePack_mp_room_name_title"
           xml:space="preserve">
         <value>Room name</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_name_summary"
+    <data name="OsuDroidLanguagePack_mp_room_name_summary"
           xml:space="preserve">
         <value>Change the room's name.</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_password_title"
+    <data name="OsuDroidLanguagePack_mp_room_password_title"
           xml:space="preserve">
         <value>Room password</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_password_summary"
+    <data name="OsuDroidLanguagePack_mp_room_password_summary"
           xml:space="preserve">
         <value>Change the room's password. If empty, the room will be public.</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_max_players_title"
+    <data name="OsuDroidLanguagePack_mp_room_max_players_title"
           xml:space="preserve">
         <value>Maximum Players</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_max_players_summary"
+    <data name="OsuDroidLanguagePack_mp_room_max_players_summary"
           xml:space="preserve">
         <value>Set the maximum number of players allowed in the room</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_category_variables"
+    <data name="OsuDroidLanguagePack_mp_room_category_variables"
           xml:space="preserve">
         <value>Variables</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_free_mods_title"
+    <data name="OsuDroidLanguagePack_mp_room_free_mods_title"
           xml:space="preserve">
         <value>Enable free mods</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_free_mods_summary"
+    <data name="OsuDroidLanguagePack_mp_room_free_mods_summary"
           xml:space="preserve">
         <value>Allow players to choose mods except speed-changing mods.</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_versus_mode_title"
+    <data name="OsuDroidLanguagePack_mp_room_versus_mode_title"
           xml:space="preserve">
         <value>Team mode</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_versus_mode_summary"
+    <data name="OsuDroidLanguagePack_mp_room_versus_mode_summary"
           xml:space="preserve">
         <value>Change the room versus mode.</value>
     </data>
-    <data name="LegacyLanguagePack_mp_team_versus_names"
+    <data name="OsuDroidLanguagePack_mp_team_versus_names"
           xml:space="preserve">
         <value>Head to Head|Team vs Team</value>
     </data>
-    <data name="LegacyLanguagePack_mp_team_versus_values"
+    <data name="OsuDroidLanguagePack_mp_team_versus_values"
           xml:space="preserve">
         <value>0|1</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_win_condition_title"
+    <data name="OsuDroidLanguagePack_mp_room_win_condition_title"
           xml:space="preserve">
         <value>Win condition</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_win_condition_summary"
+    <data name="OsuDroidLanguagePack_mp_room_win_condition_summary"
           xml:space="preserve">
         <value>Change the room win condition.</value>
     </data>
-    <data name="LegacyLanguagePack_mp_win_condition_names"
+    <data name="OsuDroidLanguagePack_mp_win_condition_names"
           xml:space="preserve">
         <value>Score V1|Accuracy|Max combo|Score V2</value>
     </data>
-    <data name="LegacyLanguagePack_mp_win_condition_values"
+    <data name="OsuDroidLanguagePack_mp_win_condition_values"
           xml:space="preserve">
         <value>0|1|2|3</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_category_share"
+    <data name="OsuDroidLanguagePack_mp_room_category_share"
           xml:space="preserve">
         <value>Share</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_link_title"
+    <data name="OsuDroidLanguagePack_mp_room_link_title"
           xml:space="preserve">
         <value>Get invite link</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_link_summary"
+    <data name="OsuDroidLanguagePack_mp_room_link_summary"
           xml:space="preserve">
         <value>Copy invite link to clipboard</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_category_teams"
+    <data name="OsuDroidLanguagePack_mp_room_category_teams"
           xml:space="preserve">
         <value>Team</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_category_teams_title"
+    <data name="OsuDroidLanguagePack_mp_room_category_teams_title"
           xml:space="preserve">
         <value>Team</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_category_teams_summary"
+    <data name="OsuDroidLanguagePack_mp_room_category_teams_summary"
           xml:space="preserve">
         <value>Change your team.</value>
     </data>
-    <data name="LegacyLanguagePack_mp_team_names"
+    <data name="OsuDroidLanguagePack_mp_team_names"
           xml:space="preserve">
         <value>Red|Blue</value>
     </data>
-    <data name="LegacyLanguagePack_mp_team_values"
+    <data name="OsuDroidLanguagePack_mp_team_values"
           xml:space="preserve">
         <value>0|1</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_category_in_game"
+    <data name="OsuDroidLanguagePack_mp_room_category_in_game"
           xml:space="preserve">
         <value>In-game</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_enable_score_submission_title"
+    <data name="OsuDroidLanguagePack_mp_room_enable_score_submission_title"
           xml:space="preserve">
         <value>Enable score submission</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_enable_score_submission_summary"
+    <data name="OsuDroidLanguagePack_mp_room_enable_score_submission_summary"
           xml:space="preserve">
         <value>Submit your score at the end of the round if you did not fail</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_nightcore_title"
+    <data name="OsuDroidLanguagePack_mp_room_nightcore_title"
           xml:space="preserve">
         <value>Use NightCore</value>
     </data>
-    <data name="LegacyLanguagePack_mp_room_nightcore_summary"
+    <data name="OsuDroidLanguagePack_mp_room_nightcore_summary"
           xml:space="preserve">
         <value>Enable NightCore mod instead when DoubleTime is enabled</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_back"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_back"
           xml:space="preserve">
         <value>Back</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_create_room"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_create_room"
           xml:space="preserve">
         <value>Create room</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_create_room_accept"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_create_room_accept"
           xml:space="preserve">
         <value>Create</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_create_room_cancel"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_create_room_cancel"
           xml:space="preserve">
         <value>Cancel</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_create_room_name_default"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_create_room_name_default"
           xml:space="preserve">
         <value>{0}'s room</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_refresh"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_refresh"
           xml:space="preserve">
         <value>Refresh</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_no_rooms"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_no_rooms"
           xml:space="preserve">
         <value>No rooms available, create a new one!</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_no_results"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_no_results"
           xml:space="preserve">
         <value>No results found for the current search.</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_fetch_error_toast"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_fetch_error_toast"
           xml:space="preserve">
         <value>Failed to obtain rooms: {0}</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_fetch_error"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_fetch_error"
           xml:space="preserve">
         <value>Failed to obtain rooms</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_room_name"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_room_name"
           xml:space="preserve">
         <value>Room name</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_room_password"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_room_password"
           xml:space="preserve">
         <value>Room password</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_room_capacity"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_room_capacity"
           xml:space="preserve">
         <value>Room capacity</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_join_room"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_join_room"
           xml:space="preserve">
         <value>Join room</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_join_room_accept"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_join_room_accept"
           xml:space="preserve">
         <value>Join</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_join_room_cancel"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_join_room_cancel"
           xml:space="preserve">
         <value>Cancel</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_room_head_to_head"
+    <data name="OsuDroidLanguagePack_multiplayer_room_head_to_head"
           xml:space="preserve">
         <value>Head to head</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_room_team_versus"
+    <data name="OsuDroidLanguagePack_multiplayer_room_team_versus"
           xml:space="preserve">
         <value>Team versus</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_room_players"
+    <data name="OsuDroidLanguagePack_multiplayer_room_players"
           xml:space="preserve">
         <value>Players</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_room_score_v1"
+    <data name="OsuDroidLanguagePack_multiplayer_room_score_v1"
           xml:space="preserve">
         <value>Score V1</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_room_score_v2"
+    <data name="OsuDroidLanguagePack_multiplayer_room_score_v2"
           xml:space="preserve">
         <value>Score V2</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_room_status_idle"
+    <data name="OsuDroidLanguagePack_multiplayer_room_status_idle"
           xml:space="preserve">
         <value>Idle</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_room_status_changing_beatmap"
+    <data name="OsuDroidLanguagePack_multiplayer_room_status_changing_beatmap"
           xml:space="preserve">
         <value>Changing beatmap</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_room_status_playing"
+    <data name="OsuDroidLanguagePack_multiplayer_room_status_playing"
           xml:space="preserve">
         <value>Playing</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_room_highest_accuracy"
+    <data name="OsuDroidLanguagePack_multiplayer_room_highest_accuracy"
           xml:space="preserve">
         <value>Highest accuracy</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_room_maximum_combo"
+    <data name="OsuDroidLanguagePack_multiplayer_room_maximum_combo"
           xml:space="preserve">
         <value>Maximum combo</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_room_no_players"
+    <data name="OsuDroidLanguagePack_multiplayer_room_no_players"
           xml:space="preserve">
         <value>No players</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_room_free_mods"
+    <data name="OsuDroidLanguagePack_multiplayer_room_free_mods"
           xml:space="preserve">
         <value>Free mods</value>
     </data>
-    <data name="LegacyLanguagePack_multiplayer_lobby_search_rooms"
+    <data name="OsuDroidLanguagePack_multiplayer_lobby_search_rooms"
           xml:space="preserve">
         <value>Search rooms...</value>
     </data>
-    <data name="LegacyLanguagePack_act_import_replay"
+    <data name="OsuDroidLanguagePack_act_import_replay"
           xml:space="preserve">
         <value>Import replay into osu!droid</value>
     </data>
-    <data name="LegacyLanguagePack_invalid_edr_file"
+    <data name="OsuDroidLanguagePack_invalid_edr_file"
           xml:space="preserve">
         <value>Invalid repay!</value>
     </data>
-    <data name="LegacyLanguagePack_failed_to_import_edr"
+    <data name="OsuDroidLanguagePack_failed_to_import_edr"
           xml:space="preserve">
         <value>Failed to import replay!</value>
     </data>
-    <data name="LegacyLanguagePack_failed_to_import_edr_with_err"
+    <data name="OsuDroidLanguagePack_failed_to_import_edr_with_err"
           xml:space="preserve">
         <value>Failed to import replay: {0}</value>
     </data>
-    <data name="LegacyLanguagePack_import_edr_successfully"
+    <data name="OsuDroidLanguagePack_import_edr_successfully"
           xml:space="preserve">
         <value>Import replay successfully!</value>
     </data>
-    <data name="LegacyLanguagePack_replay_import_result"
+    <data name="OsuDroidLanguagePack_replay_import_result"
           xml:space="preserve">
         <value>Imported {0} out of {1} replay(s)!</value>
     </data>
-    <data name="LegacyLanguagePack_replay_import_error"
+    <data name="OsuDroidLanguagePack_replay_import_error"
           xml:space="preserve">
         <value>Unable to import {0}: {1}</value>
     </data>
-    <data name="LegacyLanguagePack_message_save_replay_successful"
+    <data name="OsuDroidLanguagePack_message_save_replay_successful"
           xml:space="preserve">
         <value>Save failed replay success!</value>
     </data>
-    <data name="LegacyLanguagePack_message_save_replay_failed"
+    <data name="OsuDroidLanguagePack_message_save_replay_failed"
           xml:space="preserve">
         <value>Save replay failed</value>
     </data>
-    <data name="LegacyLanguagePack_replay_invalid"
+    <data name="OsuDroidLanguagePack_replay_invalid"
           xml:space="preserve">
         <value>Cannot load replay</value>
     </data>
-    <data name="LegacyLanguagePack_replay_cantdownload"
+    <data name="OsuDroidLanguagePack_replay_cantdownload"
           xml:space="preserve">
         <value>Cannot download replay</value>
     </data>
-    <data name="LegacyLanguagePack_replay_wrongmap"
+    <data name="OsuDroidLanguagePack_replay_wrongmap"
           xml:space="preserve">
         <value>Replay doesn't match the map</value>
     </data>
-    <data name="LegacyLanguagePack_replay_corrupted"
+    <data name="OsuDroidLanguagePack_replay_corrupted"
           xml:space="preserve">
         <value>Replay file is corrupted</value>
     </data>
-    <data name="LegacyLanguagePack_placeholder_array"
+    <data name="OsuDroidLanguagePack_placeholder_array"
           xml:space="preserve">
         <value>placeholder</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_online"
+    <data name="OsuDroidLanguagePack_opt_category_online"
           xml:space="preserve">
         <value>Online</value>
     </data>
-    <data name="LegacyLanguagePack_opt_stayonline_title"
+    <data name="OsuDroidLanguagePack_opt_stayonline_title"
           xml:space="preserve">
         <value>Server Connection</value>
     </data>
-    <data name="LegacyLanguagePack_opt_stayonline_summary"
+    <data name="OsuDroidLanguagePack_opt_stayonline_summary"
           xml:space="preserve">
         <value>Connect to osu!droid server</value>
     </data>
-    <data name="LegacyLanguagePack_opt_loadavatar_title"
+    <data name="OsuDroidLanguagePack_opt_loadavatar_title"
           xml:space="preserve">
         <value>Load Avatar</value>
     </data>
-    <data name="LegacyLanguagePack_opt_loadavatar_summary"
+    <data name="OsuDroidLanguagePack_opt_loadavatar_summary"
           xml:space="preserve">
         <value>Load avatar in online leaderboard</value>
     </data>
-    <data name="LegacyLanguagePack_opt_global_beatmap_leaderboard_scoring_mode_title"
+    <data name="OsuDroidLanguagePack_opt_global_beatmap_leaderboard_scoring_mode_title"
           xml:space="preserve">
         <value>Global beatmap leaderboard scoring mode</value>
     </data>
-    <data name="LegacyLanguagePack_opt_global_beatmap_leaderboard_scoring_mode_summary"
+    <data name="OsuDroidLanguagePack_opt_global_beatmap_leaderboard_scoring_mode_summary"
           xml:space="preserve">
         <value>Choose the scoring mode for global beatmap leaderboards</value>
     </data>
-    <data name="LegacyLanguagePack_global_beatmap_leaderboard_scoring_mode_names"
+    <data name="OsuDroidLanguagePack_global_beatmap_leaderboard_scoring_mode_names"
           xml:space="preserve">
         <value>Score|Performance Points</value>
     </data>
-    <data name="LegacyLanguagePack_global_beatmap_leaderboard_scoring_mode_values"
+    <data name="OsuDroidLanguagePack_global_beatmap_leaderboard_scoring_mode_values"
           xml:space="preserve">
         <value>0|1</value>
     </data>
-    <data name="LegacyLanguagePack_difficulty_algorithm_title"
+    <data name="OsuDroidLanguagePack_difficulty_algorithm_title"
           xml:space="preserve">
         <value>Difficulty algorithm</value>
     </data>
-    <data name="LegacyLanguagePack_difficulty_algorithm_summary"
+    <data name="OsuDroidLanguagePack_difficulty_algorithm_summary"
           xml:space="preserve">
         <value>Choose the algorithm used to calculate difficulty and performance points</value>
     </data>
-    <data name="LegacyLanguagePack_difficulty_algorithm_names"
+    <data name="OsuDroidLanguagePack_difficulty_algorithm_names"
           xml:space="preserve">
         <value>osu!droid|osu!standard</value>
     </data>
-    <data name="LegacyLanguagePack_difficulty_algorithm_values"
+    <data name="OsuDroidLanguagePack_difficulty_algorithm_values"
           xml:space="preserve">
         <value>0|1</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_account"
+    <data name="OsuDroidLanguagePack_opt_category_account"
           xml:space="preserve">
         <value>Account</value>
     </data>
-    <data name="LegacyLanguagePack_opt_login_title"
+    <data name="OsuDroidLanguagePack_opt_login_title"
           xml:space="preserve">
         <value>Login</value>
     </data>
-    <data name="LegacyLanguagePack_opt_login_summary"
+    <data name="OsuDroidLanguagePack_opt_login_summary"
           xml:space="preserve">
         <value>Your online name</value>
     </data>
-    <data name="LegacyLanguagePack_opt_password_title"
+    <data name="OsuDroidLanguagePack_opt_password_title"
           xml:space="preserve">
         <value>Password</value>
     </data>
-    <data name="LegacyLanguagePack_opt_password_summary"
+    <data name="OsuDroidLanguagePack_opt_password_summary"
           xml:space="preserve">
         <value>Password of your account</value>
     </data>
-    <data name="LegacyLanguagePack_opt_register_title"
+    <data name="OsuDroidLanguagePack_opt_register_title"
           xml:space="preserve">
         <value>Register</value>
     </data>
-    <data name="LegacyLanguagePack_opt_register_summary"
+    <data name="OsuDroidLanguagePack_opt_register_summary"
           xml:space="preserve">
         <value>Register a new account</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_community"
+    <data name="OsuDroidLanguagePack_opt_category_community"
           xml:space="preserve">
         <value>Community</value>
     </data>
-    <data name="LegacyLanguagePack_opt_receive_announcements_title"
+    <data name="OsuDroidLanguagePack_opt_receive_announcements_title"
           xml:space="preserve">
         <value>Receive announcements</value>
     </data>
-    <data name="LegacyLanguagePack_opt_receive_announcements_summary"
+    <data name="OsuDroidLanguagePack_opt_receive_announcements_summary"
           xml:space="preserve">
         <value>Receive notifications of announcements, events, etc.</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_updates"
+    <data name="OsuDroidLanguagePack_opt_category_updates"
           xml:space="preserve">
         <value>Updates</value>
     </data>
-    <data name="LegacyLanguagePack_opt_update_title"
+    <data name="OsuDroidLanguagePack_opt_update_title"
           xml:space="preserve">
         <value>Check for updates</value>
     </data>
-    <data name="LegacyLanguagePack_opt_update_summary"
+    <data name="OsuDroidLanguagePack_opt_update_summary"
           xml:space="preserve">
         <value>Check for available updates</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_config_backup"
+    <data name="OsuDroidLanguagePack_opt_category_config_backup"
           xml:space="preserve">
         <value>Backup</value>
     </data>
-    <data name="LegacyLanguagePack_opt_config_backup_title"
+    <data name="OsuDroidLanguagePack_opt_config_backup_title"
           xml:space="preserve">
         <value>Export options file</value>
     </data>
-    <data name="LegacyLanguagePack_opt_config_backup_summary"
+    <data name="OsuDroidLanguagePack_opt_config_backup_summary"
           xml:space="preserve">
         <value>Exports non-sensitive options to "osudroid.cfg" in osu!droid's main directory</value>
     </data>
-    <data name="LegacyLanguagePack_opt_config_backup_restore_title"
+    <data name="OsuDroidLanguagePack_opt_config_backup_restore_title"
           xml:space="preserve">
         <value>Import options file</value>
     </data>
-    <data name="LegacyLanguagePack_opt_config_backup_restore_summary"
+    <data name="OsuDroidLanguagePack_opt_config_backup_restore_summary"
           xml:space="preserve">
         <value>Imports non-sensitive options from "osudroid.cfg" in osu!droid's main directory</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_localization"
+    <data name="OsuDroidLanguagePack_opt_category_localization"
           xml:space="preserve">
         <value>Localization</value>
     </data>
-    <data name="LegacyLanguagePack_opt_language_title"
+    <data name="OsuDroidLanguagePack_opt_language_title"
           xml:space="preserve">
         <value>Language</value>
     </data>
-    <data name="LegacyLanguagePack_opt_language_summary"
+    <data name="OsuDroidLanguagePack_opt_language_summary"
           xml:space="preserve">
         <value>Change the language of the game. Requires a restart.</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_skin"
+    <data name="OsuDroidLanguagePack_opt_category_skin"
           xml:space="preserve">
         <value>Skin</value>
     </data>
-    <data name="LegacyLanguagePack_opt_skinpath_title"
+    <data name="OsuDroidLanguagePack_opt_skinpath_title"
           xml:space="preserve">
         <value>Select skin</value>
     </data>
-    <data name="LegacyLanguagePack_opt_skinpath_summary"
+    <data name="OsuDroidLanguagePack_opt_skinpath_summary"
           xml:space="preserve">
         <value>Select skin from top skin directory</value>
     </data>
-    <data name="LegacyLanguagePack_opt_spinner_style_title"
+    <data name="OsuDroidLanguagePack_opt_spinner_style_title"
           xml:space="preserve">
         <value>Spinner style</value>
     </data>
-    <data name="LegacyLanguagePack_opt_spinner_style_summary"
+    <data name="OsuDroidLanguagePack_opt_spinner_style_summary"
           xml:space="preserve">
         <value>Change the spinner style</value>
     </data>
-    <data name="LegacyLanguagePack_spinner_style_names"
+    <data name="OsuDroidLanguagePack_spinner_style_names"
           xml:space="preserve">
         <value>Modern|Classical</value>
     </data>
-    <data name="LegacyLanguagePack_spinner_style_values"
+    <data name="OsuDroidLanguagePack_spinner_style_values"
           xml:space="preserve">
         <value>1|0</value>
     </data>
-    <data name="LegacyLanguagePack_opt_skin_title"
+    <data name="OsuDroidLanguagePack_opt_skin_title"
           xml:space="preserve">
         <value>Beatmap skins</value>
     </data>
-    <data name="LegacyLanguagePack_opt_skin_summary"
+    <data name="OsuDroidLanguagePack_opt_skin_summary"
           xml:space="preserve">
         <value>Load beatmap-specific skin if available</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_hit_objects"
+    <data name="OsuDroidLanguagePack_opt_category_hit_objects"
           xml:space="preserve">
         <value>Hit objects</value>
     </data>
-    <data name="LegacyLanguagePack_opt_show_first_approach_circle_title"
+    <data name="OsuDroidLanguagePack_opt_show_first_approach_circle_title"
           xml:space="preserve">
         <value>Force show first approach circle</value>
     </data>
-    <data name="LegacyLanguagePack_opt_show_first_approach_circle_summary"
+    <data name="OsuDroidLanguagePack_opt_show_first_approach_circle_summary"
           xml:space="preserve">
         <value>Do not hide the first approach circle in hidden mods</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_background"
+    <data name="OsuDroidLanguagePack_opt_category_background"
           xml:space="preserve">
         <value>Background</value>
     </data>
-    <data name="LegacyLanguagePack_opt_bgbrightness_title"
+    <data name="OsuDroidLanguagePack_opt_bgbrightness_title"
           xml:space="preserve">
         <value>Background brightness</value>
     </data>
-    <data name="LegacyLanguagePack_opt_bgbrightness_summary"
+    <data name="OsuDroidLanguagePack_opt_bgbrightness_summary"
           xml:space="preserve">
         <value>Change the brightness of the background image</value>
     </data>
-    <data name="LegacyLanguagePack_opt_keep_background_aspect_ratio_title"
+    <data name="OsuDroidLanguagePack_opt_keep_background_aspect_ratio_title"
           xml:space="preserve">
         <value>Keep background aspect ratio</value>
     </data>
-    <data name="LegacyLanguagePack_opt_keep_background_aspect_ratio_summary"
+    <data name="OsuDroidLanguagePack_opt_keep_background_aspect_ratio_summary"
           xml:space="preserve">
         <value>When enabled, the background (and storyboard) will not be scaled to fill screen bounds during gameplay</value>
     </data>
-    <data name="LegacyLanguagePack_opt_enableStoryboard_title"
+    <data name="OsuDroidLanguagePack_opt_enableStoryboard_title"
           xml:space="preserve">
         <value>Enable Storyboard</value>
     </data>
-    <data name="LegacyLanguagePack_opt_video_title"
+    <data name="OsuDroidLanguagePack_opt_video_title"
           xml:space="preserve">
         <value>Background Video</value>
     </data>
-    <data name="LegacyLanguagePack_opt_video_summary"
+    <data name="OsuDroidLanguagePack_opt_video_summary"
           xml:space="preserve">
         <value>Display video playback during gameplay. Only supports .3gp, .mp4, .mkv, and .webm video formats</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_hud"
+    <data name="OsuDroidLanguagePack_opt_category_hud"
           xml:space="preserve">
         <value>HUD</value>
     </data>
-    <data name="LegacyLanguagePack_opt_hudEditor_title"
+    <data name="OsuDroidLanguagePack_opt_hudEditor_title"
           xml:space="preserve">
         <value>HUD Editor</value>
     </data>
-    <data name="LegacyLanguagePack_opt_hudEditor_summary"
+    <data name="OsuDroidLanguagePack_opt_hudEditor_summary"
           xml:space="preserve">
         <value>Edit the HUD layout as you like</value>
     </data>
-    <data name="LegacyLanguagePack_opt_hide_ingame_ui_title"
+    <data name="OsuDroidLanguagePack_opt_hide_ingame_ui_title"
           xml:space="preserve">
         <value>Hide gameplay UI</value>
     </data>
-    <data name="LegacyLanguagePack_opt_hide_ingame_ui_summary"
+    <data name="OsuDroidLanguagePack_opt_hide_ingame_ui_summary"
           xml:space="preserve">
         <value>Hide the counters and other UIs during gameplay</value>
     </data>
-    <data name="LegacyLanguagePack_opt_hide_replay_marquee_title"
+    <data name="OsuDroidLanguagePack_opt_hide_replay_marquee_title"
           xml:space="preserve">
         <value>Hide replay marquee</value>
     </data>
-    <data name="LegacyLanguagePack_opt_hide_replay_marquee_summary"
+    <data name="OsuDroidLanguagePack_opt_hide_replay_marquee_summary"
           xml:space="preserve">
         <value>Hide the scrolling text when watching replays</value>
     </data>
-    <data name="LegacyLanguagePack_opt_fps_title"
+    <data name="OsuDroidLanguagePack_opt_fps_title"
           xml:space="preserve">
         <value>FPS</value>
     </data>
-    <data name="LegacyLanguagePack_opt_fps_summary"
+    <data name="OsuDroidLanguagePack_opt_fps_summary"
           xml:space="preserve">
         <value>Display (frames per second) during gameplay</value>
     </data>
-    <data name="LegacyLanguagePack_opt_display_score_statistics_title"
+    <data name="OsuDroidLanguagePack_opt_display_score_statistics_title"
           xml:space="preserve">
         <value>Display score statistics</value>
     </data>
-    <data name="LegacyLanguagePack_opt_display_score_statistics_summary"
+    <data name="OsuDroidLanguagePack_opt_display_score_statistics_summary"
           xml:space="preserve">
         <value>Displays score statistics (star rating, PP, and more) in result screen</value>
     </data>
-    <data name="LegacyLanguagePack_opt_combo_colors_title"
+    <data name="OsuDroidLanguagePack_opt_combo_colors_title"
           xml:space="preserve">
         <value>Combo Colors</value>
     </data>
-    <data name="LegacyLanguagePack_opt_combo_colors_summary"
+    <data name="OsuDroidLanguagePack_opt_combo_colors_summary"
           xml:space="preserve">
         <value>Use custom combo's color</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_playfield"
+    <data name="OsuDroidLanguagePack_opt_category_playfield"
           xml:space="preserve">
         <value>Playfield</value>
     </data>
-    <data name="LegacyLanguagePack_opt_setplayfield_title"
+    <data name="OsuDroidLanguagePack_opt_setplayfield_title"
           xml:space="preserve">
         <value>Set playfield size</value>
     </data>
-    <data name="LegacyLanguagePack_opt_setplayfield_summary"
+    <data name="OsuDroidLanguagePack_opt_setplayfield_summary"
           xml:space="preserve">
         <value>Change the size of the playfield</value>
     </data>
-    <data name="LegacyLanguagePack_opt_display_playfield_border_title"
+    <data name="OsuDroidLanguagePack_opt_display_playfield_border_title"
           xml:space="preserve">
         <value>Display playfield border</value>
     </data>
-    <data name="LegacyLanguagePack_opt_display_playfield_border_summary"
+    <data name="OsuDroidLanguagePack_opt_display_playfield_border_summary"
           xml:space="preserve">
         <value>Displays a border around the playfield</value>
     </data>
-    <data name="LegacyLanguagePack_opt_playfieldHorizontalPosition_title"
+    <data name="OsuDroidLanguagePack_opt_playfieldHorizontalPosition_title"
           xml:space="preserve">
         <value>Horizontal position</value>
     </data>
-    <data name="LegacyLanguagePack_opt_playfieldHorizontalPosition_summary"
+    <data name="OsuDroidLanguagePack_opt_playfieldHorizontalPosition_summary"
           xml:space="preserve">
         <value>Set the horizontal position (in percentage) of the playfield from the left corner of the screen</value>
     </data>
-    <data name="LegacyLanguagePack_opt_playfieldVerticalPosition_title"
+    <data name="OsuDroidLanguagePack_opt_playfieldVerticalPosition_title"
           xml:space="preserve">
         <value>Vertical position</value>
     </data>
-    <data name="LegacyLanguagePack_opt_playfieldVerticalPosition_summary"
+    <data name="OsuDroidLanguagePack_opt_playfieldVerticalPosition_summary"
           xml:space="preserve">
         <value>Set the vertical position (in percentage) of the playfield from the top of the screen</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_cursor"
+    <data name="OsuDroidLanguagePack_opt_category_cursor"
           xml:space="preserve">
         <value>Cursor</value>
     </data>
-    <data name="LegacyLanguagePack_opt_showcursor_title"
+    <data name="OsuDroidLanguagePack_opt_showcursor_title"
           xml:space="preserve">
         <value>Cursor</value>
     </data>
-    <data name="LegacyLanguagePack_opt_showcursor_summary"
+    <data name="OsuDroidLanguagePack_opt_showcursor_summary"
           xml:space="preserve">
         <value>Show cursor under fingers during gameplay</value>
     </data>
-    <data name="LegacyLanguagePack_opt_cursor_size"
+    <data name="OsuDroidLanguagePack_opt_cursor_size"
           xml:space="preserve">
         <value>Cursor Size</value>
     </data>
-    <data name="LegacyLanguagePack_opt_cursor_size_summary"
+    <data name="OsuDroidLanguagePack_opt_cursor_size_summary"
           xml:space="preserve">
         <value>Adjust cursor size</value>
     </data>
-    <data name="LegacyLanguagePack_opt_particles_title"
+    <data name="OsuDroidLanguagePack_opt_particles_title"
           xml:space="preserve">
         <value>Particle effects</value>
     </data>
-    <data name="LegacyLanguagePack_opt_particles_summary"
+    <data name="OsuDroidLanguagePack_opt_particles_summary"
           xml:space="preserve">
         <value>Show particle-based effects like cursor trail</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_animations"
+    <data name="OsuDroidLanguagePack_opt_category_animations"
           xml:space="preserve">
         <value>Animations and effects</value>
     </data>
-    <data name="LegacyLanguagePack_opt_dim_hit_objects_title"
+    <data name="OsuDroidLanguagePack_opt_dim_hit_objects_title"
           xml:space="preserve">
         <value>Enable hit objects dim</value>
     </data>
-    <data name="LegacyLanguagePack_opt_dim_hit_objects_summary"
+    <data name="OsuDroidLanguagePack_opt_dim_hit_objects_summary"
           xml:space="preserve">
         <value>Dim hit objects when they are ready to be hit.</value>
     </data>
-    <data name="LegacyLanguagePack_opt_combo_burst_title"
+    <data name="OsuDroidLanguagePack_opt_combo_burst_title"
           xml:space="preserve">
         <value>Combo Burst</value>
     </data>
-    <data name="LegacyLanguagePack_opt_combo_burst_summary"
+    <data name="OsuDroidLanguagePack_opt_combo_burst_summary"
           xml:space="preserve">
         <value>Toggle combo burst on/off</value>
     </data>
-    <data name="LegacyLanguagePack_opt_largeimages_title"
+    <data name="OsuDroidLanguagePack_opt_largeimages_title"
           xml:space="preserve">
         <value>Countdown</value>
     </data>
-    <data name="LegacyLanguagePack_opt_largeimages_summary"
+    <data name="OsuDroidLanguagePack_opt_largeimages_summary"
           xml:space="preserve">
         <value>Show countdown at the beginning of a map that has it enabled</value>
     </data>
-    <data name="LegacyLanguagePack_opt_animate_follow_circle_title"
+    <data name="OsuDroidLanguagePack_opt_animate_follow_circle_title"
           xml:space="preserve">
         <value>Animate follow circle</value>
     </data>
-    <data name="LegacyLanguagePack_opt_animate_follow_circle_summary"
+    <data name="OsuDroidLanguagePack_opt_animate_follow_circle_summary"
           xml:space="preserve">
         <value>Enable slider follow circle animations when hitting/releasing follow circle.</value>
     </data>
-    <data name="LegacyLanguagePack_opt_animate_combo_text_title"
+    <data name="OsuDroidLanguagePack_opt_animate_combo_text_title"
           xml:space="preserve">
         <value>Animate combo text</value>
     </data>
-    <data name="LegacyLanguagePack_opt_animate_combo_text_summary"
+    <data name="OsuDroidLanguagePack_opt_animate_combo_text_summary"
           xml:space="preserve">
         <value>Enable combo text shadow animation when increasing combo.</value>
     </data>
-    <data name="LegacyLanguagePack_opt_snakingInSliders_title"
+    <data name="OsuDroidLanguagePack_opt_snakingInSliders_title"
           xml:space="preserve">
         <value>Use snaking in sliders</value>
     </data>
-    <data name="LegacyLanguagePack_opt_snakingInSliders_summary"
+    <data name="OsuDroidLanguagePack_opt_snakingInSliders_summary"
           xml:space="preserve">
         <value>Enable sliders gradually snaking from start</value>
     </data>
-    <data name="LegacyLanguagePack_opt_snakingOutSliders_title"
+    <data name="OsuDroidLanguagePack_opt_snakingOutSliders_title"
           xml:space="preserve">
         <value>Use snaking out sliders</value>
     </data>
-    <data name="LegacyLanguagePack_opt_snakingOutSliders_summary"
+    <data name="OsuDroidLanguagePack_opt_snakingOutSliders_summary"
           xml:space="preserve">
         <value>Enable sliders gradually snaking disappearing from one node</value>
     </data>
-    <data name="LegacyLanguagePack_opt_noChangeDimInBreaks_title"
+    <data name="OsuDroidLanguagePack_opt_noChangeDimInBreaks_title"
           xml:space="preserve">
         <value>Don't change background dim level during breaks</value>
     </data>
-    <data name="LegacyLanguagePack_opt_noChangeDimInBreaks_summary"
+    <data name="OsuDroidLanguagePack_opt_noChangeDimInBreaks_summary"
           xml:space="preserve">
         <value>When enabled, background dim level will not change during breaks.</value>
     </data>
-    <data name="LegacyLanguagePack_opt_bursts_title"
+    <data name="OsuDroidLanguagePack_opt_bursts_title"
           xml:space="preserve">
         <value>Burst effects</value>
     </data>
-    <data name="LegacyLanguagePack_opt_bursts_summary"
+    <data name="OsuDroidLanguagePack_opt_bursts_summary"
           xml:space="preserve">
         <value>Show burst effects when hitting circles or sliders</value>
     </data>
-    <data name="LegacyLanguagePack_opt_hitlighting_title"
+    <data name="OsuDroidLanguagePack_opt_hitlighting_title"
           xml:space="preserve">
         <value>Hit Lighting</value>
     </data>
-    <data name="LegacyLanguagePack_opt_hitlighting_summary"
+    <data name="OsuDroidLanguagePack_opt_hitlighting_summary"
           xml:space="preserve">
         <value>Adds a subtle glow behind hit explosions which lights the playfield</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_display"
+    <data name="OsuDroidLanguagePack_opt_category_display"
           xml:space="preserve">
         <value>Display</value>
     </data>
-    <data name="LegacyLanguagePack_opt_hide_navibar_title"
+    <data name="OsuDroidLanguagePack_opt_hide_navibar_title"
           xml:space="preserve">
         <value>Navigation Bar</value>
     </data>
-    <data name="LegacyLanguagePack_opt_hide_navibar_summary"
+    <data name="OsuDroidLanguagePack_opt_hide_navibar_summary"
           xml:space="preserve">
         <value>Hide the navigation bar while playing</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_volume"
+    <data name="OsuDroidLanguagePack_opt_category_volume"
           xml:space="preserve">
         <value>Volume</value>
     </data>
-    <data name="LegacyLanguagePack_opt_bgm_volume_title"
+    <data name="OsuDroidLanguagePack_opt_bgm_volume_title"
           xml:space="preserve">
         <value>BGM volume</value>
     </data>
-    <data name="LegacyLanguagePack_opt_bgm_volume_summary"
+    <data name="OsuDroidLanguagePack_opt_bgm_volume_summary"
           xml:space="preserve">
         <value>Volume of the background music</value>
     </data>
-    <data name="LegacyLanguagePack_opt_sound_volume_title"
+    <data name="OsuDroidLanguagePack_opt_sound_volume_title"
           xml:space="preserve">
         <value>Sound volume</value>
     </data>
-    <data name="LegacyLanguagePack_opt_sound_volume_summary"
+    <data name="OsuDroidLanguagePack_opt_sound_volume_summary"
           xml:space="preserve">
         <value>Volume of sound effects or hit sounds</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_offset"
+    <data name="OsuDroidLanguagePack_opt_category_offset"
           xml:space="preserve">
         <value>Offset</value>
     </data>
-    <data name="LegacyLanguagePack_opt_offset_title"
+    <data name="OsuDroidLanguagePack_opt_offset_title"
           xml:space="preserve">
         <value>Global offset</value>
     </data>
-    <data name="LegacyLanguagePack_opt_offset_summary"
+    <data name="OsuDroidLanguagePack_opt_offset_summary"
           xml:space="preserve">
         <value>Music offset in ms (positive values mean objects appear earlier)</value>
     </data>
-    <data name="LegacyLanguagePack_opt_gameAudioSynchronizationThreshold_title"
+    <data name="OsuDroidLanguagePack_opt_gameAudioSynchronizationThreshold_title"
           xml:space="preserve">
         <value>Minimum Synchronization Limit</value>
     </data>
-    <data name="LegacyLanguagePack_opt_gameAudioSynchronizationThreshold_summary"
+    <data name="OsuDroidLanguagePack_opt_gameAudioSynchronizationThreshold_summary"
           xml:space="preserve">
         <value>The minimum time difference (in milliseconds) between gameplay and audio for gameplay to attempt to synchronize with audio.
 
 A lower limit increases the frequency of the syncing attempt. If constant offset is preferred, use a higher limit.</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_metronome"
+    <data name="OsuDroidLanguagePack_opt_category_metronome"
           xml:space="preserve">
         <value>Metronome</value>
     </data>
-    <data name="LegacyLanguagePack_opt_metronome_switch_title"
+    <data name="OsuDroidLanguagePack_opt_metronome_switch_title"
           xml:space="preserve">
         <value>Metronome switch</value>
     </data>
-    <data name="LegacyLanguagePack_opt_metronome_switch_summary"
+    <data name="OsuDroidLanguagePack_opt_metronome_switch_summary"
           xml:space="preserve">
         <value>Enable metronome sound effect</value>
     </data>
-    <data name="LegacyLanguagePack_metronome_switch_names"
+    <data name="OsuDroidLanguagePack_metronome_switch_names"
           xml:space="preserve">
         <value>Off|NightCore Mode Only|Always</value>
     </data>
-    <data name="LegacyLanguagePack_metronome_switch_values"
+    <data name="OsuDroidLanguagePack_metronome_switch_values"
           xml:space="preserve">
         <value>0|1|2</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_miscellaneous"
+    <data name="OsuDroidLanguagePack_opt_category_miscellaneous"
           xml:space="preserve">
         <value>Miscellaneous</value>
     </data>
-    <data name="LegacyLanguagePack_opt_sound_title"
+    <data name="OsuDroidLanguagePack_opt_sound_title"
           xml:space="preserve">
         <value>Beatmap sounds</value>
     </data>
-    <data name="LegacyLanguagePack_opt_sound_summary"
+    <data name="OsuDroidLanguagePack_opt_sound_summary"
           xml:space="preserve">
         <value>Load beatmap-specific sounds if available</value>
     </data>
-    <data name="LegacyLanguagePack_opt_musicpreview_title"
+    <data name="OsuDroidLanguagePack_opt_musicpreview_title"
           xml:space="preserve">
         <value>Preview music</value>
     </data>
-    <data name="LegacyLanguagePack_opt_musicpreview_summary"
+    <data name="OsuDroidLanguagePack_opt_musicpreview_summary"
           xml:space="preserve">
         <value>Play music when you select a beatmap</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_effect"
+    <data name="OsuDroidLanguagePack_opt_category_effect"
           xml:space="preserve">
         <value>Effect</value>
     </data>
-    <data name="LegacyLanguagePack_opt_shiftPitchInRateChange_title"
+    <data name="OsuDroidLanguagePack_opt_shiftPitchInRateChange_title"
           xml:space="preserve">
         <value>Shift pitch in rate-changing mods</value>
     </data>
-    <data name="LegacyLanguagePack_opt_shiftPitchInRateChange_summary"
+    <data name="OsuDroidLanguagePack_opt_shiftPitchInRateChange_summary"
           xml:space="preserve">
         <value>Shifts the pitch of the music when using rate-changing mods</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_import"
+    <data name="OsuDroidLanguagePack_opt_category_import"
           xml:space="preserve">
         <value>Import</value>
     </data>
-    <data name="LegacyLanguagePack_opt_deleteosz_title"
+    <data name="OsuDroidLanguagePack_opt_deleteosz_title"
           xml:space="preserve">
         <value>Delete .osz</value>
     </data>
-    <data name="LegacyLanguagePack_opt_deleteosz_summary"
+    <data name="OsuDroidLanguagePack_opt_deleteosz_summary"
           xml:space="preserve">
         <value>Delete .osz files after importing</value>
     </data>
-    <data name="LegacyLanguagePack_opt_scandownload_title"
+    <data name="OsuDroidLanguagePack_opt_scandownload_title"
           xml:space="preserve">
         <value>Scan Download</value>
     </data>
-    <data name="LegacyLanguagePack_opt_scandownload_summary"
+    <data name="OsuDroidLanguagePack_opt_scandownload_summary"
           xml:space="preserve">
         <value>Scan /Download directory for new beatmaps and skins (might not work with SD card)</value>
     </data>
-    <data name="LegacyLanguagePack_opt_deleteUnimportedBeatmaps_title"
+    <data name="OsuDroidLanguagePack_opt_deleteUnimportedBeatmaps_title"
           xml:space="preserve">
         <value>Delete Unimported Beatmaps</value>
     </data>
-    <data name="LegacyLanguagePack_opt_deleteUnimportedBeatmaps_summary"
+    <data name="OsuDroidLanguagePack_opt_deleteUnimportedBeatmaps_summary"
           xml:space="preserve">
         <value>Delete beatmaps that cannot be imported. Will apply in future beatmap import operations.</value>
     </data>
-    <data name="LegacyLanguagePack_opt_delete_unsupported_videos_title"
+    <data name="OsuDroidLanguagePack_opt_delete_unsupported_videos_title"
           xml:space="preserve">
         <value>Delete unsupported videos</value>
     </data>
-    <data name="LegacyLanguagePack_opt_delete_unsupported_videos_summary"
+    <data name="OsuDroidLanguagePack_opt_delete_unsupported_videos_summary"
           xml:space="preserve">
         <value>Delete videos with unsupported formats (.avi and .flv)</value>
     </data>
-    <data name="LegacyLanguagePack_opt_import_replay_title"
+    <data name="OsuDroidLanguagePack_opt_import_replay_title"
           xml:space="preserve">
         <value>Import replay</value>
     </data>
-    <data name="LegacyLanguagePack_opt_import_replay_summary"
+    <data name="OsuDroidLanguagePack_opt_import_replay_summary"
           xml:space="preserve">
         <value>Import a replay file (.odr) or an exported replay file (.edr). Only .odr files from osu!droid version 1.6.7 onwards are supported</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_metadata"
+    <data name="OsuDroidLanguagePack_opt_category_metadata"
           xml:space="preserve">
         <value>Metadata</value>
     </data>
-    <data name="LegacyLanguagePack_force_romanized"
+    <data name="OsuDroidLanguagePack_force_romanized"
           xml:space="preserve">
         <value>Force romanized metadata</value>
     </data>
-    <data name="LegacyLanguagePack_force_romanized_summary"
+    <data name="OsuDroidLanguagePack_force_romanized_summary"
           xml:space="preserve">
         <value>Force using only roman character for metadata, in case titles in japanese or chinese are unreadable</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_storage"
+    <data name="OsuDroidLanguagePack_opt_category_storage"
           xml:space="preserve">
         <value>Storage</value>
     </data>
-    <data name="LegacyLanguagePack_opt_clear_title"
+    <data name="OsuDroidLanguagePack_opt_clear_title"
           xml:space="preserve">
         <value>Clear beatmap cache</value>
     </data>
-    <data name="LegacyLanguagePack_opt_clear_summary"
+    <data name="OsuDroidLanguagePack_opt_clear_summary"
           xml:space="preserve">
         <value>Clear all cached beatmaps</value>
     </data>
-    <data name="LegacyLanguagePack_opt_clearprops_title"
+    <data name="OsuDroidLanguagePack_opt_clearprops_title"
           xml:space="preserve">
         <value>Clear map-specific data</value>
     </data>
-    <data name="LegacyLanguagePack_opt_clearprops_summary"
+    <data name="OsuDroidLanguagePack_opt_clearprops_summary"
           xml:space="preserve">
         <value>Forced clear of all map-specific data (eg. per-map offsets)</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_gameplay"
+    <data name="OsuDroidLanguagePack_opt_category_gameplay"
           xml:space="preserve">
         <value>Gameplay</value>
     </data>
-    <data name="LegacyLanguagePack_block_area_preference_title"
+    <data name="OsuDroidLanguagePack_block_area_preference_title"
           xml:space="preserve">
         <value>Manage input block areas</value>
     </data>
-    <data name="LegacyLanguagePack_block_area_preference_summary"
+    <data name="OsuDroidLanguagePack_block_area_preference_summary"
           xml:space="preserve">
         <value>Manage specific areas within the screen where presses will be ignored during gameplay</value>
     </data>
-    <data name="LegacyLanguagePack_opt_backButtonPressTime_title"
+    <data name="OsuDroidLanguagePack_opt_backButtonPressTime_title"
           xml:space="preserve">
         <value>Back button press time</value>
     </data>
-    <data name="LegacyLanguagePack_opt_backButtonPressTime_summary"
+    <data name="OsuDroidLanguagePack_opt_backButtonPressTime_summary"
           xml:space="preserve">
         <value>Required time in milliseconds to action the on-screen back button</value>
     </data>
-    <data name="LegacyLanguagePack_opt_seekBarVibrateIntensity_title"
+    <data name="OsuDroidLanguagePack_opt_seekBarVibrateIntensity_title"
           xml:space="preserve">
         <value>Set Intensity</value>
     </data>
-    <data name="LegacyLanguagePack_opt_seekBarVibrateIntensity_summary"
+    <data name="OsuDroidLanguagePack_opt_seekBarVibrateIntensity_summary"
           xml:space="preserve">
         <value>Change the intensity of the vibration</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_synchronization"
+    <data name="OsuDroidLanguagePack_opt_category_synchronization"
           xml:space="preserve">
         <value>Synchronization</value>
     </data>
-    <data name="LegacyLanguagePack_opt_fix_frame_offset_title"
+    <data name="OsuDroidLanguagePack_opt_fix_frame_offset_title"
           xml:space="preserve">
         <value>Fix a random offset.</value>
     </data>
-    <data name="LegacyLanguagePack_opt_fix_frame_offset_summary"
+    <data name="OsuDroidLanguagePack_opt_fix_frame_offset_summary"
           xml:space="preserve">
         <value>Try to fix the offset between input time and frame time.</value>
     </data>
-    <data name="LegacyLanguagePack_opt_category_directories"
+    <data name="OsuDroidLanguagePack_opt_category_directories"
           xml:space="preserve">
         <value>Directories</value>
     </data>
-    <data name="LegacyLanguagePack_opt_corepath_title"
+    <data name="OsuDroidLanguagePack_opt_corepath_title"
           xml:space="preserve">
         <value>Main directory</value>
     </data>
-    <data name="LegacyLanguagePack_opt_corepath_summary"
+    <data name="OsuDroidLanguagePack_opt_corepath_summary"
           xml:space="preserve">
         <value>osu!droid main directory</value>
     </data>
-    <data name="LegacyLanguagePack_opt_skin_top_path_title"
+    <data name="OsuDroidLanguagePack_opt_skin_top_path_title"
           xml:space="preserve">
         <value>Skin directory</value>
     </data>
-    <data name="LegacyLanguagePack_opt_skin_top_path_summary"
+    <data name="OsuDroidLanguagePack_opt_skin_top_path_summary"
           xml:space="preserve">
         <value>Path to directory containing skin files. (default: /sdcard/osu!droid/Skin)</value>
     </data>
-    <data name="LegacyLanguagePack_opt_directory_title"
+    <data name="OsuDroidLanguagePack_opt_directory_title"
           xml:space="preserve">
         <value>Beatmap location</value>
     </data>
-    <data name="LegacyLanguagePack_opt_directory_summary"
+    <data name="OsuDroidLanguagePack_opt_directory_summary"
           xml:space="preserve">
         <value>Path to directory containing beatmaps (default: /mnt/sdcard/osu!droid/Songs)</value>
     </data>
-    <data name="LegacyLanguagePack_opt_force_max_refresh_rate_title"
+    <data name="OsuDroidLanguagePack_opt_force_max_refresh_rate_title"
           xml:space="preserve">
         <value>Force maximum refresh rate</value>
     </data>
-    <data name="LegacyLanguagePack_opt_force_max_refresh_rate_summary"
+    <data name="OsuDroidLanguagePack_opt_force_max_refresh_rate_summary"
           xml:space="preserve">
         <value>Attempts to force the maximum refresh rate of the device to be used. Disable if you experience screen flickering.</value>
     </data>
-    <data name="LegacyLanguagePack_opt_safe_beatmap_bg_title"
+    <data name="OsuDroidLanguagePack_opt_safe_beatmap_bg_title"
           xml:space="preserve">
         <value>Safe beatmap background</value>
     </data>
-    <data name="LegacyLanguagePack_opt_safe_beatmap_bg_summary"
+    <data name="OsuDroidLanguagePack_opt_safe_beatmap_bg_summary"
           xml:space="preserve">
         <value>Change all of the beatmaps' background to the menu-background image from your skin</value>
     </data>

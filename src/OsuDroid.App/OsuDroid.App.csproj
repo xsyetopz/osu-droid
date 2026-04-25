@@ -24,6 +24,8 @@
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\OsuDroid.Game\OsuDroid.Game.csproj" />
+        <ProjectReference Include="..\OsuDroid.Game.Runtime\OsuDroid.Game.Runtime.csproj" />
+        <ProjectReference Include="..\OsuDroid.Game.UI\OsuDroid.Game.UI.csproj" />
     </ItemGroup>
     <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
         <Compile Remove="App.cs" />

@@ -1,8 +1,15 @@
 using System.Reflection;
+using NUnit.Framework;
 using OsuDroid.Game.Beatmaps.Online;
 using OsuDroid.Game.Compatibility.Database;
-using OsuDroid.Game.Runtime;
+using OsuDroid.Game.Composition;
 using OsuDroid.Game.Runtime.Paths;
+using OsuDroid.Game.Scenes.BeatmapDownloader;
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Frames;
+using OsuDroid.Game.UI.Geometry;
+using OsuDroid.Game.UI.Style;
 
 namespace OsuDroid.Game.Tests;
 
@@ -10,12 +17,12 @@ public sealed partial class BeatmapDownloaderTests
 {
 
     [Test]
-    public void DownloadOverlayMatchesLegacyBottomDialog()
+    public void DownloadOverlayMatchesOsuDroidBottomDialog()
     {
         var download = new ActiveDownloadService();
         BeatmapDownloaderScene scene = CreateScene(downloadService: download);
 
-        VirtualViewport viewport = VirtualViewport.LegacyLandscape;
+        VirtualViewport viewport = VirtualViewport.AndroidReferenceLandscape;
         UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
         UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "downloader-download-panel");
 
@@ -37,7 +44,7 @@ public sealed partial class BeatmapDownloaderTests
     {
         BeatmapDownloaderScene scene = CreateScene(downloadService: new ActiveDownloadServiceWithoutFilename());
 
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.AndroidReferenceLandscape).UiFrame;
         UiElementSnapshot text = frame.Elements.Single(element => element.Id == "downloader-download-text");
 
         Assert.That(text.Text, Is.EqualTo("Downloading beatmap..."));
@@ -48,7 +55,7 @@ public sealed partial class BeatmapDownloaderTests
     {
         BeatmapDownloaderScene scene = CreateScene(downloadService: new ImportingDownloadService());
 
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.AndroidReferenceLandscape).UiFrame;
         UiElementSnapshot text = frame.Elements.Single(element => element.Id == "downloader-download-text");
 
         Assert.That(text.Text, Is.EqualTo("Importing beatmap 2524875 LaXal - Dam Dadi Doo..."));
@@ -61,11 +68,11 @@ public sealed partial class BeatmapDownloaderTests
         SetSets(scene, [CreateSet()]);
 
         scene.Download(0, true);
-        Assert.That(scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame.Elements.Any(element => element.Text == "download exploded"), Is.False);
+        Assert.That(scene.CreateSnapshot(VirtualViewport.AndroidReferenceLandscape).UiFrame.Elements.Any(element => element.Text == "download exploded"), Is.False);
 
         scene.Update(TimeSpan.FromMilliseconds(16));
 
-        Assert.That(scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame.Elements.Any(element => element.Text == "download exploded"), Is.True);
+        Assert.That(scene.CreateSnapshot(VirtualViewport.AndroidReferenceLandscape).UiFrame.Elements.Any(element => element.Text == "download exploded"), Is.True);
     }
 
     [Test]
@@ -143,7 +150,7 @@ public sealed partial class BeatmapDownloaderTests
         scene.ToggleFilters();
         scene.ToggleStatusDropdown();
 
-        VirtualViewport viewport = VirtualViewport.LegacyLandscape;
+        VirtualViewport viewport = VirtualViewport.AndroidReferenceLandscape;
         UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
         UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "downloader-status-option-panel");
 
@@ -183,12 +190,12 @@ public sealed partial class BeatmapDownloaderTests
             SpinUntil(() =>
             {
                 core.Update(TimeSpan.FromMilliseconds(16));
-                GameFrameSnapshot frame = core.CreateFrame(VirtualViewport.LegacyLandscape);
+                GameFrameSnapshot frame = core.CreateFrame(VirtualViewport.AndroidReferenceLandscape);
                 return frame.Scene == "BeatmapDownloader" &&
                     frame.UiFrame.Elements.Any(element => element.Text == "Beatmap downloaded");
             });
 
-            GameFrameSnapshot current = core.CreateFrame(VirtualViewport.LegacyLandscape);
+            GameFrameSnapshot current = core.CreateFrame(VirtualViewport.AndroidReferenceLandscape);
             Assert.That(current.Scene, Is.EqualTo("BeatmapDownloader"));
             Assert.That(current.UiFrame.Elements.Any(element => element.Id == "downloader-search"), Is.True);
         }
@@ -208,7 +215,7 @@ public sealed partial class BeatmapDownloaderTests
         SetSets(scene, [CreateSet()]);
 
         scene.Download(0, true);
-        Assert.That(scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame.Elements.Any(element => element.Text == "Beatmap downloaded"), Is.False);
+        Assert.That(scene.CreateSnapshot(VirtualViewport.AndroidReferenceLandscape).UiFrame.Elements.Any(element => element.Text == "Beatmap downloaded"), Is.False);
         Assert.That(scene.ConsumeLastImportedSetDirectoryNotification(), Is.Null);
 
         scene.Update(TimeSpan.FromMilliseconds(16));

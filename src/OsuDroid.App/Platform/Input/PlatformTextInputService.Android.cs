@@ -5,7 +5,6 @@ using Android.Views;
 using Android.Views.InputMethods;
 using Android.Widget;
 using Microsoft.Maui.ApplicationModel;
-using OsuDroid.Game.Runtime;
 using OsuDroid.Game.UI;
 using Platform = Microsoft.Maui.ApplicationModel.Platform;
 

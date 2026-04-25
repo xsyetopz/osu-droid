@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Runtime.Paths;
 
@@ -59,10 +60,10 @@ public sealed class DroidGamePathLayoutTests
     public void AppDataRootsUseOsuDroidDirectoryNameAndMigrateOldName()
     {
         string parent = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"path-roots-{Guid.NewGuid():N}");
-        string oldRoot = Path.Combine(parent, DroidPathRoots.LegacyCoreDirectoryName);
+        string oldRoot = Path.Combine(parent, DroidPathRoots.HyphenatedCoreDirectoryName);
         string cache = Path.Combine(parent, "Caches");
         Directory.CreateDirectory(oldRoot);
-        File.WriteAllText(Path.Combine(oldRoot, "marker.txt"), "legacy");
+        File.WriteAllText(Path.Combine(oldRoot, "marker.txt"), "old root");
 
         var roots = DroidPathRoots.FromAppDataDirectory(parent, cache);
 

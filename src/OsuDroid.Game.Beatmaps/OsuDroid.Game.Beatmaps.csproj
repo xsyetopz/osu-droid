@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <RollForward>Major</RollForward>
+        <OutputType>Library</OutputType>
+        <RootNamespace>OsuDroid.Game.Beatmaps</RootNamespace>
+        <AssemblyName>OsuDroid.Game.Beatmaps</AssemblyName>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\OsuDroid.Game.Runtime\OsuDroid.Game.Runtime.csproj" />
+        <ProjectReference Include="..\OsuDroid.Game.Compatibility\OsuDroid.Game.Compatibility.csproj" />
+    </ItemGroup>
+</Project>

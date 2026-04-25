@@ -1,4 +1,7 @@
-using OsuDroid.Game.Runtime;
+using OsuDroid.Game.UI.Assets;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Frames;
+using OsuDroid.Game.UI.Geometry;
 
 namespace OsuDroid.Game.Scenes.Startup;
 
@@ -12,7 +15,7 @@ public readonly record struct BootstrapLoadingProgress(int Percent, string Statu
 
 public static class BootstrapLoadingScene
 {
-    // Legacy source: third_party/osu-droid-legacy/.../menu/SplashScene.java.
+    // Android source: menu/SplashScene.java.
     private const float LoadingSpinnerScale = 0.4f;
     private const float ProgressTextScale = 0.5f;
     private const float StatusTextScale = 0.6f;

@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using OsuDroid.Game.Beatmaps.Online;
 
 namespace OsuDroid.Game.Tests;
@@ -6,7 +7,7 @@ public sealed partial class BeatmapDownloaderTests
 {
 
     [Test]
-    public void OsuDirectSearchUrlMatchesLegacyEndpoint()
+    public void OsuDirectSearchUrlMatchesOsuDroidEndpoint()
     {
         var client = new OsuDirectMirrorClient(new HttpClient(new EmptyHandler()));
         Uri uri = client.CreateSearchUri(new BeatmapMirrorSearchRequest("camellia", Offset: 50, Limit: 25));
@@ -28,7 +29,7 @@ public sealed partial class BeatmapDownloaderTests
         Assert.That(client.CreatePreviewUri(BeatmapMirrorKind.OsuDirect, 456).ToString(), Is.EqualTo("https://osu.direct/api/media/preview/456"));
     }
     [Test]
-    public void CatboyUrlsMatchLegacyEndpoints()
+    public void CatboyUrlsMatchOsuDroidEndpoints()
     {
         var client = new OsuDirectMirrorClient(new HttpClient(new EmptyHandler()));
         Uri uri = client.CreateSearchUri(new BeatmapMirrorSearchRequest("camellia", Offset: 50, Limit: 25, Mirror: BeatmapMirrorKind.Catboy, Status: BeatmapRankedStatus.Ranked));

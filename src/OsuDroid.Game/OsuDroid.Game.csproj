@@ -8,6 +8,9 @@
         <AssemblyName>OsuDroid.Game</AssemblyName>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.Data.Sqlite" />
+        <ProjectReference Include="..\OsuDroid.Game.Beatmaps\OsuDroid.Game.Beatmaps.csproj" />
+        <ProjectReference Include="..\OsuDroid.Game.Compatibility\OsuDroid.Game.Compatibility.csproj" />
+        <ProjectReference Include="..\OsuDroid.Game.Runtime\OsuDroid.Game.Runtime.csproj" />
+        <ProjectReference Include="..\OsuDroid.Game.UI\OsuDroid.Game.UI.csproj" />
     </ItemGroup>
 </Project>

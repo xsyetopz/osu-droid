@@ -8,13 +8,6 @@ public enum MainMenuAction
     MoveDown,
 }
 
-public enum MainMenuButtonSlot
-{
-    First,
-    Second,
-    Third,
-}
-
 public enum MainMenuRoute
 {
     None,

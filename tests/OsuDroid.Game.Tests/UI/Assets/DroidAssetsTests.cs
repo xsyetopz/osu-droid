@@ -1,3 +1,6 @@
+using NUnit.Framework;
+using OsuDroid.Game.UI.Assets;
+using OsuDroid.Game.UI.Geometry;
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
@@ -47,7 +50,7 @@ public sealed partial class UiCompatibilityTests
 
         string repositoryRoot = FindRepositoryRoot();
         string droidAssetToken = "assets/" + "droid/";
-        string allowedCatalogPath = Path.Combine(repositoryRoot, "src", "OsuDroid.Game", "UI", "Assets", "DroidAssetCatalog.cs");
+        string allowedCatalogPath = Path.Combine(repositoryRoot, "src", "OsuDroid.Game.UI", "Assets", "DroidAssetCatalog.cs");
         string[] offenders = Directory
             .EnumerateFiles(Path.Combine(repositoryRoot, "src"), "*.cs", SearchOption.AllDirectories)
             .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal))

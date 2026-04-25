@@ -1,4 +1,9 @@
 using OsuDroid.Game.Beatmaps.Online;
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Assets;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Geometry;
+using OsuDroid.Game.UI.Style;
 
 namespace OsuDroid.Game.Scenes.BeatmapDownloader;
 
@@ -70,6 +75,6 @@ public sealed partial class BeatmapDownloaderScene
         AddCompoundButton(elements, "downloader-filters", new UiRect(filtersX, 4f * Dp, filtersWidth, 48f * Dp), _localizer["BeatmapDownloader_Filters"], UiAction.DownloaderFilters, UiMaterialIcon.Tune, null, _filtersOpen ? DroidUiTheme.Controls.DropdownSelected : s_appBar, _filtersOpen ? 15f * Dp : 0f);
 
         float mirrorX = filtersX + filtersWidth;
-        AddCompoundSpriteButton(elements, "downloader-mirror", new UiRect(mirrorX, 4f * Dp, mirrorWidth, 48f * Dp), currentMirror.Description, currentMirror.LogoAssetName, UiAction.DownloaderMirror, UiMaterialIcon.ArrowDropDown);
+        AddCompoundSpriteButton(elements, "downloader-mirror", new UiRect(mirrorX, 4f * Dp, mirrorWidth, 48f * Dp), currentMirror.Description, MirrorLogoAsset(_mirror), UiAction.DownloaderMirror, UiMaterialIcon.ArrowDropDown);
     }
 }

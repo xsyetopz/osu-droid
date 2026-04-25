@@ -1,3 +1,9 @@
+using NUnit.Framework;
+using OsuDroid.Game.Scenes.BeatmapDownloader;
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Geometry;
+using OsuDroid.Game.UI.Style;
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class BeatmapDownloaderTests
@@ -10,7 +16,7 @@ public sealed partial class BeatmapDownloaderTests
         SetSets(scene, [CreateSet()]);
         scene.SelectCard(0);
 
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.AndroidReferenceLandscape).UiFrame;
         UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "downloader-details-panel");
         UiElementSnapshot selectedDifficulty = frame.Elements.Single(element => element.Id == "downloader-details-diff-0-selected");
         UiElementSnapshot selectedGlyph = frame.Elements.Single(element => element.Id == "downloader-details-diff-0");
@@ -24,13 +30,13 @@ public sealed partial class BeatmapDownloaderTests
     }
 
     [Test]
-    public void DetailsPanelUsesLegacyWrapContentConstraints()
+    public void DetailsPanelUsesOsuDroidWrapContentConstraints()
     {
         BeatmapDownloaderScene scene = CreateScene();
         SetSets(scene, [CreateSet()]);
         scene.SelectCard(0);
 
-        VirtualViewport viewport = VirtualViewport.LegacyLandscape;
+        VirtualViewport viewport = VirtualViewport.AndroidReferenceLandscape;
         UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
         UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "downloader-details-panel");
         UiElementSnapshot body = frame.Elements.Single(element => element.Id == "downloader-details-body");
@@ -52,7 +58,7 @@ public sealed partial class BeatmapDownloaderTests
         SetSets(scene, [CreateSet()]);
         scene.SelectCard(0);
 
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.LegacyLandscape).UiFrame;
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.AndroidReferenceLandscape).UiFrame;
         UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "downloader-details-panel");
         UiElementSnapshot[] dots = frame.Elements.Where(element => element.Id.StartsWith("downloader-details-diff-", StringComparison.Ordinal) && !element.Id.EndsWith("-selected", StringComparison.Ordinal)).ToArray();
         UiElementSnapshot selected = frame.Elements.Single(element => element.Id == "downloader-details-diff-0-selected");

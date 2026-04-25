@@ -1,3 +1,5 @@
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Geometry;
 namespace OsuDroid.Game;
 
 public sealed partial class OsuDroidGameCore

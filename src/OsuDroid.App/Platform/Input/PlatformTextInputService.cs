@@ -1,6 +1,5 @@
 #if ANDROID || IOS
 using Microsoft.Maui.ApplicationModel;
-using OsuDroid.Game.Runtime;
 using OsuDroid.Game.UI;
 #if IOS
 using CoreGraphics;

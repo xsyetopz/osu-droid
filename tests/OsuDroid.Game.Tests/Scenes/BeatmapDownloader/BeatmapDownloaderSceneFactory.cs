@@ -1,6 +1,10 @@
 using System.Reflection;
+using NUnit.Framework;
 using OsuDroid.Game.Beatmaps.Online;
-using OsuDroid.Game.Runtime;
+using OsuDroid.Game.Runtime.Audio;
+using OsuDroid.Game.Scenes.BeatmapDownloader;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Input;
 
 namespace OsuDroid.Game.Tests;
 

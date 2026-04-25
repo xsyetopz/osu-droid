@@ -1,3 +1,6 @@
+using NUnit.Framework;
+using OsuDroid.Game.UI.Geometry;
+using OsuDroid.Game.UI.Scrolling;
 namespace OsuDroid.Game.Tests;
 
 public sealed class KineticScrollStateTests

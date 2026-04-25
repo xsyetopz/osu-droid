@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Input.Touch;
 using OsuDroid.Game;
-using OsuDroid.Game.Runtime;
 using OsuDroid.Game.UI;
 
 namespace OsuDroid.App.MonoGame.Input;

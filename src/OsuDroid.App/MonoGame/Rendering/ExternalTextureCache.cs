@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework.Graphics;
-using OsuDroid.Game.Runtime;
 using SkiaSharp;
 
 namespace OsuDroid.App.MonoGame.Rendering;

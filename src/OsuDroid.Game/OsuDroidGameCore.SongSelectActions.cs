@@ -1,4 +1,7 @@
 using OsuDroid.Game.Beatmaps.Difficulty;
+using OsuDroid.Game.Scenes.MainMenu;
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Geometry;
 
 namespace OsuDroid.Game;
 

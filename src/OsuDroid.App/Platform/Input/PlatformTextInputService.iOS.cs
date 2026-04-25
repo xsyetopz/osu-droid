@@ -1,7 +1,6 @@
 #if IOS
 using CoreGraphics;
 using Microsoft.Xna.Framework.Input;
-using OsuDroid.Game.Runtime;
 using OsuDroid.Game.UI;
 using UIKit;
 

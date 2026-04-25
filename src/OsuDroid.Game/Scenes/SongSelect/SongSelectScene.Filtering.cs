@@ -1,5 +1,7 @@
 using System.Globalization;
 using OsuDroid.Game.Beatmaps;
+using OsuDroid.Game.Runtime.Diagnostics;
+using OsuDroid.Game.UI.Geometry;
 
 namespace OsuDroid.Game.Scenes.SongSelect;
 
@@ -204,7 +206,7 @@ public sealed partial class SongSelectScene
     }
 
     private float ClampScroll(float value) =>
-        Math.Clamp(value, MinSetScroll(VirtualViewport.LegacyLandscape), MaxSetScroll());
+        Math.Clamp(value, MinSetScroll(VirtualViewport.AndroidReferenceLandscape), MaxSetScroll());
 
     private float CalculateSelectedSetScroll(int setIndex)
     {
@@ -219,7 +221,7 @@ public sealed partial class SongSelectScene
             previousHeight += CollapsedRowHeight;
         }
 
-        return RowBaseY + previousHeight + CalculateSetTotalHeight(_visibleSnapshot.Sets[setIndex]) * 0.5f - VirtualViewport.LegacyLandscape.VirtualHeight * 0.5f;
+        return RowBaseY + previousHeight + CalculateSetTotalHeight(_visibleSnapshot.Sets[setIndex]) * 0.5f - VirtualViewport.AndroidReferenceLandscape.VirtualHeight * 0.5f;
     }
 
     private float CalculateTotalScrollHeight()

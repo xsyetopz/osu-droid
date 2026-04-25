@@ -1,5 +1,7 @@
+using NUnit.Framework;
 using OsuDroid.Game.Beatmaps;
-using OsuDroid.Game.Runtime;
+using OsuDroid.Game.Runtime.Audio;
+using OsuDroid.Game.Scenes.SongSelect;
 
 namespace OsuDroid.Game.Tests;
 

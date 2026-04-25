@@ -1,6 +1,11 @@
 using OsuDroid.Game.Beatmaps.Difficulty;
 using OsuDroid.Game.Compatibility.Online;
-using OsuDroid.Game.Runtime;
+using OsuDroid.Game.Runtime.Audio;
+using OsuDroid.Game.Runtime.Diagnostics;
+using OsuDroid.Game.Scenes.MainMenu;
+using OsuDroid.Game.UI.Actions;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Geometry;
 
 namespace OsuDroid.Game;
 
@@ -53,25 +58,25 @@ public sealed partial class OsuDroidGameCore
                 break;
             case "backup":
                 _options.ShowStatusMessage(_settingsBackupService.Export()
-                    ? "LegacyLanguagePack_config_backup_info_success"
-                    : "LegacyLanguagePack_config_backup_info_fail");
+                    ? "OsuDroidLanguagePack_config_backup_info_success"
+                    : "OsuDroidLanguagePack_config_backup_info_fail");
                 break;
             case "restore":
                 if (_settingsBackupService.Import())
                 {
                     _options.ReloadValuesFromStore();
                     ApplyRestoredOptionsSettings();
-                    _options.ShowStatusMessage("LegacyLanguagePack_config_backup_restore_info_success");
+                    _options.ShowStatusMessage("OsuDroidLanguagePack_config_backup_restore_info_success");
                 }
                 else
                 {
-                    _options.ShowStatusMessage("LegacyLanguagePack_config_backup_restore_info_fail");
+                    _options.ShowStatusMessage("OsuDroidLanguagePack_config_backup_restore_info_fail");
                 }
 
                 break;
             case "clear_beatmap_cache":
                 _beatmapLibrary.ClearBeatmapCache();
-                _options.ShowStatusMessage("LegacyLanguagePack_library_cleared");
+                _options.ShowStatusMessage("OsuDroidLanguagePack_library_cleared");
                 break;
             case "clear_properties":
                 _beatmapLibrary.ClearProperties();

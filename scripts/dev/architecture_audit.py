@@ -10,6 +10,12 @@ from collections.abc import Iterable
 DEFAULT_ROOTS = ("src", "tests")
 EXCLUDED_PARTS = {"bin", "obj", "third_party", ".git"}
 GENERIC_NAME_PARTS = ("Manager", "Helper", "Utils", "Util", "DataManager", "GlobalManager")
+REFERENCE_PORT_PARTS = ("OsuDroid.Game.Beatmaps", "Difficulty", "Reference")
+CENTRAL_TOKEN_CATALOGS = {
+    pathlib.Path("src/OsuDroid.Game.UI/Assets/DroidAssets.Mods.cs"),
+    pathlib.Path("src/OsuDroid.Game.UI/Style/DroidUiColors.cs"),
+    pathlib.Path("src/OsuDroid.Game.UI/Style/DroidUiTheme.cs"),
+}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -60,7 +66,31 @@ def audit_file(path: pathlib.Path) -> FileFinding:
     public_token_count = sum(1 for line in public_lines if re.search(r"\b(const|static\s+readonly)\b", line))
     public_api_count = len(public_lines) - public_token_count
     is_test = "tests" in path.parts
+    is_reference_port = all(part in path.parts for part in REFERENCE_PORT_PARTS)
+    is_central_token_catalog = path in CENTRAL_TOKEN_CATALOGS
     flags: list[str] = []
+    if is_reference_port:
+        return FileFinding(
+            path,
+            logical_lines,
+            len(type_names),
+            method_count,
+            public_api_count,
+            public_token_count,
+            type_names,
+            tuple(),
+        )
+    if is_central_token_catalog:
+        return FileFinding(
+            path,
+            logical_lines,
+            len(type_names),
+            method_count,
+            public_api_count,
+            public_token_count,
+            type_names,
+            tuple(),
+        )
     if logical_lines > 300:
         flags.append("god-file:candidate")
     if len(type_names) > 4:
@@ -117,6 +147,8 @@ def render_markdown(findings: list[FileFinding]) -> str:
         "- `wide-public-surface`: >30 non-token public declarations in one source file.",
         "- `public-token-catalog`: >30 public constants/static-readonly tokens in one file.",
         "- Test files can still report god-file and method-count findings, but public test methods are not treated as API surface.",
+        "- `src/OsuDroid.Game.Beatmaps/Difficulty/Reference` is a source-provenance port and is counted but not flagged by shape rules.",
+        "- Central UI token catalogs are counted but not flagged; they are the intended replacement for scene-local constants.",
     ])
     return "\n".join(lines) + "\n"
 

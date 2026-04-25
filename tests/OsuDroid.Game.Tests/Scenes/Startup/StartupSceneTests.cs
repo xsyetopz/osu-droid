@@ -1,3 +1,9 @@
+using NUnit.Framework;
+using OsuDroid.Game.Scenes.Startup;
+using OsuDroid.Game.UI.Assets;
+using OsuDroid.Game.UI.Elements;
+using OsuDroid.Game.UI.Geometry;
+using OsuDroid.Game.UI.Style;
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
