@@ -40,7 +40,7 @@
 
 ## Architecture audit
 - Run `python3 scripts/dev/architecture_audit.py --write docs/architecture-audit.md` before large feature branches.
-- The audit is advisory. Fix source god files before adding SongSelect, BeatmapDownloader, gameplay, or import subsystems.
+- The audit is advisory. Keep flagged source files at zero before adding large scenes, gameplay, or import subsystems.
 
 ## UI porting
 - Follow [`docs/ui-porting-guidelines.md`](ui-porting-guidelines.md) when translating Android reference screens to shared MonoGame UI.
