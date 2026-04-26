@@ -240,6 +240,10 @@
           xml:space="preserve">
         <value>System</value>
     </data>
+    <data name="Options_EmptySummary"
+          xml:space="preserve">
+        <value></value>
+    </data>
     <data name="Options_CategoryHitObjects"
           xml:space="preserve">
         <value>Hit objects</value>
@@ -340,6 +344,22 @@
           xml:space="preserve">
         <value>Use custom combo's color</value>
     </data>
+    <data name="Options_Combo1Title"
+          xml:space="preserve">
+        <value>Combo 1</value>
+    </data>
+    <data name="Options_Combo2Title"
+          xml:space="preserve">
+        <value>Combo 2</value>
+    </data>
+    <data name="Options_Combo3Title"
+          xml:space="preserve">
+        <value>Combo 3</value>
+    </data>
+    <data name="Options_Combo4Title"
+          xml:space="preserve">
+        <value>Combo 4</value>
+    </data>
     <data name="Options_CategorySkin"
           xml:space="preserve">
         <value>Skin</value>
@@ -359,6 +379,14 @@
     <data name="Options_SkinSummary"
           xml:space="preserve">
         <value>Load beatmap-specific skin if available</value>
+    </data>
+    <data name="Options_SpinnerStyleModern"
+          xml:space="preserve">
+        <value>Modern</value>
+    </data>
+    <data name="Options_SpinnerStyleClassical"
+          xml:space="preserve">
+        <value>Classical</value>
     </data>
     <data name="Options_CategoryCursor"
           xml:space="preserve">
@@ -662,6 +690,14 @@ A lower limit increases the frequency of the syncing attempt. If constant offset
           xml:space="preserve">
         <value>Use more touch samples for more accurate hit timing and cursor movement. May increase battery usage and reduce performance on low-end devices</value>
     </data>
+    <data name="Options_BackButtonPressTimeTitle"
+          xml:space="preserve">
+        <value>Back button press time</value>
+    </data>
+    <data name="Options_BackButtonPressTimeSummary"
+          xml:space="preserve">
+        <value>Required time in milliseconds to action the on-screen back button</value>
+    </data>
     <data name="Options_RemoveSliderLockTitle"
           xml:space="preserve">
         <value>Remove slider and spinner lock</value>
@@ -687,6 +723,14 @@ A lower limit increases the frequency of the syncing attempt. If constant offset
         <value>Spinner</value>
     </data>
     <data name="Options_VibrationSummary"
+          xml:space="preserve">
+        <value>Change the intensity of the vibration</value>
+    </data>
+    <data name="Options_SeekBarVibrateIntensityTitle"
+          xml:space="preserve">
+        <value>Set Intensity</value>
+    </data>
+    <data name="Options_SeekBarVibrateIntensitySummary"
           xml:space="preserve">
         <value>Change the intensity of the vibration</value>
     </data>

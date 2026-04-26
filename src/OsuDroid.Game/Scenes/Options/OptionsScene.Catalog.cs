@@ -12,8 +12,8 @@ public sealed partial class OptionsScene
             new("difficultyAlgorithm", "Options_DifficultyAlgorithmTitle", "Options_DifficultyAlgorithmSummary", SettingsRowKind.Select, IsBottom: true, ValueKeys: ["Options_DifficultyAlgorithmDroid", "Options_DifficultyAlgorithmStandard"]),
         ]),
         new("Options_CategoryAccount", [
-            new("login", "Options_LoginTitle", "Options_LoginSummary", SettingsRowKind.Input, Availability: SettingsRowAvailability.Locked),
-            new("password", "Options_PasswordTitle", "Options_PasswordSummary", SettingsRowKind.Input, Availability: SettingsRowAvailability.Locked),
+            new("onlineUsername", "Options_LoginTitle", "Options_LoginSummary", SettingsRowKind.Input),
+            new("onlinePassword", "Options_PasswordTitle", "Options_PasswordSummary", SettingsRowKind.Input),
             new("registerAcc", "Options_RegisterTitle", "Options_RegisterSummary", SettingsRowKind.Button, IsBottom: true),
         ]),
         new("Options_CategoryCommunity", [
@@ -27,7 +27,7 @@ public sealed partial class OptionsScene
             new("restore", "Options_RestoreTitle", "Options_RestoreSummary", SettingsRowKind.Button, IsBottom: true),
         ]),
         new("Options_CategoryLocalization", [
-            new("language", "Options_LanguageTitle", "Options_LanguageSummary", SettingsRowKind.Select, IsBottom: true, ValueKeys: ["Options_LanguageSystemDefault"], Availability: SettingsRowAvailability.Locked),
+            new("appLanguage", "Options_LanguageTitle", "Options_LanguageSummary", SettingsRowKind.Select, IsBottom: true, ValueKeys: ["Options_LanguageSystemDefault"]),
         ]),
     ];
 
@@ -39,11 +39,15 @@ public sealed partial class OptionsScene
                 new("showfirstapproachcircle", "Options_ShowFirstApproachCircleTitle", "Options_ShowFirstApproachCircleSummary", SettingsRowKind.Checkbox, true, Availability: SettingsRowAvailability.Locked),
             ]),
             new("Options_CategoryBackground", [
+                new("bgbrightness", "OsuDroidLanguagePack_opt_bgbrightness_title", "OsuDroidLanguagePack_opt_bgbrightness_summary", SettingsRowKind.Slider, Min: 0, Max: 100, DefaultValue: 25, Availability: SettingsRowAvailability.Locked),
                 new("keepBackgroundAspectRatio", "Options_KeepBackgroundAspectRatioTitle", "Options_KeepBackgroundAspectRatioSummary", SettingsRowKind.Checkbox, true, Availability: SettingsRowAvailability.Locked),
                 new("enableStoryboard", "Options_EnableStoryboardTitle", "Options_EnableStoryboardSummary", SettingsRowKind.Checkbox, true, Availability: SettingsRowAvailability.Locked),
                 new("enableVideo", "Options_EnableVideoTitle", "Options_EnableVideoSummary", SettingsRowKind.Checkbox, true, Availability: SettingsRowAvailability.Locked),
             ]),
             new("Options_CategoryPlayfield", [
+                new("playfieldSize", "OsuDroidLanguagePack_opt_setplayfield_title", "OsuDroidLanguagePack_opt_setplayfield_summary", SettingsRowKind.Slider, Min: 50, Max: 100, DefaultValue: 100, Availability: SettingsRowAvailability.Locked),
+                new("playfieldHorizontalPosition", "OsuDroidLanguagePack_opt_playfieldHorizontalPosition_title", "OsuDroidLanguagePack_opt_playfieldHorizontalPosition_summary", SettingsRowKind.Slider, Min: 0, Max: 100, DefaultValue: 50, Availability: SettingsRowAvailability.Locked),
+                new("playfieldVerticalPosition", "OsuDroidLanguagePack_opt_playfieldVerticalPosition_title", "OsuDroidLanguagePack_opt_playfieldVerticalPosition_summary", SettingsRowKind.Slider, Min: 0, Max: 100, DefaultValue: 50, Availability: SettingsRowAvailability.Locked),
                 new("displayPlayfieldBorder", "Options_DisplayPlayfieldBorderTitle", "Options_DisplayPlayfieldBorderSummary", SettingsRowKind.Checkbox, false, Availability: SettingsRowAvailability.Locked),
             ]),
             new("Options_CategoryHud", [
@@ -54,15 +58,22 @@ public sealed partial class OptionsScene
             ]),
             new("Options_CategoryComboColors", [
                 new("useCustomColors", "Options_ComboColorsTitle", "Options_ComboColorsSummary", SettingsRowKind.Checkbox, false, Availability: SettingsRowAvailability.Locked),
+                new("combo1", "Options_Combo1Title", "Options_EmptySummary", SettingsRowKind.Button, Availability: SettingsRowAvailability.Locked),
+                new("combo2", "Options_Combo2Title", "Options_EmptySummary", SettingsRowKind.Button, Availability: SettingsRowAvailability.Locked),
+                new("combo3", "Options_Combo3Title", "Options_EmptySummary", SettingsRowKind.Button, Availability: SettingsRowAvailability.Locked),
+                new("combo4", "Options_Combo4Title", "Options_EmptySummary", SettingsRowKind.Button, IsBottom: true, Availability: SettingsRowAvailability.Locked),
             ]),
         ]),
         new(OptionsSection.Graphics, "Options_Graphics", UiMaterialIcon.MonitorDashboard, UiAction.OptionsSectionGraphics, [
             new("Options_CategorySkin", [
+                new("skinPath", "OsuDroidLanguagePack_opt_skinpath_title", "OsuDroidLanguagePack_opt_skinpath_summary", SettingsRowKind.Select, ValueKeys: ["OsuDroidLanguagePack_placeholder_array"], Availability: SettingsRowAvailability.Locked),
                 new("hud_editor", "Options_HudEditorTitle", "Options_HudEditorSummary", SettingsRowKind.Button, Availability: SettingsRowAvailability.Locked),
+                new("spinnerstyle", "OsuDroidLanguagePack_opt_spinner_style_title", "OsuDroidLanguagePack_opt_spinner_style_summary", SettingsRowKind.Select, DefaultValue: 0, ValueKeys: ["Options_SpinnerStyleModern", "Options_SpinnerStyleClassical"], Availability: SettingsRowAvailability.Locked),
                 new("skin", "Options_SkinTitle", "Options_SkinSummary", SettingsRowKind.Checkbox, true, Availability: SettingsRowAvailability.Locked),
             ]),
             new("Options_CategoryCursor", [
                 new("showcursor", "Options_ShowCursorTitle", "Options_ShowCursorSummary", SettingsRowKind.Checkbox, false, Availability: SettingsRowAvailability.Locked),
+                new("cursorSize", "OsuDroidLanguagePack_opt_cursor_size", "OsuDroidLanguagePack_opt_cursor_size_summary", SettingsRowKind.Slider, Min: 25, Max: 300, DefaultValue: 50, Availability: SettingsRowAvailability.Locked),
                 new("particles", "Options_ParticlesTitle", "Options_ParticlesSummary", SettingsRowKind.Checkbox, true, Availability: SettingsRowAvailability.Locked),
             ]),
             new("Options_CategoryAnimations", [
@@ -117,12 +128,14 @@ public sealed partial class OptionsScene
             new("Options_CategoryGameplay", [
                 new("block_areas", "Options_BlockAreasTitle", "Options_BlockAreasSummary", SettingsRowKind.Button, Availability: SettingsRowAvailability.Locked),
                 new("highPrecisionInput", "Options_HighPrecisionInputTitle", "Options_HighPrecisionInputSummary", SettingsRowKind.Checkbox, false, Availability: SettingsRowAvailability.Locked),
-                new("removeSliderLock", "Options_RemoveSliderLockTitle", "Options_RemoveSliderLockSummary", SettingsRowKind.Checkbox, false, Availability: SettingsRowAvailability.Locked),
+                new("back_button_press_time", "Options_BackButtonPressTimeTitle", "Options_BackButtonPressTimeSummary", SettingsRowKind.Slider, Min: 0, Max: 300, DefaultValue: 300, Availability: SettingsRowAvailability.Locked),
+                new("removeSliderLock", "Options_RemoveSliderLockTitle", "Options_RemoveSliderLockSummary", SettingsRowKind.Checkbox, false, IsBottom: true, Availability: SettingsRowAvailability.Locked),
             ]),
             new("Options_CategoryVibration", [
-                new("vibrationCircle", "Options_VibrationCircleTitle", "Options_VibrationSummary", SettingsRowKind.Checkbox, false, Availability: SettingsRowAvailability.Locked),
-                new("vibrationSlider", "Options_VibrationSliderTitle", "Options_VibrationSummary", SettingsRowKind.Checkbox, false, Availability: SettingsRowAvailability.Locked),
-                new("vibrationSpinner", "Options_VibrationSpinnerTitle", "Options_VibrationSummary", SettingsRowKind.Checkbox, false, Availability: SettingsRowAvailability.Locked),
+                new("vibrationCircle", "Options_VibrationCircleTitle", "Options_EmptySummary", SettingsRowKind.Checkbox, false, Availability: SettingsRowAvailability.Locked),
+                new("vibrationSlider", "Options_VibrationSliderTitle", "Options_EmptySummary", SettingsRowKind.Checkbox, false, Availability: SettingsRowAvailability.Locked),
+                new("vibrationSpinner", "Options_VibrationSpinnerTitle", "Options_EmptySummary", SettingsRowKind.Checkbox, false, Availability: SettingsRowAvailability.Locked),
+                new("seekBarVibrateIntensity", "Options_SeekBarVibrateIntensityTitle", "Options_SeekBarVibrateIntensitySummary", SettingsRowKind.Slider, Min: 1, Max: 255, DefaultValue: 127, IsBottom: true, Availability: SettingsRowAvailability.Locked),
             ]),
             new("Options_CategorySynchronization", [
                 new("fixFrameOffset", "Options_FixFrameOffsetTitle", "Options_FixFrameOffsetSummary", SettingsRowKind.Checkbox, false, Availability: SettingsRowAvailability.Locked),
@@ -136,7 +149,7 @@ public sealed partial class OptionsScene
             ]),
             new("Options_CategoryMiscellaneous", [
                 new("forceMaxRefreshRate", "Options_ForceMaxRefreshRateTitle", "Options_ForceMaxRefreshRateSummary", SettingsRowKind.Checkbox, false, Availability: SettingsRowAvailability.Locked),
-                new("safebeatmapbg", "Options_SafeBeatmapBgTitle", "Options_SafeBeatmapBgSummary", SettingsRowKind.Checkbox, true, IsBottom: true, Availability: SettingsRowAvailability.Locked),
+                new("safebeatmapbg", "Options_SafeBeatmapBgTitle", "Options_SafeBeatmapBgSummary", SettingsRowKind.Checkbox, false, IsBottom: true, Availability: SettingsRowAvailability.Locked),
             ]),
         ]),
     ];
