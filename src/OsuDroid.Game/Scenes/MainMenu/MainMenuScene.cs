@@ -7,7 +7,13 @@ using OsuDroid.Game.UI.Style;
 
 namespace OsuDroid.Game.Scenes.MainMenu;
 
-public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNowPlayingState? nowPlaying = null, OnlineProfilePanelState? onlinePanelState = null, bool isDevelopmentBuild = false, GameLocalizer? localizer = null)
+public sealed partial class MainMenuScene(
+    string displayVersion = "1.0",
+    MenuNowPlayingState? nowPlaying = null,
+    OnlineProfilePanelState? onlinePanelState = null,
+    bool isDevelopmentBuild = false,
+    GameLocalizer? localizer = null
+)
 {
     private enum MenuVisibility
     {
@@ -35,7 +41,8 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
     public const float MusicControlRightOffset = 35f;
     public const float MusicNowPlayingXOffset = 500f;
     public const float MusicNowPlayingHeight = 40f;
-    public const float MusicNowPlayingTextRight = VirtualViewport.AndroidReferenceWidth - 500f + 470f;
+    public const float MusicNowPlayingTextRight =
+        VirtualViewport.AndroidReferenceWidth - 500f + 470f;
     public const float MusicNowPlayingSpriteLeftPadding = 130f;
     public const int MusicNowPlayingCharactersMaximum = 35;
     public const float MusicProgressX = VirtualViewport.AndroidReferenceWidth - 320f;
@@ -51,7 +58,8 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
     public const double MenuIdleCollapseMilliseconds = 10000d;
     public const double LogoBeatMilliseconds = 1000d;
     public const double ExitAnimationMilliseconds = 3000d;
-    public const double ReturnBackgroundFadeDurationMilliseconds = DroidUiTimings.MainMenuReturnBackgroundFadeMilliseconds;
+    public const double ReturnBackgroundFadeDurationMilliseconds =
+        DroidUiTimings.MainMenuReturnBackgroundFadeMilliseconds;
 
     private const float ButtonExpandOffset = 100f;
     private const float ButtonCollapseOffset = 50f;
@@ -73,7 +81,8 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
     private const float ExitDialogContentInset = 28f;
     private const float ExitDialogTextSize = 24f;
     private const float MainMenuReferenceWidth = 2340f;
-    private const float MainMenuReferenceToVirtualScale = MainMenuReferenceWidth / VirtualViewport.AndroidReferenceWidth;
+    private const float MainMenuReferenceToVirtualScale =
+        MainMenuReferenceWidth / VirtualViewport.AndroidReferenceWidth;
     private const float PressTint = 0.7f;
     private const float LogoBeatScale = 1.07f;
     private const float ExitLogoScale = 0.8f;
@@ -93,7 +102,9 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
     private static readonly UiColor s_white = UiColor.Opaque(255, 255, 255);
 
     private readonly GameLocalizer _localizer = localizer ?? new GameLocalizer();
-    private readonly string _displayVersion = string.IsNullOrWhiteSpace(displayVersion) ? "1.0" : displayVersion;
+    private readonly string _displayVersion = string.IsNullOrWhiteSpace(displayVersion)
+        ? "1.0"
+        : displayVersion;
     private readonly bool _isDevelopmentBuild = isDevelopmentBuild;
     private OnlineProfilePanelState? _onlinePanelState = onlinePanelState;
     private MenuNowPlayingState _nowPlaying = nowPlaying ?? new MenuNowPlayingState();
@@ -121,7 +132,11 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
 
     public bool IsSecondMenu { get; private set; }
 
-    public bool IsMenuShown => _menuVisibility is MenuVisibility.Expanding or MenuVisibility.Expanded or MenuVisibility.Collapsing;
+    public bool IsMenuShown =>
+        _menuVisibility
+            is MenuVisibility.Expanding
+                or MenuVisibility.Expanded
+                or MenuVisibility.Collapsing;
 
     public bool IsExitAnimating => _menuVisibility == MenuVisibility.Exiting;
 
@@ -130,5 +145,4 @@ public sealed partial class MainMenuScene(string displayVersion = "1.0", MenuNow
     public bool IsAboutDialogOpen => _isAboutDialogOpen;
 
     public bool IsExitDialogOpen => _isExitDialogOpen;
-
 }

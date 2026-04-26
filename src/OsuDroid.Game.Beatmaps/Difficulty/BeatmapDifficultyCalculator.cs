@@ -1,4 +1,3 @@
-
 using OsuDroid.Game.Beatmaps.Difficulty.Reference.Beatmaps;
 using OsuDroid.Game.Beatmaps.Difficulty.Reference.Calculation.Calculators;
 
@@ -22,9 +21,6 @@ public sealed class BeatmapDifficultyCalculator : IBeatmapDifficultyCalculator
         return new BeatmapStarRatings(RoundStarRating(droid), RoundStarRating(standard));
     }
 
-    private static float RoundStarRating(double value) => (float)Math.Round(value, 2, MidpointRounding.AwayFromZero);
-
+    private static float RoundStarRating(double value) =>
+        (float)Math.Round(value, 2, MidpointRounding.AwayFromZero);
 }
-
-
-

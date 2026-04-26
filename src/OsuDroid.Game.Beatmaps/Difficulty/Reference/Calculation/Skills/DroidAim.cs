@@ -23,13 +23,16 @@ internal sealed class DroidAim(IEnumerable<Mod> mods, bool withSliders) : DroidS
     {
         return sliderStrains.Count == 0 || maxSliderStrain == 0d
             ? 0d
-            : sliderStrains.Sum(strain => 1d / (1 + System.Math.Exp(-(strain / maxSliderStrain * 12 - 6))));
+            : sliderStrains.Sum(strain =>
+                1d / (1 + System.Math.Exp(-(strain / maxSliderStrain * 12 - 6)))
+            );
     }
 
     protected override double StrainValueAt(DroidDifficultyHitObject current)
     {
         currentStrain *= StrainDecay(current.DeltaTime);
-        currentStrain += DroidAimEvaluator.EvaluateDifficultyOf(current, WithSliders) * SkillMultiplier;
+        currentStrain +=
+            DroidAimEvaluator.EvaluateDifficultyOf(current, WithSliders) * SkillMultiplier;
 
         double velocity = current.TravelDistance / current.TravelTime;
         if (velocity > 0)
@@ -47,11 +50,15 @@ internal sealed class DroidAim(IEnumerable<Mod> mods, bool withSliders) : DroidS
         return currentStrain;
     }
 
-    protected override double CalculateInitialStrain(double time, DroidDifficultyHitObject current) =>
-        currentStrain * StrainDecay(time - current.Previous(0)!.StartTime);
+    protected override double CalculateInitialStrain(
+        double time,
+        DroidDifficultyHitObject current
+    ) => currentStrain * StrainDecay(time - current.Previous(0)!.StartTime);
 
     private static double StrainDecay(double ms) => System.Math.Pow(StrainDecayBase, ms / 1000d);
 
     public static new double DifficultyToPerformance(double difficulty) =>
-        StrainSkill<DroidDifficultyHitObject>.DifficultyToPerformance(System.Math.Pow(difficulty, 0.8));
+        StrainSkill<DroidDifficultyHitObject>.DifficultyToPerformance(
+            System.Math.Pow(difficulty, 0.8)
+        );
 }

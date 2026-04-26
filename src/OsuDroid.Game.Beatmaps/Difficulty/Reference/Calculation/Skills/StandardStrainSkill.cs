@@ -2,7 +2,8 @@ using OsuDroid.Game.Beatmaps.Difficulty.Reference.Mods;
 
 namespace OsuDroid.Game.Beatmaps.Difficulty.Reference.Calculation.Skills;
 
-internal abstract class StandardStrainSkill(IEnumerable<Mod> mods) : StrainSkill<StandardDifficultyHitObject>(mods)
+internal abstract class StandardStrainSkill(IEnumerable<Mod> mods)
+    : StrainSkill<StandardDifficultyHitObject>(mods)
 {
     protected virtual double DecayWeight => 0.9;
 

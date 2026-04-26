@@ -3,6 +3,7 @@ using OsuDroid.Game.Scenes.MainMenu;
 using OsuDroid.Game.UI.Actions;
 using OsuDroid.Game.UI.Elements;
 using OsuDroid.Game.UI.Geometry;
+
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
@@ -10,12 +11,15 @@ public sealed partial class UiCompatibilityTests
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "OsuDroid.sln")))
+        while (
+            directory is not null && !File.Exists(Path.Combine(directory.FullName, "OsuDroid.sln"))
+        )
         {
             directory = directory.Parent;
         }
 
-        return directory?.FullName ?? throw new DirectoryNotFoundException("Repository root not found.");
+        return directory?.FullName
+            ?? throw new DirectoryNotFoundException("Repository root not found.");
     }
 
     private static string ResolveContentSourcePath(string repositoryRoot, string contentName)
@@ -23,11 +27,22 @@ public sealed partial class UiCompatibilityTests
         const string contentPrefix = "droid/";
         if (!contentName.StartsWith(contentPrefix, StringComparison.Ordinal))
         {
-            throw new ArgumentException($"Unsupported asset content name: {contentName}", nameof(contentName));
+            throw new ArgumentException(
+                $"Unsupported asset content name: {contentName}",
+                nameof(contentName)
+            );
         }
 
         string relativePath = contentName.Replace('/', Path.DirectorySeparatorChar) + ".png";
-        return Path.Combine(repositoryRoot, "src", "OsuDroid.App", "Resources", "Raw", "assets", relativePath);
+        return Path.Combine(
+            repositoryRoot,
+            "src",
+            "OsuDroid.App",
+            "Resources",
+            "Raw",
+            "assets",
+            relativePath
+        );
     }
 
     private static UiFrameSnapshot ExpandedFrame(MainMenuScene scene, VirtualViewport viewport)
@@ -37,42 +52,12 @@ public sealed partial class UiCompatibilityTests
         return scene.CreateSnapshot(viewport).UiFrame;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    private static void AssertMusicControl(UiElementSnapshot element, string assetName, UiAction action, float androidIndex)
+    private static void AssertMusicControl(
+        UiElementSnapshot element,
+        string assetName,
+        UiAction action,
+        float androidIndex
+    )
     {
         Assert.That(element.Kind, Is.EqualTo(UiElementKind.Sprite));
         Assert.That(element.AssetName, Is.EqualTo(assetName));
@@ -80,20 +65,6 @@ public sealed partial class UiCompatibilityTests
         Assert.That(element.Action, Is.EqualTo(action));
         Assert.That(element.Alpha, Is.EqualTo(1f));
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     private static void AssertRectClose(UiRect actual, UiRect expected)
     {

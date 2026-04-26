@@ -1,5 +1,6 @@
 using OsuDroid.Game.UI.Actions;
 using OsuDroid.Game.UI.Geometry;
+
 namespace OsuDroid.Game;
 
 public sealed partial class OsuDroidGameCore
@@ -12,8 +13,6 @@ public sealed partial class OsuDroidGameCore
         }
     }
 
-
-
     public void ReleaseUiAction()
     {
         if (_activeScene == ActiveScene.MainMenu)
@@ -21,8 +20,6 @@ public sealed partial class OsuDroidGameCore
             _mainMenu.ReleasePress();
         }
     }
-
-
 
     public bool TryBeginUiDrag(string elementId, UiPoint point, VirtualViewport viewport)
     {
@@ -40,27 +37,55 @@ public sealed partial class OsuDroidGameCore
         return captured;
     }
 
+    public bool TryBeginSceneScrollDrag(
+        UiPoint point,
+        VirtualViewport viewport,
+        double timestampSeconds
+    ) =>
+        _activeScene switch
+        {
+            ActiveScene.Options => _options.TryBeginScrollDrag(point, viewport, timestampSeconds),
+            ActiveScene.BeatmapDownloader => _beatmapDownloader.TryBeginScrollDrag(
+                point,
+                viewport,
+                timestampSeconds
+            ),
+            ActiveScene.SongSelect => _songSelect.TryBeginScrollDrag(
+                point,
+                viewport,
+                timestampSeconds
+            ),
+            ActiveScene.ModSelect => _modSelect.TryBeginScrollDrag(
+                point,
+                viewport,
+                timestampSeconds
+            ),
+            ActiveScene.Startup or ActiveScene.MainMenu or ActiveScene.BeatmapProcessing => false,
+            _ => false,
+        };
 
-
-    public bool TryBeginSceneScrollDrag(UiPoint point, VirtualViewport viewport, double timestampSeconds) => _activeScene switch
-    {
-        ActiveScene.Options => _options.TryBeginScrollDrag(point, viewport, timestampSeconds),
-        ActiveScene.BeatmapDownloader => _beatmapDownloader.TryBeginScrollDrag(point, viewport, timestampSeconds),
-        ActiveScene.SongSelect => _songSelect.TryBeginScrollDrag(point, viewport, timestampSeconds),
-        ActiveScene.ModSelect => _modSelect.TryBeginScrollDrag(point, viewport, timestampSeconds),
-        ActiveScene.Startup or ActiveScene.MainMenu or ActiveScene.BeatmapProcessing => false,
-        _ => false,
-    };
-
-    public bool UpdateSceneScrollDrag(UiPoint point, VirtualViewport viewport, double timestampSeconds) => _activeScene switch
-    {
-        ActiveScene.Options => _options.UpdateScrollDrag(point, viewport, timestampSeconds),
-        ActiveScene.BeatmapDownloader => _beatmapDownloader.UpdateScrollDrag(point, viewport, timestampSeconds),
-        ActiveScene.SongSelect => _songSelect.UpdateScrollDrag(point, viewport, timestampSeconds),
-        ActiveScene.ModSelect => _modSelect.UpdateScrollDrag(point, viewport, timestampSeconds),
-        ActiveScene.Startup or ActiveScene.MainMenu or ActiveScene.BeatmapProcessing => false,
-        _ => false,
-    };
+    public bool UpdateSceneScrollDrag(
+        UiPoint point,
+        VirtualViewport viewport,
+        double timestampSeconds
+    ) =>
+        _activeScene switch
+        {
+            ActiveScene.Options => _options.UpdateScrollDrag(point, viewport, timestampSeconds),
+            ActiveScene.BeatmapDownloader => _beatmapDownloader.UpdateScrollDrag(
+                point,
+                viewport,
+                timestampSeconds
+            ),
+            ActiveScene.SongSelect => _songSelect.UpdateScrollDrag(
+                point,
+                viewport,
+                timestampSeconds
+            ),
+            ActiveScene.ModSelect => _modSelect.UpdateScrollDrag(point, viewport, timestampSeconds),
+            ActiveScene.Startup or ActiveScene.MainMenu or ActiveScene.BeatmapProcessing => false,
+            _ => false,
+        };
 
     public void EndSceneScrollDrag(UiPoint point, VirtualViewport viewport, double timestampSeconds)
     {
@@ -87,8 +112,6 @@ public sealed partial class OsuDroidGameCore
         }
     }
 
-
-
     public void UpdateUiDrag(UiPoint point, VirtualViewport viewport)
     {
         if (_activeScene != ActiveScene.Options)
@@ -104,8 +127,6 @@ public sealed partial class OsuDroidGameCore
         ApplyChangedOptionsSetting(_options.ConsumeChangedSettingKey());
     }
 
-
-
     public void EndUiDrag(UiPoint point, VirtualViewport viewport)
     {
         if (_activeScene != ActiveScene.Options)
@@ -117,13 +138,15 @@ public sealed partial class OsuDroidGameCore
         ApplyChangedOptionsSetting(_options.ConsumeChangedSettingKey());
     }
 
+    public void ScrollActiveScene(float deltaY, UiPoint point, VirtualViewport viewport) =>
+        ScrollActiveScene(0f, deltaY, point, viewport);
 
-
-    public void ScrollActiveScene(float deltaY, UiPoint point, VirtualViewport viewport) => ScrollActiveScene(0f, deltaY, point, viewport);
-
-
-
-    public void ScrollActiveScene(float deltaX, float deltaY, UiPoint point, VirtualViewport viewport)
+    public void ScrollActiveScene(
+        float deltaX,
+        float deltaY,
+        UiPoint point,
+        VirtualViewport viewport
+    )
     {
         if (_activeScene == ActiveScene.Options)
         {
@@ -143,8 +166,6 @@ public sealed partial class OsuDroidGameCore
         }
     }
 
-
-
     public void ScrollActiveScene(float deltaY, VirtualViewport viewport)
     {
         if (_activeScene == ActiveScene.Options)
@@ -161,13 +182,18 @@ public sealed partial class OsuDroidGameCore
         }
         else if (_activeScene == ActiveScene.ModSelect)
         {
-            _modSelect.Scroll(0f, deltaY, new UiPoint(VirtualViewport.AndroidReferenceLandscape.VirtualWidth / 2f, VirtualViewport.AndroidReferenceLandscape.VirtualHeight / 2f), viewport);
+            _modSelect.Scroll(
+                0f,
+                deltaY,
+                new UiPoint(
+                    VirtualViewport.AndroidReferenceLandscape.VirtualWidth / 2f,
+                    VirtualViewport.AndroidReferenceLandscape.VirtualHeight / 2f
+                ),
+                viewport
+            );
         }
     }
 
-
-
-    public void HandleUiAction(UiAction action) => HandleUiAction(action, VirtualViewport.AndroidReferenceLandscape);
-
-
+    public void HandleUiAction(UiAction action) =>
+        HandleUiAction(action, VirtualViewport.AndroidReferenceLandscape);
 }

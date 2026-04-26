@@ -1,12 +1,5 @@
 namespace OsuDroid.Game.Beatmaps.Online;
 
-
-
-
-
-
-
-
 public sealed record BeatmapMirrorSet(
     BeatmapMirrorKind Mirror,
     long Id,
@@ -18,10 +11,11 @@ public sealed record BeatmapMirrorSet(
     string Creator,
     string? CoverUrl,
     bool HasVideo,
-    IReadOnlyList<BeatmapMirrorBeatmap> Beatmaps)
+    IReadOnlyList<BeatmapMirrorBeatmap> Beatmaps
+)
 {
     public string DisplayTitle => string.IsNullOrWhiteSpace(TitleUnicode) ? Title : TitleUnicode;
 
-    public string DisplayArtist => string.IsNullOrWhiteSpace(ArtistUnicode) ? Artist : ArtistUnicode;
+    public string DisplayArtist =>
+        string.IsNullOrWhiteSpace(ArtistUnicode) ? Artist : ArtistUnicode;
 }
-

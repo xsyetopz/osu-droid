@@ -29,7 +29,8 @@ public sealed record GameServices(
     IGameSettingsStore? SettingsStore = null,
     IMenuSfxPlayer? MenuSfxPlayer = null,
     OnlineProfileSnapshot? OnlineProfile = null,
-    bool ShowStartupScene = false)
+    bool ShowStartupScene = false
+)
 {
     public string CorePath => Paths.CoreRoot;
 }

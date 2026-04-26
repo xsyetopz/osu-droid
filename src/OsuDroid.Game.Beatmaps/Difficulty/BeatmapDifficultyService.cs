@@ -24,13 +24,16 @@ public sealed class BeatmapDifficultyService(
     IBeatmapLibraryRepository repository,
     string? songsPath = null,
     IBeatmapDifficultyCalculator? calculator = null,
-    DifficultyAlgorithm algorithm = DifficultyAlgorithm.Droid) : IBeatmapDifficultyService
+    DifficultyAlgorithm algorithm = DifficultyAlgorithm.Droid
+) : IBeatmapDifficultyService
 {
     public const long DroidCalculatorVersion = BeatmapDifficultyCalculator.DroidReferenceVersion;
-    public const long StandardCalculatorVersion = BeatmapDifficultyCalculator.StandardReferenceVersion;
+    public const long StandardCalculatorVersion =
+        BeatmapDifficultyCalculator.StandardReferenceVersion;
     private const string DroidVersionKey = "droidStarRatingVersion";
     private const string StandardVersionKey = "standardStarRatingVersion";
-    private readonly IBeatmapDifficultyCalculator _calculator = calculator ?? new BeatmapDifficultyCalculator();
+    private readonly IBeatmapDifficultyCalculator _calculator =
+        calculator ?? new BeatmapDifficultyCalculator();
 
     public DifficultyAlgorithm Algorithm { get; } = algorithm;
 
@@ -69,14 +72,17 @@ public sealed class BeatmapDifficultyService(
         BeatmapInfo updated = beatmap with
         {
             DroidStarRating = needsDroidRating ? ratings.Droid : beatmap.DroidStarRating,
-            StandardStarRating = needsStandardRating ? ratings.Standard : beatmap.StandardStarRating,
+            StandardStarRating = needsStandardRating
+                ? ratings.Standard
+                : beatmap.StandardStarRating,
         };
         repository.UpdateStarRatings(
             updated.Md5,
             updated.SetDirectory,
             updated.Filename,
             updated.DroidStarRating,
-            updated.StandardStarRating);
+            updated.StandardStarRating
+        );
         return updated;
     }
 

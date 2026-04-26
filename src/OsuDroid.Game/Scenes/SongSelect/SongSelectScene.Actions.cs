@@ -21,7 +21,8 @@ public sealed partial class SongSelectScene
             return;
         }
 
-        int index = _visibleSetIndices[visibleSlot] >= 0 ? _visibleSetIndices[visibleSlot] : visibleSlot;
+        int index =
+            _visibleSetIndices[visibleSlot] >= 0 ? _visibleSetIndices[visibleSlot] : visibleSlot;
         if (index < 0 || index >= _visibleSnapshot.Sets.Count)
         {
             return;
@@ -76,7 +77,8 @@ public sealed partial class SongSelectScene
         }
 
         BeatmapSetInfo? set = SelectedSet;
-        int difficultyIndex = _visibleDifficultyIndices[index] >= 0 ? _visibleDifficultyIndices[index] : index;
+        int difficultyIndex =
+            _visibleDifficultyIndices[index] >= 0 ? _visibleDifficultyIndices[index] : index;
         if (set is null || difficultyIndex < 0 || difficultyIndex >= set.Beatmaps.Count)
         {
             return;
@@ -86,7 +88,11 @@ public sealed partial class SongSelectScene
         RefreshSelectedBackgroundPath();
         QueueVisibleDifficultyCalculations();
         PlaySelectedPreview();
-        PerfDiagnostics.Log("songSelect.selectDifficulty", start, $"slot={index} difficulty={difficultyIndex}");
+        PerfDiagnostics.Log(
+            "songSelect.selectDifficulty",
+            start,
+            $"slot={index} difficulty={difficultyIndex}"
+        );
     }
 
     private void SelectSetIndex(int index)
@@ -138,7 +144,10 @@ public sealed partial class SongSelectScene
         }
 
         BeatmapSetInfo? set = SelectedSet;
-        int difficultyIndex = _visibleDifficultyIndices[visibleSlot] >= 0 ? _visibleDifficultyIndices[visibleSlot] : visibleSlot;
+        int difficultyIndex =
+            _visibleDifficultyIndices[visibleSlot] >= 0
+                ? _visibleDifficultyIndices[visibleSlot]
+                : visibleSlot;
         if (set is null || difficultyIndex < 0 || difficultyIndex >= set.Beatmaps.Count)
         {
             return;
@@ -185,21 +194,28 @@ public sealed partial class SongSelectScene
             return;
         }
 
-        library.SaveOptions(options with { Offset = Math.Clamp(options.Offset + delta, -250, 250) });
+        library.SaveOptions(
+            options with
+            {
+                Offset = Math.Clamp(options.Offset + delta, -250, 250),
+            }
+        );
     }
 
     public void FocusOffsetInput(VirtualViewport viewport)
     {
         BeatmapOptions? options = CurrentOptions();
         UiRect bounds = PropertiesOffsetInputBounds(viewport);
-        _textInputService.RequestTextInput(new TextInputRequest(
-            (options?.Offset ?? 0).ToString(CultureInfo.InvariantCulture),
-            SaveOffsetText,
-            SaveOffsetText,
-            viewport.ToSurface(bounds),
-            () => { }));
+        _textInputService.RequestTextInput(
+            new TextInputRequest(
+                (options?.Offset ?? 0).ToString(CultureInfo.InvariantCulture),
+                SaveOffsetText,
+                SaveOffsetText,
+                viewport.ToSurface(bounds),
+                () => { }
+            )
+        );
     }
-
 
     public void RequestDeleteBeatmap()
     {
@@ -222,7 +238,10 @@ public sealed partial class SongSelectScene
         library.DeleteBeatmapSet(set.Directory);
         _snapshot = library.Load();
         ApplyBeatmapOptions();
-        selectedSetIndex = _visibleSnapshot.Sets.Count == 0 ? -1 : Math.Clamp(selectedSetIndex, 0, _visibleSnapshot.Sets.Count - 1);
+        selectedSetIndex =
+            _visibleSnapshot.Sets.Count == 0
+                ? -1
+                : Math.Clamp(selectedSetIndex, 0, _visibleSnapshot.Sets.Count - 1);
         selectedDifficultyIndex = 0;
         scrollY = ClampScroll(CalculateSelectedSetScroll(selectedSetIndex));
         RefreshSelectedBackgroundPath();
@@ -230,5 +249,4 @@ public sealed partial class SongSelectScene
         QueueVisibleDifficultyCalculations();
         PlaySelectedPreview();
     }
-
 }

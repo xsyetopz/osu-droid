@@ -30,7 +30,10 @@ internal abstract class DifficultyCalculator<TBeatmap, TObject, TAttributes>
 
     public ISet<Mod> RetainDifficultyAdjustmentMods(IEnumerable<Mod>? mods)
     {
-        return mods is null ? new HashSet<Mod>() : mods.Where(mod => DifficultyAdjustmentMods.Any(t => t.IsInstanceOfType(mod))).ToHashSet();
+        return mods is null
+            ? new HashSet<Mod>()
+            : mods.Where(mod => DifficultyAdjustmentMods.Any(t => t.IsInstanceOfType(mod)))
+                .ToHashSet();
     }
 
     public TAttributes Calculate(Beatmap beatmap, IEnumerable<Mod>? mods = null) =>
@@ -71,7 +74,10 @@ internal abstract class DifficultyCalculator<TBeatmap, TObject, TAttributes>
         return CreateDifficultyAttributes(beatmap, skills, objects, true);
     }
 
-    protected TSkill? FindSkill<TSkill>(IEnumerable<Skill<TObject>> skills, Func<TSkill, bool>? predicate = null)
+    protected TSkill? FindSkill<TSkill>(
+        IEnumerable<Skill<TObject>> skills,
+        Func<TSkill, bool>? predicate = null
+    )
         where TSkill : Skill<TObject>
     {
         foreach (Skill<TObject> skill in skills)
@@ -98,7 +104,8 @@ internal abstract class DifficultyCalculator<TBeatmap, TObject, TAttributes>
         PlayableBeatmap beatmap,
         Skill<TObject>[] skills,
         TObject[] objects,
-        bool forReplay);
+        bool forReplay
+    );
 
     protected abstract TBeatmap CreatePlayableBeatmap(Beatmap beatmap, IEnumerable<Mod>? mods);
 }

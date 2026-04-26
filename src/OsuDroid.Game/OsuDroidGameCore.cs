@@ -59,34 +59,84 @@ public sealed partial class OsuDroidGameCore
     public OsuDroidGameCore(GameServices services)
     {
         Services = services;
-        _settingsStore = services.SettingsStore ?? new JsonGameSettingsStore(Path.Combine(services.Paths.CoreRoot, "config", "settings.json"));
+        _settingsStore =
+            services.SettingsStore
+            ?? new JsonGameSettingsStore(
+                Path.Combine(services.Paths.CoreRoot, "config", "settings.json")
+            );
         _settingsBackupService = new GameSettingsBackupService(services.Paths, _settingsStore);
         _menuMusicPreviewEnabled = _settingsStore.GetBool("musicpreview", true);
         var localizer = new GameLocalizer();
         OnlineProfilePanelState? onlinePanelState = CreateOnlinePanelState(services.OnlineProfile);
         _startup = new StartupScene();
-        _mainMenu = new MainMenuScene(services.DisplayVersion, services.NowPlaying ?? new MenuNowPlayingState(), onlinePanelState, string.Equals(services.BuildType, "debug", StringComparison.OrdinalIgnoreCase), localizer);
-        _options = new OptionsScene(localizer, _settingsStore, pathDefaults: OptionsPathDefaults.FromPaths(services.Paths));
+        _mainMenu = new MainMenuScene(
+            services.DisplayVersion,
+            services.NowPlaying ?? new MenuNowPlayingState(),
+            onlinePanelState,
+            string.Equals(services.BuildType, "debug", StringComparison.OrdinalIgnoreCase),
+            localizer
+        );
+        _options = new OptionsScene(
+            localizer,
+            _settingsStore,
+            pathDefaults: OptionsPathDefaults.FromPaths(services.Paths)
+        );
         _textInputService = services.TextInputService ?? new NoOpTextInputService();
         _previewPlayer = services.BeatmapPreviewPlayer ?? new NoOpBeatmapPreviewPlayer();
-        IBeatmapDifficultyService difficultyService = services.BeatmapDifficultyService ?? new BeatmapDifficultyService(new BeatmapLibraryRepository(services.Database), services.Paths.Songs, algorithm: ReadDifficultyAlgorithmSetting());
+        IBeatmapDifficultyService difficultyService =
+            services.BeatmapDifficultyService
+            ?? new BeatmapDifficultyService(
+                new BeatmapLibraryRepository(services.Database),
+                services.Paths.Songs,
+                algorithm: ReadDifficultyAlgorithmSetting()
+            );
         difficultyService.EnsureCalculatorVersions();
-        _beatmapLibrary = services.BeatmapLibrary ?? CreateBeatmapLibrary(services.Database, services.Paths);
+        _beatmapLibrary =
+            services.BeatmapLibrary ?? CreateBeatmapLibrary(services.Database, services.Paths);
         BeatmapLibrarySnapshot initialLibrary = _beatmapLibrary.Load();
         if (initialLibrary.Sets.Count == 0 || _beatmapLibrary.NeedsScanRefresh())
         {
             _ = Task.Run(() => _beatmapLibrary.Scan());
         }
 
-        IBeatmapMirrorClient mirrorClient = services.BeatmapMirrorClient ?? new OsuDirectMirrorClient(new HttpClient());
-        IBeatmapImportService importService = services.BeatmapImportService ?? new BeatmapImportService(services.Paths, _beatmapLibrary);
-        _beatmapProcessingService = services.BeatmapProcessingService ?? new BeatmapProcessingService(services.Paths, importService, _beatmapLibrary, _settingsStore);
-        IBeatmapDownloadService downloadService = services.BeatmapDownloadService ?? new BeatmapDownloadService(services.Paths, mirrorClient, _beatmapProcessingService);
-        _beatmapDownloader = new BeatmapDownloaderScene(mirrorClient, downloadService, _textInputService, _previewPlayer, Path.Combine(services.Paths.CacheRoot, "Covers"), localizer, Path.Combine(services.Paths.Log, "beatmap-downloader.log"));
-        _musicController = services.MusicController ?? new PreviewMenuMusicController(_previewPlayer);
+        IBeatmapMirrorClient mirrorClient =
+            services.BeatmapMirrorClient ?? new OsuDirectMirrorClient(new HttpClient());
+        IBeatmapImportService importService =
+            services.BeatmapImportService
+            ?? new BeatmapImportService(services.Paths, _beatmapLibrary);
+        _beatmapProcessingService =
+            services.BeatmapProcessingService
+            ?? new BeatmapProcessingService(
+                services.Paths,
+                importService,
+                _beatmapLibrary,
+                _settingsStore
+            );
+        IBeatmapDownloadService downloadService =
+            services.BeatmapDownloadService
+            ?? new BeatmapDownloadService(services.Paths, mirrorClient, _beatmapProcessingService);
+        _beatmapDownloader = new BeatmapDownloaderScene(
+            mirrorClient,
+            downloadService,
+            _textInputService,
+            _previewPlayer,
+            Path.Combine(services.Paths.CacheRoot, "Covers"),
+            localizer,
+            Path.Combine(services.Paths.Log, "beatmap-downloader.log")
+        );
+        _musicController =
+            services.MusicController ?? new PreviewMenuMusicController(_previewPlayer);
         _activeMenuSfxPlayer = services.MenuSfxPlayer ?? new NoOpMenuSfxPlayer();
         ApplyOptionAudioVolumes();
-        _songSelect = new SongSelectScene(_beatmapLibrary, _musicController, difficultyService, services.Paths.Songs, onlinePanelState, _textInputService, localizer: localizer);
+        _songSelect = new SongSelectScene(
+            _beatmapLibrary,
+            _musicController,
+            difficultyService,
+            services.Paths.Songs,
+            onlinePanelState,
+            _textInputService,
+            localizer: localizer
+        );
         _modSelect = new ModSelectScene(_settingsStore, _textInputService, localizer);
         ApplyOptionsRuntimeSettings();
         _activeScene = services.ShowStartupScene ? ActiveScene.Startup : ActiveScene.MainMenu;

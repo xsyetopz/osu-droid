@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <RollForward>Major</RollForward>
-        <OutputType>Library</OutputType>
-        <RootNamespace>OsuDroid.Game</RootNamespace>
-        <AssemblyName>OsuDroid.Game</AssemblyName>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\OsuDroid.Game.Beatmaps\OsuDroid.Game.Beatmaps.csproj" />
-        <ProjectReference Include="..\OsuDroid.Game.Compatibility\OsuDroid.Game.Compatibility.csproj" />
-        <ProjectReference Include="..\OsuDroid.Game.Runtime\OsuDroid.Game.Runtime.csproj" />
-        <ProjectReference Include="..\OsuDroid.Game.UI\OsuDroid.Game.UI.csproj" />
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RollForward>Major</RollForward>
+    <OutputType>Library</OutputType>
+    <RootNamespace>OsuDroid.Game</RootNamespace>
+    <AssemblyName>OsuDroid.Game</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OsuDroid.Game.Beatmaps\OsuDroid.Game.Beatmaps.csproj" />
+    <ProjectReference Include="..\OsuDroid.Game.Compatibility\OsuDroid.Game.Compatibility.csproj" />
+    <ProjectReference Include="..\OsuDroid.Game.Runtime\OsuDroid.Game.Runtime.csproj" />
+    <ProjectReference Include="..\OsuDroid.Game.UI\OsuDroid.Game.UI.csproj" />
+  </ItemGroup>
 </Project>

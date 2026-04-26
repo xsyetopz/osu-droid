@@ -57,7 +57,8 @@ public sealed class DroidDatabase(string path)
             }
 
             using SqliteCommand alterCommand = connection.CreateCommand();
-            alterCommand.CommandText = $"ALTER TABLE BeatmapInfo ADD COLUMN {column.Name} {column.Definition}";
+            alterCommand.CommandText =
+                $"ALTER TABLE BeatmapInfo ADD COLUMN {column.Name} {column.Definition}";
             alterCommand.ExecuteNonQuery();
         }
     }

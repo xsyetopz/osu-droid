@@ -1,4 +1,5 @@
 using OsuDroid.Game.UI.Geometry;
+
 namespace OsuDroid.Game.UI.Scrolling;
 
 public enum KineticScrollAxis
@@ -40,7 +41,14 @@ public sealed class KineticScrollState(KineticScrollAxis axis)
 
     public float Velocity { get; private set; }
 
-    public bool Drag(UiPoint point, double timestampSeconds, Func<float> getOffset, Action<float> setOffset, float minOffset, float maxOffset)
+    public bool Drag(
+        UiPoint point,
+        double timestampSeconds,
+        Func<float> getOffset,
+        Action<float> setOffset,
+        float minOffset,
+        float maxOffset
+    )
     {
         if (!_isTracking)
         {
@@ -69,7 +77,8 @@ public sealed class KineticScrollState(KineticScrollAxis axis)
                 ? AxisDelta(_flingSamplePoint, point) / flingElapsed
                 : delta / elapsed,
             -MaxVelocity,
-            MaxVelocity);
+            MaxVelocity
+        );
         setOffset(Math.Clamp(getOffset() + delta, minOffset, maxOffset));
         _lastPoint = point;
         _lastTimestampSeconds = timestampSeconds;
@@ -83,7 +92,8 @@ public sealed class KineticScrollState(KineticScrollAxis axis)
         Func<float> getOffset,
         Action<float> setOffset,
         float minOffset,
-        float maxOffset)
+        float maxOffset
+    )
     {
         if (_isTracking || elapsedSeconds <= 0f)
         {
@@ -116,13 +126,26 @@ public sealed class KineticScrollState(KineticScrollAxis axis)
         _isDragging = false;
     }
 
-    public void End(UiPoint point, double timestampSeconds, Func<float> getOffset, Action<float> setOffset, float minOffset, float maxOffset)
+    public void End(
+        UiPoint point,
+        double timestampSeconds,
+        Func<float> getOffset,
+        Action<float> setOffset,
+        float minOffset,
+        float maxOffset
+    )
     {
         Drag(point, timestampSeconds, getOffset, setOffset, minOffset, maxOffset);
         End();
     }
 
-    public bool Update(float elapsedSeconds, Func<float> getOffset, Action<float> setOffset, float minOffset, float maxOffset)
+    public bool Update(
+        float elapsedSeconds,
+        Func<float> getOffset,
+        Action<float> setOffset,
+        float minOffset,
+        float maxOffset
+    )
     {
         if (_isTracking || elapsedSeconds <= 0f || MathF.Abs(Velocity) <= StopVelocity)
         {
@@ -155,7 +178,6 @@ public sealed class KineticScrollState(KineticScrollAxis axis)
         Velocity = 0f;
     }
 
-    private float AxisDelta(UiPoint previous, UiPoint current) => axis == KineticScrollAxis.Horizontal
-        ? previous.X - current.X
-        : previous.Y - current.Y;
+    private float AxisDelta(UiPoint previous, UiPoint current) =>
+        axis == KineticScrollAxis.Horizontal ? previous.X - current.X : previous.Y - current.Y;
 }

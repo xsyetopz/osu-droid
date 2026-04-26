@@ -8,12 +8,13 @@ public sealed partial class BeatmapDownloaderTests
     {
         public BeatmapDownloadState State { get; } = new();
 
-        public Task<BeatmapDownloadResult> DownloadAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken) =>
-            throw new InvalidOperationException("download exploded");
+        public Task<BeatmapDownloadResult> DownloadAsync(
+            BeatmapMirrorSet beatmapSet,
+            bool withVideo,
+            CancellationToken cancellationToken
+        ) => throw new InvalidOperationException("download exploded");
 
-        public void CancelActiveDownload()
-        {
-        }
+        public void CancelActiveDownload() { }
     }
 
     private sealed class RecordingDownloadService : IBeatmapDownloadService
@@ -24,15 +25,17 @@ public sealed partial class BeatmapDownloaderTests
 
         public bool? LastWithVideo { get; private set; }
 
-        public Task<BeatmapDownloadResult> DownloadAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken)
+        public Task<BeatmapDownloadResult> DownloadAsync(
+            BeatmapMirrorSet beatmapSet,
+            bool withVideo,
+            CancellationToken cancellationToken
+        )
         {
             CallCount++;
             LastWithVideo = withVideo;
             return Task.FromResult(BeatmapDownloadResult.Failed("recorded"));
         }
 
-        public void CancelActiveDownload()
-        {
-        }
+        public void CancelActiveDownload() { }
     }
 }

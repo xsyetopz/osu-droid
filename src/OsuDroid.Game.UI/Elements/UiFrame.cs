@@ -1,12 +1,14 @@
 using OsuDroid.Game.UI.Actions;
 using OsuDroid.Game.UI.Assets;
 using OsuDroid.Game.UI.Geometry;
+
 namespace OsuDroid.Game.UI.Elements;
 
 public sealed record UiFrameSnapshot(
     VirtualViewport Viewport,
     IReadOnlyList<UiElementSnapshot> Elements,
-    UiAssetManifest AssetManifest)
+    UiAssetManifest AssetManifest
+)
 {
     public UiElementSnapshot? HitTest(UiPoint point)
     {

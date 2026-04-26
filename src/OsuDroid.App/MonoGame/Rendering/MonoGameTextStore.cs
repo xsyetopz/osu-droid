@@ -19,10 +19,25 @@ internal sealed class MonoGameTextStore(GraphicsDevice graphicsDevice)
 {
     private readonly Dictionary<TextKey, Texture2D> textures = new();
 
-    public Texture2D GetTexture(string text, UiTextStyle style, UiColor color, float alpha, float renderScale, RenderCacheMetrics? metrics = null)
+    public Texture2D GetTexture(
+        string text,
+        UiTextStyle style,
+        UiColor color,
+        float alpha,
+        float renderScale,
+        RenderCacheMetrics? metrics = null
+    )
     {
         var scaledSize = Math.Max(1f, style.Size * renderScale);
-        var key = new TextKey(text, scaledSize, style.Bold, color.Red, color.Green, color.Blue, (byte)Math.Clamp((int)MathF.Round(color.Alpha * alpha), 0, 255));
+        var key = new TextKey(
+            text,
+            scaledSize,
+            style.Bold,
+            color.Red,
+            color.Green,
+            color.Blue,
+            (byte)Math.Clamp((int)MathF.Round(color.Alpha * alpha), 0, 255)
+        );
         if (textures.TryGetValue(key, out var texture))
             return texture;
 
@@ -61,7 +76,10 @@ internal sealed class MonoGameTextStore(GraphicsDevice graphicsDevice)
             Typeface = key.Bold ? Typeface.DefaultBold : Typeface.Default,
         };
         var width = Math.Max(1, (int)Math.Ceiling(paint.MeasureText(key.Text)) + 4);
-        var height = Math.Max(1, (int)Math.Ceiling(Math.Abs(paint.FontMetrics.Ascent) + paint.FontMetrics.Descent) + 4);
+        var height = Math.Max(
+            1,
+            (int)Math.Ceiling(Math.Abs(paint.FontMetrics.Ascent) + paint.FontMetrics.Descent) + 4
+        );
         using var bitmap = Bitmap.CreateBitmap(width, height, Bitmap.Config.Argb8888!);
         using var canvas = new Canvas(bitmap);
         canvas.DrawText(key.Text, 2f, 2f - paint.FontMetrics.Ascent, paint);
@@ -76,7 +94,9 @@ internal sealed class MonoGameTextStore(GraphicsDevice graphicsDevice)
     private Texture2D CreateIosTexture(TextKey key)
     {
         var safeText = SanitizeForPlatformText(key.Text);
-        using var font = key.Bold ? UIFont.BoldSystemFontOfSize(key.Size) : UIFont.SystemFontOfSize(key.Size);
+        using var font = key.Bold
+            ? UIFont.BoldSystemFontOfSize(key.Size)
+            : UIFont.SystemFontOfSize(key.Size);
         var attributes = new UIStringAttributes
         {
             Font = font,
@@ -91,7 +111,8 @@ internal sealed class MonoGameTextStore(GraphicsDevice graphicsDevice)
         format.Scale = 1f;
         using var renderer = new UIGraphicsImageRenderer(new CGSize(width, height), format);
         using var image = renderer.CreateImage(_ =>
-            nsText.DrawString(new CGRect(2, 2, width - 4, height - 4), attributes));
+            nsText.DrawString(new CGRect(2, 2, width - 4, height - 4), attributes)
+        );
         using var data = image.AsPNG();
         if (data is null)
             throw new InvalidOperationException("Failed to encode text texture.");
@@ -137,6 +158,14 @@ internal sealed class MonoGameTextStore(GraphicsDevice graphicsDevice)
     }
 #endif
 
-    private readonly record struct TextKey(string Text, float Size, bool Bold, byte Red, byte Green, byte Blue, byte Alpha);
+    private readonly record struct TextKey(
+        string Text,
+        float Size,
+        bool Bold,
+        byte Red,
+        byte Green,
+        byte Blue,
+        byte Alpha
+    );
 }
 #endif

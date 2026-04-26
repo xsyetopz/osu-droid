@@ -13,7 +13,11 @@ internal static class DroidFlashlightEvaluator
     private const double SliderMultiplier = 1.3;
     private const double MinAngleMultiplier = 0.2;
 
-    public static double EvaluateDifficultyOf(DroidDifficultyHitObject current, IEnumerable<Mod> mods, bool withSliders)
+    public static double EvaluateDifficultyOf(
+        DroidDifficultyHitObject current,
+        IEnumerable<Mod> mods,
+        bool withSliders
+    )
     {
         if (current.Obj is Spinner || current.IsOverlapping(true))
         {
@@ -34,17 +38,29 @@ internal static class DroidFlashlightEvaluator
 
             if (currentObject.Obj is not Spinner)
             {
-                double jumpDistance = current.Obj.DifficultyStackedPosition.DistanceTo(currentObject.Obj.DifficultyStackedEndPosition);
+                double jumpDistance = current.Obj.DifficultyStackedPosition.DistanceTo(
+                    currentObject.Obj.DifficultyStackedEndPosition
+                );
                 if (i == 0)
                 {
                     smallDistNerf = System.Math.Min(1d, jumpDistance / 75d);
                 }
 
-                double stackNerf = System.Math.Min(1d, currentObject.LazyJumpDistance / scalingFactor / 25d);
-                double opacityBonus = 1 + MaxOpacityBonus * (1 - current.OpacityAt(currentObject.Obj.StartTime, mods));
-                result += stackNerf * opacityBonus * scalingFactor * jumpDistance / cumulativeStrainTime;
+                double stackNerf = System.Math.Min(
+                    1d,
+                    currentObject.LazyJumpDistance / scalingFactor / 25d
+                );
+                double opacityBonus =
+                    1
+                    + MaxOpacityBonus * (1 - current.OpacityAt(currentObject.Obj.StartTime, mods));
+                result +=
+                    stackNerf * opacityBonus * scalingFactor * jumpDistance / cumulativeStrainTime;
 
-                if (currentObject.Angle.HasValue && current.Angle.HasValue && System.Math.Abs(currentObject.Angle.Value - current.Angle.Value) < 0.02)
+                if (
+                    currentObject.Angle.HasValue
+                    && current.Angle.HasValue
+                    && System.Math.Abs(currentObject.Angle.Value - current.Angle.Value) < 0.02
+                )
                 {
                     angleRepeatCount += System.Math.Max(0d, 1 - 0.1 * i);
                 }
@@ -70,7 +86,10 @@ internal static class DroidFlashlightEvaluator
         if (current.Obj is Slider slider && withSliders)
         {
             double pixelTravelDistance = current.LazyTravelDistance / scalingFactor;
-            sliderBonus = System.Math.Pow(System.Math.Max(0d, pixelTravelDistance / current.TravelTime - MinVelocity), 0.5);
+            sliderBonus = System.Math.Pow(
+                System.Math.Max(0d, pixelTravelDistance / current.TravelTime - MinVelocity),
+                0.5
+            );
             sliderBonus *= pixelTravelDistance;
             if (slider.RepeatCount > 0)
             {

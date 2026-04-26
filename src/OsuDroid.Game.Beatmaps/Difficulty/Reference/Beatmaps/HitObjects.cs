@@ -34,61 +34,81 @@ internal abstract class HitObject(double startTime, ReferenceVector2 position)
 
     public double DifficultyRadius => ObjectRadius * DifficultyScale;
 
-    public ReferenceVector2 DifficultyStackOffset => new(DifficultyStackHeight * DifficultyScale * StackOffsetMultiplier, DifficultyStackHeight * DifficultyScale * StackOffsetMultiplier);
+    public ReferenceVector2 DifficultyStackOffset =>
+        new(
+            DifficultyStackHeight * DifficultyScale * StackOffsetMultiplier,
+            DifficultyStackHeight * DifficultyScale * StackOffsetMultiplier
+        );
 
     public virtual ReferenceVector2 DifficultyStackedPosition => Position + DifficultyStackOffset;
 
     public virtual ReferenceVector2 DifficultyStackedEndPosition => DifficultyStackedPosition;
 
-    public virtual void ApplyDefaults(ReferenceBeatmapDifficulty difficulty, BeatmapControlPoints controlPoints, GameMode mode)
+    public virtual void ApplyDefaults(
+        ReferenceBeatmapDifficulty difficulty,
+        BeatmapControlPoints controlPoints,
+        GameMode mode
+    )
     {
         double preempt = ReferenceBeatmapDifficulty.DifficultyRange(
             difficulty.ApproachRate,
             ReferenceDifficultyTiming.PreemptMax,
             ReferenceDifficultyTiming.PreemptMid,
-            ReferenceDifficultyTiming.PreemptMin);
+            ReferenceDifficultyTiming.PreemptMin
+        );
 
         TimePreempt = preempt;
         TimeFadeIn = System.Math.Min(400.0, preempt);
         DifficultyScale = CalculateScale(difficulty.DifficultyCircleSize, mode);
         StackOffsetMultiplier = mode == GameMode.Droid ? -4f : -6.4f;
-        HitWindow = mode == GameMode.Standard
-            ? new ReferenceStandardHitWindow(difficulty.OverallDifficulty)
-            : new ReferenceDroidHitWindow(difficulty.OverallDifficulty);
+        HitWindow =
+            mode == GameMode.Standard
+                ? new ReferenceStandardHitWindow(difficulty.OverallDifficulty)
+                : new ReferenceDroidHitWindow(difficulty.OverallDifficulty);
     }
 
     private static float CalculateScale(float circleSize, GameMode mode)
     {
         const float droidStandardCircleSizeOffset = 6.855634f;
         const float brokenGamefieldRoundingAllowance = 1.00041f;
-        float standardCircleSize = mode == GameMode.Droid
-            ? circleSize - droidStandardCircleSizeOffset
-            : circleSize;
-        return System.Math.Max(1e-3f, (1 - 0.7f * (standardCircleSize - 5) / 5) / 2 * brokenGamefieldRoundingAllowance);
+        float standardCircleSize =
+            mode == GameMode.Droid ? circleSize - droidStandardCircleSizeOffset : circleSize;
+        return System.Math.Max(
+            1e-3f,
+            (1 - 0.7f * (standardCircleSize - 5) / 5) / 2 * brokenGamefieldRoundingAllowance
+        );
     }
 }
 
-internal sealed class HitCircle(double startTime, ReferenceVector2 position) : HitObject(startTime, position);
+internal sealed class HitCircle(double startTime, ReferenceVector2 position)
+    : HitObject(startTime, position);
 
-internal sealed class Spinner(double startTime, double endTime, ReferenceVector2 position) : HitObject(startTime, position)
+internal sealed class Spinner(double startTime, double endTime, ReferenceVector2 position)
+    : HitObject(startTime, position)
 {
     public override double EndTime { get; } = endTime;
 }
 
-internal class SliderHitObject(double startTime, ReferenceVector2 position) : HitObject(startTime, position);
+internal class SliderHitObject(double startTime, ReferenceVector2 position)
+    : HitObject(startTime, position);
 
-internal sealed class SliderHead(double startTime, ReferenceVector2 position) : SliderHitObject(startTime, position);
+internal sealed class SliderHead(double startTime, ReferenceVector2 position)
+    : SliderHitObject(startTime, position);
 
-internal class SliderEndCircle(double startTime, ReferenceVector2 position) : SliderHitObject(startTime, position);
+internal class SliderEndCircle(double startTime, ReferenceVector2 position)
+    : SliderHitObject(startTime, position);
 
-internal sealed class SliderTail(double startTime, ReferenceVector2 position) : SliderEndCircle(startTime, position);
+internal sealed class SliderTail(double startTime, ReferenceVector2 position)
+    : SliderEndCircle(startTime, position);
 
-internal sealed class SliderRepeat(double startTime, ReferenceVector2 position, int spanIndex) : SliderEndCircle(startTime, position)
+internal sealed class SliderRepeat(double startTime, ReferenceVector2 position, int spanIndex)
+    : SliderEndCircle(startTime, position)
 {
     public int SpanIndex { get; } = spanIndex;
 }
 
-internal sealed class SliderTick(double startTime, ReferenceVector2 position, int spanIndex) : SliderHitObject(startTime, position)
+internal sealed class SliderTick(double startTime, ReferenceVector2 position, int spanIndex)
+    : SliderHitObject(startTime, position)
 {
     public int SpanIndex { get; } = spanIndex;
 }
@@ -97,8 +117,8 @@ internal sealed class Slider(
     double startTime,
     ReferenceVector2 position,
     int repeatCount,
-    SliderPath path)
-    : HitObject(startTime, position)
+    SliderPath path
+) : HitObject(startTime, position)
 {
     public const double DroidLastTickOffset = 36.0;
 
@@ -118,9 +138,11 @@ internal sealed class Slider(
 
     public override double EndTime => StartTime + RepeatCount * SpanDuration;
 
-    public override ReferenceVector2 EndPosition => Position + Path.PositionAt(RepeatCount % 2 == 0 ? 0.0 : 1.0);
+    public override ReferenceVector2 EndPosition =>
+        Position + Path.PositionAt(RepeatCount % 2 == 0 ? 0.0 : 1.0);
 
-    public override ReferenceVector2 DifficultyStackedEndPosition => EndPosition + DifficultyStackOffset;
+    public override ReferenceVector2 DifficultyStackedEndPosition =>
+        EndPosition + DifficultyStackOffset;
 
     public IReadOnlyList<HitObject> NestedHitObjects => _nestedHitObjects;
 
@@ -128,24 +150,36 @@ internal sealed class Slider(
 
     public SliderTail Tail { get; private set; } = new(startTime, position);
 
-    public override void ApplyDefaults(ReferenceBeatmapDifficulty difficulty, BeatmapControlPoints controlPoints, GameMode mode)
+    public override void ApplyDefaults(
+        ReferenceBeatmapDifficulty difficulty,
+        BeatmapControlPoints controlPoints,
+        GameMode mode
+    )
     {
         base.ApplyDefaults(difficulty, controlPoints, mode);
         var timingPoint = controlPoints.Timing.ControlPointAt(StartTime);
         var difficultyPoint = controlPoints.Difficulty.ControlPointAt(StartTime);
-        double beatLength = timingPoint.MillisecondsPerBeat <= 0 ? 1.0 : timingPoint.MillisecondsPerBeat;
+        double beatLength =
+            timingPoint.MillisecondsPerBeat <= 0 ? 1.0 : timingPoint.MillisecondsPerBeat;
         double sliderVelocityAsBeatLength = -100.0 / difficultyPoint.SpeedMultiplier;
-        double bpmMultiplier = sliderVelocityAsBeatLength < 0
-            ? System.Math.Clamp(-sliderVelocityAsBeatLength, 10.0, 1000.0) / 100.0
-            : 1.0;
+        double bpmMultiplier =
+            sliderVelocityAsBeatLength < 0
+                ? System.Math.Clamp(-sliderVelocityAsBeatLength, 10.0, 1000.0) / 100.0
+                : 1.0;
 
         Velocity = 100.0 * difficulty.SliderMultiplier / (beatLength * bpmMultiplier);
         double scoringDistance = Velocity * beatLength;
-        TickDistance = difficultyPoint.GenerateTicks ? scoringDistance / difficulty.SliderTickRate : double.PositiveInfinity;
+        TickDistance = difficultyPoint.GenerateTicks
+            ? scoringDistance / difficulty.SliderTickRate
+            : double.PositiveInfinity;
         BuildNestedObjects(difficulty, controlPoints, mode);
     }
 
-    private void BuildNestedObjects(ReferenceBeatmapDifficulty difficulty, BeatmapControlPoints controlPoints, GameMode mode)
+    private void BuildNestedObjects(
+        ReferenceBeatmapDifficulty difficulty,
+        BeatmapControlPoints controlPoints,
+        GameMode mode
+    )
     {
         _nestedHitObjects.Clear();
         Head = new SliderHead(StartTime, Position);
@@ -163,11 +197,19 @@ internal sealed class Slider(
 
             if (tickDistance > 0)
             {
-                for (double distance = tickDistance; distance < Path.ExpectedDistance - minDistanceFromEnd; distance += tickDistance)
+                for (
+                    double distance = tickDistance;
+                    distance < Path.ExpectedDistance - minDistanceFromEnd;
+                    distance += tickDistance
+                )
                 {
                     double progress = distance / Path.ExpectedDistance;
                     double timeProgress = reversed ? 1.0 - progress : progress;
-                    var tick = new SliderTick(spanStartTime + timeProgress * spanDuration, Position + Path.PositionAt(progress), span);
+                    var tick = new SliderTick(
+                        spanStartTime + timeProgress * spanDuration,
+                        Position + Path.PositionAt(progress),
+                        span
+                    );
                     tick.ApplyDefaults(difficulty, controlPoints, mode);
                     _nestedHitObjects.Add(tick);
                 }
@@ -176,7 +218,11 @@ internal sealed class Slider(
             if (span < RepeatCount - 1)
             {
                 double repeatProgress = reversed ? 0.0 : 1.0;
-                var repeat = new SliderRepeat(StartTime + (span + 1) * spanDuration, Position + Path.PositionAt(repeatProgress), span);
+                var repeat = new SliderRepeat(
+                    StartTime + (span + 1) * spanDuration,
+                    Position + Path.PositionAt(repeatProgress),
+                    span
+                );
                 repeat.ApplyDefaults(difficulty, controlPoints, mode);
                 _nestedHitObjects.Add(repeat);
             }

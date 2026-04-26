@@ -9,13 +9,16 @@ public sealed partial class BeatmapDownloaderScene
     public void FocusSearch(VirtualViewport viewport)
     {
         _isSearchFocused = true;
-        _textInputService.RequestTextInput(new TextInputRequest(
-            _query,
-            text => _query = text,
-            SubmitSearch,
-            viewport.ToSurface(SearchBounds(viewport)),
-            () => _isSearchFocused = false,
-            _localizer["BeatmapDownloader_SearchPlaceholder"]));
+        _textInputService.RequestTextInput(
+            new TextInputRequest(
+                _query,
+                text => _query = text,
+                SubmitSearch,
+                viewport.ToSurface(SearchBounds(viewport)),
+                () => _isSearchFocused = false,
+                _localizer["BeatmapDownloader_SearchPlaceholder"]
+            )
+        );
     }
 
     public void SubmitSearch(string text)
@@ -75,7 +78,10 @@ public sealed partial class BeatmapDownloaderScene
 
     public void ToggleOrder()
     {
-        _order = _order == BeatmapMirrorOrder.Ascending ? BeatmapMirrorOrder.Descending : BeatmapMirrorOrder.Ascending;
+        _order =
+            _order == BeatmapMirrorOrder.Ascending
+                ? BeatmapMirrorOrder.Descending
+                : BeatmapMirrorOrder.Ascending;
         _ = SearchAsync(false);
     }
 
@@ -136,7 +142,8 @@ public sealed partial class BeatmapDownloaderScene
 
     public void Download(int index, bool withVideo) => _ = DownloadAsync(index, withVideo);
 
-    public void DownloadVisible(int visibleSlot, bool withVideo) => Download(_visibleStartIndex + visibleSlot, withVideo);
+    public void DownloadVisible(int visibleSlot, bool withVideo) =>
+        Download(_visibleStartIndex + visibleSlot, withVideo);
 
     public void DownloadDetails(bool withVideo)
     {
@@ -158,13 +165,21 @@ public sealed partial class BeatmapDownloaderScene
     {
         if (_sortDropdownOpen)
         {
-            _sortDropdownScroll = Math.Clamp(_sortDropdownScroll + deltaY, 0f, MaxDropdownScroll(SortOptions().Length, viewport));
+            _sortDropdownScroll = Math.Clamp(
+                _sortDropdownScroll + deltaY,
+                0f,
+                MaxDropdownScroll(SortOptions().Length, viewport)
+            );
             return;
         }
 
         if (_statusDropdownOpen)
         {
-            _statusDropdownScroll = Math.Clamp(_statusDropdownScroll + deltaY, 0f, MaxDropdownScroll(StatusOptions().Length, viewport));
+            _statusDropdownScroll = Math.Clamp(
+                _statusDropdownScroll + deltaY,
+                0f,
+                MaxDropdownScroll(StatusOptions().Length, viewport)
+            );
             return;
         }
 
@@ -180,7 +195,11 @@ public sealed partial class BeatmapDownloaderScene
         }
     }
 
-    public bool TryBeginScrollDrag(UiPoint point, VirtualViewport viewport, double? timestampSeconds = null)
+    public bool TryBeginScrollDrag(
+        UiPoint point,
+        VirtualViewport viewport,
+        double? timestampSeconds = null
+    )
     {
         double timestamp = timestampSeconds ?? _elapsedSeconds;
         if (_sortDropdownOpen && MaxDropdownScroll(SortOptions().Length, viewport) > 0f)
@@ -197,7 +216,12 @@ public sealed partial class BeatmapDownloaderScene
             return true;
         }
 
-        if (_selectedSetIndex is not null || _filtersOpen || _mirrorsOpen || MaxScrollOffset(viewport) <= 0f)
+        if (
+            _selectedSetIndex is not null
+            || _filtersOpen
+            || _mirrorsOpen
+            || MaxScrollOffset(viewport) <= 0f
+        )
         {
             return false;
         }
@@ -207,18 +231,49 @@ public sealed partial class BeatmapDownloaderScene
         return true;
     }
 
-    public bool UpdateScrollDrag(UiPoint point, VirtualViewport viewport, double? timestampSeconds = null)
+    public bool UpdateScrollDrag(
+        UiPoint point,
+        VirtualViewport viewport,
+        double? timestampSeconds = null
+    )
     {
         double timestamp = timestampSeconds ?? _elapsedSeconds;
         bool moved = _activeScrollTarget switch
         {
-            BeatmapDownloaderScrollTarget.SortDropdown => _sortDropdownKineticScroll.Drag(point, timestamp, () => _sortDropdownScroll, value => _sortDropdownScroll = value, 0f, MaxDropdownScroll(SortOptions().Length, viewport)),
-            BeatmapDownloaderScrollTarget.StatusDropdown => _statusDropdownKineticScroll.Drag(point, timestamp, () => _statusDropdownScroll, value => _statusDropdownScroll = value, 0f, MaxDropdownScroll(StatusOptions().Length, viewport)),
-            BeatmapDownloaderScrollTarget.Results => _resultsScroll.Drag(point, timestamp, () => _scrollOffset, value => _scrollOffset = value, 0f, MaxScrollOffset(viewport)),
+            BeatmapDownloaderScrollTarget.SortDropdown => _sortDropdownKineticScroll.Drag(
+                point,
+                timestamp,
+                () => _sortDropdownScroll,
+                value => _sortDropdownScroll = value,
+                0f,
+                MaxDropdownScroll(SortOptions().Length, viewport)
+            ),
+            BeatmapDownloaderScrollTarget.StatusDropdown => _statusDropdownKineticScroll.Drag(
+                point,
+                timestamp,
+                () => _statusDropdownScroll,
+                value => _statusDropdownScroll = value,
+                0f,
+                MaxDropdownScroll(StatusOptions().Length, viewport)
+            ),
+            BeatmapDownloaderScrollTarget.Results => _resultsScroll.Drag(
+                point,
+                timestamp,
+                () => _scrollOffset,
+                value => _scrollOffset = value,
+                0f,
+                MaxScrollOffset(viewport)
+            ),
             _ => false,
         };
 
-        if (moved && _activeScrollTarget == BeatmapDownloaderScrollTarget.Results && _hasMore && !_isSearching && _scrollOffset >= MaxScrollOffset(viewport) - 40f * Dp)
+        if (
+            moved
+            && _activeScrollTarget == BeatmapDownloaderScrollTarget.Results
+            && _hasMore
+            && !_isSearching
+            && _scrollOffset >= MaxScrollOffset(viewport) - 40f * Dp
+        )
         {
             _ = SearchAsync(true);
         }
@@ -226,23 +281,48 @@ public sealed partial class BeatmapDownloaderScene
         return moved;
     }
 
-    public void EndScrollDrag(UiPoint point, VirtualViewport viewport, double? timestampSeconds = null)
+    public void EndScrollDrag(
+        UiPoint point,
+        VirtualViewport viewport,
+        double? timestampSeconds = null
+    )
     {
         double timestamp = timestampSeconds ?? _elapsedSeconds;
         switch (_activeScrollTarget)
         {
             case BeatmapDownloaderScrollTarget.SortDropdown:
-                _sortDropdownKineticScroll.End(point, timestamp, () => _sortDropdownScroll, value => _sortDropdownScroll = value, 0f, MaxDropdownScroll(SortOptions().Length, viewport));
+                _sortDropdownKineticScroll.End(
+                    point,
+                    timestamp,
+                    () => _sortDropdownScroll,
+                    value => _sortDropdownScroll = value,
+                    0f,
+                    MaxDropdownScroll(SortOptions().Length, viewport)
+                );
                 _resultsScroll.End();
                 _statusDropdownKineticScroll.End();
                 break;
             case BeatmapDownloaderScrollTarget.StatusDropdown:
-                _statusDropdownKineticScroll.End(point, timestamp, () => _statusDropdownScroll, value => _statusDropdownScroll = value, 0f, MaxDropdownScroll(StatusOptions().Length, viewport));
+                _statusDropdownKineticScroll.End(
+                    point,
+                    timestamp,
+                    () => _statusDropdownScroll,
+                    value => _statusDropdownScroll = value,
+                    0f,
+                    MaxDropdownScroll(StatusOptions().Length, viewport)
+                );
                 _resultsScroll.End();
                 _sortDropdownKineticScroll.End();
                 break;
             case BeatmapDownloaderScrollTarget.Results:
-                _resultsScroll.End(point, timestamp, () => _scrollOffset, value => _scrollOffset = value, 0f, MaxScrollOffset(viewport));
+                _resultsScroll.End(
+                    point,
+                    timestamp,
+                    () => _scrollOffset,
+                    value => _scrollOffset = value,
+                    0f,
+                    MaxScrollOffset(viewport)
+                );
                 _sortDropdownKineticScroll.End();
                 _statusDropdownKineticScroll.End();
                 break;
@@ -255,7 +335,15 @@ public sealed partial class BeatmapDownloaderScene
 
         _activeScrollTarget = null;
         _scrollOffset = Math.Clamp(_scrollOffset, 0f, MaxScrollOffset(viewport));
-        _sortDropdownScroll = Math.Clamp(_sortDropdownScroll, 0f, MaxDropdownScroll(SortOptions().Length, viewport));
-        _statusDropdownScroll = Math.Clamp(_statusDropdownScroll, 0f, MaxDropdownScroll(StatusOptions().Length, viewport));
+        _sortDropdownScroll = Math.Clamp(
+            _sortDropdownScroll,
+            0f,
+            MaxDropdownScroll(SortOptions().Length, viewport)
+        );
+        _statusDropdownScroll = Math.Clamp(
+            _statusDropdownScroll,
+            0f,
+            MaxDropdownScroll(StatusOptions().Length, viewport)
+        );
     }
 }

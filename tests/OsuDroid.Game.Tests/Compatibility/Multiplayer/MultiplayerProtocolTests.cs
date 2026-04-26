@@ -12,7 +12,10 @@ public sealed class MultiplayerProtocolTests
     {
         Uri uri = MultiplayerProtocol.BuildRoomListUri(new RoomListQuery("abc", 12, "ssid", "sig"));
 
-        Assert.That(uri.GetLeftPart(UriPartial.Path), Is.EqualTo("https://multi.osudroid.moe/getrooms"));
+        Assert.That(
+            uri.GetLeftPart(UriPartial.Path),
+            Is.EqualTo("https://multi.osudroid.moe/getrooms")
+        );
         Assert.That(uri.Query, Does.Contain("sign=sig"));
         Assert.That(uri.Query, Does.Contain("query=abc"));
         Assert.That(uri.Query, Does.Contain("uid=12"));
@@ -29,9 +32,12 @@ public sealed class MultiplayerProtocolTests
             "ssid",
             "sig",
             "secret",
-            6);
+            6
+        );
 
-        using var json = JsonDocument.Parse(MultiplayerProtocol.SerializeCreateRoomRequest(request));
+        using var json = JsonDocument.Parse(
+            MultiplayerProtocol.SerializeCreateRoomRequest(request)
+        );
         JsonElement root = json.RootElement;
         Assert.That(root.GetProperty("hostUid").GetInt64(), Is.EqualTo(99));
         Assert.That(root.GetProperty("name").GetString(), Is.EqualTo("room"));

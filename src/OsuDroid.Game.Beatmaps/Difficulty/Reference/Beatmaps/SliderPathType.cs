@@ -5,16 +5,17 @@ internal enum SliderPathType
     Catmull,
     Bezier,
     Linear,
-    PerfectCurve
+    PerfectCurve,
 }
 
 internal static class SliderPathTypeExtensions
 {
-    public static SliderPathType Parse(char value) => value switch
-    {
-        'C' => SliderPathType.Catmull,
-        'L' => SliderPathType.Linear,
-        'P' => SliderPathType.PerfectCurve,
-        _ => SliderPathType.Bezier,
-    };
+    public static SliderPathType Parse(char value) =>
+        value switch
+        {
+            'C' => SliderPathType.Catmull,
+            'L' => SliderPathType.Linear,
+            'P' => SliderPathType.PerfectCurve,
+            _ => SliderPathType.Bezier,
+        };
 }

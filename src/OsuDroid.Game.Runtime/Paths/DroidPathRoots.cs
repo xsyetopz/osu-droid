@@ -5,12 +5,16 @@ public sealed record DroidPathRoots(string CoreRoot, string CacheRoot)
     public const string CoreDirectoryName = "osu!droid";
     public const string HyphenatedCoreDirectoryName = "osu-droid";
 
-    public static DroidPathRoots FromCoreRoot(string coreRoot) => new(coreRoot, Path.Combine(coreRoot, "Cache"));
+    public static DroidPathRoots FromCoreRoot(string coreRoot) =>
+        new(coreRoot, Path.Combine(coreRoot, "Cache"));
 
     public static DroidPathRoots FromAppDataDirectory(string appDataDirectory, string cacheRoot)
     {
         string coreRoot = Path.Combine(appDataDirectory, CoreDirectoryName);
-        MigrateHyphenatedCoreRoot(Path.Combine(appDataDirectory, HyphenatedCoreDirectoryName), coreRoot);
+        MigrateHyphenatedCoreRoot(
+            Path.Combine(appDataDirectory, HyphenatedCoreDirectoryName),
+            coreRoot
+        );
         return new DroidPathRoots(coreRoot, cacheRoot);
     }
 

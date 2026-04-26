@@ -13,4 +13,5 @@ public sealed record BeatmapMirrorBeatmap(
     int CircleCount,
     int SliderCount,
     int SpinnerCount,
-    int Mode);
+    int Mode
+);

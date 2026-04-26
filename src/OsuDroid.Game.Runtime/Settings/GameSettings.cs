@@ -14,7 +14,8 @@ public sealed class JsonGameSettingsStore(string filePath) : IExportableGameSett
             EnsureLoaded();
             return _values is null || !_values.TryGetValue(key, out JsonElement element)
                 ? defaultValue
-                : element.ValueKind == JsonValueKind.True || (element.ValueKind == JsonValueKind.False ? false : defaultValue);
+                : element.ValueKind == JsonValueKind.True
+                    || (element.ValueKind == JsonValueKind.False ? false : defaultValue);
         }
     }
 
@@ -24,8 +25,10 @@ public sealed class JsonGameSettingsStore(string filePath) : IExportableGameSett
         {
             EnsureLoaded();
             return _values is null || !_values.TryGetValue(key, out JsonElement element)
-                ? defaultValue
-                : element.ValueKind == JsonValueKind.Number && element.TryGetInt32(out int value) ? value : defaultValue;
+                    ? defaultValue
+                : element.ValueKind == JsonValueKind.Number && element.TryGetInt32(out int value)
+                    ? value
+                : defaultValue;
         }
     }
 
@@ -44,7 +47,9 @@ public sealed class JsonGameSettingsStore(string filePath) : IExportableGameSett
         lock (_gate)
         {
             EnsureLoaded();
-            _values![key] = JsonDocument.Parse(value.ToString(System.Globalization.CultureInfo.InvariantCulture)).RootElement.Clone();
+            _values![key] = JsonDocument
+                .Parse(value.ToString(System.Globalization.CultureInfo.InvariantCulture))
+                .RootElement.Clone();
             Save();
         }
     }
@@ -55,8 +60,9 @@ public sealed class JsonGameSettingsStore(string filePath) : IExportableGameSett
         {
             EnsureLoaded();
             return _values is null || !_values.TryGetValue(key, out JsonElement element)
-                ? defaultValue
-                : element.ValueKind == JsonValueKind.String ? element.GetString() ?? defaultValue : defaultValue;
+                    ? defaultValue
+                : element.ValueKind == JsonValueKind.String ? element.GetString() ?? defaultValue
+                : defaultValue;
         }
     }
 
@@ -95,7 +101,9 @@ public sealed class JsonGameSettingsStore(string filePath) : IExportableGameSett
             EnsureLoaded();
             foreach ((string key, GameSettingValue settingValue) in settings)
             {
-                _values![key] = JsonDocument.Parse(JsonSerializer.Serialize(settingValue.ToJsonValue())).RootElement.Clone();
+                _values![key] = JsonDocument
+                    .Parse(JsonSerializer.Serialize(settingValue.ToJsonValue()))
+                    .RootElement.Clone();
             }
 
             Save();
@@ -118,9 +126,16 @@ public sealed class JsonGameSettingsStore(string filePath) : IExportableGameSett
         try
         {
             using var document = JsonDocument.Parse(File.ReadAllText(filePath));
-            _values = document.RootElement.ValueKind == JsonValueKind.Object
-                ? document.RootElement.EnumerateObject().ToDictionary(property => property.Name, property => property.Value.Clone(), StringComparer.Ordinal)
-                : new Dictionary<string, JsonElement>(StringComparer.Ordinal);
+            _values =
+                document.RootElement.ValueKind == JsonValueKind.Object
+                    ? document
+                        .RootElement.EnumerateObject()
+                        .ToDictionary(
+                            property => property.Name,
+                            property => property.Value.Clone(),
+                            StringComparer.Ordinal
+                        )
+                    : new Dictionary<string, JsonElement>(StringComparer.Ordinal);
         }
         catch
         {

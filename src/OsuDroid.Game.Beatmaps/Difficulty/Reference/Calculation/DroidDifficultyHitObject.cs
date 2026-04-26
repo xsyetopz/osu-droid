@@ -15,7 +15,8 @@ internal sealed class DroidDifficultyHitObject : DifficultyHitObject
         HitObject? lastObj,
         double clockRate,
         DroidDifficultyHitObject[] difficultyHitObjects,
-        int index)
+        int index
+    )
         : base(obj, lastObj, clockRate, difficultyHitObjects, index)
     {
         typedDifficultyHitObjects = difficultyHitObjects;
@@ -26,7 +27,8 @@ internal sealed class DroidDifficultyHitObject : DifficultyHitObject
 
     protected override float MaximumSliderRadius => NormalizedRadius * 2f;
 
-    public override double SmallCircleBonus => System.Math.Max(1d, 1 + System.Math.Pow((70 - Obj.DifficultyRadius) / 50d, 2));
+    public override double SmallCircleBonus =>
+        System.Math.Max(1d, 1 + System.Math.Pow((70 - Obj.DifficultyRadius) / 50d, 2));
 
     public double RhythmMultiplier { get; set; } = 1d;
 
@@ -38,12 +40,16 @@ internal sealed class DroidDifficultyHitObject : DifficultyHitObject
     public override DifficultyHitObject? Next(int forwardsIndex)
     {
         int nextIndex = Index + forwardsIndex + 2;
-        return nextIndex < typedDifficultyHitObjects.Length ? typedDifficultyHitObjects[nextIndex] : null;
+        return nextIndex < typedDifficultyHitObjects.Length
+            ? typedDifficultyHitObjects[nextIndex]
+            : null;
     }
 
     public override double OpacityAt(double time, IEnumerable<Mod> mods)
     {
-        return Obj is HitCircle && mods.Any(static mod => mod is ModTraceable) ? 0d : base.OpacityAt(time, mods);
+        return Obj is HitCircle && mods.Any(static mod => mod is ModTraceable)
+            ? 0d
+            : base.OpacityAt(time, mods);
     }
 
     public bool IsOverlapping(bool considerDistance)
@@ -65,10 +71,15 @@ internal sealed class DroidDifficultyHitObject : DifficultyHitObject
         }
 
         var position = Obj.DifficultyStackedPosition;
-        float distanceSquared = previous.Obj.DifficultyStackedEndPosition.DistanceSquaredTo(position);
+        float distanceSquared = previous.Obj.DifficultyStackedEndPosition.DistanceSquaredTo(
+            position
+        );
         if (previous.LazyEndPosition is { } lazyEndPosition)
         {
-            distanceSquared = System.Math.Min(distanceSquared, lazyEndPosition.DistanceSquaredTo(position));
+            distanceSquared = System.Math.Min(
+                distanceSquared,
+                lazyEndPosition.DistanceSquaredTo(position)
+            );
         }
 
         float threshold = (float)(2 * Obj.DifficultyRadius);

@@ -6,4 +6,3 @@ public interface IExportableGameSettingsStore : IGameSettingsStore
 
     void SetMany(IReadOnlyDictionary<string, GameSettingValue> settings);
 }
-

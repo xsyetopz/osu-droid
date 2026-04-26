@@ -30,14 +30,18 @@ internal sealed class RenderWarmupQueue
             if (activeFrame is null)
                 return;
 
-            activeElementIndex = renderer.WarmUp(activeFrame, activeElementIndex, deadline, metrics);
+            activeElementIndex = renderer.WarmUp(
+                activeFrame,
+                activeElementIndex,
+                deadline,
+                metrics
+            );
             if (activeElementIndex < activeFrame.Elements.Count)
                 return;
 
             activeFrame = null;
             activeElementIndex = 0;
-        }
-        while (DateTime.UtcNow < deadline);
+        } while (DateTime.UtcNow < deadline);
     }
 
     private UiFrameSnapshot? DequeueFrame(RenderCacheMetrics metrics)

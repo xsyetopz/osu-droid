@@ -7,4 +7,5 @@ public sealed record BeatmapMirrorSearchRequest(
     BeatmapMirrorSort Sort = BeatmapMirrorSort.RankedDate,
     BeatmapMirrorOrder Order = BeatmapMirrorOrder.Descending,
     BeatmapRankedStatus? Status = null,
-    BeatmapMirrorKind Mirror = BeatmapMirrorKind.OsuDirect);
+    BeatmapMirrorKind Mirror = BeatmapMirrorKind.OsuDirect
+);

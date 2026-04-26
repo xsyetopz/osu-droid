@@ -30,14 +30,20 @@ public static class MultiplayerProtocol
             ["sessionId"] = query.SessionId,
         };
 
-        builder.Query = string.Join("&", parameters
-            .Where(pair => pair.Value is not null)
-            .Select(pair => $"{Uri.EscapeDataString(pair.Key)}={Uri.EscapeDataString(pair.Value!)}"));
+        builder.Query = string.Join(
+            "&",
+            parameters
+                .Where(pair => pair.Value is not null)
+                .Select(pair =>
+                    $"{Uri.EscapeDataString(pair.Key)}={Uri.EscapeDataString(pair.Value!)}"
+                )
+        );
 
         return builder.Uri;
     }
 
-    public static Uri CreateRoomUri() => new(new Uri(MultiplayerConstants.Host), MultiplayerConstants.CreateRoomPath);
+    public static Uri CreateRoomUri() =>
+        new(new Uri(MultiplayerConstants.Host), MultiplayerConstants.CreateRoomPath);
 
     public static CreateRoomRequestDto CreateRoomRequest(
         string name,
@@ -46,7 +52,9 @@ public static class MultiplayerProtocol
         string sessionId,
         string? sign,
         string? password = null,
-        int maxPlayers = 8) => new(
+        int maxPlayers = 8
+    ) =>
+        new(
             hostUserId,
             name,
             maxPlayers,
@@ -54,7 +62,9 @@ public static class MultiplayerProtocol
             string.IsNullOrWhiteSpace(password) ? null : password,
             MultiplayerConstants.ApiVersion,
             sessionId,
-            sign);
+            sign
+        );
 
-    public static string SerializeCreateRoomRequest(CreateRoomRequestDto request) => JsonSerializer.Serialize(request, s_jsonOptions);
+    public static string SerializeCreateRoomRequest(CreateRoomRequestDto request) =>
+        JsonSerializer.Serialize(request, s_jsonOptions);
 }

@@ -9,7 +9,8 @@ public sealed partial class BeatmapLibraryRepository
     {
         using SqliteConnection connection = database.OpenConnection();
         using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "SELECT setDirectory, isFavorite, offset FROM BeatmapOptions WHERE setDirectory = $setDirectory";
+        command.CommandText =
+            "SELECT setDirectory, isFavorite, offset FROM BeatmapOptions WHERE setDirectory = $setDirectory";
         command.Parameters.AddWithValue("$setDirectory", setDirectory);
         using SqliteDataReader reader = command.ExecuteReader();
 

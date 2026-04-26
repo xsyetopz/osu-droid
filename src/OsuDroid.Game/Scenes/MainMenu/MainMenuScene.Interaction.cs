@@ -9,7 +9,10 @@ public sealed partial class MainMenuScene
     public void SetNowPlaying(MenuNowPlayingState state)
     {
         _nowPlaying = state;
-        _currentBeatMilliseconds = state.IsPlaying && state.Bpm > 0.01f ? Math.Clamp(60000d / state.Bpm, 260d, 2000d) : LogoBeatMilliseconds;
+        _currentBeatMilliseconds =
+            state.IsPlaying && state.Bpm > 0.01f
+                ? Math.Clamp(60000d / state.Bpm, 260d, 2000d)
+                : LogoBeatMilliseconds;
     }
 
     public void SetOnlinePanelState(OnlineProfilePanelState? state) => _onlinePanelState = state;
@@ -42,7 +45,8 @@ public sealed partial class MainMenuScene
         switch (action)
         {
             case MainMenuAction.MoveUp:
-                _selectedIndex = (_selectedIndex + CurrentEntries.Length - 1) % CurrentEntries.Length;
+                _selectedIndex =
+                    (_selectedIndex + CurrentEntries.Length - 1) % CurrentEntries.Length;
                 return MainMenuRoute.None;
 
             case MainMenuAction.MoveDown:
@@ -63,7 +67,13 @@ public sealed partial class MainMenuScene
 
     public MainMenuRoute Tap(MainMenuButtonSlot slot)
     {
-        if (!IsMenuShown || _isAboutDialogOpen || _isExitDialogOpen || IsExitAnimating || _menuVisibility == MenuVisibility.Collapsing)
+        if (
+            !IsMenuShown
+            || _isAboutDialogOpen
+            || _isExitDialogOpen
+            || IsExitAnimating
+            || _menuVisibility == MenuVisibility.Collapsing
+        )
         {
             return MainMenuRoute.None;
         }
@@ -259,7 +269,10 @@ public sealed partial class MainMenuScene
                 break;
         }
 
-        if ((_menuVisibility is MenuVisibility.Expanding or MenuVisibility.Expanded) && _shownMilliseconds > MenuIdleCollapseMilliseconds)
+        if (
+            (_menuVisibility is MenuVisibility.Expanding or MenuVisibility.Expanded)
+            && _shownMilliseconds > MenuIdleCollapseMilliseconds
+        )
         {
             BeginCollapse();
         }

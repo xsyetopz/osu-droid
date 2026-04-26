@@ -10,17 +10,22 @@ namespace OsuDroid.Game.Tests;
 
 public sealed partial class SongSelectSceneTests
 {
-
     [Test]
     public void DifficultySelectionChangesSelectedBeatmap()
     {
-        var scene = new SongSelectScene(new FakeLibrary(CreateSnapshot()), new NoOpMenuMusicController(), new FakeDifficultyService(), CreateSongsRoot("audio.mp3"));
+        var scene = new SongSelectScene(
+            new FakeLibrary(CreateSnapshot()),
+            new NoOpMenuMusicController(),
+            new FakeDifficultyService(),
+            CreateSongsRoot("audio.mp3")
+        );
 
         scene.Enter();
         scene.SelectDifficulty(1);
 
         Assert.That(scene.SelectedBeatmap?.Version, Is.EqualTo("Insane"));
     }
+
     [Test]
     public void DifficultiesAreSortedByDisplayedStarRating()
     {
@@ -28,10 +33,15 @@ public sealed partial class SongSelectSceneTests
         BeatmapInfo easy = CreateBeatmap("Easy", null, 1.2f);
         BeatmapInfo normal = CreateBeatmap("Normal", null, 2.3f);
         var scene = new SongSelectScene(
-            new FakeLibrary(new BeatmapLibrarySnapshot([new BeatmapSetInfo(1, "1 Artist - Title", [hard, easy, normal])])),
+            new FakeLibrary(
+                new BeatmapLibrarySnapshot([
+                    new BeatmapSetInfo(1, "1 Artist - Title", [hard, easy, normal]),
+                ])
+            ),
             new NoOpMenuMusicController(),
             new FakeDifficultyService(),
-            CreateSongsRoot("audio.mp3"));
+            CreateSongsRoot("audio.mp3")
+        );
 
         scene.Enter();
 
@@ -41,16 +51,22 @@ public sealed partial class SongSelectSceneTests
         scene.SelectDifficulty(2);
         Assert.That(scene.SelectedBeatmap?.Version, Is.EqualTo("Hard"));
     }
+
     [Test]
     public void DifficultyAlgorithmToggleResortsAndKeepsSelectedBeatmap()
     {
         BeatmapInfo easy = CreateBeatmap("Easy", null, 1.2f) with { StandardStarRating = 4.2f };
         BeatmapInfo hard = CreateBeatmap("Hard", null, 3.4f) with { StandardStarRating = 2.1f };
         var scene = new SongSelectScene(
-            new FakeLibrary(new BeatmapLibrarySnapshot([new BeatmapSetInfo(1, "1 Artist - Title", [easy, hard])])),
+            new FakeLibrary(
+                new BeatmapLibrarySnapshot([
+                    new BeatmapSetInfo(1, "1 Artist - Title", [easy, hard]),
+                ])
+            ),
             new NoOpMenuMusicController(),
             new FakeDifficultyService(),
-            CreateSongsRoot("audio.mp3"));
+            CreateSongsRoot("audio.mp3")
+        );
 
         scene.Enter();
         scene.SelectDifficulty(1);
@@ -62,17 +78,31 @@ public sealed partial class SongSelectSceneTests
         scene.SelectDifficulty(1);
         Assert.That(scene.SelectedBeatmap?.Version, Is.EqualTo("Easy"));
     }
+
     [Test]
     public void BackgroundDifficultyCalculationUpdatesVisibleAndBackingSnapshots()
     {
         string songs = CreateSongsRoot("audio.mp3");
-        BeatmapInfo easy = CreateBeatmap("Easy", null, 0f) with { DroidStarRating = null, StandardStarRating = null };
-        BeatmapInfo insane = CreateBeatmap("Insane", null, 0f) with { DroidStarRating = null, StandardStarRating = null };
+        BeatmapInfo easy = CreateBeatmap("Easy", null, 0f) with
+        {
+            DroidStarRating = null,
+            StandardStarRating = null,
+        };
+        BeatmapInfo insane = CreateBeatmap("Insane", null, 0f) with
+        {
+            DroidStarRating = null,
+            StandardStarRating = null,
+        };
         var scene = new SongSelectScene(
-            new FakeLibrary(new BeatmapLibrarySnapshot([new BeatmapSetInfo(1, "1 Artist - Title", [easy, insane])])),
+            new FakeLibrary(
+                new BeatmapLibrarySnapshot([
+                    new BeatmapSetInfo(1, "1 Artist - Title", [easy, insane]),
+                ])
+            ),
             new NoOpMenuMusicController(),
             new UpdatingDifficultyService(),
-            songs);
+            songs
+        );
 
         scene.Enter();
         SpinUntil(() =>
@@ -85,8 +115,13 @@ public sealed partial class SongSelectSceneTests
         scene.SetBeatmapOptionsSearchQuery(string.Empty);
 
         Assert.That(scene.SelectedBeatmap?.DroidStarRating, Is.EqualTo(6.5f));
-        Assert.That(scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame.Elements
-            .Single(element => element.Id == "songselect-difficulty").Text, Does.Contain("Stars: 6.5"));
+        Assert.That(
+            scene
+                .CreateSnapshot(VirtualViewport.FromSurface(1280, 720))
+                .UiFrame.Elements.Single(element => element.Id == "songselect-difficulty")
+                .Text,
+            Does.Contain("Stars: 6.5")
+        );
     }
 
     [Test]
@@ -107,14 +142,20 @@ public sealed partial class SongSelectSceneTests
                 DroidStarRating = 2.3f,
             };
             var scene = new SongSelectScene(
-                new FakeLibrary(new BeatmapLibrarySnapshot([new BeatmapSetInfo(1, "1 Artist - Title", [beatmap])])),
+                new FakeLibrary(
+                    new BeatmapLibrarySnapshot([
+                        new BeatmapSetInfo(1, "1 Artist - Title", [beatmap]),
+                    ])
+                ),
                 new NoOpMenuMusicController(),
                 new FakeDifficultyService(),
-                CreateSongsRoot("audio.mp3"));
+                CreateSongsRoot("audio.mp3")
+            );
 
             scene.Enter();
-            string? text = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame.Elements
-                .Single(element => element.Id == "songselect-difficulty")
+            string? text = scene
+                .CreateSnapshot(VirtualViewport.FromSurface(1280, 720))
+                .UiFrame.Elements.Single(element => element.Id == "songselect-difficulty")
                 .Text;
 
             Assert.That(text, Does.Contain("AR: 5.5"));
@@ -130,13 +171,19 @@ public sealed partial class SongSelectSceneTests
             CultureInfo.CurrentUICulture = previousUiCulture;
         }
     }
+
     [Test]
     public void DifficultyCalculatorProducesPersistableDroidAndStandardRatings()
     {
-        string root = Path.Combine(TestContext.CurrentContext.WorkDirectory, Guid.NewGuid().ToString("N"));
+        string root = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            Guid.NewGuid().ToString("N")
+        );
         Directory.CreateDirectory(root);
         string osu = Path.Combine(root, "fixture.osu");
-        File.WriteAllText(osu, """
+        File.WriteAllText(
+            osu,
+            """
             osu file format v14
 
             [General]
@@ -160,7 +207,8 @@ public sealed partial class SongSelectSceneTests
             256,96,750,2,0,B|256:288|448:288,1,240
             64,192,1000,1,0,0:0:0:0:
             448,192,1250,1,0,0:0:0:0:
-            """);
+            """
+        );
 
         BeatmapStarRatings ratings = new BeatmapDifficultyCalculator().Calculate(osu);
 
@@ -168,6 +216,7 @@ public sealed partial class SongSelectSceneTests
         Assert.That(ratings.Standard, Is.GreaterThan(0f));
         Assert.That(ratings.Droid, Is.Not.EqualTo(ratings.Standard));
     }
+
     [Test]
     public void DifficultyCalculatorMatchesReferenceComRianOsuFixture()
     {
@@ -184,9 +233,12 @@ public sealed partial class SongSelectSceneTests
             "test",
             "resources",
             "beatmaps",
-            "YOASOBI - Love Letter (ohm002) [Please accept my overflowing emotions.].osu");
+            "YOASOBI - Love Letter (ohm002) [Please accept my overflowing emotions.].osu"
+        );
 
-        BeatmapStarRatings ratings = new BeatmapDifficultyCalculator().Calculate(Path.GetFullPath(osu));
+        BeatmapStarRatings ratings = new BeatmapDifficultyCalculator().Calculate(
+            Path.GetFullPath(osu)
+        );
 
         Assert.That(ratings.Droid, Is.EqualTo(3.86f).Within(0.000001f));
         Assert.That(ratings.Standard, Is.EqualTo(4.70f).Within(0.000001f));

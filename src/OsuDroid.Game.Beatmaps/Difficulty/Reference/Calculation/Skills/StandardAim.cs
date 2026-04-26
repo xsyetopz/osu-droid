@@ -5,7 +5,8 @@ using OsuDroid.Game.Beatmaps.Difficulty.Reference.Mods;
 
 namespace OsuDroid.Game.Beatmaps.Difficulty.Reference.Calculation.Skills;
 
-internal sealed class StandardAim(IEnumerable<Mod> mods, bool withSliders) : StandardStrainSkill(mods)
+internal sealed class StandardAim(IEnumerable<Mod> mods, bool withSliders)
+    : StandardStrainSkill(mods)
 {
     public bool WithSliders { get; } = withSliders;
 
@@ -17,15 +18,21 @@ internal sealed class StandardAim(IEnumerable<Mod> mods, bool withSliders) : Sta
 
     public double CountDifficultSliders()
     {
-        return sliderStrains.Count == 0 ? 0d : sliderStrains.Sum(strain => 1d / (1 + System.Math.Exp(-(strain / maxSliderStrain * 12 - 6))));
+        return sliderStrains.Count == 0
+            ? 0d
+            : sliderStrains.Sum(strain =>
+                1d / (1 + System.Math.Exp(-(strain / maxSliderStrain * 12 - 6)))
+            );
     }
 
-    public double CountTopWeightedSliders() => StrainUtils.CountTopWeightedSliders(sliderStrains, difficulty);
+    public double CountTopWeightedSliders() =>
+        StrainUtils.CountTopWeightedSliders(sliderStrains, difficulty);
 
     protected override double StrainValueAt(StandardDifficultyHitObject current)
     {
         currentStrain *= StrainDecay(current.DeltaTime);
-        currentStrain += StandardAimEvaluator.EvaluateDifficultyOf(current, WithSliders) * SkillMultiplier;
+        currentStrain +=
+            StandardAimEvaluator.EvaluateDifficultyOf(current, WithSliders) * SkillMultiplier;
 
         if (current.Obj is Slider)
         {
@@ -37,8 +44,10 @@ internal sealed class StandardAim(IEnumerable<Mod> mods, bool withSliders) : Sta
         return currentStrain;
     }
 
-    protected override double CalculateInitialStrain(double time, StandardDifficultyHitObject current) =>
-        currentStrain * StrainDecay(time - current.Previous(0)!.StartTime);
+    protected override double CalculateInitialStrain(
+        double time,
+        StandardDifficultyHitObject current
+    ) => currentStrain * StrainDecay(time - current.Previous(0)!.StartTime);
 
     private static double StrainDecay(double ms) => System.Math.Pow(StrainDecayBase, ms / 1000d);
 }

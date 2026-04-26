@@ -9,7 +9,10 @@ namespace OsuDroid.Game.Scenes.SongSelect;
 
 public sealed partial class SongSelectScene
 {
-    private static readonly Regex s_filterStatPattern = new("(ar|od|cs|hp|star)(=|<|>|<=|>=)(\\d+)", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex s_filterStatPattern = new(
+        "(ar|od|cs|hp|star)(=|<|>|<=|>=)(\\d+)",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant
+    );
 
 #pragma warning disable IDE0072 // Sort mode defaults to Title for unknown values.
     private BeatmapOptions? CurrentOptions()
@@ -18,7 +21,11 @@ public sealed partial class SongSelectScene
         return set is null ? null : library.GetOptions(set.Directory);
     }
 
-    private void ApplyBeatmapOptions(string? preferredSetDirectory = null, string? preferredBeatmapFilename = null, bool queueDifficultyCalculations = true)
+    private void ApplyBeatmapOptions(
+        string? preferredSetDirectory = null,
+        string? preferredBeatmapFilename = null,
+        bool queueDifficultyCalculations = true
+    )
     {
         long start = PerfDiagnostics.Start();
         BeatmapInfo? selected = SelectedBeatmap;
@@ -37,7 +44,9 @@ public sealed partial class SongSelectScene
 
         if (!string.IsNullOrWhiteSpace(collectionFilter))
         {
-            IReadOnlySet<string> directories = library.GetCollectionSetDirectories(collectionFilter);
+            IReadOnlySet<string> directories = library.GetCollectionSetDirectories(
+                collectionFilter
+            );
             sets = sets.Where(set => directories.Contains(set.Directory));
         }
 
@@ -55,7 +64,11 @@ public sealed partial class SongSelectScene
 
         int nextIndex = selectedDirectory is null
             ? Math.Clamp(selectedSetIndex, 0, _visibleSnapshot.Sets.Count - 1)
-            : _visibleSnapshot.Sets.ToList().FindIndex(set => string.Equals(set.Directory, selectedDirectory, StringComparison.Ordinal));
+            : _visibleSnapshot
+                .Sets.ToList()
+                .FindIndex(set =>
+                    string.Equals(set.Directory, selectedDirectory, StringComparison.Ordinal)
+                );
         selectedSetIndex = nextIndex >= 0 ? nextIndex : 0;
         if (!string.IsNullOrWhiteSpace(preferredBeatmapFilename))
         {
@@ -73,7 +86,11 @@ public sealed partial class SongSelectScene
             QueueVisibleDifficultyCalculations();
         }
 
-        PerfDiagnostics.Log("songSelect.applyOptions", start, $"sets={_visibleSnapshot.Sets.Count} search={searchQuery.Length} favorite={favoriteOnlyFilter} sort={sortMode}");
+        PerfDiagnostics.Log(
+            "songSelect.applyOptions",
+            start,
+            $"sets={_visibleSnapshot.Sets.Count} search={searchQuery.Length} favorite={favoriteOnlyFilter} sort={sortMode}"
+        );
     }
 
     private bool SetMatchesSearch(BeatmapSetInfo set)
@@ -94,7 +111,14 @@ public sealed partial class SongSelectScene
         {
             Match stat = s_filterStatPattern.Match(token);
             bool visible = stat.Success
-                ? set.Beatmaps.Any(beatmap => BeatmapStatMatches(beatmap, stat.Groups[1].Value, stat.Groups[2].Value, stat.Groups[3].Value))
+                ? set.Beatmaps.Any(beatmap =>
+                    BeatmapStatMatches(
+                        beatmap,
+                        stat.Groups[1].Value,
+                        stat.Groups[2].Value,
+                        stat.Groups[3].Value
+                    )
+                )
                 : text.Contains(token, StringComparison.Ordinal);
             if (!visible)
             {
@@ -128,7 +152,12 @@ public sealed partial class SongSelectScene
         return builder.ToString().ToLowerInvariant();
     }
 
-    private static bool BeatmapStatMatches(BeatmapInfo beatmap, string key, string operation, string value)
+    private static bool BeatmapStatMatches(
+        BeatmapInfo beatmap,
+        string key,
+        string operation,
+        string value
+    )
     {
         float threshold = float.Parse(value, CultureInfo.InvariantCulture);
         float actual = key switch
@@ -153,40 +182,74 @@ public sealed partial class SongSelectScene
 
     private BeatmapLibrarySnapshot CreateVisibleSnapshot(IEnumerable<BeatmapSetInfo> sets)
     {
-        BeatmapSetInfo[] source = sortMode is SongSelectSortMode.DroidStars or SongSelectSortMode.StandardStars or SongSelectSortMode.Length
+        BeatmapSetInfo[] source = sortMode
+            is SongSelectSortMode.DroidStars
+                or SongSelectSortMode.StandardStars
+                or SongSelectSortMode.Length
             ? FlattenSingleDifficultySets(sets).ToArray()
             : sets.ToArray();
         return SortDifficultyRows(new BeatmapLibrarySnapshot(SortSets(source).ToArray()));
     }
 
-    private static IEnumerable<BeatmapSetInfo> FlattenSingleDifficultySets(IEnumerable<BeatmapSetInfo> sets)
+    private static IEnumerable<BeatmapSetInfo> FlattenSingleDifficultySets(
+        IEnumerable<BeatmapSetInfo> sets
+    )
     {
         foreach (BeatmapSetInfo set in sets)
         {
             foreach (BeatmapInfo beatmap in set.Beatmaps)
             {
-                yield return set with { Beatmaps = [beatmap] };
+                yield return set with
+                {
+                    Beatmaps = [beatmap],
+                };
             }
         }
     }
 
-    private IEnumerable<BeatmapSetInfo> SortSets(IEnumerable<BeatmapSetInfo> sets) => sortMode switch
-    {
-        SongSelectSortMode.Artist => sets
-            .OrderBy(set => set.Beatmaps.FirstOrDefault()?.Artist ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(set => set.Beatmaps.FirstOrDefault()?.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase),
-        SongSelectSortMode.Creator => sets
-            .OrderBy(set => set.Beatmaps.FirstOrDefault()?.Creator ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(set => set.Beatmaps.FirstOrDefault()?.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase),
-        SongSelectSortMode.Date => sets.OrderByDescending(set => set.Beatmaps.Max(beatmap => beatmap.DateImported)),
-        SongSelectSortMode.Bpm => sets.OrderByDescending(set => set.Beatmaps.FirstOrDefault()?.BpmMax ?? 0f),
-        SongSelectSortMode.DroidStars => sets.OrderByDescending(set => set.Beatmaps.FirstOrDefault()?.DroidStarRating ?? 0f),
-        SongSelectSortMode.StandardStars => sets.OrderByDescending(set => set.Beatmaps.FirstOrDefault()?.StandardStarRating ?? 0f),
-        SongSelectSortMode.Length => sets.OrderByDescending(set => set.Beatmaps.FirstOrDefault()?.Length ?? 0L),
-        _ => sets
-                    .OrderBy(set => set.Beatmaps.FirstOrDefault()?.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                    .ThenBy(set => set.Beatmaps.FirstOrDefault()?.Artist ?? string.Empty, StringComparer.OrdinalIgnoreCase),
-    };
+    private IEnumerable<BeatmapSetInfo> SortSets(IEnumerable<BeatmapSetInfo> sets) =>
+        sortMode switch
+        {
+            SongSelectSortMode.Artist => sets.OrderBy(
+                    set => set.Beatmaps.FirstOrDefault()?.Artist ?? string.Empty,
+                    StringComparer.OrdinalIgnoreCase
+                )
+                .ThenBy(
+                    set => set.Beatmaps.FirstOrDefault()?.Title ?? string.Empty,
+                    StringComparer.OrdinalIgnoreCase
+                ),
+            SongSelectSortMode.Creator => sets.OrderBy(
+                    set => set.Beatmaps.FirstOrDefault()?.Creator ?? string.Empty,
+                    StringComparer.OrdinalIgnoreCase
+                )
+                .ThenBy(
+                    set => set.Beatmaps.FirstOrDefault()?.Title ?? string.Empty,
+                    StringComparer.OrdinalIgnoreCase
+                ),
+            SongSelectSortMode.Date => sets.OrderByDescending(set =>
+                set.Beatmaps.Max(beatmap => beatmap.DateImported)
+            ),
+            SongSelectSortMode.Bpm => sets.OrderByDescending(set =>
+                set.Beatmaps.FirstOrDefault()?.BpmMax ?? 0f
+            ),
+            SongSelectSortMode.DroidStars => sets.OrderByDescending(set =>
+                set.Beatmaps.FirstOrDefault()?.DroidStarRating ?? 0f
+            ),
+            SongSelectSortMode.StandardStars => sets.OrderByDescending(set =>
+                set.Beatmaps.FirstOrDefault()?.StandardStarRating ?? 0f
+            ),
+            SongSelectSortMode.Length => sets.OrderByDescending(set =>
+                set.Beatmaps.FirstOrDefault()?.Length ?? 0L
+            ),
+            _ => sets.OrderBy(
+                    set => set.Beatmaps.FirstOrDefault()?.Title ?? string.Empty,
+                    StringComparer.OrdinalIgnoreCase
+                )
+                .ThenBy(
+                    set => set.Beatmaps.FirstOrDefault()?.Artist ?? string.Empty,
+                    StringComparer.OrdinalIgnoreCase
+                ),
+        };
 
     private void SaveOffsetText(string text)
     {
@@ -228,8 +291,13 @@ public sealed partial class SongSelectScene
             return null;
         }
 
-        IReadOnlyList<BeatmapCollection> collections = library.GetCollections(SelectedSet?.Directory);
-        int index = _visibleCollectionIndices[visibleSlot] >= 0 ? _visibleCollectionIndices[visibleSlot] : visibleSlot;
+        IReadOnlyList<BeatmapCollection> collections = library.GetCollections(
+            SelectedSet?.Directory
+        );
+        int index =
+            _visibleCollectionIndices[visibleSlot] >= 0
+                ? _visibleCollectionIndices[visibleSlot]
+                : visibleSlot;
         return index >= 0 && index < collections.Count ? collections[index] : null;
     }
 
@@ -246,20 +314,34 @@ public sealed partial class SongSelectScene
     {
         float panelX = (viewport.VirtualWidth - PropertiesWidth) / 2f;
         float panelY = (viewport.VirtualHeight - PropertiesRowHeight * 5f) / 2f;
-        return new UiRect(panelX + 70f * Dp, panelY + PropertiesRowHeight, PropertiesWidth - 140f * Dp, PropertiesRowHeight);
+        return new UiRect(
+            panelX + 70f * Dp,
+            panelY + PropertiesRowHeight,
+            PropertiesWidth - 140f * Dp,
+            PropertiesRowHeight
+        );
     }
 
     private static UiRect CollectionsNewFolderBounds(VirtualViewport viewport)
     {
         float panelHeight = Math.Min(viewport.VirtualHeight - CollectionsMargin * 2f, 500f * Dp);
-        return new UiRect((viewport.VirtualWidth - CollectionsWidth) / 2f, (viewport.VirtualHeight - panelHeight) / 2f, CollectionsWidth, PropertiesRowHeight);
+        return new UiRect(
+            (viewport.VirtualWidth - CollectionsWidth) / 2f,
+            (viewport.VirtualHeight - panelHeight) / 2f,
+            CollectionsWidth,
+            PropertiesRowHeight
+        );
     }
 
     private int SelectInitialSetIndex(string? preferredSetDirectory)
     {
         if (preferredSetDirectory is not null)
         {
-            int preferred = _visibleSnapshot.Sets.ToList().FindIndex(set => string.Equals(set.Directory, preferredSetDirectory, StringComparison.Ordinal));
+            int preferred = _visibleSnapshot
+                .Sets.ToList()
+                .FindIndex(set =>
+                    string.Equals(set.Directory, preferredSetDirectory, StringComparison.Ordinal)
+                );
             if (preferred >= 0)
             {
                 return preferred;
@@ -277,7 +359,11 @@ public sealed partial class SongSelectScene
             return 0;
         }
 
-        int preferred = set.Beatmaps.ToList().FindIndex(beatmap => string.Equals(beatmap.Filename, preferredBeatmapFilename, StringComparison.Ordinal));
+        int preferred = set
+            .Beatmaps.ToList()
+            .FindIndex(beatmap =>
+                string.Equals(beatmap.Filename, preferredBeatmapFilename, StringComparison.Ordinal)
+            );
         return preferred >= 0 ? preferred : 0;
     }
 
@@ -297,7 +383,10 @@ public sealed partial class SongSelectScene
             previousHeight += CollapsedRowHeight;
         }
 
-        return RowBaseY + previousHeight + CalculateSetTotalHeight(_visibleSnapshot.Sets[setIndex]) * 0.5f - VirtualViewport.AndroidReferenceLandscape.VirtualHeight * 0.5f;
+        return RowBaseY
+            + previousHeight
+            + CalculateSetTotalHeight(_visibleSnapshot.Sets[setIndex]) * 0.5f
+            - VirtualViewport.AndroidReferenceLandscape.VirtualHeight * 0.5f;
     }
 
     private float CalculateTotalScrollHeight()
@@ -312,7 +401,8 @@ public sealed partial class SongSelectScene
         return height;
     }
 
-    private static int VisibleDifficultyCount(BeatmapSetInfo set) => Math.Max(1, Math.Min(VisibleDifficultySlots, set.Beatmaps.Count));
+    private static int VisibleDifficultyCount(BeatmapSetInfo set) =>
+        Math.Max(1, Math.Min(VisibleDifficultySlots, set.Beatmaps.Count));
 
     private float CalculateSelectedSetHeight(BeatmapSetInfo set)
     {
@@ -320,5 +410,6 @@ public sealed partial class SongSelectScene
         return ExpandedRowSpacing + ExpandedRowSpacing * (count - 1) * selectedSetExpansion;
     }
 
-    private static float CalculateSetTotalHeight(BeatmapSetInfo set) => ExpandedRowSpacing * VisibleDifficultyCount(set);
+    private static float CalculateSetTotalHeight(BeatmapSetInfo set) =>
+        ExpandedRowSpacing * VisibleDifficultyCount(set);
 }

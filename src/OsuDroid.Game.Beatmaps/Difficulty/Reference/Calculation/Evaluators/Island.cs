@@ -8,7 +8,8 @@ internal sealed class Island(double epsilon) : IEquatable<Island>
 
     private readonly double deltaDifferenceEpsilon = epsilon;
 
-    public Island(int delta, double epsilon) : this(epsilon)
+    public Island(int delta, double epsilon)
+        : this(epsilon)
     {
         AddDelta(delta);
     }
@@ -26,9 +27,9 @@ internal sealed class Island(double epsilon) : IEquatable<Island>
     public bool IsSimilarPolarity(Island other) => DeltaCount % 2 == other.DeltaCount % 2;
 
     public bool Equals(Island? other) =>
-        other is not null &&
-        System.Math.Abs(Delta - other.Delta) < deltaDifferenceEpsilon &&
-        DeltaCount == other.DeltaCount;
+        other is not null
+        && System.Math.Abs(Delta - other.Delta) < deltaDifferenceEpsilon
+        && DeltaCount == other.DeltaCount;
 
     public override bool Equals(object? obj) => obj is Island other && Equals(other);
 

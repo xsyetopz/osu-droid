@@ -1,6 +1,7 @@
 namespace OsuDroid.Game.Beatmaps.Difficulty.Reference.Rulesets;
 
-public sealed class ReferenceStandardHitWindow(double? overallDifficulty = 5.0) : ReferenceHitWindow(overallDifficulty)
+public sealed class ReferenceStandardHitWindow(double? overallDifficulty = 5.0)
+    : ReferenceHitWindow(overallDifficulty)
 {
     public override double GreatWindow => System.Math.Floor(80 - 6 * OverallDifficulty) - 0.5;
 

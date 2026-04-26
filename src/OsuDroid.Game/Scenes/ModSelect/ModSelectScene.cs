@@ -61,7 +61,9 @@ public sealed partial class ModSelectScene
     private readonly Dictionary<string, float> _sectionVelocities = new(StringComparer.Ordinal);
     private double _railScrollbarVisibleUntil;
     private double _selectedModsScrollbarVisibleUntil;
-    private readonly Dictionary<string, double> _sectionScrollbarVisibleUntil = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, double> _sectionScrollbarVisibleUntil = new(
+        StringComparer.Ordinal
+    );
     private ScrollDragTarget? _dragTarget;
     private BeatmapInfo? _selectedBeatmap;
     private VirtualViewport _lastViewport = VirtualViewport.AndroidReferenceLandscape;
@@ -70,7 +72,11 @@ public sealed partial class ModSelectScene
     private string _presetNameInput = string.Empty;
     private int _pendingPresetDeleteIndex = -1;
 
-    public ModSelectScene(IGameSettingsStore settingsStore, ITextInputService textInputService, GameLocalizer? localizer = null)
+    public ModSelectScene(
+        IGameSettingsStore settingsStore,
+        ITextInputService textInputService,
+        GameLocalizer? localizer = null
+    )
     {
         _settingsStore = settingsStore;
         _textInputService = textInputService;
@@ -81,13 +87,16 @@ public sealed partial class ModSelectScene
 
     public IReadOnlyCollection<string> SelectedAcronyms => _selectedAcronyms;
 
-    public float ScoreMultiplier => ModCatalog.Entries
-        .Where(entry => _selectedAcronyms.Contains(entry.Acronym))
-        .Aggregate(1f, (multiplier, entry) => multiplier * entry.ScoreMultiplier);
+    public float ScoreMultiplier =>
+        ModCatalog
+            .Entries.Where(entry => _selectedAcronyms.Contains(entry.Acronym))
+            .Aggregate(1f, (multiplier, entry) => multiplier * entry.ScoreMultiplier);
 
-    public bool IsRanked => _selectedAcronyms.Count == 0 || ModCatalog.Entries
-        .Where(entry => _selectedAcronyms.Contains(entry.Acronym))
-        .All(entry => entry.IsRanked);
+    public bool IsRanked =>
+        _selectedAcronyms.Count == 0
+        || ModCatalog
+            .Entries.Where(entry => _selectedAcronyms.Contains(entry.Acronym))
+            .All(entry => entry.IsRanked);
 
     public bool IsPresetDialogOpen => _isPresetFormOpen || _isPresetDeleteDialogOpen;
 
@@ -95,23 +104,22 @@ public sealed partial class ModSelectScene
 
     public void SetSelectedBeatmap(BeatmapInfo? beatmap) => _selectedBeatmap = beatmap;
 
-    public GameFrameSnapshot CreateSnapshot(VirtualViewport viewport) => new(
-        "ModSelect",
-        "Mods",
-        "osu!droid mod menu",
-        [],
-        0,
-        false,
-        CreateUiFrame(viewport));
+    public GameFrameSnapshot CreateSnapshot(VirtualViewport viewport) =>
+        new("ModSelect", "Mods", "osu!droid mod menu", [], 0, false, CreateUiFrame(viewport));
 
-    public GameFrameSnapshot CreateSnapshot(VirtualViewport viewport, UiFrameSnapshot parentFrame) => new(
-        "ModSelect",
-        "Mods",
-        "osu!droid mod menu",
-        [],
-        0,
-        false,
-        CreateUiFrame(viewport, parentFrame));
+    public GameFrameSnapshot CreateSnapshot(
+        VirtualViewport viewport,
+        UiFrameSnapshot parentFrame
+    ) =>
+        new(
+            "ModSelect",
+            "Mods",
+            "osu!droid mod menu",
+            [],
+            0,
+            false,
+            CreateUiFrame(viewport, parentFrame)
+        );
 
     public void Update(TimeSpan elapsed)
     {
@@ -141,5 +149,4 @@ public sealed partial class ModSelectScene
 
         return -1;
     }
-
 }

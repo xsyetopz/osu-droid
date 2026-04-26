@@ -1,4 +1,5 @@
 using OsuDroid.Game.UI.Geometry;
+
 namespace OsuDroid.Game.UI.Scrolling;
 
 public sealed class DroidScrollableRegion(KineticScrollAxis axis)
@@ -22,7 +23,14 @@ public sealed class DroidScrollableRegion(KineticScrollAxis axis)
 
     public bool Drag(UiPoint point, double timestampSeconds, float maxOffset)
     {
-        bool changed = _scroll.Drag(point, timestampSeconds, () => Offset, value => Offset = value, 0f, maxOffset);
+        bool changed = _scroll.Drag(
+            point,
+            timestampSeconds,
+            () => Offset,
+            value => Offset = value,
+            0f,
+            maxOffset
+        );
         Offset = Math.Clamp(Offset, 0f, maxOffset);
         return changed;
     }
@@ -35,7 +43,13 @@ public sealed class DroidScrollableRegion(KineticScrollAxis axis)
 
     public bool Update(float elapsedSeconds, float maxOffset)
     {
-        bool changed = _scroll.Update(elapsedSeconds, () => Offset, value => Offset = value, 0f, maxOffset);
+        bool changed = _scroll.Update(
+            elapsedSeconds,
+            () => Offset,
+            value => Offset = value,
+            0f,
+            maxOffset
+        );
         Offset = Math.Clamp(Offset, 0f, maxOffset);
         return changed;
     }

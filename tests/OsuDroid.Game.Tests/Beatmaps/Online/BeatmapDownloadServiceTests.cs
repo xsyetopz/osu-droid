@@ -17,19 +17,34 @@ public sealed partial class BeatmapDownloadServiceTests
             var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(root));
             paths.EnsureDirectories();
             var processingService = new RecordingProcessingService();
-            var downloadService = new BeatmapDownloadService(paths, new WritingMirrorClient(CreateOszBytes()), processingService);
+            var downloadService = new BeatmapDownloadService(
+                paths,
+                new WritingMirrorClient(CreateOszBytes()),
+                processingService
+            );
 
-            BeatmapDownloadResult downloadResult = await downloadService.DownloadAsync(CreateSet(hasVideo: true), withVideo: false, CancellationToken.None).ConfigureAwait(false);
+            BeatmapDownloadResult downloadResult = await downloadService
+                .DownloadAsync(CreateSet(hasVideo: true), withVideo: false, CancellationToken.None)
+                .ConfigureAwait(false);
 
             Assert.That(downloadResult.IsSuccess, Is.True);
             Assert.That(downloadResult.ArchivePath, Is.Not.Null);
-            Assert.That(Path.GetFileName(downloadResult.ArchivePath!), Is.EqualTo("123 Artist - Title [no video].osz"));
+            Assert.That(
+                Path.GetFileName(downloadResult.ArchivePath!),
+                Is.EqualTo("123 Artist - Title [no video].osz")
+            );
             Assert.That(File.Exists(downloadResult.ArchivePath!), Is.True);
             Assert.That(File.Exists(downloadResult.ArchivePath! + ".download"), Is.False);
-            Assert.That(processingService.QueuedArchives, Is.EqualTo(new[] { downloadResult.ArchivePath! }));
+            Assert.That(
+                processingService.QueuedArchives,
+                Is.EqualTo(new[] { downloadResult.ArchivePath! })
+            );
             Assert.That(processingService.LastMetadata, Is.Not.Null);
             Assert.That(processingService.LastMetadata!.SetId, Is.EqualTo(123));
-            Assert.That(processingService.LastMetadata.Beatmaps.Single().StarRating, Is.EqualTo(2.1f));
+            Assert.That(
+                processingService.LastMetadata.Beatmaps.Single().StarRating,
+                Is.EqualTo(2.1f)
+            );
             Assert.That(downloadService.State.IsActive, Is.False);
         }
         finally
@@ -47,15 +62,27 @@ public sealed partial class BeatmapDownloadServiceTests
             var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(root));
             paths.EnsureDirectories();
             var processingService = new RecordingProcessingService();
-            var downloadService = new BeatmapDownloadService(paths, new WritingMirrorClient("not a zip"u8.ToArray()), processingService);
+            var downloadService = new BeatmapDownloadService(
+                paths,
+                new WritingMirrorClient("not a zip"u8.ToArray()),
+                processingService
+            );
 
-            BeatmapDownloadResult downloadResult = await downloadService.DownloadAsync(CreateSet(hasVideo: true), withVideo: false, CancellationToken.None).ConfigureAwait(false);
+            BeatmapDownloadResult downloadResult = await downloadService
+                .DownloadAsync(CreateSet(hasVideo: true), withVideo: false, CancellationToken.None)
+                .ConfigureAwait(false);
 
             Assert.That(downloadResult.IsSuccess, Is.False);
-            Assert.That(downloadResult.ErrorMessage, Is.EqualTo("Downloaded beatmap archive is invalid."));
+            Assert.That(
+                downloadResult.ErrorMessage,
+                Is.EqualTo("Downloaded beatmap archive is invalid.")
+            );
             Assert.That(Directory.EnumerateFiles(paths.Downloads), Is.Empty);
             Assert.That(processingService.QueuedArchives, Is.Empty);
-            Assert.That(downloadService.State.ErrorMessage, Is.EqualTo("Downloaded beatmap archive is invalid."));
+            Assert.That(
+                downloadService.State.ErrorMessage,
+                Is.EqualTo("Downloaded beatmap archive is invalid.")
+            );
         }
         finally
         {
@@ -72,9 +99,15 @@ public sealed partial class BeatmapDownloadServiceTests
             var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(root));
             paths.EnsureDirectories();
             var mirror = new CapturingMirrorClient(CreateOszBytes());
-            var downloadService = new BeatmapDownloadService(paths, mirror, new RecordingProcessingService());
+            var downloadService = new BeatmapDownloadService(
+                paths,
+                mirror,
+                new RecordingProcessingService()
+            );
 
-            BeatmapDownloadResult downloadResult = await downloadService.DownloadAsync(CreateSet(hasVideo: true), withVideo: true, CancellationToken.None).ConfigureAwait(false);
+            BeatmapDownloadResult downloadResult = await downloadService
+                .DownloadAsync(CreateSet(hasVideo: true), withVideo: true, CancellationToken.None)
+                .ConfigureAwait(false);
             mirror.ReportLateProgress();
 
             Assert.That(downloadResult.IsSuccess, Is.True);
@@ -87,18 +120,20 @@ public sealed partial class BeatmapDownloadServiceTests
         }
     }
 
-    private static BeatmapMirrorSet CreateSet(bool hasVideo) => new(
-        BeatmapMirrorKind.OsuDirect,
-        123,
-        "Title",
-        "Title",
-        "Artist",
-        "Artist",
-        BeatmapRankedStatus.Ranked,
-        "Mapper",
-        null,
-        hasVideo,
-        [new BeatmapMirrorBeatmap(456, "Normal", 2.1f, 5, 4, 5, 5, 120, 90, 10, 20, 0, 0)]);
+    private static BeatmapMirrorSet CreateSet(bool hasVideo) =>
+        new(
+            BeatmapMirrorKind.OsuDirect,
+            123,
+            "Title",
+            "Title",
+            "Artist",
+            "Artist",
+            BeatmapRankedStatus.Ranked,
+            "Mapper",
+            null,
+            hasVideo,
+            [new BeatmapMirrorBeatmap(456, "Normal", 2.1f, 5, 4, 5, 5, 120, 90, 10, 20, 0, 0)]
+        );
 
     private static byte[] CreateOszBytes()
     {
@@ -115,7 +150,10 @@ public sealed partial class BeatmapDownloadServiceTests
 
     private static string CreateTempDirectory()
     {
-        string root = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"download-service-{Guid.NewGuid():N}");
+        string root = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"download-service-{Guid.NewGuid():N}"
+        );
         Directory.CreateDirectory(root);
         return root;
     }
@@ -127,6 +165,4 @@ public sealed partial class BeatmapDownloadServiceTests
             Directory.Delete(directory, true);
         }
     }
-
-
 }

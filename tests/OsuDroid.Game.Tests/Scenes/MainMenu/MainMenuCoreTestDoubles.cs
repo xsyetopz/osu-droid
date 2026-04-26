@@ -10,8 +10,6 @@ public sealed partial class UiCompatibilityTests
 
         public void Play(string key) => Keys.Add(key);
 
-        public void SetVolume(float normalizedVolume)
-        {
-        }
+        public void SetVolume(float normalizedVolume) { }
     }
 }

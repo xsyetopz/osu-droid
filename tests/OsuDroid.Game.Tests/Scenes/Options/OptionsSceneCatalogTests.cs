@@ -8,7 +8,6 @@ namespace OsuDroid.Game.Tests;
 
 public sealed partial class OptionsSceneTests
 {
-
     [Test]
     public void LocalizerReturnsEnglishFallbackAndMissingKey()
     {
@@ -17,27 +16,43 @@ public sealed partial class OptionsSceneTests
         Assert.That(localizer["Options_Title"], Is.EqualTo("Settings"));
         Assert.That(localizer["missing.key"], Is.EqualTo("missing.key"));
     }
+
     [Test]
     public void OptionsSceneListsAndroidSourceSectionsAndGeneralRows()
     {
         var scene = new OptionsScene(new GameLocalizer());
 
-        Assert.That(scene.Sections, Is.EqualTo(new[] { "General", "Gameplay", "Graphics", "Audio", "Library", "Input", "Advanced" }));
-        Assert.That(scene.GeneralCategories, Is.EqualTo(new[] { "Online", "Account", "Community", "Updates", "Backup", "Localization" }));
-        Assert.That(scene.GeneralRows, Is.EqualTo(new[]
-        {
-            "Server Connection",
-            "Load Avatar",
-            "Difficulty algorithm",
-            "Login",
-            "Password",
-            "Register",
-            "Receive announcements",
-            "Check for updates",
-            "Export options file",
-            "Import options file",
-            "Language",
-        }));
+        Assert.That(
+            scene.Sections,
+            Is.EqualTo(
+                new[] { "General", "Gameplay", "Graphics", "Audio", "Library", "Input", "Advanced" }
+            )
+        );
+        Assert.That(
+            scene.GeneralCategories,
+            Is.EqualTo(
+                new[] { "Online", "Account", "Community", "Updates", "Backup", "Localization" }
+            )
+        );
+        Assert.That(
+            scene.GeneralRows,
+            Is.EqualTo(
+                new[]
+                {
+                    "Server Connection",
+                    "Load Avatar",
+                    "Difficulty algorithm",
+                    "Login",
+                    "Password",
+                    "Register",
+                    "Receive announcements",
+                    "Check for updates",
+                    "Export options file",
+                    "Import options file",
+                    "Language",
+                }
+            )
+        );
     }
 
     [Test]

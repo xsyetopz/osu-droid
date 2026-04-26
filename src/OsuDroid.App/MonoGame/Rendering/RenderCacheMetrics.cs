@@ -15,7 +15,8 @@ internal sealed class RenderCacheMetrics
 
     public int SpriteMisses { get; private set; }
 
-    public bool HasCacheMisses => TextMisses > 0 || IconMisses > 0 || ShapeMisses > 0 || SpriteMisses > 0;
+    public bool HasCacheMisses =>
+        TextMisses > 0 || IconMisses > 0 || ShapeMisses > 0 || SpriteMisses > 0;
 
     public void AddWarmupFrame() => WarmupFrames++;
 

@@ -14,16 +14,18 @@ public static class OnlinePasswordHasher
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
-    public static string AddSlashes(string value) => value
-        .Replace("\\", "\\\\", StringComparison.Ordinal)
-        .Replace("'", "\\'", StringComparison.Ordinal)
-        .Replace("\"", "\\\"", StringComparison.Ordinal)
-        .Replace("\0", "\\0", StringComparison.Ordinal);
+    public static string AddSlashes(string value) =>
+        value
+            .Replace("\\", "\\\\", StringComparison.Ordinal)
+            .Replace("'", "\\'", StringComparison.Ordinal)
+            .Replace("\"", "\\\"", StringComparison.Ordinal)
+            .Replace("\0", "\\0", StringComparison.Ordinal);
 
-    public static string EscapeHtmlSpecialCharacters(string value) => value
-        .Replace("&", "&amp;", StringComparison.Ordinal)
-        .Replace("\"", "&quot;", StringComparison.Ordinal)
-        .Replace("'", "&#039;", StringComparison.Ordinal)
-        .Replace("<", "&lt;", StringComparison.Ordinal)
-        .Replace(">", "&gt;", StringComparison.Ordinal);
+    public static string EscapeHtmlSpecialCharacters(string value) =>
+        value
+            .Replace("&", "&amp;", StringComparison.Ordinal)
+            .Replace("\"", "&quot;", StringComparison.Ordinal)
+            .Replace("'", "&#039;", StringComparison.Ordinal)
+            .Replace("<", "&lt;", StringComparison.Ordinal)
+            .Replace(">", "&gt;", StringComparison.Ordinal);
 }

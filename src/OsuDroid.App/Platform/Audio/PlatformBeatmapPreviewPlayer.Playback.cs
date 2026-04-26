@@ -20,7 +20,11 @@ public sealed partial class PlatformBeatmapPreviewPlayer
                 if (!disposed && request.Generation == playGeneration)
                     PlayFallbackLocked(request.AudioPath, request.PreviewTimeMilliseconds);
             }
-            PerfDiagnostics.Log("audio.previewPlay", start, $"backend=fallback path=\"{Path.GetFileName(request.AudioPath)}\"");
+            PerfDiagnostics.Log(
+                "audio.previewPlay",
+                start,
+                $"backend=fallback path=\"{Path.GetFileName(request.AudioPath)}\""
+            );
             return;
         }
 
@@ -32,7 +36,11 @@ public sealed partial class PlatformBeatmapPreviewPlayer
                 if (!disposed && request.Generation == playGeneration)
                     PlayFallbackLocked(request.AudioPath, request.PreviewTimeMilliseconds);
             }
-            PerfDiagnostics.Log("audio.previewPlay", start, $"backend=fallback streamFailed=true path=\"{Path.GetFileName(request.AudioPath)}\"");
+            PerfDiagnostics.Log(
+                "audio.previewPlay",
+                start,
+                $"backend=fallback streamFailed=true path=\"{Path.GetFileName(request.AudioPath)}\""
+            );
             return;
         }
 
@@ -41,14 +49,20 @@ public sealed partial class PlatformBeatmapPreviewPlayer
             ApplyBassVolumeLocked(handle);
         if (!Bass.ChannelPlay(handle, false))
         {
-            BassAudioEngine.LogBassError($"BASS_ChannelPlay({Path.GetFileName(request.AudioPath)})");
+            BassAudioEngine.LogBassError(
+                $"BASS_ChannelPlay({Path.GetFileName(request.AudioPath)})"
+            );
             Bass.StreamFree(handle);
             lock (playbackGate)
             {
                 if (!disposed && request.Generation == playGeneration)
                     PlayFallbackLocked(request.AudioPath, request.PreviewTimeMilliseconds);
             }
-            PerfDiagnostics.Log("audio.previewPlay", start, $"backend=fallback playFailed=true path=\"{Path.GetFileName(request.AudioPath)}\"");
+            PerfDiagnostics.Log(
+                "audio.previewPlay",
+                start,
+                $"backend=fallback playFailed=true path=\"{Path.GetFileName(request.AudioPath)}\""
+            );
             return;
         }
 
@@ -63,10 +77,19 @@ public sealed partial class PlatformBeatmapPreviewPlayer
 
             FreeCurrentChannel();
             channel = handle;
-            playbackSnapshot = new BeatmapPreviewPlaybackSnapshot(request.AudioPath, true, PositionMillisecondsLocked(), DurationMillisecondsLocked());
+            playbackSnapshot = new BeatmapPreviewPlaybackSnapshot(
+                request.AudioPath,
+                true,
+                PositionMillisecondsLocked(),
+                DurationMillisecondsLocked()
+            );
         }
 
-        PerfDiagnostics.Log("audio.previewPlay", start, $"backend=bass path=\"{Path.GetFileName(request.AudioPath)}\"");
+        PerfDiagnostics.Log(
+            "audio.previewPlay",
+            start,
+            $"backend=bass path=\"{Path.GetFileName(request.AudioPath)}\""
+        );
     }
 
     private static int CreateLocalPlaybackStream(string audioPath)
@@ -105,7 +128,12 @@ public sealed partial class PlatformBeatmapPreviewPlayer
             if (previewTimeMilliseconds > 0)
                 fallbackPlayer.CurrentTime = previewTimeMilliseconds / 1000d;
             if (fallbackPlayer.Play())
-                playbackSnapshot = new BeatmapPreviewPlaybackSnapshot(audioPath, true, PositionMillisecondsLocked(), DurationMillisecondsLocked());
+                playbackSnapshot = new BeatmapPreviewPlaybackSnapshot(
+                    audioPath,
+                    true,
+                    PositionMillisecondsLocked(),
+                    DurationMillisecondsLocked()
+                );
             else
                 playbackSnapshot = new();
         }
@@ -157,7 +185,11 @@ public sealed partial class PlatformBeatmapPreviewPlayer
         playbackSnapshot = new();
     }
 
-    private sealed record PreviewRequest(string AudioPath, int PreviewTimeMilliseconds, long Generation);
+    private sealed record PreviewRequest(
+        string AudioPath,
+        int PreviewTimeMilliseconds,
+        long Generation
+    );
 
 #if IOS
     private void FreeFallbackPlayer()

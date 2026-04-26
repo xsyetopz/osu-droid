@@ -4,7 +4,10 @@ using OsuDroid.Game.Scenes;
 
 namespace OsuDroid.App.MonoGame.Bootstrap;
 
-public sealed class GameBootstrapper(Func<OsuDroidGameCore> createCore, Action<OsuDroidGameCore>? attachPlatformRuntime = null)
+public sealed class GameBootstrapper(
+    Func<OsuDroidGameCore> createCore,
+    Action<OsuDroidGameCore>? attachPlatformRuntime = null
+)
 {
     private readonly object gate = new();
     private Task? bootTask;

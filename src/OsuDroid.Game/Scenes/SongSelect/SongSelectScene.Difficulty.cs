@@ -15,7 +15,14 @@ public sealed partial class SongSelectScene
         BeatmapInfo? selected = SelectedBeatmap;
         BeatmapInfo[] beatmaps = EnumerateDifficultyCalculationCandidates()
             .OrderByDescending(beatmap => selected is not null && BeatmapMatches(beatmap, selected))
-            .ThenByDescending(beatmap => SelectedSet is not null && string.Equals(beatmap.SetDirectory, SelectedSet.Directory, StringComparison.Ordinal))
+            .ThenByDescending(beatmap =>
+                SelectedSet is not null
+                && string.Equals(
+                    beatmap.SetDirectory,
+                    SelectedSet.Directory,
+                    StringComparison.Ordinal
+                )
+            )
             .Where(NeedsDifficultyCalculation)
             .Where(TrackPendingDifficulty)
             .ToArray();
@@ -46,7 +53,11 @@ public sealed partial class SongSelectScene
                 }
             }
         });
-        PerfDiagnostics.Log("songSelect.queueDifficulty", start, $"queued={beatmaps.Length} sets={_visibleSnapshot.Sets.Count}");
+        PerfDiagnostics.Log(
+            "songSelect.queueDifficulty",
+            start,
+            $"queued={beatmaps.Length} sets={_visibleSnapshot.Sets.Count}"
+        );
     }
 
     private IEnumerable<BeatmapInfo> EnumerateDifficultyCalculationCandidates()
@@ -102,7 +113,12 @@ public sealed partial class SongSelectScene
             {
                 if (_completedDifficultyUpdates.Count == 0)
                 {
-                    if (applied && sortMode is SongSelectSortMode.DroidStars or SongSelectSortMode.StandardStars)
+                    if (
+                        applied
+                        && sortMode
+                            is SongSelectSortMode.DroidStars
+                                or SongSelectSortMode.StandardStars
+                    )
                     {
                         ApplyBeatmapOptions();
                     }
@@ -139,9 +155,7 @@ public sealed partial class SongSelectScene
                         _completedLibraryRefresh = library.Scan();
                     }
                 }
-                catch
-                {
-                }
+                catch { }
             });
         }
     }
@@ -165,7 +179,10 @@ public sealed partial class SongSelectScene
         QueueVisibleDifficultyCalculations();
     }
 
-    private static BeatmapLibrarySnapshot ReplaceBeatmap(BeatmapLibrarySnapshot source, BeatmapInfo updated)
+    private static BeatmapLibrarySnapshot ReplaceBeatmap(
+        BeatmapLibrarySnapshot source,
+        BeatmapInfo updated
+    )
     {
         if (source.Sets.Count == 0)
         {
@@ -173,43 +190,54 @@ public sealed partial class SongSelectScene
         }
 
         bool changed = false;
-        BeatmapSetInfo[] sets = source.Sets.Select(set =>
-        {
-            BeatmapInfo[] beatmaps = set.Beatmaps.ToArray();
-            int index = Array.FindIndex(beatmaps, beatmap => BeatmapMatches(beatmap, updated));
-            if (index < 0)
+        BeatmapSetInfo[] sets = source
+            .Sets.Select(set =>
             {
-                return set;
-            }
+                BeatmapInfo[] beatmaps = set.Beatmaps.ToArray();
+                int index = Array.FindIndex(beatmaps, beatmap => BeatmapMatches(beatmap, updated));
+                if (index < 0)
+                {
+                    return set;
+                }
 
-            beatmaps[index] = updated;
-            changed = true;
-            return set with { Beatmaps = beatmaps };
-        }).ToArray();
+                beatmaps[index] = updated;
+                changed = true;
+                return set with { Beatmaps = beatmaps };
+            })
+            .ToArray();
 
         return changed ? new BeatmapLibrarySnapshot(sets) : source;
     }
 
     private static bool BeatmapMatches(BeatmapInfo left, BeatmapInfo right) =>
-        string.Equals(left.SetDirectory, right.SetDirectory, StringComparison.Ordinal) &&
-        string.Equals(left.Filename, right.Filename, StringComparison.Ordinal);
+        string.Equals(left.SetDirectory, right.SetDirectory, StringComparison.Ordinal)
+        && string.Equals(left.Filename, right.Filename, StringComparison.Ordinal);
 
-    private static string DifficultyKey(BeatmapInfo beatmap) => string.Concat(beatmap.SetDirectory, "/", beatmap.Filename);
+    private static string DifficultyKey(BeatmapInfo beatmap) =>
+        string.Concat(beatmap.SetDirectory, "/", beatmap.Filename);
 
     private BeatmapLibrarySnapshot SortDifficultyRows(BeatmapLibrarySnapshot source)
     {
         return source.Sets.Count == 0
             ? source
-            : new BeatmapLibrarySnapshot(source.Sets
-            .Select(set => set with { Beatmaps = SortBeatmapsByDifficulty(set.Beatmaps).ToArray() })
-            .ToArray());
+            : new BeatmapLibrarySnapshot(
+                source
+                    .Sets.Select(set =>
+                        set with
+                        {
+                            Beatmaps = SortBeatmapsByDifficulty(set.Beatmaps).ToArray(),
+                        }
+                    )
+                    .ToArray()
+            );
     }
 
-    private IEnumerable<BeatmapInfo> SortBeatmapsByDifficulty(IEnumerable<BeatmapInfo> beatmaps) => beatmaps
-        .OrderBy(beatmap => CurrentStarRating(beatmap) is null)
-        .ThenBy(beatmap => CurrentStarRating(beatmap) ?? float.MaxValue)
-        .ThenBy(beatmap => beatmap.Version, StringComparer.OrdinalIgnoreCase)
-        .ThenBy(beatmap => beatmap.Filename, StringComparer.OrdinalIgnoreCase);
+    private IEnumerable<BeatmapInfo> SortBeatmapsByDifficulty(IEnumerable<BeatmapInfo> beatmaps) =>
+        beatmaps
+            .OrderBy(beatmap => CurrentStarRating(beatmap) is null)
+            .ThenBy(beatmap => CurrentStarRating(beatmap) ?? float.MaxValue)
+            .ThenBy(beatmap => beatmap.Version, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(beatmap => beatmap.Filename, StringComparer.OrdinalIgnoreCase);
 
     private void RestoreSelectedDifficulty(BeatmapInfo? selected)
     {
@@ -222,7 +250,9 @@ public sealed partial class SongSelectScene
 
         if (selected is not null)
         {
-            int index = set.Beatmaps.ToList().FindIndex(beatmap => BeatmapMatches(beatmap, selected));
+            int index = set
+                .Beatmaps.ToList()
+                .FindIndex(beatmap => BeatmapMatches(beatmap, selected));
             if (index >= 0)
             {
                 selectedDifficultyIndex = index;
@@ -253,9 +283,15 @@ public sealed partial class SongSelectScene
                 (int)Math.Clamp(beatmap.Length, 0L, int.MaxValue),
                 beatmap.MostCommonBpm,
                 set.Directory,
-                beatmap.Filename),
-            !string.IsNullOrWhiteSpace(audioPath));
-        PerfDiagnostics.Log("songSelect.playPreview", start, $"set=\"{set.Directory}\" file=\"{beatmap.Filename}\"");
+                beatmap.Filename
+            ),
+            !string.IsNullOrWhiteSpace(audioPath)
+        );
+        PerfDiagnostics.Log(
+            "songSelect.playPreview",
+            start,
+            $"set=\"{set.Directory}\" file=\"{beatmap.Filename}\""
+        );
     }
 
     private void RefreshSelectedBackgroundPath()
@@ -278,20 +314,42 @@ public sealed partial class SongSelectScene
         selectedBackgroundLuminance = nextPath is null ? 1f : 0f;
     }
 
-    private float? CurrentStarRating(BeatmapInfo beatmap) => _displayAlgorithm == DifficultyAlgorithm.Standard ? beatmap.StandardStarRating : beatmap.DroidStarRating;
+    private float? CurrentStarRating(BeatmapInfo beatmap) =>
+        _displayAlgorithm == DifficultyAlgorithm.Standard
+            ? beatmap.StandardStarRating
+            : beatmap.DroidStarRating;
 
-    private static float CalculateRowX(float centerY, VirtualViewport viewport) => viewport.VirtualWidth / 1.85f + 200f * MathF.Abs(MathF.Cos(centerY * MathF.PI / (viewport.VirtualHeight * 2f)));
+    private static float CalculateRowX(float centerY, VirtualViewport viewport) =>
+        viewport.VirtualWidth / 1.85f
+        + 200f * MathF.Abs(MathF.Cos(centerY * MathF.PI / (viewport.VirtualHeight * 2f)));
 
-    private string DisplayTitle(BeatmapInfo beatmap) => _forceRomanizedMetadata || string.IsNullOrWhiteSpace(beatmap.TitleUnicode) ? beatmap.Title : beatmap.TitleUnicode;
+    private string DisplayTitle(BeatmapInfo beatmap) =>
+        _forceRomanizedMetadata || string.IsNullOrWhiteSpace(beatmap.TitleUnicode)
+            ? beatmap.Title
+            : beatmap.TitleUnicode;
 
-    private string DisplayArtist(BeatmapInfo beatmap) => _forceRomanizedMetadata || string.IsNullOrWhiteSpace(beatmap.ArtistUnicode) ? beatmap.Artist : beatmap.ArtistUnicode;
+    private string DisplayArtist(BeatmapInfo beatmap) =>
+        _forceRomanizedMetadata || string.IsNullOrWhiteSpace(beatmap.ArtistUnicode)
+            ? beatmap.Artist
+            : beatmap.ArtistUnicode;
 
     private string FormatLengthLine(BeatmapInfo beatmap)
     {
-        string bpm = Math.Abs(beatmap.BpmMax - beatmap.BpmMin) < 0.01f
-            ? beatmap.MostCommonBpm.ToString("0", CultureInfo.InvariantCulture)
-            : string.Create(CultureInfo.InvariantCulture, $"{beatmap.BpmMin:0}-{beatmap.BpmMax:0} ({beatmap.MostCommonBpm:0})");
-        return _localizer.Format("SongSelect_DifficultyStats", TimeSpan.FromMilliseconds(beatmap.Length).ToString("m\\:ss", CultureInfo.InvariantCulture), bpm, beatmap.MaxCombo);
+        string bpm =
+            Math.Abs(beatmap.BpmMax - beatmap.BpmMin) < 0.01f
+                ? beatmap.MostCommonBpm.ToString("0", CultureInfo.InvariantCulture)
+                : string.Create(
+                    CultureInfo.InvariantCulture,
+                    $"{beatmap.BpmMin:0}-{beatmap.BpmMax:0} ({beatmap.MostCommonBpm:0})"
+                );
+        return _localizer.Format(
+            "SongSelect_DifficultyStats",
+            TimeSpan
+                .FromMilliseconds(beatmap.Length)
+                .ToString("m\\:ss", CultureInfo.InvariantCulture),
+            bpm,
+            beatmap.MaxCombo
+        );
     }
 
     private string FormatObjectLine(BeatmapInfo beatmap) =>
@@ -300,7 +358,8 @@ public sealed partial class SongSelectScene
             beatmap.HitCircleCount,
             beatmap.SliderCount,
             beatmap.SpinnerCount,
-            beatmap.SetId?.ToString(CultureInfo.InvariantCulture) ?? "0");
+            beatmap.SetId?.ToString(CultureInfo.InvariantCulture) ?? "0"
+        );
 
     private string FormatDifficultyLine(BeatmapInfo beatmap)
     {
@@ -311,8 +370,10 @@ public sealed partial class SongSelectScene
             FormatStatNumber(beatmap.OverallDifficulty),
             FormatStatNumber(beatmap.CircleSize),
             FormatStatNumber(beatmap.HpDrainRate),
-            stars);
+            stars
+        );
     }
 
-    private static string FormatStatNumber(float value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+    private static string FormatStatNumber(float value) =>
+        value.ToString("0.##", CultureInfo.InvariantCulture);
 }

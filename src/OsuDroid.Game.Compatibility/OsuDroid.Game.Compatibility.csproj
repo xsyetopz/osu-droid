@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <RollForward>Major</RollForward>
-        <OutputType>Library</OutputType>
-        <RootNamespace>OsuDroid.Game.Compatibility</RootNamespace>
-        <AssemblyName>OsuDroid.Game.Compatibility</AssemblyName>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\OsuDroid.Game.Beatmaps\OsuDroid.Game.Beatmaps.csproj" />
-        <ProjectReference Include="..\OsuDroid.Game.Runtime\OsuDroid.Game.Runtime.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Microsoft.Data.Sqlite" />
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RollForward>Major</RollForward>
+    <OutputType>Library</OutputType>
+    <RootNamespace>OsuDroid.Game.Compatibility</RootNamespace>
+    <AssemblyName>OsuDroid.Game.Compatibility</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OsuDroid.Game.Beatmaps\OsuDroid.Game.Beatmaps.csproj" />
+    <ProjectReference Include="..\OsuDroid.Game.Runtime\OsuDroid.Game.Runtime.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+  </ItemGroup>
 </Project>

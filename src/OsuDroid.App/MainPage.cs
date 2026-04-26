@@ -36,18 +36,23 @@ public sealed class MainPage : ContentPage
             return;
 
         CrashLogInstaller.Install(platformPaths.Roots);
-        runtimeServices = new PlatformRuntimeServices(Path.Combine(AppContext.BaseDirectory, "assets", "droid", "sfx"));
+        runtimeServices = new PlatformRuntimeServices(
+            Path.Combine(AppContext.BaseDirectory, "assets", "droid", "sfx")
+        );
         var bootstrapper = new GameBootstrapper(
-            () => OsuDroidGameCore.Create(
-                platformPaths.Roots,
+            () =>
+                OsuDroidGameCore.Create(
+                    platformPaths.Roots,
 #if DEBUG
-                "debug",
+                    "debug",
 #else
-                "release",
+                    "release",
 #endif
-                AppInfo.Current.VersionString,
-                showStartupScene: true),
-            AttachPlatformServices);
+                    AppInfo.Current.VersionString,
+                    showStartupScene: true
+                ),
+            AttachPlatformServices
+        );
 
         monoGame = new OsuDroidMonoGame(bootstrapper);
         monoGame.Run(XnaGameRunBehavior.Asynchronous);

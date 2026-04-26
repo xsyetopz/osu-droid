@@ -10,7 +10,10 @@ internal static class DroidRhythmEvaluator
     private const double RhythmOverallMultiplier = 0.95;
     private const double RhythmRatioMultiplier = 15d;
 
-    public static double EvaluateDifficultyOf(DroidDifficultyHitObject current, bool useSliderAccuracy)
+    public static double EvaluateDifficultyOf(
+        DroidDifficultyHitObject current,
+        bool useSliderAccuracy
+    )
     {
         if (current.Obj is Spinner)
         {
@@ -50,7 +53,10 @@ internal static class DroidRhythmEvaluator
             return 1d;
         }
 
-        while (rhythmStart < validPrevious.Count - 2 && current.StartTime - validPrevious[rhythmStart].StartTime < HistoryTimeMax)
+        while (
+            rhythmStart < validPrevious.Count - 2
+            && current.StartTime - validPrevious[rhythmStart].StartTime < HistoryTimeMax
+        )
         {
             ++rhythmStart;
         }
@@ -62,7 +68,8 @@ internal static class DroidRhythmEvaluator
         {
             DroidDifficultyHitObject currentObject = validPrevious[i - 1];
 
-            double timeDecay = (HistoryTimeMax - (current.StartTime - currentObject.StartTime)) / HistoryTimeMax;
+            double timeDecay =
+                (HistoryTimeMax - (current.StartTime - currentObject.StartTime)) / HistoryTimeMax;
             double noteDecay = (validPrevious.Count - i) / (double)validPrevious.Count;
             double currentHistoricalDecay = System.Math.Min(noteDecay, timeDecay);
 
@@ -70,11 +77,24 @@ internal static class DroidRhythmEvaluator
             double prevDelta = System.Math.Max(1e-7, prevObject.DeltaTime);
             double lastDelta = System.Math.Max(1e-7, lastObject.DeltaTime);
 
-            double deltaDifference = System.Math.Max(prevDelta, currentDelta) / System.Math.Min(prevDelta, currentDelta);
-            double deltaDifferenceFraction = deltaDifference - System.Math.Truncate(deltaDifference);
-            double currentRatio = 1 + RhythmRatioMultiplier * System.Math.Min(0.5, DifficultyCalculationUtils.SmoothstepBellCurve(deltaDifferenceFraction));
+            double deltaDifference =
+                System.Math.Max(prevDelta, currentDelta) / System.Math.Min(prevDelta, currentDelta);
+            double deltaDifferenceFraction =
+                deltaDifference - System.Math.Truncate(deltaDifference);
+            double currentRatio =
+                1
+                + RhythmRatioMultiplier
+                    * System.Math.Min(
+                        0.5,
+                        DifficultyCalculationUtils.SmoothstepBellCurve(deltaDifferenceFraction)
+                    );
             double differenceMultiplier = System.Math.Clamp(2 - deltaDifference / 8, 0, 1);
-            double windowPenalty = System.Math.Clamp((System.Math.Abs(prevDelta - currentDelta) - deltaDifferenceEpsilon) / deltaDifferenceEpsilon, 0, 1);
+            double windowPenalty = System.Math.Clamp(
+                (System.Math.Abs(prevDelta - currentDelta) - deltaDifferenceEpsilon)
+                    / deltaDifferenceEpsilon,
+                0,
+                1
+            );
             double effectiveRatio = windowPenalty * currentRatio * differenceMultiplier;
 
             if (firstDeltaSwitch)
@@ -103,7 +123,10 @@ internal static class DroidRhythmEvaluator
                         effectiveRatio /= 2;
                     }
 
-                    if (lastDelta > prevDelta + deltaDifferenceEpsilon && prevDelta > currentDelta + deltaDifferenceEpsilon)
+                    if (
+                        lastDelta > prevDelta + deltaDifferenceEpsilon
+                        && prevDelta > currentDelta + deltaDifferenceEpsilon
+                    )
                     {
                         effectiveRatio /= 8;
                     }
@@ -130,7 +153,11 @@ internal static class DroidRhythmEvaluator
 
                         effectiveRatio *= System.Math.Min(
                             3d / islandCount,
-                            System.Math.Pow(1d / islandCount, DifficultyCalculationUtils.Logistic(island.Delta, 58.33, 0.24, 2.75)));
+                            System.Math.Pow(
+                                1d / islandCount,
+                                DifficultyCalculationUtils.Logistic(island.Delta, 58.33, 0.24, 2.75)
+                            )
+                        );
                         break;
                     }
 
@@ -140,7 +167,8 @@ internal static class DroidRhythmEvaluator
                     }
 
                     effectiveRatio *= 1 - prevObject.GetDoubletapness(prevObject.Next(0)) * 0.75;
-                    rhythmComplexitySum += System.Math.Sqrt(effectiveRatio * startRatio) * currentHistoricalDecay;
+                    rhythmComplexitySum +=
+                        System.Math.Sqrt(effectiveRatio * startRatio) * currentHistoricalDecay;
                     startRatio = effectiveRatio;
                     previousIsland = island;
 

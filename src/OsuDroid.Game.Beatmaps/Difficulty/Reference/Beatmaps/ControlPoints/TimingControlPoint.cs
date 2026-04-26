@@ -1,6 +1,7 @@
 namespace OsuDroid.Game.Beatmaps.Difficulty.Reference.Beatmaps.ControlPoints;
 
-internal sealed class TimingControlPoint(double time, double msPerBeat, int timeSignature) : ControlPoint(time)
+internal sealed class TimingControlPoint(double time, double msPerBeat, int timeSignature)
+    : ControlPoint(time)
 {
     public double MillisecondsPerBeat { get; } = msPerBeat;
 

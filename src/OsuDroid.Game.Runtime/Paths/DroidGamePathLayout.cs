@@ -33,7 +33,8 @@ public sealed record DroidGamePathLayout
 
     public string NoMedia { get; }
 
-    public string GetDatabasePath(string buildType) => Path.Combine(Databases, $"room-{buildType}.db");
+    public string GetDatabasePath(string buildType) =>
+        Path.Combine(Databases, $"room-{buildType}.db");
 
     public void EnsureDirectories()
     {
@@ -52,5 +53,8 @@ public sealed record DroidGamePathLayout
         }
     }
 
-    private static string NormalizeDirectory(string path) => string.IsNullOrWhiteSpace(path) ? throw new ArgumentException("Path cannot be empty.", nameof(path)) : Path.GetFullPath(path);
+    private static string NormalizeDirectory(string path) =>
+        string.IsNullOrWhiteSpace(path)
+            ? throw new ArgumentException("Path cannot be empty.", nameof(path))
+            : Path.GetFullPath(path);
 }

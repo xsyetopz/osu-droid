@@ -11,7 +11,6 @@ namespace OsuDroid.Game.Tests;
 
 public sealed partial class BeatmapDownloaderTests
 {
-
     [Test]
     public void SearchFocusRequestsPlatformTextInput()
     {
@@ -24,17 +23,42 @@ public sealed partial class BeatmapDownloaderTests
         Assert.That(textInput.ActiveRequest, Is.Not.Null);
         Assert.That(scene.Query, Is.EqualTo("camellia"));
     }
+
     [Test]
     public void SearchBarAndIconHitTestFocusInput()
     {
         BeatmapDownloaderScene scene = CreateScene();
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.AndroidReferenceLandscape).UiFrame;
-        UiElementSnapshot search = frame.Elements.Single(element => element.Id == "downloader-search");
-        UiElementSnapshot icon = frame.Elements.Single(element => element.Id == "downloader-search-icon");
+        UiFrameSnapshot frame = scene
+            .CreateSnapshot(VirtualViewport.AndroidReferenceLandscape)
+            .UiFrame;
+        UiElementSnapshot search = frame.Elements.Single(element =>
+            element.Id == "downloader-search"
+        );
+        UiElementSnapshot icon = frame.Elements.Single(element =>
+            element.Id == "downloader-search-icon"
+        );
 
-        Assert.That(frame.HitTest(new UiPoint(search.Bounds.X + 12, search.Bounds.Y + search.Bounds.Height / 2))!.Action, Is.EqualTo(UiAction.DownloaderSearchBox));
-        Assert.That(frame.HitTest(new UiPoint(icon.Bounds.X + icon.Bounds.Width / 2, icon.Bounds.Y + icon.Bounds.Height / 2))!.Action, Is.EqualTo(UiAction.DownloaderSearchBox));
+        Assert.That(
+            frame
+                .HitTest(
+                    new UiPoint(search.Bounds.X + 12, search.Bounds.Y + search.Bounds.Height / 2)
+                )!
+                .Action,
+            Is.EqualTo(UiAction.DownloaderSearchBox)
+        );
+        Assert.That(
+            frame
+                .HitTest(
+                    new UiPoint(
+                        icon.Bounds.X + icon.Bounds.Width / 2,
+                        icon.Bounds.Y + icon.Bounds.Height / 2
+                    )
+                )!
+                .Action,
+            Is.EqualTo(UiAction.DownloaderSearchBox)
+        );
     }
+
     [Test]
     public void FocusedSearchShowsVisibleFeedback()
     {
@@ -43,9 +67,15 @@ public sealed partial class BeatmapDownloaderTests
 
         scene.FocusSearch(VirtualViewport.AndroidReferenceLandscape);
 
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.AndroidReferenceLandscape).UiFrame;
-        Assert.That(frame.Elements.Any(element => element.Id == "downloader-search-focus"), Is.True);
+        UiFrameSnapshot frame = scene
+            .CreateSnapshot(VirtualViewport.AndroidReferenceLandscape)
+            .UiFrame;
+        Assert.That(
+            frame.Elements.Any(element => element.Id == "downloader-search-focus"),
+            Is.True
+        );
     }
+
     [Test]
     public void SearchCancelClearsVisibleFeedback()
     {
@@ -55,27 +85,47 @@ public sealed partial class BeatmapDownloaderTests
         scene.FocusSearch(VirtualViewport.AndroidReferenceLandscape);
         textInput.ActiveRequest!.OnCanceled?.Invoke();
 
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.AndroidReferenceLandscape).UiFrame;
-        Assert.That(frame.Elements.Any(element => element.Id == "downloader-search-focus"), Is.False);
+        UiFrameSnapshot frame = scene
+            .CreateSnapshot(VirtualViewport.AndroidReferenceLandscape)
+            .UiFrame;
+        Assert.That(
+            frame.Elements.Any(element => element.Id == "downloader-search-focus"),
+            Is.False
+        );
     }
+
     [Test]
     public void CoreDownloaderSearchActionRequestsPlatformTextInput()
     {
         var textInput = new CapturingTextInputService();
-        var database = new DroidDatabase(Path.Combine(TestContext.CurrentContext.WorkDirectory, $"downloader-search-{Guid.NewGuid():N}.db"));
+        var database = new DroidDatabase(
+            Path.Combine(
+                TestContext.CurrentContext.WorkDirectory,
+                $"downloader-search-{Guid.NewGuid():N}.db"
+            )
+        );
         database.EnsureCreated();
-        var core = new OsuDroidGameCore(new GameServices(
-            database,
-            new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(TestContext.CurrentContext.WorkDirectory)),
-            "test",
-            TextInputService: textInput));
+        var core = new OsuDroidGameCore(
+            new GameServices(
+                database,
+                new DroidGamePathLayout(
+                    DroidPathRoots.FromCoreRoot(TestContext.CurrentContext.WorkDirectory)
+                ),
+                "test",
+                TextInputService: textInput
+            )
+        );
 
         core.HandleUiAction(UiAction.MainMenuBeatmapDownloader);
-        core.HandleUiAction(UiAction.DownloaderSearchBox, VirtualViewport.AndroidReferenceLandscape);
+        core.HandleUiAction(
+            UiAction.DownloaderSearchBox,
+            VirtualViewport.AndroidReferenceLandscape
+        );
 
         Assert.That(textInput.ActiveRequest, Is.Not.Null);
         Assert.That(textInput.ActiveRequest!.SurfaceBounds, Is.Not.Null);
     }
+
     [Test]
     public void SearchFocusPassesSurfaceBoundsToPlatformInput()
     {

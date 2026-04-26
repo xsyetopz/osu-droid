@@ -10,7 +10,6 @@ namespace OsuDroid.Game.Tests;
 [TestFixture]
 public sealed partial class BeatmapImportTests
 {
-
     [Test]
     public void ParserRejectsNonStandardBeatmapMode()
     {
@@ -57,7 +56,11 @@ public sealed partial class BeatmapImportTests
     }
 
     [Test]
-    public void SanitizerMatchesDroidInvalidCharacters() => Assert.That(BeatmapImportService.SanitizeArchiveName("a\\b/c:d*e?f\"g<h>i|j"), Is.EqualTo("a_b_c_d_e_f_g_h_i_j"));
+    public void SanitizerMatchesDroidInvalidCharacters() =>
+        Assert.That(
+            BeatmapImportService.SanitizeArchiveName("a\\b/c:d*e?f\"g<h>i|j"),
+            Is.EqualTo("a_b_c_d_e_f_g_h_i_j")
+        );
 
     private static DroidGamePathLayout CreatePathLayout()
     {
@@ -67,7 +70,8 @@ public sealed partial class BeatmapImportTests
         return layout;
     }
 
-    private static void CreateOsz(string archivePath, string entryName, string osuText) => CreateOsz(archivePath, new Dictionary<string, string> { [entryName] = osuText });
+    private static void CreateOsz(string archivePath, string entryName, string osuText) =>
+        CreateOsz(archivePath, new Dictionary<string, string> { [entryName] = osuText });
 
     private static void CreateOsz(string archivePath, IReadOnlyDictionary<string, string> entries)
     {
@@ -82,7 +86,10 @@ public sealed partial class BeatmapImportTests
 
     private static string CreateTempDirectory()
     {
-        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, Guid.NewGuid().ToString("N"));
+        string path = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            Guid.NewGuid().ToString("N")
+        );
         Directory.CreateDirectory(path);
         return path;
     }

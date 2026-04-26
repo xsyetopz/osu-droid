@@ -1,6 +1,7 @@
 using OsuDroid.Game.UI.Actions;
 using OsuDroid.Game.UI.Geometry;
 using OsuDroid.Game.UI.Input;
+
 namespace OsuDroid.Game.Scenes.Options;
 
 public sealed partial class OptionsScene
@@ -41,8 +42,6 @@ public sealed partial class OptionsScene
         }
     }
 
-
-
     public void HandleAction(UiAction action, VirtualViewport viewport)
     {
         OptionsSection? selectedSection = SectionForAction(action);
@@ -72,25 +71,18 @@ public sealed partial class OptionsScene
         }
     }
 
-
-
     private static OptionsSection? SectionForAction(UiAction action) =>
         s_sectionActions.TryGetValue(action, out OptionsSection section) ? section : null;
 
     private static string? ToggleKeyForAction(UiAction action) =>
-            s_toggleActions.TryGetValue(action, out string? key) ? key : null;
+        s_toggleActions.TryGetValue(action, out string? key) ? key : null;
 
     public bool GetBoolValue(string key) => _boolValues.TryGetValue(key, out bool value) && value;
 
-
-
     public int GetIntValue(string key) => _intValues.TryGetValue(key, out int value) ? value : 0;
 
-
-
-    public string GetStringValue(string key) => _stringValues.TryGetValue(key, out string? value) ? value : string.Empty;
-
-
+    public string GetStringValue(string key) =>
+        _stringValues.TryGetValue(key, out string? value) ? value : string.Empty;
 
     public void SetIntValue(string key, int value)
     {
@@ -100,24 +92,21 @@ public sealed partial class OptionsScene
             return;
         }
 
-        int normalized = row.Kind == SettingsRowKind.Select ? ClampSelectValue(row, value) : ClampSliderValue(row, value);
+        int normalized =
+            row.Kind == SettingsRowKind.Select
+                ? ClampSelectValue(row, value)
+                : ClampSliderValue(row, value);
         _intValues[key] = normalized;
         _settingsStore?.SetInt(key, normalized);
     }
 
-
-
     internal static bool IsInteractive(SettingsRow row) => row.IsEnabled && !row.IsLocked;
-
-
 
     private static bool IsInteractive(string key)
     {
         SettingsRow? row = AllRows().FirstOrDefault(candidate => candidate.Key == key);
         return row is not null && IsInteractive(row);
     }
-
-
 
     private string GetInputDisplayValue(SettingsRow row)
     {
@@ -130,18 +119,22 @@ public sealed partial class OptionsScene
         return IsPathInput(row.Key) ? OptionsPathDisplayFormatter.Format(value) : value;
     }
 
-
-
-    private string GetSummaryText(SettingsRow row)
-            => _pathDefaults.UsesNativeDefaultSummaries ? row.Key switch
+    private string GetSummaryText(SettingsRow row) =>
+        _pathDefaults.UsesNativeDefaultSummaries
+            ? row.Key switch
             {
                 "corePath" => _localizer["Options_CorePathSummaryIos"],
-                "skinTopPath" => _localizer.Format("Options_SkinTopPathSummaryIos", OptionsPathDisplayFormatter.Format(_pathDefaults.SkinTopPath)),
-                "directory" => _localizer.Format("Options_DirectorySummaryIos", OptionsPathDisplayFormatter.Format(_pathDefaults.SongsDirectory)),
+                "skinTopPath" => _localizer.Format(
+                    "Options_SkinTopPathSummaryIos",
+                    OptionsPathDisplayFormatter.Format(_pathDefaults.SkinTopPath)
+                ),
+                "directory" => _localizer.Format(
+                    "Options_DirectorySummaryIos",
+                    OptionsPathDisplayFormatter.Format(_pathDefaults.SongsDirectory)
+                ),
                 _ => _localizer[row.SummaryKey],
-            } : _localizer[row.SummaryKey];
-
-
+            }
+            : _localizer[row.SummaryKey];
 
     private void Toggle(string key)
     {
@@ -155,11 +148,11 @@ public sealed partial class OptionsScene
         }
     }
 
-
-
     private void HandleRowAction(int rowIndex, VirtualViewport viewport)
     {
-        SettingsRow[] rows = ActiveSectionData.Categories.SelectMany(category => category.Rows).ToArray();
+        SettingsRow[] rows = ActiveSectionData
+            .Categories.SelectMany(category => category.Rows)
+            .ToArray();
         if ((uint)rowIndex >= (uint)rows.Length)
         {
             return;
@@ -201,8 +194,6 @@ public sealed partial class OptionsScene
         }
     }
 
-
-
     private void StepSlider(SettingsRow row)
     {
         int current = GetIntValue(row.Key);
@@ -219,8 +210,6 @@ public sealed partial class OptionsScene
         _changedSettingKey = row.Key;
     }
 
-
-
     private void CycleSelect(SettingsRow row)
     {
         int valueCount = row.ValueKeys?.Count ?? (row.ValueKey is null ? 0 : 1);
@@ -236,69 +225,56 @@ public sealed partial class OptionsScene
         _changedSettingKey = row.Key;
     }
 
-
-
     private string GetSelectValue(SettingsRow row)
     {
         return row.ValueKeys is { Count: > 0 } valueKeys
-            ? _localizer[valueKeys[ClampSelectValue(row, GetIntValue(row.Key))]]
-            : row.ValueKey is null ? string.Empty : _localizer[row.ValueKey];
+                ? _localizer[valueKeys[ClampSelectValue(row, GetIntValue(row.Key))]]
+            : row.ValueKey is null ? string.Empty
+            : _localizer[row.ValueKey];
     }
-
-
 
     private void FocusInput(SettingsRow row, int rowIndex, VirtualViewport viewport)
     {
         UiRect? rowBounds = FindRowBounds(rowIndex, viewport);
-        _textInputService.RequestTextInput(new TextInputRequest(
-            GetStringValue(row.Key),
-            text =>
-            {
-                string value = NormalizeInputValue(row, text);
-                _stringValues[row.Key] = value;
-                _settingsStore?.SetString(row.Key, value);
-                _changedSettingKey = row.Key;
-            },
-            text =>
-            {
-                string value = NormalizeInputValue(row, text);
-                _stringValues[row.Key] = value;
-                _settingsStore?.SetString(row.Key, value);
-                _changedSettingKey = row.Key;
-            },
-            rowBounds));
+        _textInputService.RequestTextInput(
+            new TextInputRequest(
+                GetStringValue(row.Key),
+                text =>
+                {
+                    string value = NormalizeInputValue(row, text);
+                    _stringValues[row.Key] = value;
+                    _settingsStore?.SetString(row.Key, value);
+                    _changedSettingKey = row.Key;
+                },
+                text =>
+                {
+                    string value = NormalizeInputValue(row, text);
+                    _stringValues[row.Key] = value;
+                    _settingsStore?.SetString(row.Key, value);
+                    _changedSettingKey = row.Key;
+                },
+                rowBounds
+            )
+        );
     }
 
-
-
-    private string NormalizeInputValue(SettingsRow row, string? value)
-            => !IsPathInput(row.Key)
-                ? value ?? string.Empty
-                : string.IsNullOrWhiteSpace(value)
-                    ? InputDefaultValue(row)
-                    : _pathDefaults.NormalizePathValue(value.Trim());
-
-
+    private string NormalizeInputValue(SettingsRow row, string? value) =>
+        !IsPathInput(row.Key) ? value ?? string.Empty
+        : string.IsNullOrWhiteSpace(value) ? InputDefaultValue(row)
+        : _pathDefaults.NormalizePathValue(value.Trim());
 
     private string InputDefaultValue(SettingsRow row) =>
-            IsPathInput(row.Key) ? _pathDefaults.GetDefaultValue(row.Key) : string.Empty;
-
-
+        IsPathInput(row.Key) ? _pathDefaults.GetDefaultValue(row.Key) : string.Empty;
 
     private static bool IsPathInput(string key) =>
-            key is "corePath" or "skinTopPath" or "directory";
+        key is "corePath" or "skinTopPath" or "directory";
 
-
-
-    private static int ClampSliderValue(SettingsRow row, int value) => Math.Clamp(value, row.Min, row.Max);
-
-
+    private static int ClampSliderValue(SettingsRow row, int value) =>
+        Math.Clamp(value, row.Min, row.Max);
 
     private static int ClampSelectValue(SettingsRow row, int value)
     {
         int valueCount = row.ValueKeys?.Count ?? (row.ValueKey is null ? 0 : 1);
         return valueCount <= 0 ? 0 : Math.Clamp(value, 0, valueCount - 1);
     }
-
-
 }

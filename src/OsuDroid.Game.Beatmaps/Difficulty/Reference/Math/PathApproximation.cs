@@ -8,7 +8,10 @@ internal static class PathApproximation
     private const float CircularArcTolerance = 0.1f;
     private const float BezierToleranceThreshold = BezierTolerance * BezierTolerance * 4f;
 
-    public static List<ReferenceVector2> ApproximateBezier(IReadOnlyList<ReferenceVector2> controlPoints, CancellationToken cancellationToken = default)
+    public static List<ReferenceVector2> ApproximateBezier(
+        IReadOnlyList<ReferenceVector2> controlPoints,
+        CancellationToken cancellationToken = default
+    )
     {
         var output = new List<ReferenceVector2>();
         int count = controlPoints.Count - 1;
@@ -32,13 +35,28 @@ internal static class PathApproximation
 
             if (BezierIsFlatEnough(parent, cancellationToken))
             {
-                BezierApproximate(parent, output, subdivisionBuffer1, subdivisionBuffer2, count + 1, cancellationToken);
+                BezierApproximate(
+                    parent,
+                    output,
+                    subdivisionBuffer1,
+                    subdivisionBuffer2,
+                    count + 1,
+                    cancellationToken
+                );
                 freeBuffers.Push(parent);
                 continue;
             }
 
-            ReferenceVector2[] rightChild = freeBuffers.Count > 0 ? freeBuffers.Pop() : new ReferenceVector2[count + 1];
-            BezierSubdivide(parent, subdivisionBuffer2, rightChild, subdivisionBuffer1, count + 1, cancellationToken);
+            ReferenceVector2[] rightChild =
+                freeBuffers.Count > 0 ? freeBuffers.Pop() : new ReferenceVector2[count + 1];
+            BezierSubdivide(
+                parent,
+                subdivisionBuffer2,
+                rightChild,
+                subdivisionBuffer1,
+                count + 1,
+                cancellationToken
+            );
 
             for (int i = 0; i <= count; i++)
             {
@@ -54,7 +72,10 @@ internal static class PathApproximation
         return output;
     }
 
-    public static List<ReferenceVector2> ApproximateCatmull(IReadOnlyList<ReferenceVector2> controlPoints, CancellationToken cancellationToken = default)
+    public static List<ReferenceVector2> ApproximateCatmull(
+        IReadOnlyList<ReferenceVector2> controlPoints,
+        CancellationToken cancellationToken = default
+    )
     {
         int segmentCount = System.Math.Max(controlPoints.Count - 1, 0);
         var result = new List<ReferenceVector2>(segmentCount * CatmullDetail * 2);
@@ -66,12 +87,14 @@ internal static class PathApproximation
 
             ReferenceVector2 v1 = i > 0 ? controlPoints[i - 1] : controlPoints[i];
             ReferenceVector2 v2 = controlPoints[i];
-            ReferenceVector2 v3 = i < controlPoints.Count - 1
-                ? controlPoints[i + 1]
-                : new ReferenceVector2(2 * v2.X - v1.X, 2 * v2.Y - v1.Y);
-            ReferenceVector2 v4 = i < controlPoints.Count - 2
-                ? controlPoints[i + 2]
-                : new ReferenceVector2(2 * v3.X - v2.X, 2 * v3.Y - v2.Y);
+            ReferenceVector2 v3 =
+                i < controlPoints.Count - 1
+                    ? controlPoints[i + 1]
+                    : new ReferenceVector2(2 * v2.X - v1.X, 2 * v2.Y - v1.Y);
+            ReferenceVector2 v4 =
+                i < controlPoints.Count - 2
+                    ? controlPoints[i + 2]
+                    : new ReferenceVector2(2 * v3.X - v2.X, 2 * v3.Y - v2.Y);
 
             for (int c = 0; c < CatmullDetail; c++)
             {
@@ -84,7 +107,10 @@ internal static class PathApproximation
         return result;
     }
 
-    public static List<ReferenceVector2> ApproximateCircularArc(IReadOnlyList<ReferenceVector2> controlPoints, CancellationToken cancellationToken = default)
+    public static List<ReferenceVector2> ApproximateCircularArc(
+        IReadOnlyList<ReferenceVector2> controlPoints,
+        CancellationToken cancellationToken = default
+    )
     {
         if (controlPoints.Count != 3)
         {
@@ -105,10 +131,14 @@ internal static class PathApproximation
         float bSquared = b.LengthSquared;
         float cSquared = c.LengthSquared;
 
-        float centerX = (aSquared * (b.Y - c.Y) + bSquared * (c.Y - a.Y) + cSquared * (a.Y - b.Y)) / d;
-        float centerY = (aSquared * (c.X - b.X) + bSquared * (a.X - c.X) + cSquared * (b.X - a.X)) / d;
+        float centerX =
+            (aSquared * (b.Y - c.Y) + bSquared * (c.Y - a.Y) + cSquared * (a.Y - b.Y)) / d;
+        float centerY =
+            (aSquared * (c.X - b.X) + bSquared * (a.X - c.X) + cSquared * (b.X - a.X)) / d;
 
-        float radius = MathF.Sqrt((a.X - centerX) * (a.X - centerX) + (a.Y - centerY) * (a.Y - centerY));
+        float radius = MathF.Sqrt(
+            (a.X - centerX) * (a.X - centerX) + (a.Y - centerY) * (a.Y - centerY)
+        );
         double thetaStart = System.Math.Atan2(a.Y - centerY, a.X - centerX);
         double thetaEnd = System.Math.Atan2(c.Y - centerY, c.X - centerX);
 
@@ -130,9 +160,16 @@ internal static class PathApproximation
             thetaRange = System.Math.Tau - thetaRange;
         }
 
-        int pointCount = 2 * radius <= CircularArcTolerance
-            ? 2
-            : System.Math.Max(2, (int)System.Math.Ceiling(thetaRange / (2 * System.Math.Acos(1 - CircularArcTolerance / radius))));
+        int pointCount =
+            2 * radius <= CircularArcTolerance
+                ? 2
+                : System.Math.Max(
+                    2,
+                    (int)
+                        System.Math.Ceiling(
+                            thetaRange / (2 * System.Math.Acos(1 - CircularArcTolerance / radius))
+                        )
+                );
 
         var output = new List<ReferenceVector2>(pointCount);
 
@@ -142,17 +179,25 @@ internal static class PathApproximation
             double fraction = i / (double)(pointCount - 1);
             double theta = thetaStart + direction * fraction * thetaRange;
 
-            output.Add(new ReferenceVector2(
-                centerX + (float)System.Math.Cos(theta) * radius,
-                centerY + (float)System.Math.Sin(theta) * radius));
+            output.Add(
+                new ReferenceVector2(
+                    centerX + (float)System.Math.Cos(theta) * radius,
+                    centerY + (float)System.Math.Sin(theta) * radius
+                )
+            );
         }
 
         return output;
     }
 
-    public static List<ReferenceVector2> ApproximateLinear(IReadOnlyList<ReferenceVector2> controlPoints) => controlPoints.ToList();
+    public static List<ReferenceVector2> ApproximateLinear(
+        IReadOnlyList<ReferenceVector2> controlPoints
+    ) => controlPoints.ToList();
 
-    private static bool BezierIsFlatEnough(ReferenceVector2[] controlPoints, CancellationToken cancellationToken)
+    private static bool BezierIsFlatEnough(
+        ReferenceVector2[] controlPoints,
+        CancellationToken cancellationToken
+    )
     {
         for (int i = 1; i < controlPoints.Length - 1; i++)
         {
@@ -178,9 +223,17 @@ internal static class PathApproximation
         ReferenceVector2[] subdivisionBuffer1,
         ReferenceVector2[] subdivisionBuffer2,
         int count,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
-        BezierSubdivide(controlPoints, subdivisionBuffer2, subdivisionBuffer1, subdivisionBuffer1, count, cancellationToken);
+        BezierSubdivide(
+            controlPoints,
+            subdivisionBuffer2,
+            subdivisionBuffer1,
+            subdivisionBuffer1,
+            count,
+            cancellationToken
+        );
 
         if (count > 1)
         {
@@ -198,9 +251,12 @@ internal static class PathApproximation
             ReferenceVector2 current = subdivisionBuffer2[index];
             ReferenceVector2 next = subdivisionBuffer2[index + 1];
 
-            output.Add(new ReferenceVector2(
-                0.25f * (previous.X + current.X * 2 + next.X),
-                0.25f * (previous.Y + current.Y * 2 + next.Y)));
+            output.Add(
+                new ReferenceVector2(
+                    0.25f * (previous.X + current.X * 2 + next.X),
+                    0.25f * (previous.Y + current.Y * 2 + next.Y)
+                )
+            );
         }
     }
 
@@ -210,7 +266,8 @@ internal static class PathApproximation
         ReferenceVector2[] right,
         ReferenceVector2[] subdivisionBuffer,
         int count,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         for (int i = 0; i < count; i++)
         {
@@ -231,7 +288,8 @@ internal static class PathApproximation
                 ReferenceVector2 rightPoint = subdivisionBuffer[j + 1];
                 subdivisionBuffer[j] = new ReferenceVector2(
                     (leftPoint.X + rightPoint.X) * 0.5f,
-                    (leftPoint.Y + rightPoint.Y) * 0.5f);
+                    (leftPoint.Y + rightPoint.Y) * 0.5f
+                );
             }
         }
     }
@@ -241,13 +299,27 @@ internal static class PathApproximation
         ReferenceVector2 vector2,
         ReferenceVector2 vector3,
         ReferenceVector2 vector4,
-        float t)
+        float t
+    )
     {
         float t2 = t * t;
         float t3 = t2 * t;
 
         return new ReferenceVector2(
-            0.5f * (2 * vector2.X + (-vector1.X + vector3.X) * t + (2 * vector1.X - 5 * vector2.X + 4 * vector3.X - vector4.X) * t2 + (-vector1.X + 3 * vector2.X - 3 * vector3.X + vector4.X) * t3),
-            0.5f * (2 * vector2.Y + (-vector1.Y + vector3.Y) * t + (2 * vector1.Y - 5 * vector2.Y + 4 * vector3.Y - vector4.Y) * t2 + (-vector1.Y + 3 * vector2.Y - 3 * vector3.Y + vector4.Y) * t3));
+            0.5f
+                * (
+                    2 * vector2.X
+                    + (-vector1.X + vector3.X) * t
+                    + (2 * vector1.X - 5 * vector2.X + 4 * vector3.X - vector4.X) * t2
+                    + (-vector1.X + 3 * vector2.X - 3 * vector3.X + vector4.X) * t3
+                ),
+            0.5f
+                * (
+                    2 * vector2.Y
+                    + (-vector1.Y + vector3.Y) * t
+                    + (2 * vector1.Y - 5 * vector2.Y + 4 * vector3.Y - vector4.Y) * t2
+                    + (-vector1.Y + 3 * vector2.Y - 3 * vector3.Y + vector4.Y) * t3
+                )
+        );
     }
 }

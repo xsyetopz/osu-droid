@@ -86,8 +86,12 @@ public sealed partial class BeatmapDownloaderScene
     private double _elapsedSeconds;
     private BeatmapDownloaderScrollTarget? _activeScrollTarget;
     private readonly KineticScrollState _resultsScroll = new(KineticScrollAxis.Vertical);
-    private readonly KineticScrollState _sortDropdownKineticScroll = new(KineticScrollAxis.Vertical);
-    private readonly KineticScrollState _statusDropdownKineticScroll = new(KineticScrollAxis.Vertical);
+    private readonly KineticScrollState _sortDropdownKineticScroll = new(
+        KineticScrollAxis.Vertical
+    );
+    private readonly KineticScrollState _statusDropdownKineticScroll = new(
+        KineticScrollAxis.Vertical
+    );
     private string _query = string.Empty;
     private string? _message;
     private string? _lastImportedSetDirectory;
@@ -104,7 +108,8 @@ public sealed partial class BeatmapDownloaderScene
         IBeatmapPreviewPlayer _previewPlayer,
         string _coverCacheDirectory,
         GameLocalizer? _localizer = null,
-        string? _downloadTracePath = null)
+        string? _downloadTracePath = null
+    )
     {
         this._mirrorClient = _mirrorClient;
         this._downloadService = _downloadService;
@@ -156,7 +161,8 @@ public sealed partial class BeatmapDownloaderScene
 
     public void SetTextInputService(ITextInputService service) => _textInputService = service;
 
-    public void SetPreferNoVideoDownloads(bool preferNoVideo) => _preferNoVideoDownloads = preferNoVideo;
+    public void SetPreferNoVideoDownloads(bool preferNoVideo) =>
+        _preferNoVideoDownloads = preferNoVideo;
 
     public void SetForceRomanized(bool forceRomanized) => _forceRomanizedMetadata = forceRomanized;
 
@@ -177,16 +183,42 @@ public sealed partial class BeatmapDownloaderScene
         _ownsPreviewPlayback = false;
     }
 
-
-    public GameFrameSnapshot CreateSnapshot(VirtualViewport viewport) => new("BeatmapDownloader", "Beatmap Downloader", string.Empty, Array.Empty<string>(), 0, false, CreateFrame(viewport));
+    public GameFrameSnapshot CreateSnapshot(VirtualViewport viewport) =>
+        new(
+            "BeatmapDownloader",
+            "Beatmap Downloader",
+            string.Empty,
+            Array.Empty<string>(),
+            0,
+            false,
+            CreateFrame(viewport)
+        );
 
     public void Update(TimeSpan elapsed)
     {
         float elapsedSeconds = (float)elapsed.TotalSeconds;
         _elapsedSeconds += elapsedSeconds;
-        _resultsScroll.Update(elapsedSeconds, () => _scrollOffset, value => _scrollOffset = value, 0f, MaxScrollOffset(VirtualViewport.AndroidReferenceLandscape));
-        _sortDropdownKineticScroll.Update(elapsedSeconds, () => _sortDropdownScroll, value => _sortDropdownScroll = value, 0f, MaxDropdownScroll(SortOptions().Length, VirtualViewport.AndroidReferenceLandscape));
-        _statusDropdownKineticScroll.Update(elapsedSeconds, () => _statusDropdownScroll, value => _statusDropdownScroll = value, 0f, MaxDropdownScroll(StatusOptions().Length, VirtualViewport.AndroidReferenceLandscape));
+        _resultsScroll.Update(
+            elapsedSeconds,
+            () => _scrollOffset,
+            value => _scrollOffset = value,
+            0f,
+            MaxScrollOffset(VirtualViewport.AndroidReferenceLandscape)
+        );
+        _sortDropdownKineticScroll.Update(
+            elapsedSeconds,
+            () => _sortDropdownScroll,
+            value => _sortDropdownScroll = value,
+            0f,
+            MaxDropdownScroll(SortOptions().Length, VirtualViewport.AndroidReferenceLandscape)
+        );
+        _statusDropdownKineticScroll.Update(
+            elapsedSeconds,
+            () => _statusDropdownScroll,
+            value => _statusDropdownScroll = value,
+            0f,
+            MaxDropdownScroll(StatusOptions().Length, VirtualViewport.AndroidReferenceLandscape)
+        );
         float maxScroll = MaxScrollOffset(VirtualViewport.AndroidReferenceLandscape);
         if (maxScroll > 0f && _hasMore && !_isSearching && _scrollOffset >= maxScroll - 40f * Dp)
         {
@@ -202,17 +234,19 @@ public sealed partial class BeatmapDownloaderScene
         ApplyQueuedDownloadCompletions();
     }
 
-    private string DisplayTitle(BeatmapMirrorSet set) => _forceRomanizedMetadata || string.IsNullOrWhiteSpace(set.TitleUnicode) ? set.Title : set.TitleUnicode;
+    private string DisplayTitle(BeatmapMirrorSet set) =>
+        _forceRomanizedMetadata || string.IsNullOrWhiteSpace(set.TitleUnicode)
+            ? set.Title
+            : set.TitleUnicode;
 
-    private string DisplayArtist(BeatmapMirrorSet set) => _forceRomanizedMetadata || string.IsNullOrWhiteSpace(set.ArtistUnicode) ? set.Artist : set.ArtistUnicode;
+    private string DisplayArtist(BeatmapMirrorSet set) =>
+        _forceRomanizedMetadata || string.IsNullOrWhiteSpace(set.ArtistUnicode)
+            ? set.Artist
+            : set.ArtistUnicode;
 
-
-
-
-
-
-
-
-
-    private sealed record BeatmapDownloadCompletion(bool IsSuccess, string? ArchivePath, string? ErrorMessage);
+    private sealed record BeatmapDownloadCompletion(
+        bool IsSuccess,
+        string? ArchivePath,
+        string? ErrorMessage
+    );
 }

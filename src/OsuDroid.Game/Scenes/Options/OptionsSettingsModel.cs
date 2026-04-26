@@ -2,20 +2,27 @@ using OsuDroid.Game.Runtime.Paths;
 
 namespace OsuDroid.Game.Scenes.Options;
 
-public sealed record OptionsPathDefaults(string CorePath, string SkinTopPath, string SongsDirectory, bool UsesNativeDefaultSummaries = false)
+public sealed record OptionsPathDefaults(
+    string CorePath,
+    string SkinTopPath,
+    string SongsDirectory,
+    bool UsesNativeDefaultSummaries = false
+)
 {
-    public static OptionsPathDefaults Empty { get; } = new(string.Empty, string.Empty, string.Empty);
+    public static OptionsPathDefaults Empty { get; } =
+        new(string.Empty, string.Empty, string.Empty);
 
     public static OptionsPathDefaults FromPaths(DroidGamePathLayout paths) =>
         new(paths.CoreRoot, paths.Skin, paths.Songs, UsesNativeSummaryDefaults(paths.CoreRoot));
 
-    public string GetDefaultValue(string key) => key switch
-    {
-        "corePath" => CorePath,
-        "skinTopPath" => SkinTopPath,
-        "directory" => SongsDirectory,
-        _ => string.Empty,
-    };
+    public string GetDefaultValue(string key) =>
+        key switch
+        {
+            "corePath" => CorePath,
+            "skinTopPath" => SkinTopPath,
+            "directory" => SongsDirectory,
+            _ => string.Empty,
+        };
 
     public string NormalizePathValue(string value)
     {

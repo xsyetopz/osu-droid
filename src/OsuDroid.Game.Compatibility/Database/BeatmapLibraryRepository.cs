@@ -3,8 +3,8 @@ using OsuDroid.Game.Beatmaps;
 
 namespace OsuDroid.Game.Compatibility.Database;
 
-
-public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : IBeatmapLibraryRepository
+public sealed partial class BeatmapLibraryRepository(DroidDatabase database)
+    : IBeatmapLibraryRepository
 {
     public void UpsertBeatmaps(IReadOnlyList<BeatmapInfo> beatmaps)
     {
@@ -53,9 +53,24 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
     {
         using SqliteConnection connection = database.OpenConnection();
         using SqliteTransaction transaction = connection.BeginTransaction();
-        ExecuteSetDirectoryDelete(connection, transaction, "DELETE FROM BeatmapInfo WHERE setDirectory = $setDirectory", directory);
-        ExecuteSetDirectoryDelete(connection, transaction, "DELETE FROM BeatmapOptions WHERE setDirectory = $setDirectory", directory);
-        ExecuteSetDirectoryDelete(connection, transaction, "DELETE FROM BeatmapSetCollection_BeatmapSetInfo WHERE setDirectory = $setDirectory", directory);
+        ExecuteSetDirectoryDelete(
+            connection,
+            transaction,
+            "DELETE FROM BeatmapInfo WHERE setDirectory = $setDirectory",
+            directory
+        );
+        ExecuteSetDirectoryDelete(
+            connection,
+            transaction,
+            "DELETE FROM BeatmapOptions WHERE setDirectory = $setDirectory",
+            directory
+        );
+        ExecuteSetDirectoryDelete(
+            connection,
+            transaction,
+            "DELETE FROM BeatmapSetCollection_BeatmapSetInfo WHERE setDirectory = $setDirectory",
+            directory
+        );
         transaction.Commit();
     }
 
@@ -81,11 +96,14 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
     {
         using SqliteConnection connection = database.OpenConnection();
         using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "SELECT EXISTS(SELECT setDirectory FROM BeatmapInfo WHERE setDirectory = $setDirectory LIMIT 1)";
+        command.CommandText =
+            "SELECT EXISTS(SELECT setDirectory FROM BeatmapInfo WHERE setDirectory = $setDirectory LIMIT 1)";
         command.Parameters.AddWithValue("$setDirectory", directory);
-        return Convert.ToInt32(command.ExecuteScalar(), System.Globalization.CultureInfo.InvariantCulture) != 0;
+        return Convert.ToInt32(
+                command.ExecuteScalar(),
+                System.Globalization.CultureInfo.InvariantCulture
+            ) != 0;
     }
-
 
     public IReadOnlyList<string> GetBeatmapSetDirectories()
     {
@@ -119,12 +137,16 @@ public sealed partial class BeatmapLibraryRepository(DroidDatabase database) : I
         BeatmapSetInfo[] sets = beatmaps
             .GroupBy(beatmap => beatmap.SetDirectory, StringComparer.Ordinal)
             .Select(group => new BeatmapSetInfo(group.First().SetId, group.Key, group.ToArray()))
-            .OrderBy(set => set.Beatmaps.FirstOrDefault()?.Artist ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(set => set.Beatmaps.FirstOrDefault()?.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(
+                set => set.Beatmaps.FirstOrDefault()?.Artist ?? string.Empty,
+                StringComparer.OrdinalIgnoreCase
+            )
+            .ThenBy(
+                set => set.Beatmaps.FirstOrDefault()?.Title ?? string.Empty,
+                StringComparer.OrdinalIgnoreCase
+            )
             .ToArray();
 
         return new BeatmapLibrarySnapshot(sets);
     }
-
-
 }

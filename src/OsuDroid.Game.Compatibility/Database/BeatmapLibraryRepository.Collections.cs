@@ -18,16 +18,22 @@ public sealed partial class BeatmapLibraryRepository
             GROUP BY c.name
             ORDER BY LOWER(c.name), c.name
             """;
-        command.Parameters.AddWithValue("$selectedSetDirectory", selectedSetDirectory ?? string.Empty);
+        command.Parameters.AddWithValue(
+            "$selectedSetDirectory",
+            selectedSetDirectory ?? string.Empty
+        );
         using SqliteDataReader reader = command.ExecuteReader();
         var collections = new List<BeatmapCollection>();
 
         while (reader.Read())
         {
-            collections.Add(new BeatmapCollection(
-                reader.GetString(0),
-                reader.GetInt32(1),
-                reader.GetInt32(2) > 0));
+            collections.Add(
+                new BeatmapCollection(
+                    reader.GetString(0),
+                    reader.GetInt32(1),
+                    reader.GetInt32(2) > 0
+                )
+            );
         }
 
         return collections;
@@ -37,7 +43,8 @@ public sealed partial class BeatmapLibraryRepository
     {
         using SqliteConnection connection = database.OpenConnection();
         using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "SELECT setDirectory FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = $name";
+        command.CommandText =
+            "SELECT setDirectory FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = $name";
         command.Parameters.AddWithValue("$name", name);
         using SqliteDataReader reader = command.ExecuteReader();
         var directories = new HashSet<string>(StringComparer.Ordinal);
@@ -54,9 +61,13 @@ public sealed partial class BeatmapLibraryRepository
     {
         using SqliteConnection connection = database.OpenConnection();
         using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "SELECT EXISTS(SELECT name FROM BeatmapSetCollection WHERE name = $name LIMIT 1)";
+        command.CommandText =
+            "SELECT EXISTS(SELECT name FROM BeatmapSetCollection WHERE name = $name LIMIT 1)";
         command.Parameters.AddWithValue("$name", name);
-        return Convert.ToInt32(command.ExecuteScalar(), System.Globalization.CultureInfo.InvariantCulture) != 0;
+        return Convert.ToInt32(
+                command.ExecuteScalar(),
+                System.Globalization.CultureInfo.InvariantCulture
+            ) != 0;
     }
 
     public void CreateCollection(string name)
@@ -72,8 +83,18 @@ public sealed partial class BeatmapLibraryRepository
     {
         using SqliteConnection connection = database.OpenConnection();
         using SqliteTransaction transaction = connection.BeginTransaction();
-        ExecuteCollectionDelete(connection, transaction, "DELETE FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = $name", name);
-        ExecuteCollectionDelete(connection, transaction, "DELETE FROM BeatmapSetCollection WHERE name = $name", name);
+        ExecuteCollectionDelete(
+            connection,
+            transaction,
+            "DELETE FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = $name",
+            name
+        );
+        ExecuteCollectionDelete(
+            connection,
+            transaction,
+            "DELETE FROM BeatmapSetCollection WHERE name = $name",
+            name
+        );
         transaction.Commit();
     }
 
@@ -81,7 +102,8 @@ public sealed partial class BeatmapLibraryRepository
     {
         using SqliteConnection connection = database.OpenConnection();
         using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "INSERT OR IGNORE INTO BeatmapSetCollection_BeatmapSetInfo (collectionName, setDirectory) VALUES ($name, $setDirectory)";
+        command.CommandText =
+            "INSERT OR IGNORE INTO BeatmapSetCollection_BeatmapSetInfo (collectionName, setDirectory) VALUES ($name, $setDirectory)";
         command.Parameters.AddWithValue("$name", name);
         command.Parameters.AddWithValue("$setDirectory", setDirectory);
         command.ExecuteNonQuery();
@@ -91,7 +113,8 @@ public sealed partial class BeatmapLibraryRepository
     {
         using SqliteConnection connection = database.OpenConnection();
         using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "DELETE FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = $name AND setDirectory = $setDirectory";
+        command.CommandText =
+            "DELETE FROM BeatmapSetCollection_BeatmapSetInfo WHERE collectionName = $name AND setDirectory = $setDirectory";
         command.Parameters.AddWithValue("$name", name);
         command.Parameters.AddWithValue("$setDirectory", setDirectory);
         command.ExecuteNonQuery();

@@ -7,7 +7,8 @@ public sealed record VirtualViewport(
     float VirtualHeight,
     float Scale,
     float OffsetX,
-    float OffsetY)
+    float OffsetY
+)
 {
     public const float AndroidReferenceWidth = 1280f;
 
@@ -27,7 +28,15 @@ public sealed record VirtualViewport(
 
         float scale = surfaceWidth / AndroidReferenceWidth;
         float virtualHeight = surfaceHeight / scale;
-        return new VirtualViewport(surfaceWidth, surfaceHeight, AndroidReferenceWidth, virtualHeight, scale, 0f, 0f);
+        return new VirtualViewport(
+            surfaceWidth,
+            surfaceHeight,
+            AndroidReferenceWidth,
+            virtualHeight,
+            scale,
+            0f,
+            0f
+        );
     }
 
     public UiPoint ToVirtual(float surfaceX, float surfaceY) =>
@@ -38,5 +47,6 @@ public sealed record VirtualViewport(
             OffsetX + virtualBounds.X * Scale,
             OffsetY + virtualBounds.Y * Scale,
             virtualBounds.Width * Scale,
-            virtualBounds.Height * Scale);
+            virtualBounds.Height * Scale
+        );
 }

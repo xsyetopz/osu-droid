@@ -25,7 +25,12 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
 
     public void Route(UiFrameSnapshot currentFrame)
     {
-        if (activeTouchId is not null && !isTouchDragging && !longPressFired && DateTime.UtcNow - touchStartedUtc >= LongPressDelay)
+        if (
+            activeTouchId is not null
+            && !isTouchDragging
+            && !longPressFired
+            && DateTime.UtcNow - touchStartedUtc >= LongPressDelay
+        )
         {
             if (core.HandleUiLongPress(pressedAction, currentFrame.Viewport))
             {
@@ -48,7 +53,10 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
                 pressedAction = pressedElement?.Action ?? UiAction.None;
                 isUiDragCaptured = false;
                 isSceneScrollCandidate = false;
-                if (pressedElement is not null && core.TryBeginUiDrag(pressedElement.Id, virtualPoint, currentFrame.Viewport))
+                if (
+                    pressedElement is not null
+                    && core.TryBeginUiDrag(pressedElement.Id, virtualPoint, currentFrame.Viewport)
+                )
                 {
                     pressedAction = UiAction.None;
                     isTouchDragging = false;
@@ -57,7 +65,11 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
                     continue;
                 }
 
-                isSceneScrollCandidate = core.TryBeginSceneScrollDrag(virtualPoint, currentFrame.Viewport, timestampSeconds);
+                isSceneScrollCandidate = core.TryBeginSceneScrollDrag(
+                    virtualPoint,
+                    currentFrame.Viewport,
+                    timestampSeconds
+                );
                 touchStartedUtc = DateTime.UtcNow;
                 longPressFired = false;
                 core.PressUiAction(pressedAction);
@@ -80,7 +92,10 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
 
                 var movedX = virtualPoint.X - touchStart.X;
                 var movedY = virtualPoint.Y - touchStart.Y;
-                if (!isTouchDragging && MathF.Sqrt(movedX * movedX + movedY * movedY) > TouchDragThreshold)
+                if (
+                    !isTouchDragging
+                    && MathF.Sqrt(movedX * movedX + movedY * movedY) > TouchDragThreshold
+                )
                 {
                     isTouchDragging = true;
                     longPressFired = false;
@@ -89,11 +104,20 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
 
                 if (isTouchDragging && isSceneScrollCandidate)
                 {
-                    core.UpdateSceneScrollDrag(virtualPoint, currentFrame.Viewport, timestampSeconds);
+                    core.UpdateSceneScrollDrag(
+                        virtualPoint,
+                        currentFrame.Viewport,
+                        timestampSeconds
+                    );
                 }
                 else if (isTouchDragging)
                 {
-                    core.ScrollActiveScene(previousTouch.X - virtualPoint.X, previousTouch.Y - virtualPoint.Y, touchStart, currentFrame.Viewport);
+                    core.ScrollActiveScene(
+                        previousTouch.X - virtualPoint.X,
+                        previousTouch.Y - virtualPoint.Y,
+                        touchStart,
+                        currentFrame.Viewport
+                    );
                 }
 
                 previousTouch = virtualPoint;
@@ -139,11 +163,16 @@ internal sealed class MonoGameTouchRouter(OsuDroidGameCore core)
 
             var start = PerfDiagnostics.Start();
             core.HandleUiAction(element.Action, currentFrame.Viewport);
-            PerfDiagnostics.Log("input.releasedAction", start, $"pressed={pressedAction} released={element.Action}");
+            PerfDiagnostics.Log(
+                "input.releasedAction",
+                start,
+                $"pressed={pressedAction} released={element.Action}"
+            );
             break;
         }
     }
 
-    private static double TimestampSeconds() => Stopwatch.GetTimestamp() / (double)Stopwatch.Frequency;
+    private static double TimestampSeconds() =>
+        Stopwatch.GetTimestamp() / (double)Stopwatch.Frequency;
 }
 #endif

@@ -3,7 +3,11 @@ using OsuDroid.Game.Beatmaps.Difficulty.Reference.Mods;
 
 namespace OsuDroid.Game.Beatmaps.Difficulty.Reference.Calculation.Skills;
 
-internal sealed class DroidTap(IEnumerable<Mod> mods, bool considerCheesability, double? strainTimeCap = null) : DroidStrainSkill(mods)
+internal sealed class DroidTap(
+    IEnumerable<Mod> mods,
+    bool considerCheesability,
+    double? strainTimeCap = null
+) : DroidStrainSkill(mods)
 {
     protected override double StarsPerDouble => 1.1;
 
@@ -22,7 +26,9 @@ internal sealed class DroidTap(IEnumerable<Mod> mods, bool considerCheesability,
     {
         return ObjectStrains.Count == 0 || maxStrain == 0d
             ? 0d
-            : ObjectStrains.Sum(strain => 1d / (1 + System.Math.Exp(-(strain / maxStrain * 12 - 6))));
+            : ObjectStrains.Sum(strain =>
+                1d / (1 + System.Math.Exp(-(strain / maxStrain * 12 - 6)))
+            );
     }
 
     public double RelevantDeltaTime()
@@ -37,7 +43,9 @@ internal sealed class DroidTap(IEnumerable<Mod> mods, bool considerCheesability,
 
         for (int i = 0; i < objectDeltaTimes.Count; ++i)
         {
-            numerator += objectDeltaTimes[i] / (1 + System.Math.Exp(-(ObjectStrains[i] / maxStrain * 25 - 20)));
+            numerator +=
+                objectDeltaTimes[i]
+                / (1 + System.Math.Exp(-(ObjectStrains[i] / maxStrain * 25 - 20)));
             denominator += 1d / (1 + System.Math.Exp(-(ObjectStrains[i] / maxStrain * 25 - 20)));
         }
 
@@ -47,7 +55,9 @@ internal sealed class DroidTap(IEnumerable<Mod> mods, bool considerCheesability,
     protected override double StrainValueAt(DroidDifficultyHitObject current)
     {
         currentStrain *= StrainDecay(current.StrainTime);
-        currentStrain += DroidTapEvaluator.EvaluateDifficultyOf(current, ConsiderCheesability, StrainTimeCap) * SkillMultiplier;
+        currentStrain +=
+            DroidTapEvaluator.EvaluateDifficultyOf(current, ConsiderCheesability, StrainTimeCap)
+            * SkillMultiplier;
         currentRhythm = current.RhythmMultiplier;
 
         double totalStrain = currentStrain * currentRhythm;
@@ -57,8 +67,10 @@ internal sealed class DroidTap(IEnumerable<Mod> mods, bool considerCheesability,
         return totalStrain;
     }
 
-    protected override double CalculateInitialStrain(double time, DroidDifficultyHitObject current) =>
-        currentStrain * currentRhythm * StrainDecay(time - current.Previous(0)!.StartTime);
+    protected override double CalculateInitialStrain(
+        double time,
+        DroidDifficultyHitObject current
+    ) => currentStrain * currentRhythm * StrainDecay(time - current.Previous(0)!.StartTime);
 
     private static double StrainDecay(double ms) => System.Math.Pow(StrainDecayBase, ms / 1000d);
 }

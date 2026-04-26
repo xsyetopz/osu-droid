@@ -1,10 +1,10 @@
 using NUnit.Framework;
 using OsuDroid.Game.UI.Geometry;
+
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
 {
-
     [Test]
     public void ViewportPreservesAndroidReferenceWidthAndDeviceAspect()
     {

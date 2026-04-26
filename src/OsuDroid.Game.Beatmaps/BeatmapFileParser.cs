@@ -10,12 +10,24 @@ public sealed class BeatmapFileParser
     public static BeatmapInfo Parse(string osuFilePath, string songsPath)
     {
         Dictionary<string, Dictionary<string, string>> sections = ReadSections(osuFilePath);
-        Dictionary<string, string> general = sections.GetValueOrDefault("General") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        Dictionary<string, string> metadata = sections.GetValueOrDefault("Metadata") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        Dictionary<string, string> difficulty = sections.GetValueOrDefault("Difficulty") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        Dictionary<string, string> events = sections.GetValueOrDefault("Events") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        Dictionary<string, string> timingPoints = sections.GetValueOrDefault("TimingPoints") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        Dictionary<string, string> hitObjects = sections.GetValueOrDefault("HitObjects") ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string> general =
+            sections.GetValueOrDefault("General")
+            ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string> metadata =
+            sections.GetValueOrDefault("Metadata")
+            ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string> difficulty =
+            sections.GetValueOrDefault("Difficulty")
+            ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string> events =
+            sections.GetValueOrDefault("Events")
+            ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string> timingPoints =
+            sections.GetValueOrDefault("TimingPoints")
+            ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string> hitObjects =
+            sections.GetValueOrDefault("HitObjects")
+            ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         if (GetRulesetMode(general) != 0)
         {
             throw new NotSupportedException("Only osu!standard beatmaps are supported.");
@@ -23,7 +35,10 @@ public sealed class BeatmapFileParser
 
         HitObjectSummary beatmapTimes = ParseHitObjects(hitObjects.Values);
         BpmSummary bpm = ParseBpm(timingPoints.Values, beatmapTimes.LastTime);
-        string setDirectory = Path.GetRelativePath(songsPath, Path.GetDirectoryName(osuFilePath) ?? songsPath);
+        string setDirectory = Path.GetRelativePath(
+            songsPath,
+            Path.GetDirectoryName(osuFilePath) ?? songsPath
+        );
         BeatmapStarRatings ratings = CalculateStarRatings(osuFilePath);
 
         return new BeatmapInfo(
@@ -36,14 +51,20 @@ public sealed class BeatmapFileParser
             Status: null,
             SetId: ParseInt(metadata.GetValueOrDefault("BeatmapSetID")),
             Title: metadata.GetValueOrDefault("Title") ?? string.Empty,
-            TitleUnicode: metadata.GetValueOrDefault("TitleUnicode") ?? metadata.GetValueOrDefault("Title") ?? string.Empty,
+            TitleUnicode: metadata.GetValueOrDefault("TitleUnicode")
+                ?? metadata.GetValueOrDefault("Title")
+                ?? string.Empty,
             Artist: metadata.GetValueOrDefault("Artist") ?? string.Empty,
-            ArtistUnicode: metadata.GetValueOrDefault("ArtistUnicode") ?? metadata.GetValueOrDefault("Artist") ?? string.Empty,
+            ArtistUnicode: metadata.GetValueOrDefault("ArtistUnicode")
+                ?? metadata.GetValueOrDefault("Artist")
+                ?? string.Empty,
             Creator: metadata.GetValueOrDefault("Creator") ?? string.Empty,
             Version: metadata.GetValueOrDefault("Version") ?? string.Empty,
             Tags: metadata.GetValueOrDefault("Tags") ?? string.Empty,
             Source: metadata.GetValueOrDefault("Source") ?? string.Empty,
-            DateImported: new DateTimeOffset(File.GetLastWriteTimeUtc(Path.GetDirectoryName(osuFilePath) ?? osuFilePath)).ToUnixTimeMilliseconds(),
+            DateImported: new DateTimeOffset(
+                File.GetLastWriteTimeUtc(Path.GetDirectoryName(osuFilePath) ?? osuFilePath)
+            ).ToUnixTimeMilliseconds(),
             ApproachRate: ParseFloat(difficulty.GetValueOrDefault("ApproachRate")),
             OverallDifficulty: ParseFloat(difficulty.GetValueOrDefault("OverallDifficulty")),
             CircleSize: ParseFloat(difficulty.GetValueOrDefault("CircleSize")),
@@ -59,7 +80,8 @@ public sealed class BeatmapFileParser
             SliderCount: beatmapTimes.Sliders,
             SpinnerCount: beatmapTimes.Spinners,
             MaxCombo: beatmapTimes.Circles + beatmapTimes.Sliders + beatmapTimes.Spinners,
-            EpilepsyWarning: ParseInt(general.GetValueOrDefault("EpilepsyWarning")) == 1);
+            EpilepsyWarning: ParseInt(general.GetValueOrDefault("EpilepsyWarning")) == 1
+        );
     }
 
     public static bool IsStandardRulesetFile(string osuFilePath)
@@ -92,7 +114,11 @@ public sealed class BeatmapFileParser
                     return 0;
                 }
 
-                inGeneral = string.Equals(line[1..^1], "General", StringComparison.OrdinalIgnoreCase);
+                inGeneral = string.Equals(
+                    line[1..^1],
+                    "General",
+                    StringComparison.OrdinalIgnoreCase
+                );
                 continue;
             }
 
@@ -102,7 +128,14 @@ public sealed class BeatmapFileParser
             }
 
             int separator = line.IndexOf(':', StringComparison.Ordinal);
-            if (separator <= 0 || !string.Equals(line[..separator].Trim(), "Mode", StringComparison.OrdinalIgnoreCase))
+            if (
+                separator <= 0
+                || !string.Equals(
+                    line[..separator].Trim(),
+                    "Mode",
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
             {
                 continue;
             }
@@ -115,7 +148,9 @@ public sealed class BeatmapFileParser
 
     private static Dictionary<string, Dictionary<string, string>> ReadSections(string path)
     {
-        var sections = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+        var sections = new Dictionary<string, Dictionary<string, string>>(
+            StringComparer.OrdinalIgnoreCase
+        );
         Dictionary<string, string>? current = null;
         string currentSection = string.Empty;
         int lineNumber = 0;
@@ -160,13 +195,17 @@ public sealed class BeatmapFileParser
         return sections;
     }
 
-    private static int GetRulesetMode(IReadOnlyDictionary<string, string> general) => ParseInt(general.GetValueOrDefault("Mode")) ?? 0;
+    private static int GetRulesetMode(IReadOnlyDictionary<string, string> general) =>
+        ParseInt(general.GetValueOrDefault("Mode")) ?? 0;
 
     private static string? ParseBackgroundFilename(IEnumerable<string> eventLines)
     {
         foreach (string line in eventLines)
         {
-            if (!line.StartsWith("0,", StringComparison.Ordinal) && !line.StartsWith("Background,", StringComparison.OrdinalIgnoreCase))
+            if (
+                !line.StartsWith("0,", StringComparison.Ordinal)
+                && !line.StartsWith("Background,", StringComparison.OrdinalIgnoreCase)
+            )
             {
                 continue;
             }
@@ -210,15 +249,22 @@ public sealed class BeatmapFileParser
 
         float min = bpms.Min(point => point.Bpm);
         float max = bpms.Max(point => point.Bpm);
-        float common = bpms
-            .Select((point, index) => new
-            {
-                point.Bpm,
-                Duration = Math.Max(0L, (index + 1 < bpms.Count ? bpms[index + 1].Time : lastObjectTime) - point.Time),
-            })
+        float common = bpms.Select(
+                (point, index) =>
+                    new
+                    {
+                        point.Bpm,
+                        Duration = Math.Max(
+                            0L,
+                            (index + 1 < bpms.Count ? bpms[index + 1].Time : lastObjectTime)
+                                - point.Time
+                        ),
+                    }
+            )
             .OrderByDescending(point => point.Duration)
             .ThenBy(point => point.Bpm)
-            .First().Bpm;
+            .First()
+            .Bpm;
         return new BpmSummary(min, max, common);
     }
 
@@ -264,7 +310,8 @@ public sealed class BeatmapFileParser
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
 
-    private static string NormalizeSetDirectory(string path) => path.Replace(Path.DirectorySeparatorChar, '/').Replace(Path.AltDirectorySeparatorChar, '/');
+    private static string NormalizeSetDirectory(string path) =>
+        path.Replace(Path.DirectorySeparatorChar, '/').Replace(Path.AltDirectorySeparatorChar, '/');
 
     private static BeatmapStarRatings CalculateStarRatings(string osuFilePath)
     {
@@ -278,13 +325,27 @@ public sealed class BeatmapFileParser
         }
     }
 
-    private static int? ParseInt(string? text) => int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed) ? parsed : null;
+    private static int? ParseInt(string? text) =>
+        int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed)
+            ? parsed
+            : null;
 
-    private static long? ParseLong(string? text) => long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out long parsed) ? parsed : null;
+    private static long? ParseLong(string? text) =>
+        long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out long parsed)
+            ? parsed
+            : null;
 
-    private static float ParseFloat(string? text) => float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed) ? parsed : 0f;
+    private static float ParseFloat(string? text) =>
+        float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed)
+            ? parsed
+            : 0f;
 
     private readonly record struct BpmSummary(float Min, float Max, float Common);
 
-    private readonly record struct HitObjectSummary(int Circles, int Sliders, int Spinners, long LastTime);
+    private readonly record struct HitObjectSummary(
+        int Circles,
+        int Sliders,
+        int Spinners,
+        long LastTime
+    );
 }

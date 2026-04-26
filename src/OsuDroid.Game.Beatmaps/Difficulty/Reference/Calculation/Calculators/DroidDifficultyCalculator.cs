@@ -8,10 +8,21 @@ using OsuDroid.Game.Beatmaps.Difficulty.Reference.Rulesets;
 
 namespace OsuDroid.Game.Beatmaps.Difficulty.Reference.Calculation.Calculators;
 
-internal sealed class DroidDifficultyCalculator : DifficultyCalculator<DroidPlayableBeatmap, DroidDifficultyHitObject, DroidDifficultyAttributes>
+internal sealed class DroidDifficultyCalculator
+    : DifficultyCalculator<
+        DroidPlayableBeatmap,
+        DroidDifficultyHitObject,
+        DroidDifficultyAttributes
+    >
 {
     protected override HashSet<Type> DifficultyAdjustmentMods =>
-        [.. base.DifficultyAdjustmentMods, typeof(ModPrecise), typeof(ModScoreV2), typeof(ModFreezeFrame), typeof(ModReplayV6)];
+        [
+            .. base.DifficultyAdjustmentMods,
+            typeof(ModPrecise),
+            typeof(ModScoreV2),
+            typeof(ModFreezeFrame),
+            typeof(ModReplayV6),
+        ];
 
     private const int MinimumSectionObjectCount = 5;
     private const double ThreeFingerStrainThreshold = 175d;
@@ -22,7 +33,8 @@ internal sealed class DroidDifficultyCalculator : DifficultyCalculator<DroidPlay
         PlayableBeatmap beatmap,
         Skill<DroidDifficultyHitObject>[] skills,
         DroidDifficultyHitObject[] objects,
-        bool forReplay)
+        bool forReplay
+    )
     {
         DroidDifficultyAttributes attributes = new()
         {
@@ -58,23 +70,36 @@ internal sealed class DroidDifficultyCalculator : DifficultyCalculator<DroidPlay
         }
 
         double baseAimPerformance = DroidAim.DifficultyToPerformance(attributes.AimDifficulty);
-        double baseTapPerformance = StrainSkill<DroidDifficultyHitObject>.DifficultyToPerformance(attributes.TapDifficulty);
-        double baseFlashlightPerformance = DroidFlashlight.DifficultyToPerformance(attributes.FlashlightDifficulty);
-        double baseReadingPerformance = DroidReading.DifficultyToPerformance(attributes.ReadingDifficulty);
+        double baseTapPerformance = StrainSkill<DroidDifficultyHitObject>.DifficultyToPerformance(
+            attributes.TapDifficulty
+        );
+        double baseFlashlightPerformance = DroidFlashlight.DifficultyToPerformance(
+            attributes.FlashlightDifficulty
+        );
+        double baseReadingPerformance = DroidReading.DifficultyToPerformance(
+            attributes.ReadingDifficulty
+        );
         double basePerformance = System.Math.Pow(
-            System.Math.Pow(baseAimPerformance, 1.1) +
-            System.Math.Pow(baseTapPerformance, 1.1) +
-            System.Math.Pow(baseFlashlightPerformance, 1.1) +
-            System.Math.Pow(baseReadingPerformance, 1.1), 1 / 1.1);
+            System.Math.Pow(baseAimPerformance, 1.1)
+                + System.Math.Pow(baseTapPerformance, 1.1)
+                + System.Math.Pow(baseFlashlightPerformance, 1.1)
+                + System.Math.Pow(baseReadingPerformance, 1.1),
+            1 / 1.1
+        );
 
-        attributes.StarRating = basePerformance > 1e-5
-            ? 0.027 * (System.Math.Cbrt(100000 / System.Math.Pow(2, 1 / 1.1) * basePerformance) + 4)
-            : 0;
+        attributes.StarRating =
+            basePerformance > 1e-5
+                ? 0.027
+                    * (System.Math.Cbrt(100000 / System.Math.Pow(2, 1 / 1.1) * basePerformance) + 4)
+                : 0;
 
         return attributes;
     }
 
-    protected override Skill<DroidDifficultyHitObject>[] CreateSkills(DroidPlayableBeatmap beatmap, bool forReplay)
+    protected override Skill<DroidDifficultyHitObject>[] CreateSkills(
+        DroidPlayableBeatmap beatmap,
+        bool forReplay
+    )
     {
         IReadOnlyCollection<Mod> mods = beatmap.Mods.Values;
         List<Skill<DroidDifficultyHitObject>> skills = [];
@@ -111,7 +136,9 @@ internal sealed class DroidDifficultyCalculator : DifficultyCalculator<DroidPlay
         return [.. skills];
     }
 
-    protected override DroidDifficultyHitObject[] CreateDifficultyHitObjects(DroidPlayableBeatmap beatmap)
+    protected override DroidDifficultyHitObject[] CreateDifficultyHitObjects(
+        DroidPlayableBeatmap beatmap
+    )
     {
         if (beatmap.HitObjects.Objects.Count == 0)
         {
@@ -129,17 +156,24 @@ internal sealed class DroidDifficultyCalculator : DifficultyCalculator<DroidPlay
                 i > 0 ? objects[i - 1] : null,
                 clockRate,
                 result,
-                i - 1);
+                i - 1
+            );
             result[i].ComputeProperties(clockRate);
         }
 
         return result;
     }
 
-    protected override DroidPlayableBeatmap CreatePlayableBeatmap(Beatmap beatmap, IEnumerable<Mod>? mods) =>
-        beatmap.CreateDroidPlayableBeatmap(mods);
+    protected override DroidPlayableBeatmap CreatePlayableBeatmap(
+        Beatmap beatmap,
+        IEnumerable<Mod>? mods
+    ) => beatmap.CreateDroidPlayableBeatmap(mods);
 
-    private void PopulateAimAttributes(DroidDifficultyAttributes attributes, IEnumerable<Skill<DroidDifficultyHitObject>> skills, bool forReplay)
+    private void PopulateAimAttributes(
+        DroidDifficultyAttributes attributes,
+        IEnumerable<Skill<DroidDifficultyHitObject>> skills,
+        bool forReplay
+    )
     {
         DroidAim? aim = FindSkill<DroidAim>(skills, skill => skill.WithSliders);
         if (aim is null)
@@ -172,15 +206,25 @@ internal sealed class DroidDifficultyCalculator : DifficultyCalculator<DroidPlay
             double difficultyRating = slider.DifficultyRating / velocitySum;
             if (difficultyRating > 0.02)
             {
-                attributes.DifficultSliders.Add(slider with { DifficultyRating = difficultyRating });
+                attributes.DifficultSliders.Add(
+                    slider with
+                    {
+                        DifficultyRating = difficultyRating,
+                    }
+                );
             }
         }
 
-        attributes.DifficultSliders.Sort((a, b) => b.DifficultyRating.CompareTo(a.DifficultyRating));
+        attributes.DifficultSliders.Sort(
+            (a, b) => b.DifficultyRating.CompareTo(a.DifficultyRating)
+        );
         int limit = (int)System.Math.Ceiling(0.15 * attributes.SliderCount);
         if (attributes.DifficultSliders.Count > limit)
         {
-            attributes.DifficultSliders.RemoveRange(limit, attributes.DifficultSliders.Count - limit);
+            attributes.DifficultSliders.RemoveRange(
+                limit,
+                attributes.DifficultSliders.Count - limit
+            );
         }
     }
 
@@ -188,10 +232,14 @@ internal sealed class DroidDifficultyCalculator : DifficultyCalculator<DroidPlay
         DroidDifficultyAttributes attributes,
         IEnumerable<Skill<DroidDifficultyHitObject>> skills,
         IReadOnlyList<DroidDifficultyHitObject> objects,
-        bool forReplay)
+        bool forReplay
+    )
     {
         DroidTap? tap = FindSkill<DroidTap>(skills, skill => skill.ConsiderCheesability);
-        DroidTap? tapVibro = FindSkill<DroidTap>(skills, skill => skill.ConsiderCheesability && skill.StrainTimeCap.HasValue);
+        DroidTap? tapVibro = FindSkill<DroidTap>(
+            skills,
+            skill => skill.ConsiderCheesability && skill.StrainTimeCap.HasValue
+        );
         if (tap is null || tapVibro is null)
         {
             return;
@@ -238,12 +286,17 @@ internal sealed class DroidDifficultyCalculator : DifficultyCalculator<DroidPlay
 
             double currentDelta = (current.StartTime - prev.StartTime) / clockRate;
             double prevDelta = (prev.StartTime - prevPrev.StartTime) / clockRate;
-            double deltaRatio = System.Math.Min(prevDelta, currentDelta) / System.Math.Max(prevDelta, currentDelta);
+            double deltaRatio =
+                System.Math.Min(prevDelta, currentDelta) / System.Math.Max(prevDelta, currentDelta);
 
-            if (inSpeedSection &&
-                (currentStrain < ThreeFingerStrainThreshold ||
-                 (prevDelta < currentDelta && deltaRatio <= 0.5) ||
-                 i == objects.Count - 1))
+            if (
+                inSpeedSection
+                && (
+                    currentStrain < ThreeFingerStrainThreshold
+                    || (prevDelta < currentDelta && deltaRatio <= 0.5)
+                    || i == objects.Count - 1
+                )
+            )
             {
                 int lastSpeedObjectIndex = i - (i == objects.Count - 1 ? 0 : 1);
                 inSpeedSection = false;
@@ -253,15 +306,26 @@ internal sealed class DroidDifficultyCalculator : DifficultyCalculator<DroidPlay
                     continue;
                 }
 
-                attributes.PossibleThreeFingeredSections.Add(new HighStrainSection(
-                    firstSpeedObjectIndex,
-                    lastSpeedObjectIndex,
-                    CalculateThreeFingerSummedStrain(tapNoCheese.ObjectStrains.GetRange(firstSpeedObjectIndex, lastSpeedObjectIndex - firstSpeedObjectIndex))));
+                attributes.PossibleThreeFingeredSections.Add(
+                    new HighStrainSection(
+                        firstSpeedObjectIndex,
+                        lastSpeedObjectIndex,
+                        CalculateThreeFingerSummedStrain(
+                            tapNoCheese.ObjectStrains.GetRange(
+                                firstSpeedObjectIndex,
+                                lastSpeedObjectIndex - firstSpeedObjectIndex
+                            )
+                        )
+                    )
+                );
             }
         }
     }
 
-    private void PopulateRhythmAttributes(DroidDifficultyAttributes attributes, IEnumerable<Skill<DroidDifficultyHitObject>> skills)
+    private void PopulateRhythmAttributes(
+        DroidDifficultyAttributes attributes,
+        IEnumerable<Skill<DroidDifficultyHitObject>> skills
+    )
     {
         DroidRhythm? rhythm = FindSkill<DroidRhythm>(skills);
         if (rhythm is not null)
@@ -270,15 +334,24 @@ internal sealed class DroidDifficultyCalculator : DifficultyCalculator<DroidPlay
         }
     }
 
-    private void PopulateFlashlightAttributes(DroidDifficultyAttributes attributes, IEnumerable<Skill<DroidDifficultyHitObject>> skills)
+    private void PopulateFlashlightAttributes(
+        DroidDifficultyAttributes attributes,
+        IEnumerable<Skill<DroidDifficultyHitObject>> skills
+    )
     {
-        DroidFlashlight? flashlight = FindSkill<DroidFlashlight>(skills, skill => skill.WithSliders);
+        DroidFlashlight? flashlight = FindSkill<DroidFlashlight>(
+            skills,
+            skill => skill.WithSliders
+        );
         if (flashlight is null)
         {
             return;
         }
 
-        DroidFlashlight? flashlightNoSlider = FindSkill<DroidFlashlight>(skills, skill => !skill.WithSliders);
+        DroidFlashlight? flashlightNoSlider = FindSkill<DroidFlashlight>(
+            skills,
+            skill => !skill.WithSliders
+        );
         attributes.FlashlightDifficulty = CalculateRating(flashlight);
         attributes.FlashlightDifficultStrainCount = flashlight.CountTopWeightedStrains();
         attributes.FlashlightSliderFactor =
@@ -287,7 +360,10 @@ internal sealed class DroidDifficultyCalculator : DifficultyCalculator<DroidPlay
                 : 1;
     }
 
-    private void PopulateReadingAttributes(DroidDifficultyAttributes attributes, IEnumerable<Skill<DroidDifficultyHitObject>> skills)
+    private void PopulateReadingAttributes(
+        DroidDifficultyAttributes attributes,
+        IEnumerable<Skill<DroidDifficultyHitObject>> skills
+    )
     {
         DroidReading? reading = FindSkill<DroidReading>(skills);
         if (reading is null)
@@ -302,8 +378,10 @@ internal sealed class DroidDifficultyCalculator : DifficultyCalculator<DroidPlay
             ? new ReferencePreciseDroidHitWindow(attributes.OverallDifficulty).GreatWindow
             : new ReferenceDroidHitWindow(attributes.OverallDifficulty).GreatWindow;
 
-        double standardOverallDifficulty = ReferenceUnadjustedStandardHitWindow.HitWindow300ToOverallDifficulty(greatWindow);
-        double ratingMultiplier = 0.75 + System.Math.Pow(System.Math.Max(0d, standardOverallDifficulty), 2.2) / 800;
+        double standardOverallDifficulty =
+            ReferenceUnadjustedStandardHitWindow.HitWindow300ToOverallDifficulty(greatWindow);
+        double ratingMultiplier =
+            0.75 + System.Math.Pow(System.Math.Max(0d, standardOverallDifficulty), 2.2) / 800;
         attributes.ReadingDifficulty *= System.Math.Sqrt(ratingMultiplier);
     }
 

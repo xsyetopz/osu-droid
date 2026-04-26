@@ -5,5 +5,5 @@ internal enum SampleBank
     None,
     Normal,
     Soft,
-    Drum
+    Drum,
 }

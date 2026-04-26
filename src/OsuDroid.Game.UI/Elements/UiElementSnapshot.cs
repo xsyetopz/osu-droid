@@ -1,5 +1,6 @@
 using OsuDroid.Game.UI.Actions;
 using OsuDroid.Game.UI.Geometry;
+
 namespace OsuDroid.Game.UI.Elements;
 
 public sealed record UiElementSnapshot(
@@ -26,14 +27,14 @@ public sealed record UiElementSnapshot(
     UiRect? SpriteSource = null,
     UiMeasuredTextAnchor? MeasuredTextAnchor = null,
     UiProgressRing? ProgressRing = null,
-    UiRect? ClipBounds = null);
+    UiRect? ClipBounds = null
+);
 
 public sealed record UiMeasuredTextAnchor(
     string Text,
     UiTextStyle TextStyle,
     float RightX,
-    float LeftPadding);
+    float LeftPadding
+);
 
-public sealed record UiProgressRing(
-    float StrokeWidth,
-    float SweepDegrees);
+public sealed record UiProgressRing(float StrokeWidth, float SweepDegrees);

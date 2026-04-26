@@ -40,7 +40,12 @@ public sealed partial class OptionsScene
     private readonly KineticScrollState _contentScroll = new(KineticScrollAxis.Vertical);
     private readonly KineticScrollState _sectionScroll = new(KineticScrollAxis.Vertical);
 
-    public OptionsScene(GameLocalizer localizer, IGameSettingsStore? settingsStore = null, ITextInputService? textInputService = null, OptionsPathDefaults? pathDefaults = null)
+    public OptionsScene(
+        GameLocalizer localizer,
+        IGameSettingsStore? settingsStore = null,
+        ITextInputService? textInputService = null,
+        OptionsPathDefaults? pathDefaults = null
+    )
     {
         _localizer = localizer;
         _settingsStore = settingsStore;
@@ -57,17 +62,31 @@ public sealed partial class OptionsScene
 
     public float SectionScrollOffset => _sectionScrollOffset;
 
-    public IReadOnlyList<string> Sections => s_sections.Select(section => _localizer.Get(section.Key)).ToArray();
+    public IReadOnlyList<string> Sections =>
+        s_sections.Select(section => _localizer.Get(section.Key)).ToArray();
 
-    public static IReadOnlyList<OptionsSection> AllSections => s_sections.Select(section => section.Section).ToArray();
+    public static IReadOnlyList<OptionsSection> AllSections =>
+        s_sections.Select(section => section.Section).ToArray();
 
-    public IReadOnlyList<string> GeneralRows => s_generalCategories.SelectMany(category => category.Rows).Select(row => _localizer.Get(row.TitleKey)).ToArray();
+    public IReadOnlyList<string> GeneralRows =>
+        s_generalCategories
+            .SelectMany(category => category.Rows)
+            .Select(row => _localizer.Get(row.TitleKey))
+            .ToArray();
 
-    public IReadOnlyList<string> GeneralCategories => s_generalCategories.Select(category => _localizer.Get(category.TitleKey)).ToArray();
+    public IReadOnlyList<string> GeneralCategories =>
+        s_generalCategories.Select(category => _localizer.Get(category.TitleKey)).ToArray();
 
-    public IReadOnlyList<string> ActiveRows => ActiveSectionData.Categories.SelectMany(category => category.Rows).Select(row => _localizer.Get(row.TitleKey)).ToArray();
+    public IReadOnlyList<string> ActiveRows =>
+        ActiveSectionData
+            .Categories.SelectMany(category => category.Rows)
+            .Select(row => _localizer.Get(row.TitleKey))
+            .ToArray();
 
-    public IReadOnlyList<string> ActiveCategories => ActiveSectionData.Categories.Select(category => _localizer.Get(category.TitleKey)).ToArray();
+    public IReadOnlyList<string> ActiveCategories =>
+        ActiveSectionData
+            .Categories.Select(category => _localizer.Get(category.TitleKey))
+            .ToArray();
 
     public void SetTextInputService(ITextInputService service) => _textInputService = service;
 
@@ -80,22 +99,34 @@ public sealed partial class OptionsScene
         {
             if (row.Kind == SettingsRowKind.Checkbox)
             {
-                _boolValues[row.Key] = _settingsStore?.GetBool(row.Key, row.DefaultChecked) ?? row.DefaultChecked;
+                _boolValues[row.Key] =
+                    _settingsStore?.GetBool(row.Key, row.DefaultChecked) ?? row.DefaultChecked;
             }
             else if (row.Kind == SettingsRowKind.Slider)
             {
-                _intValues[row.Key] = ClampSliderValue(row, _settingsStore?.GetInt(row.Key, row.DefaultValue) ?? row.DefaultValue);
+                _intValues[row.Key] = ClampSliderValue(
+                    row,
+                    _settingsStore?.GetInt(row.Key, row.DefaultValue) ?? row.DefaultValue
+                );
             }
             else if (row.Kind == SettingsRowKind.Select)
             {
-                _intValues[row.Key] = ClampSelectValue(row, _settingsStore?.GetInt(row.Key, row.DefaultValue) ?? row.DefaultValue);
+                _intValues[row.Key] = ClampSelectValue(
+                    row,
+                    _settingsStore?.GetInt(row.Key, row.DefaultValue) ?? row.DefaultValue
+                );
             }
             else if (row.Kind == SettingsRowKind.Input)
             {
-                string storedValue = _settingsStore?.GetString(row.Key, InputDefaultValue(row)) ?? InputDefaultValue(row);
+                string storedValue =
+                    _settingsStore?.GetString(row.Key, InputDefaultValue(row))
+                    ?? InputDefaultValue(row);
                 string normalizedValue = NormalizeInputValue(row, storedValue);
                 _stringValues[row.Key] = normalizedValue;
-                if (_settingsStore is not null && !string.Equals(storedValue, normalizedValue, StringComparison.Ordinal))
+                if (
+                    _settingsStore is not null
+                    && !string.Equals(storedValue, normalizedValue, StringComparison.Ordinal)
+                )
                 {
                     _settingsStore.SetString(row.Key, normalizedValue);
                 }
@@ -113,8 +144,20 @@ public sealed partial class OptionsScene
     {
         float elapsedSeconds = (float)elapsed.TotalSeconds;
         _elapsedSeconds += elapsedSeconds;
-        _contentScroll.Update(elapsedSeconds, () => _contentScrollOffset, value => _contentScrollOffset = value, 0f, MaxActiveContentScrollOffset(VirtualViewport.AndroidReferenceLandscape));
-        _sectionScroll.Update(elapsedSeconds, () => _sectionScrollOffset, value => _sectionScrollOffset = value, 0f, MaxSectionScrollOffset(VirtualViewport.AndroidReferenceLandscape));
+        _contentScroll.Update(
+            elapsedSeconds,
+            () => _contentScrollOffset,
+            value => _contentScrollOffset = value,
+            0f,
+            MaxActiveContentScrollOffset(VirtualViewport.AndroidReferenceLandscape)
+        );
+        _sectionScroll.Update(
+            elapsedSeconds,
+            () => _sectionScrollOffset,
+            value => _sectionScrollOffset = value,
+            0f,
+            MaxSectionScrollOffset(VirtualViewport.AndroidReferenceLandscape)
+        );
 
         if (_statusMessageKey is not null)
         {
@@ -142,5 +185,4 @@ public sealed partial class OptionsScene
 
 #pragma warning disable IDE0072 // UiAction has cross-scene members; Options maps only Options actions.
 #pragma warning restore IDE0072
-
 }

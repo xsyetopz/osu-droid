@@ -1,4 +1,5 @@
 using NUnit.Framework;
+
 namespace OsuDroid.Game.Tests.UI;
 
 public sealed class DroidUiCentralizationTests
@@ -16,9 +17,18 @@ public sealed class DroidUiCentralizationTests
     {
         string root = FindRepoRoot();
         string[] offenders = s_sceneFiles
-            .SelectMany(path => Directory.EnumerateFiles(Path.Combine(root, path), "*.cs", SearchOption.AllDirectories))
+            .SelectMany(path =>
+                Directory.EnumerateFiles(
+                    Path.Combine(root, path),
+                    "*.cs",
+                    SearchOption.AllDirectories
+                )
+            )
             .Where(path => !path.EndsWith("SongSelectScene.RowLayout.cs", StringComparison.Ordinal))
-            .Where(path => File.ReadAllText(path).Contains("UiColor.Opaque(", StringComparison.Ordinal) || File.ReadAllText(path).Contains("new UiColor(", StringComparison.Ordinal))
+            .Where(path =>
+                File.ReadAllText(path).Contains("UiColor.Opaque(", StringComparison.Ordinal)
+                || File.ReadAllText(path).Contains("new UiColor(", StringComparison.Ordinal)
+            )
             .Select(path => Path.GetRelativePath(root, path))
             .Order(StringComparer.Ordinal)
             .ToArray();
@@ -29,11 +39,14 @@ public sealed class DroidUiCentralizationTests
     private static string FindRepoRoot()
     {
         var directory = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "OsuDroid.sln")))
+        while (
+            directory is not null && !File.Exists(Path.Combine(directory.FullName, "OsuDroid.sln"))
+        )
         {
             directory = directory.Parent;
         }
 
-        return directory?.FullName ?? throw new InvalidOperationException("Could not locate repository root.");
+        return directory?.FullName
+            ?? throw new InvalidOperationException("Could not locate repository root.");
     }
 }

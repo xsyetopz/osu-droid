@@ -8,13 +8,30 @@ namespace OsuDroid.Game.Scenes.BeatmapDownloader;
 
 public sealed partial class BeatmapDownloaderScene
 {
-    private void AddCover(List<UiElementSnapshot> elements, string id, BeatmapMirrorSet set, UiRect bounds, UiAction action)
+    private void AddCover(
+        List<UiElementSnapshot> elements,
+        string id,
+        BeatmapMirrorSet set,
+        UiRect bounds,
+        UiAction action
+    )
     {
         elements.Add(Fill(id + "-fallback", bounds, s_coverFallback, 0.55f, action, Radius));
         string? path = GetCoverPath(set);
         if (path is not null && File.Exists(path))
         {
-            elements.Add(new UiElementSnapshot(id, UiElementKind.Sprite, bounds, s_white, 0.55f, Action: action, ExternalAssetPath: path, SpriteFit: UiSpriteFit.Cover));
+            elements.Add(
+                new UiElementSnapshot(
+                    id,
+                    UiElementKind.Sprite,
+                    bounds,
+                    s_white,
+                    0.55f,
+                    Action: action,
+                    ExternalAssetPath: path,
+                    SpriteFit: UiSpriteFit.Cover
+                )
+            );
             return;
         }
 
@@ -38,9 +55,13 @@ public sealed partial class BeatmapDownloaderScene
         {
             try
             {
-                using HttpResponseMessage response = await s_coverClient.GetAsync(set.CoverUrl).ConfigureAwait(false);
+                using HttpResponseMessage response = await s_coverClient
+                    .GetAsync(set.CoverUrl)
+                    .ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
-                using Stream source = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                using Stream source = await response
+                    .Content.ReadAsStreamAsync()
+                    .ConfigureAwait(false);
                 using FileStream destination = File.Create(path);
                 await source.CopyToAsync(destination).ConfigureAwait(false);
             }
@@ -68,6 +89,9 @@ public sealed partial class BeatmapDownloaderScene
             extension = ".jpg";
         }
 
-        return Path.Combine(_coverCacheDirectory, BeatmapImportService.SanitizeArchiveName($"{set.Mirror}-{set.Id}") + extension);
+        return Path.Combine(
+            _coverCacheDirectory,
+            BeatmapImportService.SanitizeArchiveName($"{set.Mirror}-{set.Id}") + extension
+        );
     }
 }

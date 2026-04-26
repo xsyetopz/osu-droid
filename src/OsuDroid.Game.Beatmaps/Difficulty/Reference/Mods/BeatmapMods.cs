@@ -8,7 +8,11 @@ public sealed class ModAutopilot : ReferenceMod;
 
 public sealed class ModEasy : ReferenceMod, IReferenceModApplicableToDifficulty
 {
-    public void ApplyToDifficulty(GameMode mode, ReferenceBeatmapDifficulty difficulty, IEnumerable<IReferenceModFacilitatesAdjustment> adjustmentMods)
+    public void ApplyToDifficulty(
+        GameMode mode,
+        ReferenceBeatmapDifficulty difficulty,
+        IEnumerable<IReferenceModFacilitatesAdjustment> adjustmentMods
+    )
     {
         difficulty.DifficultyCircleSize *= 0.5f;
         difficulty.GameplayCircleSize *= 0.5f;
@@ -24,9 +28,16 @@ public sealed class ModMirror : ReferenceMod;
 
 public sealed class ModHardRock : ReferenceMod, IReferenceModApplicableToDifficulty
 {
-    public void ApplyToDifficulty(GameMode mode, ReferenceBeatmapDifficulty difficulty, IEnumerable<IReferenceModFacilitatesAdjustment> adjustmentMods)
+    public void ApplyToDifficulty(
+        GameMode mode,
+        ReferenceBeatmapDifficulty difficulty,
+        IEnumerable<IReferenceModFacilitatesAdjustment> adjustmentMods
+    )
     {
-        difficulty.DifficultyCircleSize = System.Math.Min(difficulty.DifficultyCircleSize * 1.3f, 10f);
+        difficulty.DifficultyCircleSize = System.Math.Min(
+            difficulty.DifficultyCircleSize * 1.3f,
+            10f
+        );
         difficulty.GameplayCircleSize = System.Math.Min(difficulty.GameplayCircleSize * 1.3f, 10f);
         difficulty.ApproachRate = System.Math.Min(difficulty.ApproachRate * 1.4f, 10f);
         difficulty.OverallDifficulty = System.Math.Min(difficulty.OverallDifficulty * 1.4f, 10f);
@@ -45,12 +56,16 @@ public sealed class ModFlashlight : ReferenceMod;
 
 public sealed class ModDifficultyAdjust : ReferenceMod, IReferenceModApplicableToDifficultyWithMods
 {
-    public void ApplyToDifficulty(GameMode mode, ReferenceBeatmapDifficulty difficulty, IEnumerable<ReferenceMod> mods)
-    {
-    }
+    public void ApplyToDifficulty(
+        GameMode mode,
+        ReferenceBeatmapDifficulty difficulty,
+        IEnumerable<ReferenceMod> mods
+    )
+    { }
 }
 
-public sealed class ModRateAdjust(float trackRateMultiplier = 1f) : ReferenceModRateAdjust(trackRateMultiplier);
+public sealed class ModRateAdjust(float trackRateMultiplier = 1f)
+    : ReferenceModRateAdjust(trackRateMultiplier);
 
 public sealed class ModTimeRamp : ReferenceMod;
 

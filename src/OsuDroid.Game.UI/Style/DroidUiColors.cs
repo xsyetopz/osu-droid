@@ -1,4 +1,5 @@
 using OsuDroid.Game.UI.Geometry;
+
 namespace OsuDroid.Game.UI.Style;
 
 public static class DroidUiColors

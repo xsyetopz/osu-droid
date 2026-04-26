@@ -105,8 +105,18 @@ public sealed class MenuMusicControllerTests
     {
         var player = new ConfirmingPreviewPlayer();
         var controller = new PreviewMenuMusicController(player);
-        MenuTrack missing = CreateTrack(Path.Combine(TestContext.CurrentContext.WorkDirectory, $"{Guid.NewGuid():N}.mp3"), "Missing.osu", "Artist - Missing", 1000);
-        MenuTrack playable = CreateTrack(CreateAudioFile(), "Playable.osu", "Artist - Playable", 1000);
+        MenuTrack missing = CreateTrack(
+            Path.Combine(TestContext.CurrentContext.WorkDirectory, $"{Guid.NewGuid():N}.mp3"),
+            "Missing.osu",
+            "Artist - Missing",
+            1000
+        );
+        MenuTrack playable = CreateTrack(
+            CreateAudioFile(),
+            "Playable.osu",
+            "Artist - Playable",
+            1000
+        );
 
         controller.SetPlaylist([missing, playable], 0, true);
 
@@ -114,29 +124,41 @@ public sealed class MenuMusicControllerTests
         Assert.That(controller.State.IsPlaying, Is.True);
     }
 
-    private static MenuTrack CreateTrack(string audioPath) => new(
-        "beatmap:1 Artist - Title/Easy.osu",
-        "Artist - Title",
-        audioPath,
-        45000,
-        123000,
-        180f,
-        "1 Artist - Title",
-        "Easy.osu");
+    private static MenuTrack CreateTrack(string audioPath) =>
+        new(
+            "beatmap:1 Artist - Title/Easy.osu",
+            "Artist - Title",
+            audioPath,
+            45000,
+            123000,
+            180f,
+            "1 Artist - Title",
+            "Easy.osu"
+        );
 
-    private static MenuTrack CreateTrack(string audioPath, string beatmapFilename, string displayTitle, int lengthMilliseconds) => new(
-        $"beatmap:1 Artist - Title/{beatmapFilename}",
-        displayTitle,
-        audioPath,
-        0,
-        lengthMilliseconds,
-        180f,
-        "1 Artist - Title",
-        beatmapFilename);
+    private static MenuTrack CreateTrack(
+        string audioPath,
+        string beatmapFilename,
+        string displayTitle,
+        int lengthMilliseconds
+    ) =>
+        new(
+            $"beatmap:1 Artist - Title/{beatmapFilename}",
+            displayTitle,
+            audioPath,
+            0,
+            lengthMilliseconds,
+            180f,
+            "1 Artist - Title",
+            beatmapFilename
+        );
 
     private static string CreateAudioFile()
     {
-        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"{Guid.NewGuid():N}.mp3");
+        string path = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"{Guid.NewGuid():N}.mp3"
+        );
         File.WriteAllBytes(path, [1]);
         return path;
     }
@@ -153,7 +175,8 @@ public sealed class MenuMusicControllerTests
 
         public string? Source { get; set; }
 
-        public BeatmapPreviewPlaybackSnapshot PlaybackSnapshot => new(Source, IsPlaying, PositionMilliseconds, DurationMilliseconds);
+        public BeatmapPreviewPlaybackSnapshot PlaybackSnapshot =>
+            new(Source, IsPlaying, PositionMilliseconds, DurationMilliseconds);
 
         public void Play(string audioPath, int previewTimeMilliseconds)
         {
@@ -189,9 +212,7 @@ public sealed class MenuMusicControllerTests
             PositionMilliseconds = 0;
         }
 
-        public void SetVolume(float normalizedVolume)
-        {
-        }
+        public void SetVolume(float normalizedVolume) { }
 
         public bool TryReadSpectrum1024(float[] destination) => false;
     }

@@ -7,7 +7,8 @@ public sealed record RoomBeatmapDto(
     [property: JsonPropertyName("title")] string Title,
     [property: JsonPropertyName("artist")] string Artist,
     [property: JsonPropertyName("creator")] string Creator,
-    [property: JsonPropertyName("version")] string Version);
+    [property: JsonPropertyName("version")] string Version
+);
 
 public sealed record CreateRoomRequestDto(
     [property: JsonPropertyName("hostUid")] long HostUid,
@@ -17,6 +18,7 @@ public sealed record CreateRoomRequestDto(
     [property: JsonPropertyName("password")] string? Password,
     [property: JsonPropertyName("version")] int Version,
     [property: JsonPropertyName("sessionId")] string SessionId,
-    [property: JsonPropertyName("sign")] string? Sign);
+    [property: JsonPropertyName("sign")] string? Sign
+);
 
 public sealed record RoomListQuery(string? Query, long UserId, string SessionId, string? Sign);

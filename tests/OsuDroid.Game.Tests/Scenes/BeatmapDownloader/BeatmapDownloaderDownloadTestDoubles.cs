@@ -8,11 +8,12 @@ public sealed partial class BeatmapDownloaderTests
     {
         public BeatmapDownloadState State { get; } = new();
 
-        public Task<BeatmapDownloadResult> DownloadAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken) =>
-            Task.FromResult(BeatmapDownloadResult.Failed("Not used."));
+        public Task<BeatmapDownloadResult> DownloadAsync(
+            BeatmapMirrorSet beatmapSet,
+            bool withVideo,
+            CancellationToken cancellationToken
+        ) => Task.FromResult(BeatmapDownloadResult.Failed("Not used."));
 
-        public void CancelActiveDownload()
-        {
-        }
+        public void CancelActiveDownload() { }
     }
 }

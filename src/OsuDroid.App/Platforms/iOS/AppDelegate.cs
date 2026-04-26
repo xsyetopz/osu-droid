@@ -19,19 +19,30 @@ public sealed class AppDelegate : UIApplicationDelegate
         application.IdleTimerDisabled = true;
         DroidPathRoots pathRoots = GetPathRoots();
         CrashLogInstaller.Install(pathRoots);
-        runtimeServices = new PlatformRuntimeServices(Path.Combine(NSBundle.MainBundle.ResourcePath!, "assets", "droid", "sfx"));
+        runtimeServices = new PlatformRuntimeServices(
+            Path.Combine(NSBundle.MainBundle.ResourcePath!, "assets", "droid", "sfx")
+        );
 
         var bootstrapper = new GameBootstrapper(
-            () => OsuDroidGameCore.Create(pathRoots, BuildType, DisplayVersion, showStartupScene: true),
-            runtimeServices.AttachTo);
+            () =>
+                OsuDroidGameCore.Create(
+                    pathRoots,
+                    BuildType,
+                    DisplayVersion,
+                    showStartupScene: true
+                ),
+            runtimeServices.AttachTo
+        );
 
         game = new OsuDroidMonoGame(bootstrapper);
         game.Run();
         return true;
     }
 
-    public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations(UIApplication application, UIWindow? forWindow) =>
-        UIInterfaceOrientationMask.Landscape;
+    public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations(
+        UIApplication application,
+        UIWindow? forWindow
+    ) => UIInterfaceOrientationMask.Landscape;
 
     public override void WillTerminate(UIApplication application)
     {
@@ -59,8 +70,14 @@ public sealed class AppDelegate : UIApplicationDelegate
 
     private static DroidPathRoots GetPathRoots()
     {
-        var libraryPath = NSSearchPath.GetDirectories(NSSearchPathDirectory.LibraryDirectory, NSSearchPathDomain.User)[0];
-        var cachePath = NSSearchPath.GetDirectories(NSSearchPathDirectory.CachesDirectory, NSSearchPathDomain.User)[0];
+        var libraryPath = NSSearchPath.GetDirectories(
+            NSSearchPathDirectory.LibraryDirectory,
+            NSSearchPathDomain.User
+        )[0];
+        var cachePath = NSSearchPath.GetDirectories(
+            NSSearchPathDirectory.CachesDirectory,
+            NSSearchPathDomain.User
+        )[0];
         return DroidPathRoots.FromAppDataDirectory(libraryPath, cachePath);
     }
 }

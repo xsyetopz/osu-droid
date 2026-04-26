@@ -8,12 +8,19 @@ namespace OsuDroid.Game.Tests;
 public sealed class DatabaseCompatibilityTests
 {
     [Test]
-    public void DatabasePathMatchesOsuDroidRoomName() => Assert.That(DroidDatabaseConstants.GetDatabasePath("/core", "debug"), Is.EqualTo(Path.Combine("/core", "databases", "room-debug.db")));
+    public void DatabasePathMatchesOsuDroidRoomName() =>
+        Assert.That(
+            DroidDatabaseConstants.GetDatabasePath("/core", "debug"),
+            Is.EqualTo(Path.Combine("/core", "databases", "room-debug.db"))
+        );
 
     [Test]
     public void SchemaCreatesRequiredTablesAtCurrentVersion()
     {
-        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"schema-{Guid.NewGuid():N}.db");
+        string path = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"schema-{Guid.NewGuid():N}.db"
+        );
         try
         {
             var database = new DroidDatabase(path);
@@ -37,7 +44,13 @@ public sealed class DatabaseCompatibilityTests
 
             using SqliteCommand version = connection.CreateCommand();
             version.CommandText = "PRAGMA user_version";
-            Assert.That(Convert.ToInt32(version.ExecuteScalar(), System.Globalization.CultureInfo.InvariantCulture), Is.EqualTo(DroidDatabaseConstants.CurrentVersion));
+            Assert.That(
+                Convert.ToInt32(
+                    version.ExecuteScalar(),
+                    System.Globalization.CultureInfo.InvariantCulture
+                ),
+                Is.EqualTo(DroidDatabaseConstants.CurrentVersion)
+            );
         }
         finally
         {
@@ -52,6 +65,9 @@ public sealed class DatabaseCompatibilityTests
 
         Assert.That(plan.PropertiesPath, Is.EqualTo(Path.Combine("/files", "properties")));
         Assert.That(plan.FavoritesPath, Is.EqualTo(Path.Combine("/core", "json", "favorite.json")));
-        Assert.That(plan.ScoreDatabasePath, Is.EqualTo(Path.Combine("/core", "databases", "osudroid_test.db")));
+        Assert.That(
+            plan.ScoreDatabasePath,
+            Is.EqualTo(Path.Combine("/core", "databases", "osudroid_test.db"))
+        );
     }
 }

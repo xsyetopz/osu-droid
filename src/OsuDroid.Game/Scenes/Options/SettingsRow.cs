@@ -1,4 +1,5 @@
 using OsuDroid.Game.UI.Actions;
+
 namespace OsuDroid.Game.Scenes.Options;
 
 internal sealed record SettingsRow(
@@ -15,8 +16,8 @@ internal sealed record SettingsRow(
     UiAction Action = UiAction.None,
     bool IsBottom = false,
     IReadOnlyList<string>? ValueKeys = null,
-    SettingsRowAvailability Availability = SettingsRowAvailability.Implemented)
+    SettingsRowAvailability Availability = SettingsRowAvailability.Implemented
+)
 {
     public bool IsLocked => Availability == SettingsRowAvailability.Locked;
 }
-

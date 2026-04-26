@@ -89,14 +89,14 @@ public sealed partial class PlatformTextInputService : ITextInputService, IDispo
                 return;
 
             editText.ClearFocus();
-            var input = (InputMethodManager?)Platform.CurrentActivity?.GetSystemService(Context.InputMethodService);
+            var input = (InputMethodManager?)
+                Platform.CurrentActivity?.GetSystemService(Context.InputMethodService);
             input?.HideSoftInputFromWindow(editText.WindowToken, HideSoftInputFlags.None);
 #endif
         });
     }
 
     public void Dispose() => Detach();
-
 
     private static void RunOnMainThread(Action action)
     {

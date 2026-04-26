@@ -32,8 +32,18 @@ public sealed partial class BeatmapDownloaderScene
             _isSearching = true;
             _hasSearchError = false;
             _message = null;
-            var request = new BeatmapMirrorSearchRequest(_query, _offset, PageSize, _sort, _order, _status, _mirror);
-            IReadOnlyList<BeatmapMirrorSet> result = await _mirrorClient.SearchAsync(request, _searchCancellation.Token).ConfigureAwait(false);
+            var request = new BeatmapMirrorSearchRequest(
+                _query,
+                _offset,
+                PageSize,
+                _sort,
+                _order,
+                _status,
+                _mirror
+            );
+            IReadOnlyList<BeatmapMirrorSet> result = await _mirrorClient
+                .SearchAsync(request, _searchCancellation.Token)
+                .ConfigureAwait(false);
             _sets = append ? _sets.Concat(result).ToArray() : result;
             _offset += result.Count;
             _hasMore = result.Count >= PageSize;
@@ -62,35 +72,62 @@ public sealed partial class BeatmapDownloaderScene
 
             BeatmapMirrorSet set = _sets[index];
             TraceDownload("started", $"set={set.Id} withVideo={withVideo}");
-            if (_preferNoVideoDownloads && withVideo && MirrorDefinition(set.Mirror).SupportsNoVideoDownloads && set.HasVideo)
+            if (
+                _preferNoVideoDownloads
+                && withVideo
+                && MirrorDefinition(set.Mirror).SupportsNoVideoDownloads
+                && set.HasVideo
+            )
             {
                 withVideo = false;
                 TraceDownload("prefer-no-video", $"set={set.Id}");
             }
 
-            BeatmapDownloadResult downloadResult = await _downloadService.DownloadAsync(set, withVideo, CancellationToken.None).ConfigureAwait(false);
+            BeatmapDownloadResult downloadResult = await _downloadService
+                .DownloadAsync(set, withVideo, CancellationToken.None)
+                .ConfigureAwait(false);
             if (downloadResult.IsSuccess)
             {
-                EnqueueDownloadCompletion(new BeatmapDownloadCompletion(true, downloadResult.ArchivePath, null));
-                TraceDownload("service-success", $"set={set.Id} archive={Path.GetFileName(downloadResult.ArchivePath)}");
+                EnqueueDownloadCompletion(
+                    new BeatmapDownloadCompletion(true, downloadResult.ArchivePath, null)
+                );
+                TraceDownload(
+                    "service-success",
+                    $"set={set.Id} archive={Path.GetFileName(downloadResult.ArchivePath)}"
+                );
             }
             else
             {
-                EnqueueDownloadCompletion(new BeatmapDownloadCompletion(false, null, downloadResult.ErrorMessage));
-                TraceDownload("service-failure", $"set={set.Id} error={downloadResult.ErrorMessage}");
+                EnqueueDownloadCompletion(
+                    new BeatmapDownloadCompletion(false, null, downloadResult.ErrorMessage)
+                );
+                TraceDownload(
+                    "service-failure",
+                    $"set={set.Id} error={downloadResult.ErrorMessage}"
+                );
             }
         }
         catch (Exception exception)
         {
-            EnqueueDownloadCompletion(new BeatmapDownloadCompletion(false, null, exception.Message));
-            TraceDownload("exception", $"index={index} error={exception.GetType().Name}: {exception.Message}");
+            EnqueueDownloadCompletion(
+                new BeatmapDownloadCompletion(false, null, exception.Message)
+            );
+            TraceDownload(
+                "exception",
+                $"index={index} error={exception.GetType().Name}: {exception.Message}"
+            );
         }
     }
 
     private void EnqueueDownloadCompletion(BeatmapDownloadCompletion completion)
     {
         _downloadCompletions.Enqueue(completion);
-        TraceDownload("queued-completion", completion.IsSuccess ? Path.GetFileName(completion.ArchivePath) : completion.ErrorMessage);
+        TraceDownload(
+            "queued-completion",
+            completion.IsSuccess
+                ? Path.GetFileName(completion.ArchivePath)
+                : completion.ErrorMessage
+        );
     }
 
     private void ApplyQueuedDownloadCompletions()
@@ -100,7 +137,9 @@ public sealed partial class BeatmapDownloaderScene
             if (completion.IsSuccess)
             {
                 _selectedSetIndex = null;
-                _lastImportedSetDirectory = completion.ArchivePath is null ? null : Path.GetFileNameWithoutExtension(completion.ArchivePath);
+                _lastImportedSetDirectory = completion.ArchivePath is null
+                    ? null
+                    : Path.GetFileNameWithoutExtension(completion.ArchivePath);
                 _message = _localizer["BeatmapDownloader_Downloaded"];
                 TraceDownload("applied-success", Path.GetFileName(completion.ArchivePath));
             }
@@ -132,11 +171,12 @@ public sealed partial class BeatmapDownloaderScene
                 Directory.CreateDirectory(directory);
             }
 
-            File.AppendAllText(_downloadTracePath, $"{DateTimeOffset.UtcNow:O} {message}{Environment.NewLine}");
+            File.AppendAllText(
+                _downloadTracePath,
+                $"{DateTimeOffset.UtcNow:O} {message}{Environment.NewLine}"
+            );
         }
-        catch (Exception)
-        {
-        }
+        catch (Exception) { }
     }
 
     private void Preview(int index)
@@ -158,7 +198,10 @@ public sealed partial class BeatmapDownloaderScene
             return;
         }
 
-        if (_previewPlayCount >= 2 && DateTime.UtcNow - _lastPreviewStartedUtc < TimeSpan.FromSeconds(5))
+        if (
+            _previewPlayCount >= 2
+            && DateTime.UtcNow - _lastPreviewStartedUtc < TimeSpan.FromSeconds(5)
+        )
         {
             return;
         }
@@ -173,7 +216,9 @@ public sealed partial class BeatmapDownloaderScene
             _previewPlayer.StopPreview();
         }
 
-        _previewPlayer.Play(_mirrorClient.CreatePreviewUri(_sets[index].Mirror, _sets[index].Beatmaps[0].Id));
+        _previewPlayer.Play(
+            _mirrorClient.CreatePreviewUri(_sets[index].Mirror, _sets[index].Beatmaps[0].Id)
+        );
         _previewingSetIndex = index;
         _ownsPreviewPlayback = true;
         _previewPlayCount++;

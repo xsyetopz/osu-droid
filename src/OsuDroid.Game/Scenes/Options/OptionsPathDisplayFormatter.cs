@@ -16,8 +16,13 @@ internal static class OptionsPathDisplayFormatter
         }
 
         string normalized = path.Replace('\\', '/');
-        int osuDroidSegmentIndex = normalized.IndexOf(OsuDroidLibrarySegment, StringComparison.Ordinal);
-        return osuDroidSegmentIndex >= 0 && normalized.StartsWith(MobileContainerPrefix, StringComparison.Ordinal)
+        int osuDroidSegmentIndex = normalized.IndexOf(
+            OsuDroidLibrarySegment,
+            StringComparison.Ordinal
+        );
+        return
+            osuDroidSegmentIndex >= 0
+            && normalized.StartsWith(MobileContainerPrefix, StringComparison.Ordinal)
             ? MobileContainerDisplayPrefix + normalized[osuDroidSegmentIndex..]
             : MiddleEllipsize(normalized);
     }

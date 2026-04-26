@@ -11,12 +11,28 @@ internal sealed class MonoGameShapeStore(GraphicsDevice graphicsDevice) : IDispo
     private readonly Dictionary<ShapeCacheKey, Texture2D> cache = new();
     private readonly Dictionary<ProgressRingCacheKey, Texture2D> progressRingCache = new();
 
-    public Texture2D GetRoundedFill(int width, int height, float radius, UiCornerMode cornerMode, XnaColor color, RenderCacheMetrics? metrics = null)
+    public Texture2D GetRoundedFill(
+        int width,
+        int height,
+        float radius,
+        UiCornerMode cornerMode,
+        XnaColor color,
+        RenderCacheMetrics? metrics = null
+    )
     {
         width = Math.Max(1, width);
         height = Math.Max(1, height);
         var roundedRadius = Math.Max(0, (int)MathF.Round(radius));
-        var key = new ShapeCacheKey(width, height, roundedRadius, cornerMode, color.R, color.G, color.B, color.A);
+        var key = new ShapeCacheKey(
+            width,
+            height,
+            roundedRadius,
+            cornerMode,
+            color.R,
+            color.G,
+            color.B,
+            color.A
+        );
         if (cache.TryGetValue(key, out var texture))
             return texture;
 
@@ -26,18 +42,40 @@ internal sealed class MonoGameShapeStore(GraphicsDevice graphicsDevice) : IDispo
         return texture;
     }
 
-    public Texture2D GetProgressRing(int width, int height, float strokeWidth, float sweepDegrees, XnaColor color, RenderCacheMetrics? metrics = null)
+    public Texture2D GetProgressRing(
+        int width,
+        int height,
+        float strokeWidth,
+        float sweepDegrees,
+        XnaColor color,
+        RenderCacheMetrics? metrics = null
+    )
     {
         width = Math.Max(1, width);
         height = Math.Max(1, height);
         int roundedStrokeWidth = Math.Max(1, (int)MathF.Round(strokeWidth));
         int roundedSweepDegrees = Math.Clamp((int)MathF.Round(sweepDegrees), 0, 360);
-        var key = new ProgressRingCacheKey(width, height, roundedStrokeWidth, roundedSweepDegrees, color.R, color.G, color.B, color.A);
+        var key = new ProgressRingCacheKey(
+            width,
+            height,
+            roundedStrokeWidth,
+            roundedSweepDegrees,
+            color.R,
+            color.G,
+            color.B,
+            color.A
+        );
         if (progressRingCache.TryGetValue(key, out var texture))
             return texture;
 
         metrics?.AddShapeMiss();
-        texture = CreateProgressRingTexture(width, height, roundedStrokeWidth, roundedSweepDegrees, color);
+        texture = CreateProgressRingTexture(
+            width,
+            height,
+            roundedStrokeWidth,
+            roundedSweepDegrees,
+            color
+        );
         progressRingCache[key] = texture;
         return texture;
     }
@@ -52,7 +90,13 @@ internal sealed class MonoGameShapeStore(GraphicsDevice graphicsDevice) : IDispo
         progressRingCache.Clear();
     }
 
-    private Texture2D CreateRoundedFillTexture(int width, int height, int radius, UiCornerMode cornerMode, XnaColor color)
+    private Texture2D CreateRoundedFillTexture(
+        int width,
+        int height,
+        int radius,
+        UiCornerMode cornerMode,
+        XnaColor color
+    )
     {
         using var bitmap = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Premul);
         using var canvas = new SKCanvas(bitmap);
@@ -65,7 +109,12 @@ internal sealed class MonoGameShapeStore(GraphicsDevice graphicsDevice) : IDispo
             Color = new SKColor(color.R, color.G, color.B, color.A),
         };
 
-        using var path = CreateRoundedPath(width, height, Math.Min(radius, Math.Min(width, height) / 2), cornerMode);
+        using var path = CreateRoundedPath(
+            width,
+            height,
+            Math.Min(radius, Math.Min(width, height) / 2),
+            cornerMode
+        );
         canvas.DrawPath(path, paint);
         canvas.Flush();
 
@@ -82,7 +131,13 @@ internal sealed class MonoGameShapeStore(GraphicsDevice graphicsDevice) : IDispo
         return texture;
     }
 
-    private Texture2D CreateProgressRingTexture(int width, int height, int strokeWidth, int sweepDegrees, XnaColor color)
+    private Texture2D CreateProgressRingTexture(
+        int width,
+        int height,
+        int strokeWidth,
+        int sweepDegrees,
+        XnaColor color
+    )
     {
         using var bitmap = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Premul);
         using var canvas = new SKCanvas(bitmap);
@@ -118,7 +173,12 @@ internal sealed class MonoGameShapeStore(GraphicsDevice graphicsDevice) : IDispo
         return texture;
     }
 
-    private static SKPath CreateRoundedPath(int width, int height, int radius, UiCornerMode cornerMode)
+    private static SKPath CreateRoundedPath(
+        int width,
+        int height,
+        int radius,
+        UiCornerMode cornerMode
+    )
     {
         var path = new SKPath();
         var roundTop = cornerMode is UiCornerMode.All or UiCornerMode.Top;
@@ -149,8 +209,26 @@ internal sealed class MonoGameShapeStore(GraphicsDevice graphicsDevice) : IDispo
         return path;
     }
 
-    private readonly record struct ShapeCacheKey(int Width, int Height, int Radius, UiCornerMode CornerMode, byte R, byte G, byte B, byte A);
+    private readonly record struct ShapeCacheKey(
+        int Width,
+        int Height,
+        int Radius,
+        UiCornerMode CornerMode,
+        byte R,
+        byte G,
+        byte B,
+        byte A
+    );
 
-    private readonly record struct ProgressRingCacheKey(int Width, int Height, int StrokeWidth, int SweepDegrees, byte R, byte G, byte B, byte A);
+    private readonly record struct ProgressRingCacheKey(
+        int Width,
+        int Height,
+        int StrokeWidth,
+        int SweepDegrees,
+        byte R,
+        byte G,
+        byte B,
+        byte A
+    );
 }
 #endif

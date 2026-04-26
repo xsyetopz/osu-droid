@@ -4,7 +4,13 @@ namespace OsuDroid.Game.Compatibility.Database;
 
 public sealed partial class BeatmapLibraryRepository
 {
-    public void UpdateStarRatings(string md5, string setDirectory, string filename, float? droidStarRating, float? standardStarRating)
+    public void UpdateStarRatings(
+        string md5,
+        string setDirectory,
+        string filename,
+        float? droidStarRating,
+        float? standardStarRating
+    )
     {
         using SqliteConnection connection = database.OpenConnection();
         using SqliteCommand command = connection.CreateCommand();
@@ -15,15 +21,28 @@ public sealed partial class BeatmapLibraryRepository
             WHERE md5 = $md5
                OR (setDirectory = $setDirectory AND filename = $filename)
             """;
-        command.Parameters.AddWithValue("$droidStarRating", droidStarRating is null ? DBNull.Value : droidStarRating.Value);
-        command.Parameters.AddWithValue("$standardStarRating", standardStarRating is null ? DBNull.Value : standardStarRating.Value);
+        command.Parameters.AddWithValue(
+            "$droidStarRating",
+            droidStarRating is null ? DBNull.Value : droidStarRating.Value
+        );
+        command.Parameters.AddWithValue(
+            "$standardStarRating",
+            standardStarRating is null ? DBNull.Value : standardStarRating.Value
+        );
         command.Parameters.AddWithValue("$md5", md5);
         command.Parameters.AddWithValue("$setDirectory", setDirectory);
         command.Parameters.AddWithValue("$filename", filename);
         command.ExecuteNonQuery();
     }
 
-    public void UpdateOnlineMetadata(string setDirectory, long beatmapId, string version, int? status, float? droidStarRating, float? standardStarRating)
+    public void UpdateOnlineMetadata(
+        string setDirectory,
+        long beatmapId,
+        string version,
+        int? status,
+        float? droidStarRating,
+        float? standardStarRating
+    )
     {
         using SqliteConnection connection = database.OpenConnection();
         using SqliteCommand command = connection.CreateCommand();
@@ -39,8 +58,14 @@ public sealed partial class BeatmapLibraryRepository
                   )
             """;
         command.Parameters.AddWithValue("$status", status is null ? DBNull.Value : status.Value);
-        command.Parameters.AddWithValue("$droidStarRating", droidStarRating is null ? DBNull.Value : droidStarRating.Value);
-        command.Parameters.AddWithValue("$standardStarRating", standardStarRating is null ? DBNull.Value : standardStarRating.Value);
+        command.Parameters.AddWithValue(
+            "$droidStarRating",
+            droidStarRating is null ? DBNull.Value : droidStarRating.Value
+        );
+        command.Parameters.AddWithValue(
+            "$standardStarRating",
+            standardStarRating is null ? DBNull.Value : standardStarRating.Value
+        );
         command.Parameters.AddWithValue("$setDirectory", setDirectory);
         command.Parameters.AddWithValue("$beatmapId", beatmapId);
         command.Parameters.AddWithValue("$version", version);

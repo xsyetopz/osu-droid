@@ -60,8 +60,14 @@ public sealed partial class MainMenuScene
             }
             else
             {
-                _spectrumPeakLevel[i] = MathF.Max(_spectrumPeakLevel[i] - _spectrumPeakDownRate[i], 0f);
-                _spectrumPeakAlpha[i] = MathF.Max(_spectrumPeakAlpha[i] - initialAlpha / gradient, 0f);
+                _spectrumPeakLevel[i] = MathF.Max(
+                    _spectrumPeakLevel[i] - _spectrumPeakDownRate[i],
+                    0f
+                );
+                _spectrumPeakAlpha[i] = MathF.Max(
+                    _spectrumPeakAlpha[i] - initialAlpha / gradient,
+                    0f
+                );
             }
         }
     }

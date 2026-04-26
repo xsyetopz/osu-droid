@@ -32,10 +32,20 @@ public static partial class DroidAssets
         Texture(SettingsAdvanced, "assets/droid/settings/category-advanced.png", 192, 192),
         Texture(SettingsCheck, "assets/droid/settings/check.png", 192, 192),
         Texture(SettingsArrowDropDown, "assets/droid/settings/arrow-drop-down.png", 192, 192),
-        Texture(BeatmapDownloaderOsuDirect, "assets/droid/beatmap-downloader/osudirect.png", 96, 96),
+        Texture(
+            BeatmapDownloaderOsuDirect,
+            "assets/droid/beatmap-downloader/osudirect.png",
+            96,
+            96
+        ),
         Texture(BeatmapDownloaderCatboy, "assets/droid/beatmap-downloader/catboy.png", 96, 96),
         Texture(SongSelectTop, "assets/droid/common/songselect-top.png", 2560, 378),
-        Texture(SongSelectButtonBackground, "assets/droid/main-menu/button-background.png", 724, 127),
+        Texture(
+            SongSelectButtonBackground,
+            "assets/droid/main-menu/button-background.png",
+            724,
+            127
+        ),
         Texture(SongSelectBack, "assets/droid/main-menu/back.png", 125, 125),
         Texture(SongSelectMods, "assets/droid/song-select/mods.png", 74, 74),
         Texture(SongSelectModsOver, "assets/droid/song-select/mods-over.png", 74, 74),
@@ -49,7 +59,6 @@ public static partial class DroidAssets
         Texture(CommonBackspace, "assets/droid/common/backspace.png", 96, 96),
         Texture(CommonSearchSmall, "assets/droid/common/search-small.png", 96, 96),
         Texture(CommonSettings, "assets/droid/common/settings.png", 96, 96),
-
         Texture(ModNoFail, "assets/droid/song-select/mod-nofail.png", 68, 66),
         Texture(ModEasy, "assets/droid/song-select/mod-easy.png", 68, 66),
         Texture(ModReallyEasy, "assets/droid/song-select/mod-reallyeasy.png", 68, 66),

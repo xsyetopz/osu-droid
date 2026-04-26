@@ -1,23 +1,22 @@
 using OsuDroid.Game.Scenes.MainMenu;
 using OsuDroid.Game.UI.Actions;
 using OsuDroid.Game.UI.Geometry;
+
 namespace OsuDroid.Game;
 
 public sealed partial class OsuDroidGameCore
 {
     public void TapMainMenuCookie() => _mainMenu.ToggleCookie();
 
-
-
     public void BackToMainMenu() => BackToMainMenu(MainMenuReturnTransition.None);
-
-
 
     public void BackToMainMenu(MainMenuReturnTransition transition)
     {
-        string? returnBackgroundPath = _activeScene == ActiveScene.SongSelect && transition == MainMenuReturnTransition.SongSelectBack
-            ? _songSelect.SelectedBackgroundPath
-            : null;
+        string? returnBackgroundPath =
+            _activeScene == ActiveScene.SongSelect
+            && transition == MainMenuReturnTransition.SongSelectBack
+                ? _songSelect.SelectedBackgroundPath
+                : null;
 
         if (_activeScene == ActiveScene.SongSelect)
         {
@@ -37,8 +36,6 @@ public sealed partial class OsuDroidGameCore
         }
     }
 
-
-
     public MainMenuRoute HandleMainMenu(MainMenuAction action)
     {
         if (_activeScene != ActiveScene.MainMenu)
@@ -50,8 +47,6 @@ public sealed partial class OsuDroidGameCore
         ApplyRoute(LastRoute);
         return LastRoute;
     }
-
-
 
     public MainMenuRoute TapMainMenu(MainMenuButtonSlot slot)
     {
@@ -65,11 +60,12 @@ public sealed partial class OsuDroidGameCore
         return LastRoute;
     }
 
-
-
     public bool HandleUiLongPress(UiAction action, VirtualViewport _)
     {
-        if (_activeScene == ActiveScene.ModSelect && UiActionGroups.TryGetModSelectPresetIndex(action, out int presetIndex))
+        if (
+            _activeScene == ActiveScene.ModSelect
+            && UiActionGroups.TryGetModSelectPresetIndex(action, out int presetIndex)
+        )
         {
             bool opened = _modSelect.OpenPresetDeleteDialog(presetIndex);
             if (opened)
@@ -80,7 +76,10 @@ public sealed partial class OsuDroidGameCore
             return opened;
         }
 
-        if (_activeScene != ActiveScene.SongSelect || !UiActionGroups.TryGetSongSelectDifficultyIndex(action, out int index))
+        if (
+            _activeScene != ActiveScene.SongSelect
+            || !UiActionGroups.TryGetSongSelectDifficultyIndex(action, out int index)
+        )
         {
             return false;
         }
@@ -90,15 +89,10 @@ public sealed partial class OsuDroidGameCore
         return true;
     }
 
-
-
     public string? ConsumePendingExternalUrl()
     {
         string? pendingUrl = PendingExternalUrl;
         PendingExternalUrl = null;
         return pendingUrl;
     }
-
-
-
 }

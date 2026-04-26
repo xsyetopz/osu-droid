@@ -35,7 +35,7 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
 #if IOS
                     || fallbackPlayer?.Playing == true
 #endif
-                    ;
+                ;
         }
     }
 
@@ -48,7 +48,9 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
                 if (channel == 0)
                 {
 #if IOS
-                    return fallbackPlayer is null ? 0 : (int)Math.Min(int.MaxValue, fallbackPlayer.CurrentTime * 1000d);
+                    return fallbackPlayer is null
+                        ? 0
+                        : (int)Math.Min(int.MaxValue, fallbackPlayer.CurrentTime * 1000d);
 #else
                     return 0;
 #endif
@@ -85,7 +87,11 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
         {
             FreeCurrentChannel();
             playbackSnapshot = new();
-            pendingPlayRequest = new PreviewRequest(audioPath, previewTimeMilliseconds, ++playGeneration);
+            pendingPlayRequest = new PreviewRequest(
+                audioPath,
+                previewTimeMilliseconds,
+                ++playGeneration
+            );
             playWorker ??= Task.Run(ProcessPlayRequests);
         }
 
@@ -135,7 +141,13 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
                 return;
 
             FreeCurrentChannel();
-            var handle = Bass.CreateStream(previewUri.ToString(), 0, BassFlags.AutoFree, null, IntPtr.Zero);
+            var handle = Bass.CreateStream(
+                previewUri.ToString(),
+                0,
+                BassFlags.AutoFree,
+                null,
+                IntPtr.Zero
+            );
             if (handle == 0)
             {
                 BassAudioEngine.LogBassError($"BASS_StreamCreateURL({previewUri})");
@@ -152,7 +164,12 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
                 return;
             }
 
-            playbackSnapshot = new BeatmapPreviewPlaybackSnapshot(previewUri.ToString(), true, PositionMillisecondsLocked(), DurationMillisecondsLocked());
+            playbackSnapshot = new BeatmapPreviewPlaybackSnapshot(
+                previewUri.ToString(),
+                true,
+                PositionMillisecondsLocked(),
+                DurationMillisecondsLocked()
+            );
         }
     }
 
@@ -160,7 +177,11 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
     {
         lock (playbackGate)
         {
-            if (channel != 0 && Bass.ChannelIsActive(channel) == PlaybackState.Playing && !Bass.ChannelPause(channel))
+            if (
+                channel != 0
+                && Bass.ChannelIsActive(channel) == PlaybackState.Playing
+                && !Bass.ChannelPause(channel)
+            )
                 BassAudioEngine.LogBassError("BASS_ChannelPause");
 #if IOS
             fallbackPlayer?.Pause();
@@ -173,7 +194,11 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
     {
         lock (playbackGate)
         {
-            if (channel != 0 && Bass.ChannelIsActive(channel) == PlaybackState.Paused && !Bass.ChannelPlay(channel, false))
+            if (
+                channel != 0
+                && Bass.ChannelIsActive(channel) == PlaybackState.Paused
+                && !Bass.ChannelPlay(channel, false)
+            )
                 BassAudioEngine.LogBassError("BASS_ChannelPlay(resume)");
 #if IOS
             if (fallbackPlayer is not null && !fallbackPlayer.Playing)
@@ -257,14 +282,16 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
 #if IOS
         || fallbackPlayer?.Playing == true
 #endif
-        ;
+    ;
 
     private int PositionMillisecondsLocked()
     {
         if (channel == 0)
         {
 #if IOS
-            return fallbackPlayer is null ? 0 : (int)Math.Min(int.MaxValue, fallbackPlayer.CurrentTime * 1000d);
+            return fallbackPlayer is null
+                ? 0
+                : (int)Math.Min(int.MaxValue, fallbackPlayer.CurrentTime * 1000d);
 #else
             return 0;
 #endif
@@ -286,7 +313,9 @@ public sealed partial class PlatformBeatmapPreviewPlayer : IBeatmapPreviewPlayer
         if (channel == 0)
         {
 #if IOS
-            return fallbackPlayer is null ? playbackSnapshot.DurationMilliseconds : (int)Math.Min(int.MaxValue, fallbackPlayer.Duration * 1000d);
+            return fallbackPlayer is null
+                ? playbackSnapshot.DurationMilliseconds
+                : (int)Math.Min(int.MaxValue, fallbackPlayer.Duration * 1000d);
 #else
             return playbackSnapshot.DurationMilliseconds;
 #endif

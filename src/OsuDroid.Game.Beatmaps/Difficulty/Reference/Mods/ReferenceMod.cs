@@ -11,6 +11,4 @@ public abstract class Mod
     public virtual bool IsRelevant => true;
 }
 
-public abstract class ReferenceMod : Mod
-{
-}
+public abstract class ReferenceMod : Mod { }

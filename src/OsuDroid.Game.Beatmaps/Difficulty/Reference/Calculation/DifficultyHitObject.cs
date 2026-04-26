@@ -12,7 +12,8 @@ internal abstract class DifficultyHitObject
         HitObject? lastObj,
         double clockRate,
         DifficultyHitObject[] difficultyHitObjects,
-        int index)
+        int index
+    )
     {
         Obj = obj;
         this.lastObj = lastObj;
@@ -22,7 +23,10 @@ internal abstract class DifficultyHitObject
         StrainTime = lastObj is null ? 0d : System.Math.Max(DeltaTime, MinDeltaTime);
         StartTime = obj.StartTime / clockRate;
         EndTime = obj.EndTime / clockRate;
-        FullGreatWindow = (((obj is Slider slider ? slider.Head : obj).HitWindow?.GreatWindow) ?? 1200d) * 2 / clockRate;
+        FullGreatWindow =
+            (((obj is Slider slider ? slider.Head : obj).HitWindow?.GreatWindow) ?? 1200d)
+            * 2
+            / clockRate;
     }
 
     public const float NormalizedRadius = 50f;
@@ -98,13 +102,20 @@ internal abstract class DifficultyHitObject
 
         double fadeInStartTime = Obj.StartTime - Obj.TimePreempt;
         double fadeInDuration = Obj.TimeFadeIn;
-        double nonHiddenOpacity = System.Math.Clamp((time - fadeInStartTime) / fadeInDuration, 0d, 1d);
+        double nonHiddenOpacity = System.Math.Clamp(
+            (time - fadeInStartTime) / fadeInDuration,
+            0d,
+            1d
+        );
 
         if (mods.Any(static m => m is ModHidden))
         {
             double fadeOutStartTime = fadeInStartTime + fadeInDuration;
             double fadeOutDuration = Obj.TimePreempt * ModHidden.FadeOutDurationMultiplier;
-            return System.Math.Min(nonHiddenOpacity, 1 - System.Math.Clamp((time - fadeOutStartTime) / fadeOutDuration, 0d, 1d));
+            return System.Math.Min(
+                nonHiddenOpacity,
+                1 - System.Math.Clamp((time - fadeOutStartTime) / fadeOutDuration, 0d, 1d)
+            );
         }
 
         return nonHiddenOpacity;
@@ -121,7 +132,10 @@ internal abstract class DifficultyHitObject
         double nextDeltaTime = System.Math.Max(1d, nextObj.DeltaTime);
         double deltaDifference = System.Math.Abs(nextDeltaTime - currentDeltaTime);
         double speedRatio = currentDeltaTime / System.Math.Max(currentDeltaTime, deltaDifference);
-        double windowRatio = System.Math.Pow(System.Math.Min(1d, currentDeltaTime / FullGreatWindow), 2);
+        double windowRatio = System.Math.Pow(
+            System.Math.Min(1d, currentDeltaTime / FullGreatWindow),
+            2
+        );
         return 1 - System.Math.Pow(speedRatio, 1 - windowRatio);
     }
 
@@ -129,12 +143,19 @@ internal abstract class DifficultyHitObject
     {
         if (Obj is Slider slider)
         {
-            TravelDistance = LazyTravelDistance * (Mode switch
-            {
-                GameMode.Droid => System.Math.Pow(1 + slider.RepeatCount / 4d, 1d / 4d),
-                GameMode.Standard => System.Math.Pow(1 + slider.RepeatCount / 2.5d, 1d / 2.5d),
-                _ => System.Math.Pow(1 + slider.RepeatCount / 2.5d, 1d / 2.5d),
-            });
+            TravelDistance =
+                LazyTravelDistance
+                * (
+                    Mode switch
+                    {
+                        GameMode.Droid => System.Math.Pow(1 + slider.RepeatCount / 4d, 1d / 4d),
+                        GameMode.Standard => System.Math.Pow(
+                            1 + slider.RepeatCount / 2.5d,
+                            1d / 2.5d
+                        ),
+                        _ => System.Math.Pow(1 + slider.RepeatCount / 2.5d, 1d / 2.5d),
+                    }
+                );
 
             TravelTime = System.Math.Max(LazyTravelTime / clockRate, MinDeltaTime);
         }
@@ -152,21 +173,30 @@ internal abstract class DifficultyHitObject
             ? lastObj.DifficultyStackedPosition
             : GetEndCursorPosition(lastDifficultyObject);
 
-        LazyJumpDistance = (Obj.DifficultyStackedPosition * scalingFactor - lastCursorPosition * scalingFactor).Length;
+        LazyJumpDistance = (
+            Obj.DifficultyStackedPosition * scalingFactor - lastCursorPosition * scalingFactor
+        ).Length;
         MinimumJumpTime = StrainTime;
         MinimumJumpDistance = LazyJumpDistance;
 
         if (lastObj is Slider lastSlider && lastDifficultyObject is not null)
         {
-            double lastTravelTime = System.Math.Max(lastDifficultyObject.LazyTravelTime / clockRate, MinDeltaTime);
+            double lastTravelTime = System.Math.Max(
+                lastDifficultyObject.LazyTravelTime / clockRate,
+                MinDeltaTime
+            );
             MinimumJumpTime = System.Math.Max(StrainTime - lastTravelTime, MinDeltaTime);
-            float tailJumpDistance = (lastSlider.Tail.DifficultyStackedPosition - Obj.DifficultyStackedPosition).Length * scalingFactor;
+            float tailJumpDistance =
+                (lastSlider.Tail.DifficultyStackedPosition - Obj.DifficultyStackedPosition).Length
+                * scalingFactor;
 
             MinimumJumpDistance = System.Math.Max(
                 0d,
                 System.Math.Min(
                     LazyJumpDistance - (MaximumSliderRadius - assumedSliderRadius),
-                    tailJumpDistance - MaximumSliderRadius));
+                    tailJumpDistance - MaximumSliderRadius
+                )
+            );
         }
 
         if (lastLastDifficultyObject is null || lastLastDifficultyObject.Obj is Spinner)
@@ -194,7 +224,10 @@ internal abstract class DifficultyHitObject
 
         if (Mode == GameMode.Standard)
         {
-            trackingEndTime = System.Math.Max(slider.EndTime - Slider.DroidLastTickOffset, slider.StartTime + slider.Duration / 2);
+            trackingEndTime = System.Math.Max(
+                slider.EndTime - Slider.DroidLastTickOffset,
+                slider.StartTime + slider.Duration / 2
+            );
             SliderTick? lastRealTick = null;
 
             for (int i = nestedObjects.Count - 2; i >= 1; --i)
@@ -243,7 +276,8 @@ internal abstract class DifficultyHitObject
         for (int i = 1; i < nestedObjects.Count; ++i)
         {
             HitObject movementObject = nestedObjects[i];
-            ReferenceVector2 movement = movementObject.DifficultyStackedPosition - currentCursorPosition;
+            ReferenceVector2 movement =
+                movementObject.DifficultyStackedPosition - currentCursorPosition;
             double movementLength = scalingFactor * movement.Length;
             double requiredMovement = assumedSliderRadius;
 
@@ -264,7 +298,8 @@ internal abstract class DifficultyHitObject
 
             if (movementLength > requiredMovement)
             {
-                currentCursorPosition += movement * ((movementLength - requiredMovement) / movementLength);
+                currentCursorPosition +=
+                    movement * ((movementLength - requiredMovement) / movementLength);
                 movementLength *= (movementLength - requiredMovement) / movementLength;
                 LazyTravelDistance += movementLength;
             }

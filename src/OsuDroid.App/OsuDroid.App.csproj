@@ -1,83 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFrameworks Condition="'$(BuildMobile)' != 'true'">net9.0</TargetFrameworks>
-        <TargetFrameworks Condition="'$(BuildMobile)' == 'true' and '$(MobileTarget)' == 'android'">net9.0-android</TargetFrameworks>
-        <TargetFrameworks Condition="'$(BuildMobile)' == 'true' and '$(MobileTarget)' == 'ios'">net9.0-ios</TargetFrameworks>
-        <TargetFrameworks Condition="'$(BuildMobile)' == 'true' and '$(MobileTarget)' == ''">net9.0-android;net9.0-ios</TargetFrameworks>
-        <OutputType Condition="'$(BuildMobile)' == 'true'">Exe</OutputType>
-        <OutputType Condition="'$(BuildMobile)' != 'true'">Library</OutputType>
-        <RootNamespace>OsuDroid.App</RootNamespace>
-        <AssemblyName>OsuDroid.App</AssemblyName>
-        <UseMaui Condition="'$(BuildMobile)' == 'true'">true</UseMaui>
-        <SingleProject Condition="'$(BuildMobile)' == 'true'">true</SingleProject>
-        <Nullable>enable</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <RollForward>Major</RollForward>
-        <ApplicationTitle>osu!droid</ApplicationTitle>
-        <ApplicationId>moe.osudroid</ApplicationId>
-        <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-        <ApplicationVersion>1</ApplicationVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">13.4</SupportedOSPlatformVersion>
-        <SupportedInterfaceOrientations Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">UIInterfaceOrientationLandscapeLeft;UIInterfaceOrientationLandscapeRight</SupportedInterfaceOrientations>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\OsuDroid.Game\OsuDroid.Game.csproj" />
-        <ProjectReference Include="..\OsuDroid.Game.Runtime\OsuDroid.Game.Runtime.csproj" />
-        <ProjectReference Include="..\OsuDroid.Game.UI\OsuDroid.Game.UI.csproj" />
-    </ItemGroup>
-    <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
-        <Compile Remove="App.cs" />
-        <Compile Remove="MainPage.cs" />
-        <Compile Remove="MauiProgram.cs" />
-        <Compile Remove="MonoGame\**\*.cs" />
-        <Compile Remove="Platform\**\*.cs" />
-        <Compile Remove="Platforms\**\*.cs" />
-    </ItemGroup>
-    <ItemGroup Condition="'$(BuildMobile)' == 'true'">
-        <PackageReference Include="Microsoft.Maui.Controls" />
-        <PackageReference Include="MonoGame.Content.Builder.Task" />
-        <PackageReference Include="SocketIOClient" />
-        <MonoGameContentReference Include="Content\DroidAssets.mgcb" />
-    </ItemGroup>
-    <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
-        <PackageReference Include="MonoGame.Framework.Android" />
-        <AndroidNativeLibrary Include="Native\Android\**\*.so" />
-    </ItemGroup>
-    <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
-        <InterfaceDefinition Remove="Platforms\iOS\LaunchScreen.storyboard" />
-        <BundleResource Include="Platforms\iOS\LaunchScreen.storyboard" Link="LaunchScreen.storyboard" />
-        <BundleResource Include="Platforms\iOS\Icons\Icon-60@2x.png" Link="Icon-60@2x.png" />
-        <BundleResource Include="Platforms\iOS\Icons\Icon-60@3x.png" Link="Icon-60@3x.png" />
-        <BundleResource Include="Platforms\iOS\Icons\Icon-76@2x.png" Link="Icon-76@2x.png" />
-        <BundleResource Include="Platforms\iOS\Icons\Icon-83.5@2x.png" Link="Icon-83.5@2x.png" />
-    </ItemGroup>
-    <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
-        <PackageReference Include="MonoGame.Framework.iOS" />
-        <NativeReference Include="Native\iOS\bass.xcframework">
-            <Kind>Framework</Kind>
-            <ForceLoad>true</ForceLoad>
-        </NativeReference>
-        <NativeReference Include="Native\iOS\bass_fx.xcframework">
-            <Kind>Framework</Kind>
-            <ForceLoad>true</ForceLoad>
-        </NativeReference>
-    </ItemGroup>
-    <ItemGroup Condition="'$(BuildMobile)' == 'true' and '$(MobileTarget)' != 'ios'">
-        <MauiIcon Include="Resources\AppIcon\appicon.png" BaseSize="192,192" />
-    </ItemGroup>
-    <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
-        <AndroidResource Remove="Platforms\Android\Resources\drawable-*\ic_launcher.png" />
-        <AndroidResource Include="Platforms\Android\Resources\drawable-*\ic_launcher.png" />
-    </ItemGroup>
-    <ItemGroup Condition="'$(BuildMobile)' == 'true'">
-        <MauiAsset Include="Resources\Raw\assets\droid\**\*.ogg" LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="ManagedBass" />
-        <PackageReference Include="ManagedBass.Fx" />
-        <PackageReference Include="Material.Icons" />
-        <PackageReference Include="SkiaSharp" />
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFrameworks Condition="'$(BuildMobile)' != 'true'">net9.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(BuildMobile)' == 'true' and '$(MobileTarget)' == 'android'"
+      >net9.0-android</TargetFrameworks
+    >
+    <TargetFrameworks Condition="'$(BuildMobile)' == 'true' and '$(MobileTarget)' == 'ios'"
+      >net9.0-ios</TargetFrameworks
+    >
+    <TargetFrameworks Condition="'$(BuildMobile)' == 'true' and '$(MobileTarget)' == ''"
+      >net9.0-android;net9.0-ios</TargetFrameworks
+    >
+    <OutputType Condition="'$(BuildMobile)' == 'true'">Exe</OutputType>
+    <OutputType Condition="'$(BuildMobile)' != 'true'">Library</OutputType>
+    <RootNamespace>OsuDroid.App</RootNamespace>
+    <AssemblyName>OsuDroid.App</AssemblyName>
+    <UseMaui Condition="'$(BuildMobile)' == 'true'">true</UseMaui>
+    <SingleProject Condition="'$(BuildMobile)' == 'true'">true</SingleProject>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RollForward>Major</RollForward>
+    <ApplicationTitle>osu!droid</ApplicationTitle>
+    <ApplicationId>moe.osudroid</ApplicationId>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+    <SupportedOSPlatformVersion
+      Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'"
+      >24.0</SupportedOSPlatformVersion
+    >
+    <SupportedOSPlatformVersion
+      Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'"
+      >13.4</SupportedOSPlatformVersion
+    >
+    <SupportedInterfaceOrientations
+      Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'"
+      >UIInterfaceOrientationLandscapeLeft;UIInterfaceOrientationLandscapeRight</SupportedInterfaceOrientations
+    >
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OsuDroid.Game\OsuDroid.Game.csproj" />
+    <ProjectReference Include="..\OsuDroid.Game.Runtime\OsuDroid.Game.Runtime.csproj" />
+    <ProjectReference Include="..\OsuDroid.Game.UI\OsuDroid.Game.UI.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
+    <Compile Remove="App.cs" />
+    <Compile Remove="MainPage.cs" />
+    <Compile Remove="MauiProgram.cs" />
+    <Compile Remove="MonoGame\**\*.cs" />
+    <Compile Remove="Platform\**\*.cs" />
+    <Compile Remove="Platforms\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(BuildMobile)' == 'true'">
+    <PackageReference Include="Microsoft.Maui.Controls" />
+    <PackageReference Include="MonoGame.Content.Builder.Task" />
+    <PackageReference Include="SocketIOClient" />
+    <MonoGameContentReference Include="Content\DroidAssets.mgcb" />
+  </ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <PackageReference Include="MonoGame.Framework.Android" />
+    <AndroidNativeLibrary Include="Native\Android\**\*.so" />
+  </ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
+    <InterfaceDefinition Remove="Platforms\iOS\LaunchScreen.storyboard" />
+    <BundleResource
+      Include="Platforms\iOS\LaunchScreen.storyboard"
+      Link="LaunchScreen.storyboard"
+    />
+    <BundleResource Include="Platforms\iOS\Icons\Icon-60@2x.png" Link="Icon-60@2x.png" />
+    <BundleResource Include="Platforms\iOS\Icons\Icon-60@3x.png" Link="Icon-60@3x.png" />
+    <BundleResource Include="Platforms\iOS\Icons\Icon-76@2x.png" Link="Icon-76@2x.png" />
+    <BundleResource Include="Platforms\iOS\Icons\Icon-83.5@2x.png" Link="Icon-83.5@2x.png" />
+  </ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
+    <PackageReference Include="MonoGame.Framework.iOS" />
+    <NativeReference Include="Native\iOS\bass.xcframework">
+      <Kind>Framework</Kind>
+      <ForceLoad>true</ForceLoad>
+    </NativeReference>
+    <NativeReference Include="Native\iOS\bass_fx.xcframework">
+      <Kind>Framework</Kind>
+      <ForceLoad>true</ForceLoad>
+    </NativeReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(BuildMobile)' == 'true' and '$(MobileTarget)' != 'ios'">
+    <MauiIcon Include="Resources\AppIcon\appicon.png" BaseSize="192,192" />
+  </ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <AndroidResource Remove="Platforms\Android\Resources\drawable-*\ic_launcher.png" />
+    <AndroidResource Include="Platforms\Android\Resources\drawable-*\ic_launcher.png" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(BuildMobile)' == 'true'">
+    <MauiAsset
+      Include="Resources\Raw\assets\droid\**\*.ogg"
+      LogicalName="assets/droid/%(RecursiveDir)%(Filename)%(Extension)"
+    />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ManagedBass" />
+    <PackageReference Include="ManagedBass.Fx" />
+    <PackageReference Include="Material.Icons" />
+    <PackageReference Include="SkiaSharp" />
+  </ItemGroup>
 </Project>

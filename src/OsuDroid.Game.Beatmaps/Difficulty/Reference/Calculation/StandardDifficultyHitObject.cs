@@ -8,10 +8,11 @@ internal sealed class StandardDifficultyHitObject(
     HitObject lastObj,
     double clockRate,
     StandardDifficultyHitObject[] difficultyHitObjects,
-    int index)
-    : DifficultyHitObject(obj, lastObj, clockRate, difficultyHitObjects, index)
+    int index
+) : DifficultyHitObject(obj, lastObj, clockRate, difficultyHitObjects, index)
 {
     protected override GameMode Mode => GameMode.Standard;
 
-    public override double SmallCircleBonus => System.Math.Max(1d, 1 + (30 - Obj.DifficultyRadius) / 40d);
+    public override double SmallCircleBonus =>
+        System.Math.Max(1d, 1 + (30 - Obj.DifficultyRadius) / 40d);
 }

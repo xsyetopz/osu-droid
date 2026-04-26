@@ -10,21 +10,25 @@ public sealed partial class OsuDroidGameCore
 {
     public GameFrameSnapshot CurrentFrame => CreateFrame(VirtualViewport.AndroidReferenceLandscape);
 
-
-
-    public GameFrameSnapshot CreateFrame(VirtualViewport viewport) => _activeScene switch
-    {
-        ActiveScene.Startup => _startup.CreateSnapshot(viewport),
-        ActiveScene.MainMenu => _mainMenu.CreateSnapshot(viewport),
-        ActiveScene.Options => _options.CreateSnapshot(viewport),
-        ActiveScene.BeatmapDownloader => _beatmapDownloader.CreateSnapshot(viewport),
-        ActiveScene.BeatmapProcessing => BootstrapLoadingScene.CreateSnapshot(viewport, CreateBeatmapProcessingProgress(), TimeSpan.Zero),
-        ActiveScene.SongSelect => _songSelect.CreateSnapshot(viewport),
-        ActiveScene.ModSelect => _modSelect.CreateSnapshot(viewport, _songSelect.CreateSnapshot(viewport).UiFrame),
-        _ => throw new InvalidOperationException($"Unknown scene: {_activeScene}"),
-    };
-
-
+    public GameFrameSnapshot CreateFrame(VirtualViewport viewport) =>
+        _activeScene switch
+        {
+            ActiveScene.Startup => _startup.CreateSnapshot(viewport),
+            ActiveScene.MainMenu => _mainMenu.CreateSnapshot(viewport),
+            ActiveScene.Options => _options.CreateSnapshot(viewport),
+            ActiveScene.BeatmapDownloader => _beatmapDownloader.CreateSnapshot(viewport),
+            ActiveScene.BeatmapProcessing => BootstrapLoadingScene.CreateSnapshot(
+                viewport,
+                CreateBeatmapProcessingProgress(),
+                TimeSpan.Zero
+            ),
+            ActiveScene.SongSelect => _songSelect.CreateSnapshot(viewport),
+            ActiveScene.ModSelect => _modSelect.CreateSnapshot(
+                viewport,
+                _songSelect.CreateSnapshot(viewport).UiFrame
+            ),
+            _ => throw new InvalidOperationException($"Unknown scene: {_activeScene}"),
+        };
 
     public IReadOnlyList<UiFrameSnapshot> CreateWarmupFrames(VirtualViewport viewport)
     {
@@ -43,6 +47,4 @@ public sealed partial class OsuDroidGameCore
 
         return frames;
     }
-
-
 }

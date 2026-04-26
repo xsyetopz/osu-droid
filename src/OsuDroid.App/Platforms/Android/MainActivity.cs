@@ -9,5 +9,11 @@ namespace OsuDroid.App;
     MainLauncher = true,
     Icon = "@drawable/ic_launcher",
     LaunchMode = LaunchMode.SingleTask,
-    ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
+    ConfigurationChanges = ConfigChanges.ScreenSize
+        | ConfigChanges.Orientation
+        | ConfigChanges.UiMode
+        | ConfigChanges.ScreenLayout
+        | ConfigChanges.SmallestScreenSize
+        | ConfigChanges.Density
+)]
 public sealed class MainActivity : MauiAppCompatActivity;

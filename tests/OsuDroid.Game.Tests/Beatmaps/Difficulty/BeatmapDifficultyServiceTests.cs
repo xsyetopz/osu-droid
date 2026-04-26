@@ -19,7 +19,11 @@ public sealed class BeatmapDifficultyServiceTests
         context.Repository.SetDifficultyMetadata("standardStarRatingVersion", 1);
         WriteOsuFile(context.Paths, stale);
         var calculator = new FixedDifficultyCalculator(new BeatmapStarRatings(6.99f, 5.64f));
-        var service = new BeatmapDifficultyService(context.Repository, context.Paths.Songs, calculator);
+        var service = new BeatmapDifficultyService(
+            context.Repository,
+            context.Paths.Songs,
+            calculator
+        );
 
         BeatmapInfo updated = service.EnsureCalculated(stale);
         BeatmapInfo persisted = context.Repository.LoadLibrary().Sets.Single().Beatmaps.Single();
@@ -30,8 +34,14 @@ public sealed class BeatmapDifficultyServiceTests
             Assert.That(updated.StandardStarRating, Is.EqualTo(5.64f));
             Assert.That(persisted.DroidStarRating, Is.EqualTo(6.99f));
             Assert.That(persisted.StandardStarRating, Is.EqualTo(5.64f));
-            Assert.That(context.Repository.GetDifficultyMetadata("droidStarRatingVersion"), Is.EqualTo(BeatmapDifficultyService.DroidCalculatorVersion));
-            Assert.That(context.Repository.GetDifficultyMetadata("standardStarRatingVersion"), Is.EqualTo(BeatmapDifficultyService.StandardCalculatorVersion));
+            Assert.That(
+                context.Repository.GetDifficultyMetadata("droidStarRatingVersion"),
+                Is.EqualTo(BeatmapDifficultyService.DroidCalculatorVersion)
+            );
+            Assert.That(
+                context.Repository.GetDifficultyMetadata("standardStarRatingVersion"),
+                Is.EqualTo(BeatmapDifficultyService.StandardCalculatorVersion)
+            );
             Assert.That(calculator.CallCount, Is.EqualTo(1));
         });
     }
@@ -42,11 +52,21 @@ public sealed class BeatmapDifficultyServiceTests
         using TestContextData context = CreateContext();
         BeatmapInfo cached = CreateBeatmap(3.96f, 4.70f);
         context.Repository.UpsertBeatmaps([cached]);
-        context.Repository.SetDifficultyMetadata("droidStarRatingVersion", BeatmapDifficultyService.DroidCalculatorVersion);
-        context.Repository.SetDifficultyMetadata("standardStarRatingVersion", BeatmapDifficultyService.StandardCalculatorVersion);
+        context.Repository.SetDifficultyMetadata(
+            "droidStarRatingVersion",
+            BeatmapDifficultyService.DroidCalculatorVersion
+        );
+        context.Repository.SetDifficultyMetadata(
+            "standardStarRatingVersion",
+            BeatmapDifficultyService.StandardCalculatorVersion
+        );
         WriteOsuFile(context.Paths, cached);
         var calculator = new FixedDifficultyCalculator(new BeatmapStarRatings(6.99f, 5.64f));
-        var service = new BeatmapDifficultyService(context.Repository, context.Paths.Songs, calculator);
+        var service = new BeatmapDifficultyService(
+            context.Repository,
+            context.Paths.Songs,
+            calculator
+        );
 
         BeatmapInfo updated = service.EnsureCalculated(cached);
         BeatmapInfo persisted = context.Repository.LoadLibrary().Sets.Single().Beatmaps.Single();
@@ -63,7 +83,10 @@ public sealed class BeatmapDifficultyServiceTests
 
     private static TestContextData CreateContext()
     {
-        string root = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"difficulty-service-{Guid.NewGuid():N}");
+        string root = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"difficulty-service-{Guid.NewGuid():N}"
+        );
         var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(root));
         paths.EnsureDirectories();
         var database = new DroidDatabase(paths.GetDatabasePath("test"));
@@ -71,40 +94,42 @@ public sealed class BeatmapDifficultyServiceTests
         return new TestContextData(root, paths, new BeatmapLibraryRepository(database));
     }
 
-    private static BeatmapInfo CreateBeatmap(float? droidStarRating, float? standardStarRating) => new(
-        Filename: "map.osu",
-        SetDirectory: "Artist - Title",
-        Md5: "abc123",
-        Id: 123,
-        AudioFilename: "audio.mp3",
-        BackgroundFilename: null,
-        Status: null,
-        SetId: 12,
-        Title: "Title",
-        TitleUnicode: "Title",
-        Artist: "Artist",
-        ArtistUnicode: "Artist",
-        Creator: "Creator",
-        Version: "Insane",
-        Tags: string.Empty,
-        Source: string.Empty,
-        DateImported: 0,
-        ApproachRate: 9,
-        OverallDifficulty: 8,
-        CircleSize: 4,
-        HpDrainRate: 6,
-        DroidStarRating: droidStarRating,
-        StandardStarRating: standardStarRating,
-        BpmMax: 180,
-        BpmMin: 180,
-        MostCommonBpm: 180,
-        Length: 120000,
-        PreviewTime: 0,
-        HitCircleCount: 1,
-        SliderCount: 0,
-        SpinnerCount: 0,
-        MaxCombo: 1,
-        EpilepsyWarning: false);
+    private static BeatmapInfo CreateBeatmap(float? droidStarRating, float? standardStarRating) =>
+        new(
+            Filename: "map.osu",
+            SetDirectory: "Artist - Title",
+            Md5: "abc123",
+            Id: 123,
+            AudioFilename: "audio.mp3",
+            BackgroundFilename: null,
+            Status: null,
+            SetId: 12,
+            Title: "Title",
+            TitleUnicode: "Title",
+            Artist: "Artist",
+            ArtistUnicode: "Artist",
+            Creator: "Creator",
+            Version: "Insane",
+            Tags: string.Empty,
+            Source: string.Empty,
+            DateImported: 0,
+            ApproachRate: 9,
+            OverallDifficulty: 8,
+            CircleSize: 4,
+            HpDrainRate: 6,
+            DroidStarRating: droidStarRating,
+            StandardStarRating: standardStarRating,
+            BpmMax: 180,
+            BpmMin: 180,
+            MostCommonBpm: 180,
+            Length: 120000,
+            PreviewTime: 0,
+            HitCircleCount: 1,
+            SliderCount: 0,
+            SpinnerCount: 0,
+            MaxCombo: 1,
+            EpilepsyWarning: false
+        );
 
     private static void WriteOsuFile(DroidGamePathLayout paths, BeatmapInfo beatmap)
     {
@@ -113,7 +138,8 @@ public sealed class BeatmapDifficultyServiceTests
         File.WriteAllText(Path.Combine(setPath, beatmap.Filename), "osu file format v14");
     }
 
-    private sealed class FixedDifficultyCalculator(BeatmapStarRatings ratings) : IBeatmapDifficultyCalculator
+    private sealed class FixedDifficultyCalculator(BeatmapStarRatings ratings)
+        : IBeatmapDifficultyCalculator
     {
         public int CallCount { get; private set; }
 
@@ -125,7 +151,11 @@ public sealed class BeatmapDifficultyServiceTests
         }
     }
 
-    private sealed class TestContextData(string root, DroidGamePathLayout paths, BeatmapLibraryRepository repository) : IDisposable
+    private sealed class TestContextData(
+        string root,
+        DroidGamePathLayout paths,
+        BeatmapLibraryRepository repository
+    ) : IDisposable
     {
         public DroidGamePathLayout Paths { get; } = paths;
 

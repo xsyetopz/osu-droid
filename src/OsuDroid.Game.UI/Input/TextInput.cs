@@ -1,4 +1,5 @@
 using OsuDroid.Game.UI.Geometry;
+
 namespace OsuDroid.Game.UI.Input;
 
 public interface ITextInputService
@@ -14,15 +15,12 @@ public sealed record TextInputRequest(
     Action<string> OnSubmitted,
     UiRect? SurfaceBounds = null,
     Action? OnCanceled = null,
-    string? Title = null);
+    string? Title = null
+);
 
 public sealed class NoOpTextInputService : ITextInputService
 {
-    public void RequestTextInput(TextInputRequest request)
-    {
-    }
+    public void RequestTextInput(TextInputRequest request) { }
 
-    public void HideTextInput()
-    {
-    }
+    public void HideTextInput() { }
 }

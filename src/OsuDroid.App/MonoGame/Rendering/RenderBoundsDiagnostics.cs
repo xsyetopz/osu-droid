@@ -9,5 +9,6 @@ internal readonly record struct RenderBoundsDiagnostics(
     int DisplayWidth,
     int DisplayHeight,
     int PreferredBackBufferWidth,
-    int PreferredBackBufferHeight);
+    int PreferredBackBufferHeight
+);
 #endif

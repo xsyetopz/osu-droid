@@ -8,20 +8,31 @@ public sealed partial class OptionsScene
     public GameFrameSnapshot CreateSnapshot(VirtualViewport viewport)
     {
         ClampScroll(viewport);
-        return CreateSnapshot(viewport, ActiveSectionData, _contentScrollOffset, _sectionScrollOffset);
+        return CreateSnapshot(
+            viewport,
+            ActiveSectionData,
+            _contentScrollOffset,
+            _sectionScrollOffset
+        );
     }
 
-
-
-    public GameFrameSnapshot CreateSnapshotForSection(OptionsSection section, VirtualViewport viewport)
+    public GameFrameSnapshot CreateSnapshotForSection(
+        OptionsSection section,
+        VirtualViewport viewport
+    )
     {
-        SettingsSection sectionData = s_sections.Single(settingsSection => settingsSection.Section == section);
+        SettingsSection sectionData = s_sections.Single(settingsSection =>
+            settingsSection.Section == section
+        );
         return CreateSnapshot(viewport, sectionData, 0f, 0f);
     }
 
-
-
-    private GameFrameSnapshot CreateSnapshot(VirtualViewport viewport, SettingsSection sectionData, float activeContentScrollOffset, float activeSectionScrollOffset)
+    private GameFrameSnapshot CreateSnapshot(
+        VirtualViewport viewport,
+        SettingsSection sectionData,
+        float activeContentScrollOffset,
+        float activeSectionScrollOffset
+    )
     {
         return new GameFrameSnapshot(
             "Options",
@@ -30,16 +41,18 @@ public sealed partial class OptionsScene
             Sections,
             (int)sectionData.Section,
             false,
-            CreateUiFrame(viewport, sectionData, activeContentScrollOffset, activeSectionScrollOffset));
+            CreateUiFrame(
+                viewport,
+                sectionData,
+                activeContentScrollOffset,
+                activeSectionScrollOffset
+            )
+        );
     }
 
+    private SettingsSection ActiveSectionData =>
+        s_sections.Single(section => section.Section == _activeSection);
 
-
-    private SettingsSection ActiveSectionData => s_sections.Single(section => section.Section == _activeSection);
-
-
-
-    private static IEnumerable<SettingsRow> AllRows() => s_sections.SelectMany(section => section.Categories).SelectMany(category => category.Rows);
-
-
+    private static IEnumerable<SettingsRow> AllRows() =>
+        s_sections.SelectMany(section => section.Categories).SelectMany(category => category.Rows);
 }

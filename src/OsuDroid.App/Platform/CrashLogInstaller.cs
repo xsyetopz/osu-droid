@@ -32,10 +32,18 @@ internal static class CrashLogInstaller
     }
 
     private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs args) =>
-        WriteCrash("unhandled", args.ExceptionObject as Exception ?? new InvalidOperationException(args.ExceptionObject?.ToString() ?? "Unknown exception."));
+        WriteCrash(
+            "unhandled",
+            args.ExceptionObject as Exception
+                ?? new InvalidOperationException(
+                    args.ExceptionObject?.ToString() ?? "Unknown exception."
+                )
+        );
 
-    private static void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs args) =>
-        WriteCrash("unobserved-task", args.Exception);
+    private static void OnUnobservedTaskException(
+        object? sender,
+        UnobservedTaskExceptionEventArgs args
+    ) => WriteCrash("unobserved-task", args.Exception);
 
     private static void WriteCrash(string kind, Exception exception)
     {
@@ -58,10 +66,11 @@ internal static class CrashLogInstaller
                 Directory.CreateDirectory(logDirectory);
             }
 
-            File.AppendAllText(logPath, $"{DateTimeOffset.UtcNow:O} {kind}{Environment.NewLine}{exception}{Environment.NewLine}");
+            File.AppendAllText(
+                logPath,
+                $"{DateTimeOffset.UtcNow:O} {kind}{Environment.NewLine}{exception}{Environment.NewLine}"
+            );
         }
-        catch (Exception)
-        {
-        }
+        catch (Exception) { }
     }
 }

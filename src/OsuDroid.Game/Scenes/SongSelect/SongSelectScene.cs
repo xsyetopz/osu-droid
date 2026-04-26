@@ -10,7 +10,16 @@ using OsuDroid.Game.UI.Style;
 
 namespace OsuDroid.Game.Scenes.SongSelect;
 
-public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicController musicController, IBeatmapDifficultyService difficultyService, string songsPath, OnlineProfilePanelState? onlinePanelState = null, ITextInputService? textInputService = null, Func<int, int>? randomIndexProvider = null, GameLocalizer? localizer = null)
+public sealed partial class SongSelectScene(
+    IBeatmapLibrary library,
+    IMenuMusicController musicController,
+    IBeatmapDifficultyService difficultyService,
+    string songsPath,
+    OnlineProfilePanelState? onlinePanelState = null,
+    ITextInputService? textInputService = null,
+    Func<int, int>? randomIndexProvider = null,
+    GameLocalizer? localizer = null
+)
 {
     private const float RowWidth = 724f;
     private const float RowHeight = 127f;
@@ -71,13 +80,18 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
     private static readonly UiColor s_beatmapOptionsInactiveCheckbox = DroidUiColors.SurfaceInput;
 
     private readonly int[] _visibleSetIndices = Enumerable.Repeat(-1, VisibleSetSlots).ToArray();
-    private readonly int[] _visibleDifficultyIndices = Enumerable.Repeat(-1, VisibleDifficultySlots).ToArray();
-    private readonly int[] _visibleCollectionIndices = Enumerable.Repeat(-1, VisibleCollectionSlots).ToArray();
+    private readonly int[] _visibleDifficultyIndices = Enumerable
+        .Repeat(-1, VisibleDifficultySlots)
+        .ToArray();
+    private readonly int[] _visibleCollectionIndices = Enumerable
+        .Repeat(-1, VisibleCollectionSlots)
+        .ToArray();
     private readonly SelectionState _selectionState = new();
     private readonly QueryState _queryState = new();
     private readonly BackgroundState _backgroundState = new();
     private OnlineProfilePanelState? _onlinePanelState = onlinePanelState;
-    private readonly Func<int, int> _randomIndexProvider = randomIndexProvider ?? Random.Shared.Next;
+    private readonly Func<int, int> _randomIndexProvider =
+        randomIndexProvider ?? Random.Shared.Next;
     private readonly GameLocalizer _localizer = localizer ?? new GameLocalizer();
     private readonly object _difficultyGate = new();
     private readonly HashSet<string> _pendingDifficultyKeys = new(StringComparer.Ordinal);
@@ -174,13 +188,17 @@ public sealed partial class SongSelectScene(IBeatmapLibrary library, IMenuMusicC
         set => _backgroundState.Luminance = Math.Clamp(value, 0f, 1f);
     }
 
-    public BeatmapInfo? SelectedBeatmap => SelectedSet?.Beatmaps.Count > 0
-        ? SelectedSet.Beatmaps[Math.Clamp(selectedDifficultyIndex, 0, SelectedSet.Beatmaps.Count - 1)]
-        : null;
+    public BeatmapInfo? SelectedBeatmap =>
+        SelectedSet?.Beatmaps.Count > 0
+            ? SelectedSet.Beatmaps[
+                Math.Clamp(selectedDifficultyIndex, 0, SelectedSet.Beatmaps.Count - 1)
+            ]
+            : null;
 
     public string? SelectedBackgroundPath => selectedBackgroundPath;
 
-    private BeatmapSetInfo? SelectedSet => selectedSetIndex >= 0 && selectedSetIndex < _visibleSnapshot.Sets.Count ? _visibleSnapshot.Sets[selectedSetIndex] : null;
-
+    private BeatmapSetInfo? SelectedSet =>
+        selectedSetIndex >= 0 && selectedSetIndex < _visibleSnapshot.Sets.Count
+            ? _visibleSnapshot.Sets[selectedSetIndex]
+            : null;
 }
-

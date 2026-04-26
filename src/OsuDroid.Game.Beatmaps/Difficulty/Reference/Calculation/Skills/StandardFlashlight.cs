@@ -18,16 +18,20 @@ internal sealed class StandardFlashlight(IEnumerable<Mod> mods) : StandardStrain
     protected override double StrainValueAt(StandardDifficultyHitObject current)
     {
         currentStrain *= StrainDecay(current.DeltaTime);
-        currentStrain += StandardFlashlightEvaluator.EvaluateDifficultyOf(current, Mods) * SkillMultiplier;
+        currentStrain +=
+            StandardFlashlightEvaluator.EvaluateDifficultyOf(current, Mods) * SkillMultiplier;
         return currentStrain;
     }
 
-    protected override double CalculateInitialStrain(double time, StandardDifficultyHitObject current) =>
-        currentStrain * StrainDecay(time - current.Previous(0)!.StartTime);
+    protected override double CalculateInitialStrain(
+        double time,
+        StandardDifficultyHitObject current
+    ) => currentStrain * StrainDecay(time - current.Previous(0)!.StartTime);
 
     public override double DifficultyValue() => CurrentStrainPeaks.Sum();
 
     private static double StrainDecay(double ms) => System.Math.Pow(StrainDecayBase, ms / 1000d);
 
-    public static new double DifficultyToPerformance(double difficulty) => System.Math.Pow(difficulty, 2) * 25;
+    public static new double DifficultyToPerformance(double difficulty) =>
+        System.Math.Pow(difficulty, 2) * 25;
 }

@@ -1,5 +1,6 @@
 using OsuDroid.Game.Runtime.Audio;
 using OsuDroid.Game.Scenes.MainMenu;
+
 namespace OsuDroid.Game;
 
 public sealed partial class OsuDroidGameCore
@@ -26,7 +27,10 @@ public sealed partial class OsuDroidGameCore
 
         _musicController.Update(elapsed);
         _mainMenu.SetNowPlaying(_musicController.State);
-        _mainMenu.SetSpectrum(_menuSpectrumBuffer, _musicController.TryReadSpectrum1024(_menuSpectrumBuffer));
+        _mainMenu.SetSpectrum(
+            _menuSpectrumBuffer,
+            _musicController.TryReadSpectrum1024(_menuSpectrumBuffer)
+        );
 
         if (_activeScene == ActiveScene.BeatmapDownloader)
         {
@@ -78,8 +82,6 @@ public sealed partial class OsuDroidGameCore
         ApplyRoute(pendingRoute);
     }
 
-
-
     private void StartDeferredMenuMusic()
     {
         if (!_startMenuMusicAfterStartup)
@@ -88,7 +90,10 @@ public sealed partial class OsuDroidGameCore
         }
 
         _startMenuMusicAfterStartup = false;
-        if (!_menuMusicPreviewEnabled || string.IsNullOrWhiteSpace(_musicController.State.ArtistTitle))
+        if (
+            !_menuMusicPreviewEnabled
+            || string.IsNullOrWhiteSpace(_musicController.State.ArtistTitle)
+        )
         {
             return;
         }
@@ -96,6 +101,4 @@ public sealed partial class OsuDroidGameCore
         _musicController.Execute(MenuMusicCommand.Play);
         _mainMenu.SetNowPlaying(_musicController.State);
     }
-
-
 }

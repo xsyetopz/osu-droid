@@ -12,7 +12,8 @@ public sealed partial class SongSelectSceneTests
 
         public string? Source { get; private set; }
 
-        public BeatmapPreviewPlaybackSnapshot PlaybackSnapshot => new(Source, IsPlaying, PositionMilliseconds);
+        public BeatmapPreviewPlaybackSnapshot PlaybackSnapshot =>
+            new(Source, IsPlaying, PositionMilliseconds);
 
         public void Play(string audioPath, int previewTimeMilliseconds)
         {
@@ -38,9 +39,7 @@ public sealed partial class SongSelectSceneTests
             PositionMilliseconds = 0;
         }
 
-        public void SetVolume(float normalizedVolume)
-        {
-        }
+        public void SetVolume(float normalizedVolume) { }
 
         public bool TryReadSpectrum1024(float[] destination) => false;
     }

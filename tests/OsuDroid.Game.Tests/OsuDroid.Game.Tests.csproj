@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <RollForward>Major</RollForward>
-        <IsPackable>false</IsPackable>
-        <IsTestProject>true</IsTestProject>
-    </PropertyGroup>
-    <ItemGroup>
-        <ProjectReference Include="../../src/OsuDroid.Game/OsuDroid.Game.csproj" />
-        <ProjectReference Include="../../src/OsuDroid.Game.Beatmaps/OsuDroid.Game.Beatmaps.csproj" />
-        <ProjectReference Include="../../src/OsuDroid.Game.Compatibility/OsuDroid.Game.Compatibility.csproj" />
-        <ProjectReference Include="../../src/OsuDroid.Game.Runtime/OsuDroid.Game.Runtime.csproj" />
-        <ProjectReference Include="../../src/OsuDroid.Game.UI/OsuDroid.Game.UI.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" />
-        <PackageReference Include="NUnit" />
-        <PackageReference Include="NUnit.Analyzers"
-                          PrivateAssets="all" />
-        <PackageReference Include="NUnit3TestAdapter" />
-        <PackageReference Include="coverlet.collector"
-                          PrivateAssets="all" />
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RollForward>Major</RollForward>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/OsuDroid.Game/OsuDroid.Game.csproj" />
+    <ProjectReference Include="../../src/OsuDroid.Game.Beatmaps/OsuDroid.Game.Beatmaps.csproj" />
+    <ProjectReference Include="../../src/OsuDroid.Game.Compatibility/OsuDroid.Game.Compatibility.csproj" />
+    <ProjectReference Include="../../src/OsuDroid.Game.Runtime/OsuDroid.Game.Runtime.csproj" />
+    <ProjectReference Include="../../src/OsuDroid.Game.UI/OsuDroid.Game.UI.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="NUnit3TestAdapter" />
+    <PackageReference Include="coverlet.collector" PrivateAssets="all" />
+  </ItemGroup>
 </Project>

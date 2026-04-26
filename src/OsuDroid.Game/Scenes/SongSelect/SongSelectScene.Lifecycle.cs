@@ -9,7 +9,8 @@ namespace OsuDroid.Game.Scenes.SongSelect;
 
 public sealed partial class SongSelectScene
 {
-    public void SetPreviewPlayer(IBeatmapPreviewPlayer player) => musicController.SetPreviewPlayer(player);
+    public void SetPreviewPlayer(IBeatmapPreviewPlayer player) =>
+        musicController.SetPreviewPlayer(player);
 
     public void SetTextInputService(ITextInputService service) => _textInputService = service;
 
@@ -54,13 +55,21 @@ public sealed partial class SongSelectScene
             StartBackgroundLibraryRefresh();
         }
 
-        ApplyBeatmapOptions(preferredSetDirectory, preferredBeatmapFilename, queueDifficultyCalculations: false);
+        ApplyBeatmapOptions(
+            preferredSetDirectory,
+            preferredBeatmapFilename,
+            queueDifficultyCalculations: false
+        );
         selectedSetExpansion = 1f;
         scrollY = ClampScroll(CalculateSelectedSetScroll(selectedSetIndex));
         RefreshSelectedBackgroundPath();
         QueueVisibleDifficultyCalculations();
         PlaySelectedPreview();
-        PerfDiagnostics.Log("songSelect.enter", start, $"sets={_visibleSnapshot.Sets.Count} selectedSet={selectedSetIndex}");
+        PerfDiagnostics.Log(
+            "songSelect.enter",
+            start,
+            $"sets={_visibleSnapshot.Sets.Count} selectedSet={selectedSetIndex}"
+        );
     }
 
     public void PrepareForWarmup()

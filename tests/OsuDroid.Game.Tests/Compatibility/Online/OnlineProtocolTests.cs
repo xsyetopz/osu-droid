@@ -14,7 +14,10 @@ public sealed class OnlineProtocolTests
         Assert.That(request.Url, Is.EqualTo("https://osudroid.moe/api/login.php"));
         Assert.That(request.Fields["username"], Is.EqualTo("player"));
         Assert.That(request.Fields["version"], Is.EqualTo("60"));
-        Assert.That(request.Fields["password"], Is.EqualTo(OnlinePasswordHasher.HashPassword("password")));
+        Assert.That(
+            request.Fields["password"],
+            Is.EqualTo(OnlinePasswordHasher.HashPassword("password"))
+        );
         Assert.That(request.Fields["password"], Has.Length.EqualTo(32));
     }
 
@@ -37,7 +40,13 @@ public sealed class OnlineProtocolTests
     [Test]
     public void ReplayUrlsMatchOsuDroidLeaderboardMode()
     {
-        Assert.That(OnlineProtocol.GetReplayUrl(42, BeatmapLeaderboardScoringMode.Score), Is.EqualTo("https://osudroid.moe/api/upload/42.odr"));
-        Assert.That(OnlineProtocol.GetReplayUrl(42, BeatmapLeaderboardScoringMode.PerformancePoints), Is.EqualTo("https://osudroid.moe/api/bestpp/42.odr"));
+        Assert.That(
+            OnlineProtocol.GetReplayUrl(42, BeatmapLeaderboardScoringMode.Score),
+            Is.EqualTo("https://osudroid.moe/api/upload/42.odr")
+        );
+        Assert.That(
+            OnlineProtocol.GetReplayUrl(42, BeatmapLeaderboardScoringMode.PerformancePoints),
+            Is.EqualTo("https://osudroid.moe/api/bestpp/42.odr")
+        );
     }
 }

@@ -51,26 +51,34 @@ public sealed partial class OsuDroidGameCore
                 ApplyOnlinePanelSetting();
                 break;
             case "registerAcc":
-                PendingExternalUrl = $"https://{OsuDroidOnlineConstants.Hostname}/user/?action=register";
+                PendingExternalUrl =
+                    $"https://{OsuDroidOnlineConstants.Hostname}/user/?action=register";
                 break;
             case "update":
-                PendingExternalUrl = OsuDroidOnlineConstants.UpdateEndpointPrefix + CurrentUpdateLanguageCode();
+                PendingExternalUrl =
+                    OsuDroidOnlineConstants.UpdateEndpointPrefix + CurrentUpdateLanguageCode();
                 break;
             case "backup":
-                _options.ShowStatusMessage(_settingsBackupService.Export()
-                    ? "OsuDroidLanguagePack_config_backup_info_success"
-                    : "OsuDroidLanguagePack_config_backup_info_fail");
+                _options.ShowStatusMessage(
+                    _settingsBackupService.Export()
+                        ? "OsuDroidLanguagePack_config_backup_info_success"
+                        : "OsuDroidLanguagePack_config_backup_info_fail"
+                );
                 break;
             case "restore":
                 if (_settingsBackupService.Import())
                 {
                     _options.ReloadValuesFromStore();
                     ApplyRestoredOptionsSettings();
-                    _options.ShowStatusMessage("OsuDroidLanguagePack_config_backup_restore_info_success");
+                    _options.ShowStatusMessage(
+                        "OsuDroidLanguagePack_config_backup_restore_info_success"
+                    );
                 }
                 else
                 {
-                    _options.ShowStatusMessage("OsuDroidLanguagePack_config_backup_restore_info_fail");
+                    _options.ShowStatusMessage(
+                        "OsuDroidLanguagePack_config_backup_restore_info_fail"
+                    );
                 }
 
                 break;
@@ -108,13 +116,18 @@ public sealed partial class OsuDroidGameCore
         ApplyOnlinePanelSetting();
     }
 
-    private void ApplyMusicVolumeSetting() => _previewPlayer.SetVolume(_options.GetIntValue("bgmvolume") / 100f);
+    private void ApplyMusicVolumeSetting() =>
+        _previewPlayer.SetVolume(_options.GetIntValue("bgmvolume") / 100f);
 
-    private void ApplyEffectVolumeSetting() => _activeMenuSfxPlayer.SetVolume(_options.GetIntValue("soundvolume") / 100f);
+    private void ApplyEffectVolumeSetting() =>
+        _activeMenuSfxPlayer.SetVolume(_options.GetIntValue("soundvolume") / 100f);
 
     private void ApplyDifficultyAlgorithmSetting()
     {
-        DifficultyAlgorithm algorithm = _options.GetIntValue("difficultyAlgorithm") == 1 ? DifficultyAlgorithm.Standard : DifficultyAlgorithm.Droid;
+        DifficultyAlgorithm algorithm =
+            _options.GetIntValue("difficultyAlgorithm") == 1
+                ? DifficultyAlgorithm.Standard
+                : DifficultyAlgorithm.Droid;
         _songSelect.SetDisplayAlgorithm(algorithm);
     }
 
@@ -125,7 +138,10 @@ public sealed partial class OsuDroidGameCore
         _beatmapDownloader.SetForceRomanized(forceRomanized);
     }
 
-    private void ApplyDownloadPreferenceSetting() => _beatmapDownloader.SetPreferNoVideoDownloads(_options.GetBoolValue("preferNoVideoDownloads"));
+    private void ApplyDownloadPreferenceSetting() =>
+        _beatmapDownloader.SetPreferNoVideoDownloads(
+            _options.GetBoolValue("preferNoVideoDownloads")
+        );
 
     private void ApplyOnlinePanelSetting()
     {

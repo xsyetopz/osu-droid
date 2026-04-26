@@ -5,11 +5,15 @@ namespace OsuDroid.Game.Beatmaps.Difficulty.Reference.Calculation.Evaluators;
 
 internal static class StandardSpeedEvaluator
 {
-    private static readonly double SingleSpacingThreshold = DifficultyHitObject.NormalizedDiameter * 1.25;
+    private static readonly double SingleSpacingThreshold =
+        DifficultyHitObject.NormalizedDiameter * 1.25;
     private const double MinSpeedBonus = 75;
     private const double DistanceMultiplier = 0.8;
 
-    public static double EvaluateDifficultyOf(StandardDifficultyHitObject current, IEnumerable<Mod> mods)
+    public static double EvaluateDifficultyOf(
+        StandardDifficultyHitObject current,
+        IEnumerable<Mod> mods
+    )
     {
         if (current.Obj is Spinner)
         {
@@ -28,7 +32,10 @@ internal static class StandardSpeedEvaluator
         }
 
         double travelDistance = prev?.TravelDistance ?? 0d;
-        double distance = System.Math.Min(SingleSpacingThreshold, travelDistance + current.MinimumJumpDistance);
+        double distance = System.Math.Min(
+            SingleSpacingThreshold,
+            travelDistance + current.MinimumJumpDistance
+        );
         double distanceBonus = mods.Any(static mod => mod is ModAutopilot)
             ? 0d
             : System.Math.Pow(distance / SingleSpacingThreshold, 3.95) * DistanceMultiplier;

@@ -3,7 +3,10 @@ using OsuDroid.Game.Runtime.Paths;
 
 namespace OsuDroid.Game.Runtime.Settings;
 
-public sealed class GameSettingsBackupService(DroidGamePathLayout paths, IGameSettingsStore settingsStore)
+public sealed class GameSettingsBackupService(
+    DroidGamePathLayout paths,
+    IGameSettingsStore settingsStore
+)
 {
     private static readonly HashSet<string> s_sensitiveKeys = new(StringComparer.Ordinal)
     {
@@ -33,9 +36,14 @@ public sealed class GameSettingsBackupService(DroidGamePathLayout paths, IGameSe
                 Directory.CreateDirectory(directory);
             }
 
-            var payload = exportableStore.GetAll()
+            var payload = exportableStore
+                .GetAll()
                 .Where(pair => !s_sensitiveKeys.Contains(pair.Key))
-                .ToDictionary(pair => pair.Key, pair => pair.Value.ToJsonValue(), StringComparer.Ordinal);
+                .ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value.ToJsonValue(),
+                    StringComparer.Ordinal
+                );
             File.WriteAllText(BackupPath, JsonSerializer.Serialize(payload, s_jsonOptions));
             return true;
         }
@@ -63,7 +71,13 @@ public sealed class GameSettingsBackupService(DroidGamePathLayout paths, IGameSe
             Dictionary<string, GameSettingValue> importedSettings = [];
             foreach (JsonProperty property in document.RootElement.EnumerateObject())
             {
-                if (s_sensitiveKeys.Contains(property.Name) || !JsonGameSettingsStore.TryReadSettingValue(property.Value, out GameSettingValue settingValue))
+                if (
+                    s_sensitiveKeys.Contains(property.Name)
+                    || !JsonGameSettingsStore.TryReadSettingValue(
+                        property.Value,
+                        out GameSettingValue settingValue
+                    )
+                )
                 {
                     continue;
                 }
@@ -88,7 +102,9 @@ public sealed class GameSettingsBackupService(DroidGamePathLayout paths, IGameSe
         }
     }
 
-    private void ApplyImportedSettings(IReadOnlyDictionary<string, GameSettingValue> importedSettings)
+    private void ApplyImportedSettings(
+        IReadOnlyDictionary<string, GameSettingValue> importedSettings
+    )
     {
         foreach ((string key, GameSettingValue settingValue) in importedSettings)
         {

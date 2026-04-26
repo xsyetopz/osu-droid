@@ -5,7 +5,11 @@ using OsuDroid.Game.Beatmaps.Difficulty.Reference.Mods;
 
 namespace OsuDroid.Game.Beatmaps.Difficulty.Reference.Calculation.Skills;
 
-internal sealed class DroidReading(IEnumerable<Mod> mods, double clockRate, IReadOnlyList<HitObject> hitObjects) : Skill<DroidDifficultyHitObject>(mods)
+internal sealed class DroidReading(
+    IEnumerable<Mod> mods,
+    double clockRate,
+    IReadOnlyList<HitObject> hitObjects
+) : Skill<DroidDifficultyHitObject>(mods)
 {
     private readonly List<double> noteDifficulties = [];
     private const double StrainDecayBase = 0.8;
@@ -17,7 +21,8 @@ internal sealed class DroidReading(IEnumerable<Mod> mods, double clockRate, IRea
     public override void Process(DroidDifficultyHitObject current)
     {
         currentNoteDifficulty *= StrainDecay(current.DeltaTime);
-        currentNoteDifficulty += DroidReadingEvaluator.EvaluateDifficultyOf(current, clockRate, Mods) * SkillMultiplier;
+        currentNoteDifficulty +=
+            DroidReadingEvaluator.EvaluateDifficultyOf(current, clockRate, Mods) * SkillMultiplier;
         noteDifficulties.Add(currentNoteDifficulty * current.RhythmMultiplier);
     }
 
@@ -44,7 +49,9 @@ internal sealed class DroidReading(IEnumerable<Mod> mods, double clockRate, IRea
 
         for (int i = 0; i < System.Math.Min(peaks.Count, reducedCount); ++i)
         {
-            peaks[i] *= System.Math.Log10(Interpolation.Linear(1d, 10d, System.Math.Clamp(i / (double)reducedCount, 0, 1)));
+            peaks[i] *= System.Math.Log10(
+                Interpolation.Linear(1d, 10d, System.Math.Clamp(i / (double)reducedCount, 0, 1))
+            );
         }
 
         peaks.Sort((a, b) => b.CompareTo(a));
@@ -74,10 +81,13 @@ internal sealed class DroidReading(IEnumerable<Mod> mods, double clockRate, IRea
         }
 
         double consistentTopNote = difficulty / noteWeightSum;
-        return noteDifficulties.Sum(d => 1.1d / (1 + System.Math.Exp(-5 * (d / consistentTopNote - 1.15))));
+        return noteDifficulties.Sum(d =>
+            1.1d / (1 + System.Math.Exp(-5 * (d / consistentTopNote - 1.15)))
+        );
     }
 
     private static double StrainDecay(double ms) => System.Math.Pow(StrainDecayBase, ms / 1000d);
 
-    public static double DifficultyToPerformance(double difficulty) => System.Math.Pow(System.Math.Pow(difficulty, 2) * 25, 0.8);
+    public static double DifficultyToPerformance(double difficulty) =>
+        System.Math.Pow(System.Math.Pow(difficulty, 2) * 25, 0.8);
 }

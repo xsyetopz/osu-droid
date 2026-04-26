@@ -17,7 +17,10 @@ public sealed class MainMenuSceneTests
 
         Assert.That(route, Is.EqualTo(MainMenuRoute.None));
         Assert.That(scene.Snapshot.IsSecondMenu, Is.True);
-        Assert.That(scene.Snapshot.MenuEntries, Is.EqualTo(new[] { "Solo", "Multiplayer", "Back" }));
+        Assert.That(
+            scene.Snapshot.MenuEntries,
+            Is.EqualTo(new[] { "Solo", "Multiplayer", "Back" })
+        );
     }
 
     [Test]
@@ -34,11 +37,17 @@ public sealed class MainMenuSceneTests
     [Test]
     public void CoreCreatesDatabaseBackedShell()
     {
-        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"core-{Guid.NewGuid():N}");
+        string path = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"core-{Guid.NewGuid():N}"
+        );
         try
         {
             var core = OsuDroidGameCore.Create(path, "debug");
-            Assert.That(File.Exists(DroidDatabaseConstants.GetDatabasePath(path, "debug")), Is.True);
+            Assert.That(
+                File.Exists(DroidDatabaseConstants.GetDatabasePath(path, "debug")),
+                Is.True
+            );
             Assert.That(core.CurrentFrame.Scene, Is.EqualTo("MainMenu"));
         }
         finally

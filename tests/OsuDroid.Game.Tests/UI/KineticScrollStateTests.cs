@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using OsuDroid.Game.UI.Geometry;
 using OsuDroid.Game.UI.Scrolling;
+
 namespace OsuDroid.Game.Tests;
 
 public sealed class KineticScrollStateTests
@@ -12,7 +13,14 @@ public sealed class KineticScrollStateTests
         float offset = 0f;
 
         scroll.Begin(new UiPoint(0f, 100f), 0d);
-        bool moved = scroll.Drag(new UiPoint(0f, 85f), 0.1d, () => offset, value => offset = value, 0f, 500f);
+        bool moved = scroll.Drag(
+            new UiPoint(0f, 85f),
+            0.1d,
+            () => offset,
+            value => offset = value,
+            0f,
+            500f
+        );
 
         Assert.That(moved, Is.False);
         Assert.That(offset, Is.Zero);
@@ -25,7 +33,17 @@ public sealed class KineticScrollStateTests
         float offset = 0f;
 
         scroll.Begin(new UiPoint(0f, 100f), 0d);
-        Assert.That(scroll.Drag(new UiPoint(0f, 40f), 0.05d, () => offset, value => offset = value, 0f, 500f), Is.True);
+        Assert.That(
+            scroll.Drag(
+                new UiPoint(0f, 40f),
+                0.05d,
+                () => offset,
+                value => offset = value,
+                0f,
+                500f
+            ),
+            Is.True
+        );
         float afterDrag = offset;
         float velocity = scroll.Velocity;
         scroll.End();
@@ -43,7 +61,17 @@ public sealed class KineticScrollStateTests
         float offset = 0f;
 
         scroll.Begin(new UiPoint(0f, 100f), 0d);
-        Assert.That(scroll.Drag(new UiPoint(0f, 85f), 0.05d, () => offset, value => offset = value, 0f, 500f), Is.False);
+        Assert.That(
+            scroll.Drag(
+                new UiPoint(0f, 85f),
+                0.05d,
+                () => offset,
+                value => offset = value,
+                0f,
+                500f
+            ),
+            Is.False
+        );
         scroll.End(new UiPoint(0f, 35f), 0.08d, () => offset, value => offset = value, 0f, 500f);
         float afterRelease = offset;
 

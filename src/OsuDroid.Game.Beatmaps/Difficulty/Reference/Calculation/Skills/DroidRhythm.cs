@@ -15,7 +15,10 @@ internal sealed class DroidRhythm(IEnumerable<Mod> mods) : DroidStrainSkill(mods
 
     protected override double StrainValueAt(DroidDifficultyHitObject current)
     {
-        double rhythmMultiplier = DroidRhythmEvaluator.EvaluateDifficultyOf(current, useSliderAccuracy);
+        double rhythmMultiplier = DroidRhythmEvaluator.EvaluateDifficultyOf(
+            current,
+            useSliderAccuracy
+        );
         double doubletapness = 1 - current.GetDoubletapness(current.Next(0));
         current.RhythmMultiplier = rhythmMultiplier * doubletapness;
 
@@ -24,8 +27,10 @@ internal sealed class DroidRhythm(IEnumerable<Mod> mods) : DroidStrainSkill(mods
         return currentStrain;
     }
 
-    protected override double CalculateInitialStrain(double time, DroidDifficultyHitObject current) =>
-        currentStrain * StrainDecay(time - current.Previous(0)!.StartTime);
+    protected override double CalculateInitialStrain(
+        double time,
+        DroidDifficultyHitObject current
+    ) => currentStrain * StrainDecay(time - current.Previous(0)!.StartTime);
 
     private static double StrainDecay(double ms) => System.Math.Pow(StrainDecayBase, ms / 1000d);
 }

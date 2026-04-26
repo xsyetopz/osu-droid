@@ -1,6 +1,11 @@
 namespace OsuDroid.Game.Beatmaps.Difficulty.Reference.Rulesets;
 
-public sealed class ReferenceBeatmapDifficulty(float circleSize = 5f, float? approachRate = null, float overallDifficulty = 5f, float healthDrainRate = 5f)
+public sealed class ReferenceBeatmapDifficulty(
+    float circleSize = 5f,
+    float? approachRate = null,
+    float overallDifficulty = 5f,
+    float healthDrainRate = 5f
+)
 {
     private float _approachRate = approachRate ?? float.NaN;
 
@@ -36,7 +41,12 @@ public sealed class ReferenceBeatmapDifficulty(float circleSize = 5f, float? app
         return difficulty < 5 ? mid + (mid - min) * (difficulty - 5) / 5 : mid;
     }
 
-    public static double InverseDifficultyRange(double difficultyValue, double diff0, double diff5, double diff10)
+    public static double InverseDifficultyRange(
+        double difficultyValue,
+        double diff0,
+        double diff5,
+        double diff10
+    )
     {
         return System.Math.Sign(difficultyValue - diff5) == System.Math.Sign(diff10 - diff0)
             ? (difficultyValue - diff5) / (diff10 - diff5) * 5 + 5

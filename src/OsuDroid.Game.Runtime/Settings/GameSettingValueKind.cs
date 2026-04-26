@@ -6,4 +6,3 @@ public enum GameSettingValueKind
     Number,
     Text,
 }
-

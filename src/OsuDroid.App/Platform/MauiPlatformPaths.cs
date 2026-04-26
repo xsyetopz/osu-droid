@@ -6,6 +6,7 @@ namespace OsuDroid.App.Platform;
 
 public sealed class MauiPlatformPaths : IPlatformPaths
 {
-    public DroidPathRoots Roots => DroidPathRoots.FromAppDataDirectory(FileSystem.AppDataDirectory, FileSystem.CacheDirectory);
+    public DroidPathRoots Roots =>
+        DroidPathRoots.FromAppDataDirectory(FileSystem.AppDataDirectory, FileSystem.CacheDirectory);
 }
 #endif

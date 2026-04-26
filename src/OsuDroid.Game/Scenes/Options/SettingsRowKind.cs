@@ -8,4 +8,3 @@ internal enum SettingsRowKind
     Button,
     Slider,
 }
-

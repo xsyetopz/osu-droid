@@ -9,27 +9,48 @@ public sealed partial class BeatmapDownloadServiceTests
     private sealed class WritingMirrorClient(byte[] bytes) : IBeatmapMirrorClient
     {
         public IReadOnlyList<BeatmapMirrorDefinition> Mirrors { get; } =
-        [
-            new(BeatmapMirrorKind.OsuDirect, "https://osu.direct", "osu.direct", true),
-        ];
+        [new(BeatmapMirrorKind.OsuDirect, "https://osu.direct", "osu.direct", true)];
 
-        public Uri CreateSearchUri(BeatmapMirrorSearchRequest request) => new("https://osu.direct/api/v2/search");
+        public Uri CreateSearchUri(BeatmapMirrorSearchRequest request) =>
+            new("https://osu.direct/api/v2/search");
 
-        public Uri CreateDownloadUri(long beatmapSetId, bool withVideo) => CreateDownloadUri(BeatmapMirrorKind.OsuDirect, beatmapSetId, withVideo);
+        public Uri CreateDownloadUri(long beatmapSetId, bool withVideo) =>
+            CreateDownloadUri(BeatmapMirrorKind.OsuDirect, beatmapSetId, withVideo);
 
-        public Uri CreateDownloadUri(BeatmapMirrorKind mirror, long beatmapSetId, bool withVideo) => new($"https://osu.direct/api/d/{beatmapSetId}{(withVideo ? string.Empty : "?noVideo=1")}");
+        public Uri CreateDownloadUri(BeatmapMirrorKind mirror, long beatmapSetId, bool withVideo) =>
+            new(
+                $"https://osu.direct/api/d/{beatmapSetId}{(withVideo ? string.Empty : "?noVideo=1")}"
+            );
 
-        public Uri CreatePreviewUri(BeatmapMirrorKind mirror, long beatmapId) => new($"https://osu.direct/api/media/preview/{beatmapId}");
+        public Uri CreatePreviewUri(BeatmapMirrorKind mirror, long beatmapId) =>
+            new($"https://osu.direct/api/media/preview/{beatmapId}");
 
-        public Task<IReadOnlyList<BeatmapMirrorSet>> SearchAsync(BeatmapMirrorSearchRequest request, CancellationToken cancellationToken) =>
-            Task.FromResult<IReadOnlyList<BeatmapMirrorSet>>([]);
+        public Task<IReadOnlyList<BeatmapMirrorSet>> SearchAsync(
+            BeatmapMirrorSearchRequest request,
+            CancellationToken cancellationToken
+        ) => Task.FromResult<IReadOnlyList<BeatmapMirrorSet>>([]);
 
-        public async Task DownloadAsync(Uri source, string destinationPath, IProgress<BeatmapDownloadProgress>? progress, CancellationToken cancellationToken)
+        public async Task DownloadAsync(
+            Uri source,
+            string destinationPath,
+            IProgress<BeatmapDownloadProgress>? progress,
+            CancellationToken cancellationToken
+        )
         {
             Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
-            progress?.Report(new BeatmapDownloadProgress(0, bytes.Length, BeatmapDownloadPhase.Connecting));
-            await File.WriteAllBytesAsync(destinationPath, bytes, cancellationToken).ConfigureAwait(false);
-            progress?.Report(new BeatmapDownloadProgress(bytes.Length, bytes.Length, BeatmapDownloadPhase.Downloading, bytes.Length));
+            progress?.Report(
+                new BeatmapDownloadProgress(0, bytes.Length, BeatmapDownloadPhase.Connecting)
+            );
+            await File.WriteAllBytesAsync(destinationPath, bytes, cancellationToken)
+                .ConfigureAwait(false);
+            progress?.Report(
+                new BeatmapDownloadProgress(
+                    bytes.Length,
+                    bytes.Length,
+                    BeatmapDownloadPhase.Downloading,
+                    bytes.Length
+                )
+            );
         }
     }
 
@@ -38,31 +59,55 @@ public sealed partial class BeatmapDownloadServiceTests
         private IProgress<BeatmapDownloadProgress>? _progress;
 
         public IReadOnlyList<BeatmapMirrorDefinition> Mirrors { get; } =
-        [
-            new(BeatmapMirrorKind.OsuDirect, "https://osu.direct", "osu.direct", true),
-        ];
+        [new(BeatmapMirrorKind.OsuDirect, "https://osu.direct", "osu.direct", true)];
 
-        public Uri CreateSearchUri(BeatmapMirrorSearchRequest request) => new("https://osu.direct/api/v2/search");
+        public Uri CreateSearchUri(BeatmapMirrorSearchRequest request) =>
+            new("https://osu.direct/api/v2/search");
 
-        public Uri CreateDownloadUri(long beatmapSetId, bool withVideo) => CreateDownloadUri(BeatmapMirrorKind.OsuDirect, beatmapSetId, withVideo);
+        public Uri CreateDownloadUri(long beatmapSetId, bool withVideo) =>
+            CreateDownloadUri(BeatmapMirrorKind.OsuDirect, beatmapSetId, withVideo);
 
-        public Uri CreateDownloadUri(BeatmapMirrorKind mirror, long beatmapSetId, bool withVideo) => new($"https://osu.direct/api/d/{beatmapSetId}");
+        public Uri CreateDownloadUri(BeatmapMirrorKind mirror, long beatmapSetId, bool withVideo) =>
+            new($"https://osu.direct/api/d/{beatmapSetId}");
 
-        public Uri CreatePreviewUri(BeatmapMirrorKind mirror, long beatmapId) => new($"https://osu.direct/api/media/preview/{beatmapId}");
+        public Uri CreatePreviewUri(BeatmapMirrorKind mirror, long beatmapId) =>
+            new($"https://osu.direct/api/media/preview/{beatmapId}");
 
-        public Task<IReadOnlyList<BeatmapMirrorSet>> SearchAsync(BeatmapMirrorSearchRequest request, CancellationToken cancellationToken) =>
-            Task.FromResult<IReadOnlyList<BeatmapMirrorSet>>([]);
+        public Task<IReadOnlyList<BeatmapMirrorSet>> SearchAsync(
+            BeatmapMirrorSearchRequest request,
+            CancellationToken cancellationToken
+        ) => Task.FromResult<IReadOnlyList<BeatmapMirrorSet>>([]);
 
-        public Task DownloadAsync(Uri source, string destinationPath, IProgress<BeatmapDownloadProgress>? progress, CancellationToken cancellationToken)
+        public Task DownloadAsync(
+            Uri source,
+            string destinationPath,
+            IProgress<BeatmapDownloadProgress>? progress,
+            CancellationToken cancellationToken
+        )
         {
             _progress = progress;
             Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
             File.WriteAllBytes(destinationPath, bytes);
-            _progress?.Report(new BeatmapDownloadProgress(bytes.Length, bytes.Length, BeatmapDownloadPhase.Downloading, bytes.Length));
+            _progress?.Report(
+                new BeatmapDownloadProgress(
+                    bytes.Length,
+                    bytes.Length,
+                    BeatmapDownloadPhase.Downloading,
+                    bytes.Length
+                )
+            );
             return Task.CompletedTask;
         }
 
-        public void ReportLateProgress() => _progress?.Report(new BeatmapDownloadProgress(bytes.Length, bytes.Length, BeatmapDownloadPhase.Downloading, bytes.Length));
+        public void ReportLateProgress() =>
+            _progress?.Report(
+                new BeatmapDownloadProgress(
+                    bytes.Length,
+                    bytes.Length,
+                    BeatmapDownloadPhase.Downloading,
+                    bytes.Length
+                )
+            );
     }
 
     private sealed class RecordingProcessingService : IBeatmapProcessingService
@@ -83,9 +128,7 @@ public sealed partial class BeatmapDownloadServiceTests
 
         public bool HasPendingWork() => _queuedArchives.Count > 0;
 
-        public void Start()
-        {
-        }
+        public void Start() { }
 
         public bool TryConsumeCompletedSnapshot(out BeatmapLibrarySnapshot snapshot)
         {

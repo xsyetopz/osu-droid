@@ -1,4 +1,5 @@
 using OsuDroid.Game.UI.Geometry;
+
 namespace OsuDroid.Game.UI.Assets;
 
 public static partial class DroidAssets
@@ -10,12 +11,24 @@ public static partial class DroidAssets
         Welcome,
     };
 
-    public static UiAssetManifest StartupManifest { get; } = new(s_assetCatalog.Where(entry => s_startupAssetNames.Contains(entry.LogicalName)));
+    public static UiAssetManifest StartupManifest { get; } =
+        new(s_assetCatalog.Where(entry => s_startupAssetNames.Contains(entry.LogicalName)));
 
     public static UiAssetManifest MainMenuManifest { get; } = new(s_assetCatalog);
 
-    private static UiAssetEntry Texture(string logicalName, string packagePath, float width, float height) =>
-        new(logicalName, ToContentName(packagePath), UiAssetKind.Texture, UiAssetProvenance.OsuDroid, new UiSize(width, height));
+    private static UiAssetEntry Texture(
+        string logicalName,
+        string packagePath,
+        float width,
+        float height
+    ) =>
+        new(
+            logicalName,
+            ToContentName(packagePath),
+            UiAssetKind.Texture,
+            UiAssetProvenance.OsuDroid,
+            new UiSize(width, height)
+        );
 
     private static string ToContentName(string packagePath)
     {

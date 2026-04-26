@@ -14,25 +14,15 @@ public sealed partial class OptionsSceneTests
 
         public BeatmapPreviewPlaybackSnapshot PlaybackSnapshot { get; } = new();
 
-        public void Play(string audioPath, int previewTimeMilliseconds)
-        {
-        }
+        public void Play(string audioPath, int previewTimeMilliseconds) { }
 
-        public void Play(Uri previewUri)
-        {
-        }
+        public void Play(Uri previewUri) { }
 
-        public void PausePreview()
-        {
-        }
+        public void PausePreview() { }
 
-        public void ResumePreview()
-        {
-        }
+        public void ResumePreview() { }
 
-        public void StopPreview()
-        {
-        }
+        public void StopPreview() { }
 
         public void SetVolume(float normalizedVolume) => Volume = normalizedVolume;
 
@@ -43,9 +33,7 @@ public sealed partial class OptionsSceneTests
     {
         public float Volume { get; private set; } = 1f;
 
-        public void Play(string key)
-        {
-        }
+        public void Play(string key) { }
 
         public void SetVolume(float normalizedVolume) => Volume = normalizedVolume;
     }

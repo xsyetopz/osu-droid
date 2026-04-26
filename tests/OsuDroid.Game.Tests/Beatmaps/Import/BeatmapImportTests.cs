@@ -87,7 +87,8 @@ public sealed partial class BeatmapImportTests
         var metadata = new BeatmapOnlineMetadata(
             123,
             BeatmapRankedStatus.Ranked,
-            [new BeatmapOnlineDifficultyMetadata(456, "Hard", 3.96f)]);
+            [new BeatmapOnlineDifficultyMetadata(456, "Hard", 3.96f)]
+        );
 
         BeatmapImportResult importResult = importer.ImportOsz(archive, onlineMetadata: metadata);
         BeatmapInfo beatmap = repository.LoadLibrary().Sets.Single().Beatmaps.Single();
@@ -109,22 +110,37 @@ public sealed partial class BeatmapImportTests
         var importer = new BeatmapImportService(roots, library);
         string archive = Path.Combine(roots.Downloads, "123 Artist - Title.osz");
         Directory.CreateDirectory(roots.Downloads);
-        CreateOsz(archive, new Dictionary<string, string>
-        {
-            ["standard.osu"] = SampleOsu(mode: 0, version: "Standard"),
-            ["taiko.osu"] = SampleOsu(mode: 1, version: "Taiko"),
-            ["catch.osu"] = SampleOsu(mode: 2, version: "Catch"),
-            ["mania.osu"] = SampleOsu(mode: 3, version: "Mania"),
-        });
+        CreateOsz(
+            archive,
+            new Dictionary<string, string>
+            {
+                ["standard.osu"] = SampleOsu(mode: 0, version: "Standard"),
+                ["taiko.osu"] = SampleOsu(mode: 1, version: "Taiko"),
+                ["catch.osu"] = SampleOsu(mode: 2, version: "Catch"),
+                ["mania.osu"] = SampleOsu(mode: 3, version: "Mania"),
+            }
+        );
 
         BeatmapImportResult importResult = importer.ImportOsz(archive);
         BeatmapLibrarySnapshot snapshot = repository.LoadLibrary();
 
         Assert.That(importResult.IsSuccess, Is.True);
-        Assert.That(File.Exists(Path.Combine(roots.Songs, "123 Artist - Title", "standard.osu")), Is.True);
-        Assert.That(File.Exists(Path.Combine(roots.Songs, "123 Artist - Title", "taiko.osu")), Is.True);
-        Assert.That(File.Exists(Path.Combine(roots.Songs, "123 Artist - Title", "catch.osu")), Is.True);
-        Assert.That(File.Exists(Path.Combine(roots.Songs, "123 Artist - Title", "mania.osu")), Is.True);
+        Assert.That(
+            File.Exists(Path.Combine(roots.Songs, "123 Artist - Title", "standard.osu")),
+            Is.True
+        );
+        Assert.That(
+            File.Exists(Path.Combine(roots.Songs, "123 Artist - Title", "taiko.osu")),
+            Is.True
+        );
+        Assert.That(
+            File.Exists(Path.Combine(roots.Songs, "123 Artist - Title", "catch.osu")),
+            Is.True
+        );
+        Assert.That(
+            File.Exists(Path.Combine(roots.Songs, "123 Artist - Title", "mania.osu")),
+            Is.True
+        );
         Assert.That(snapshot.Sets, Has.Count.EqualTo(1));
         Assert.That(snapshot.Sets[0].Beatmaps, Has.Count.EqualTo(1));
         Assert.That(snapshot.Sets[0].Beatmaps[0].Version, Is.EqualTo("Standard"));
@@ -141,20 +157,32 @@ public sealed partial class BeatmapImportTests
         var importer = new BeatmapImportService(roots, library);
         string archive = Path.Combine(roots.Downloads, "123 Artist - Title.osz");
         Directory.CreateDirectory(roots.Downloads);
-        CreateOsz(archive, new Dictionary<string, string>
-        {
-            ["taiko.osu"] = SampleOsu(mode: 1, version: "Taiko"),
-            ["catch.osu"] = SampleOsu(mode: 2, version: "Catch"),
-            ["mania.osu"] = SampleOsu(mode: 3, version: "Mania"),
-        });
+        CreateOsz(
+            archive,
+            new Dictionary<string, string>
+            {
+                ["taiko.osu"] = SampleOsu(mode: 1, version: "Taiko"),
+                ["catch.osu"] = SampleOsu(mode: 2, version: "Catch"),
+                ["mania.osu"] = SampleOsu(mode: 3, version: "Mania"),
+            }
+        );
 
         BeatmapImportResult importResult = importer.ImportOsz(archive);
         BeatmapLibrarySnapshot snapshot = repository.LoadLibrary();
 
         Assert.That(importResult.IsSuccess, Is.True);
-        Assert.That(File.Exists(Path.Combine(roots.Songs, "123 Artist - Title", "taiko.osu")), Is.True);
-        Assert.That(File.Exists(Path.Combine(roots.Songs, "123 Artist - Title", "catch.osu")), Is.True);
-        Assert.That(File.Exists(Path.Combine(roots.Songs, "123 Artist - Title", "mania.osu")), Is.True);
+        Assert.That(
+            File.Exists(Path.Combine(roots.Songs, "123 Artist - Title", "taiko.osu")),
+            Is.True
+        );
+        Assert.That(
+            File.Exists(Path.Combine(roots.Songs, "123 Artist - Title", "catch.osu")),
+            Is.True
+        );
+        Assert.That(
+            File.Exists(Path.Combine(roots.Songs, "123 Artist - Title", "mania.osu")),
+            Is.True
+        );
         Assert.That(snapshot.Sets, Is.Empty);
     }
 
@@ -188,7 +216,10 @@ public sealed partial class BeatmapImportTests
         Assert.That(File.Exists(standardFile), Is.True);
         Assert.That(File.Exists(taikoFile), Is.True);
         Assert.That(snapshot.Sets, Has.Count.EqualTo(1));
-        Assert.That(snapshot.Sets[0].Beatmaps.Select(beatmap => beatmap.Version), Is.EqualTo(new[] { "Standard" }));
+        Assert.That(
+            snapshot.Sets[0].Beatmaps.Select(beatmap => beatmap.Version),
+            Is.EqualTo(new[] { "Standard" })
+        );
     }
 
     [Test]
@@ -220,8 +251,9 @@ public sealed partial class BeatmapImportTests
 
         Assert.That(File.Exists(taikoFile), Is.True);
         Assert.That(snapshot.Sets, Has.Count.EqualTo(1));
-        Assert.That(snapshot.Sets[0].Beatmaps.Select(beatmap => beatmap.Version), Is.EqualTo(new[] { "Standard" }));
+        Assert.That(
+            snapshot.Sets[0].Beatmaps.Select(beatmap => beatmap.Version),
+            Is.EqualTo(new[] { "Standard" })
+        );
     }
-
-
 }

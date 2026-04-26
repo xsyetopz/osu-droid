@@ -12,6 +12,7 @@ public sealed class App : Application
         this.services = services;
     }
 
-    protected override Window CreateWindow(IActivationState? activationState) => new(new MainPage(services));
+    protected override Window CreateWindow(IActivationState? activationState) =>
+        new(new MainPage(services));
 }
 #endif

@@ -80,17 +80,27 @@ internal static class BassAudioEngine
         {
             NativeLibrary.SetDllImportResolver(assembly, ResolveNativeLibrary);
         }
-        catch (InvalidOperationException)
-        {
-        }
+        catch (InvalidOperationException) { }
     }
 
-    private static IntPtr ResolveNativeLibrary(string libraryName, System.Reflection.Assembly assembly, DllImportSearchPath? searchPath)
+    private static IntPtr ResolveNativeLibrary(
+        string libraryName,
+        System.Reflection.Assembly assembly,
+        DllImportSearchPath? searchPath
+    )
     {
 #if IOS
-        if (libraryName.Equals("bass", StringComparison.OrdinalIgnoreCase) && NativeLibrary.TryLoad("@rpath/bass.framework/bass", out var bass))
+        if (
+            libraryName.Equals("bass", StringComparison.OrdinalIgnoreCase)
+            && NativeLibrary.TryLoad("@rpath/bass.framework/bass", out var bass)
+        )
             return bass;
-        if ((libraryName.Equals("bass_fx", StringComparison.OrdinalIgnoreCase) || libraryName.Equals("bassfx", StringComparison.OrdinalIgnoreCase)) && NativeLibrary.TryLoad("@rpath/bass_fx.framework/bass_fx", out var bassFx))
+        if (
+            (
+                libraryName.Equals("bass_fx", StringComparison.OrdinalIgnoreCase)
+                || libraryName.Equals("bassfx", StringComparison.OrdinalIgnoreCase)
+            ) && NativeLibrary.TryLoad("@rpath/bass_fx.framework/bass_fx", out var bassFx)
+        )
             return bassFx;
 
         if (TryLoadFrameworkBinary(libraryName, "bass", out bass))
@@ -102,12 +112,25 @@ internal static class BassAudioEngine
     }
 
 #if IOS
-    private static bool TryLoadFrameworkBinary(string libraryName, string frameworkName, out IntPtr handle)
+    private static bool TryLoadFrameworkBinary(
+        string libraryName,
+        string frameworkName,
+        out IntPtr handle
+    )
     {
         handle = IntPtr.Zero;
-        var normalizedLibraryName = libraryName.Replace("-", "_", StringComparison.OrdinalIgnoreCase);
-        if (!normalizedLibraryName.Equals(frameworkName, StringComparison.OrdinalIgnoreCase) &&
-            !normalizedLibraryName.Equals(frameworkName.Replace("_", string.Empty, StringComparison.OrdinalIgnoreCase), StringComparison.OrdinalIgnoreCase))
+        var normalizedLibraryName = libraryName.Replace(
+            "-",
+            "_",
+            StringComparison.OrdinalIgnoreCase
+        );
+        if (
+            !normalizedLibraryName.Equals(frameworkName, StringComparison.OrdinalIgnoreCase)
+            && !normalizedLibraryName.Equals(
+                frameworkName.Replace("_", string.Empty, StringComparison.OrdinalIgnoreCase),
+                StringComparison.OrdinalIgnoreCase
+            )
+        )
             return false;
 
         foreach (var path in GetFrameworkProbePaths(frameworkName))
@@ -123,9 +146,22 @@ internal static class BassAudioEngine
     {
         var binaryName = frameworkName;
         if (!string.IsNullOrWhiteSpace(NSBundle.MainBundle.PrivateFrameworksPath))
-            yield return Path.Combine(NSBundle.MainBundle.PrivateFrameworksPath, $"{frameworkName}.framework", binaryName);
-        yield return Path.Combine(NSBundle.MainBundle.BundlePath, "Frameworks", $"{frameworkName}.framework", binaryName);
-        yield return Path.Combine(NSBundle.MainBundle.BundlePath, $"{frameworkName}.framework", binaryName);
+            yield return Path.Combine(
+                NSBundle.MainBundle.PrivateFrameworksPath,
+                $"{frameworkName}.framework",
+                binaryName
+            );
+        yield return Path.Combine(
+            NSBundle.MainBundle.BundlePath,
+            "Frameworks",
+            $"{frameworkName}.framework",
+            binaryName
+        );
+        yield return Path.Combine(
+            NSBundle.MainBundle.BundlePath,
+            $"{frameworkName}.framework",
+            binaryName
+        );
     }
 #endif
 
@@ -136,12 +172,20 @@ internal static class BassAudioEngine
         {
             var session = AVAudioSession.SharedInstance();
             NSError? error;
-            session.SetCategory(AVAudioSessionCategory.Playback, AVAudioSessionCategoryOptions.DefaultToSpeaker, out error);
+            session.SetCategory(
+                AVAudioSessionCategory.Playback,
+                AVAudioSessionCategoryOptions.DefaultToSpeaker,
+                out error
+            );
             if (error is not null)
-                Console.Error.WriteLine($"[osu-droid] AVAudioSession SetCategory failed: {error.LocalizedDescription}");
+                Console.Error.WriteLine(
+                    $"[osu-droid] AVAudioSession SetCategory failed: {error.LocalizedDescription}"
+                );
             session.SetActive(true, out error);
             if (error is not null)
-                Console.Error.WriteLine($"[osu-droid] AVAudioSession SetActive failed: {error.LocalizedDescription}");
+                Console.Error.WriteLine(
+                    $"[osu-droid] AVAudioSession SetActive failed: {error.LocalizedDescription}"
+                );
         }
         catch (Exception ex)
         {

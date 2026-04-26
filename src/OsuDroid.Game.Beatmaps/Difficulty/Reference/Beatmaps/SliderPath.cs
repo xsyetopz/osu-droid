@@ -10,7 +10,8 @@ internal sealed class SliderPath
         SliderPathType pathType,
         IReadOnlyList<ReferenceVector2> controlPoints,
         double expectedDistance,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         PathType = pathType;
         ControlPoints = controlPoints;
@@ -35,15 +36,20 @@ internal sealed class SliderPath
         return InterpolateVertices(IndexOfDistance(distance), distance);
     }
 
-    public List<ReferenceVector2> GetPathToProgress(double startProgress, double endProgress, CancellationToken cancellationToken = default)
+    public List<ReferenceVector2> GetPathToProgress(
+        double startProgress,
+        double endProgress,
+        CancellationToken cancellationToken = default
+    )
     {
         double startDistance = ProgressToDistance(startProgress);
         double endDistance = ProgressToDistance(endProgress);
         int startEstimate = IndexOfDistance(startDistance);
         int endEstimate = IndexOfDistance(endDistance);
-        int estimatedSize = endEstimate >= startEstimate
-            ? endEstimate - startEstimate + 3
-            : startEstimate - endEstimate + 3;
+        int estimatedSize =
+            endEstimate >= startEstimate
+                ? endEstimate - startEstimate + 3
+                : startEstimate - endEstimate + 3;
 
         var path = new List<ReferenceVector2>(estimatedSize);
         int index = 0;
@@ -82,10 +88,16 @@ internal sealed class SliderPath
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (index == ControlPoints.Count - 1 || ControlPoints[index] == ControlPoints[index + 1])
+            if (
+                index == ControlPoints.Count - 1
+                || ControlPoints[index] == ControlPoints[index + 1]
+            )
             {
                 int spanEnd = index + 1;
-                IReadOnlyList<ReferenceVector2> span = ControlPoints.Skip(spanStart).Take(spanEnd - spanStart).ToArray();
+                IReadOnlyList<ReferenceVector2> span = ControlPoints
+                    .Skip(spanStart)
+                    .Take(spanEnd - spanStart)
+                    .ToArray();
                 foreach (ReferenceVector2 point in CalculateSubPath(span, cancellationToken))
                 {
                     if (CalculatedPath.Count == 0 || CalculatedPath[^1] != point)
@@ -117,9 +129,11 @@ internal sealed class SliderPath
             return;
         }
 
-        if (ControlPoints.Count >= 2 &&
-            ControlPoints[^1] == ControlPoints[^2] &&
-            ExpectedDistance > calculatedLength)
+        if (
+            ControlPoints.Count >= 2
+            && ControlPoints[^1] == ControlPoints[^2]
+            && ExpectedDistance > calculatedLength
+        )
         {
             return;
         }
@@ -151,23 +165,38 @@ internal sealed class SliderPath
 
         CalculatedPath[pathEndIndex] = new ReferenceVector2(
             previousPoint.X + (endPoint.X - previousPoint.X) * inverseLength * extension,
-            previousPoint.Y + (endPoint.Y - previousPoint.Y) * inverseLength * extension);
+            previousPoint.Y + (endPoint.Y - previousPoint.Y) * inverseLength * extension
+        );
 
         CumulativeLength.Add(ExpectedDistance);
     }
 
-    private IReadOnlyList<ReferenceVector2> CalculateSubPath(IReadOnlyList<ReferenceVector2> controlPoints, CancellationToken cancellationToken) =>
+    private IReadOnlyList<ReferenceVector2> CalculateSubPath(
+        IReadOnlyList<ReferenceVector2> controlPoints,
+        CancellationToken cancellationToken
+    ) =>
         PathType switch
         {
             SliderPathType.Linear => PathApproximation.ApproximateLinear(controlPoints),
-            SliderPathType.PerfectCurve when controlPoints.Count == 3 => PathApproximation.ApproximateCircularArc(controlPoints, cancellationToken),
-            SliderPathType.PerfectCurve => PathApproximation.ApproximateBezier(controlPoints, cancellationToken),
-            SliderPathType.Catmull => PathApproximation.ApproximateCatmull(controlPoints, cancellationToken),
-            SliderPathType.Bezier => PathApproximation.ApproximateBezier(controlPoints, cancellationToken),
+            SliderPathType.PerfectCurve when controlPoints.Count == 3 =>
+                PathApproximation.ApproximateCircularArc(controlPoints, cancellationToken),
+            SliderPathType.PerfectCurve => PathApproximation.ApproximateBezier(
+                controlPoints,
+                cancellationToken
+            ),
+            SliderPathType.Catmull => PathApproximation.ApproximateCatmull(
+                controlPoints,
+                cancellationToken
+            ),
+            SliderPathType.Bezier => PathApproximation.ApproximateBezier(
+                controlPoints,
+                cancellationToken
+            ),
             _ => PathApproximation.ApproximateBezier(controlPoints, cancellationToken),
         };
 
-    private double ProgressToDistance(double progress) => System.Math.Clamp(progress, 0, 1) * ExpectedDistance;
+    private double ProgressToDistance(double progress) =>
+        System.Math.Clamp(progress, 0, 1) * ExpectedDistance;
 
     private ReferenceVector2 InterpolateVertices(int index, double distance)
     {
@@ -199,7 +228,8 @@ internal sealed class SliderPath
         float t = (float)((distance - distance0) / (distance1 - distance0));
         return new ReferenceVector2(
             point0.X + (point1.X - point0.X) * t,
-            point0.Y + (point1.Y - point0.Y) * t);
+            point0.Y + (point1.Y - point0.Y) * t
+        );
     }
 
     private int IndexOfDistance(double distance)

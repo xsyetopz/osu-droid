@@ -6,8 +6,8 @@ public sealed class ReferenceModDifficultyAdjust(
     float? circleSize = null,
     float? approachRate = null,
     float? overallDifficulty = null,
-    float? healthDrainRate = null)
-    : ReferenceMod, IReferenceModApplicableToDifficultyWithMods
+    float? healthDrainRate = null
+) : ReferenceMod, IReferenceModApplicableToDifficultyWithMods
 {
     private float? _defaultCircleSize;
     private float? _defaultOverallDifficulty;
@@ -23,7 +23,10 @@ public sealed class ReferenceModDifficultyAdjust(
     public override bool RequiresConfiguration => true;
 
     public override bool IsRelevant =>
-        CircleSize.HasValue || ApproachRate.HasValue || OverallDifficulty.HasValue || HealthDrainRate.HasValue;
+        CircleSize.HasValue
+        || ApproachRate.HasValue
+        || OverallDifficulty.HasValue
+        || HealthDrainRate.HasValue;
 
     public override float ScoreMultiplier
     {
@@ -34,17 +37,19 @@ public sealed class ReferenceModDifficultyAdjust(
             if (CircleSize is { } cs && _defaultCircleSize is { } defaultCs)
             {
                 float diff = cs - defaultCs;
-                multiplier *= diff >= 0f
-                    ? 1f + 0.0075f * (float)System.Math.Pow(diff, 1.5)
-                    : 2f / (1f + (float)System.Math.Exp(-0.5f * diff));
+                multiplier *=
+                    diff >= 0f
+                        ? 1f + 0.0075f * (float)System.Math.Pow(diff, 1.5)
+                        : 2f / (1f + (float)System.Math.Exp(-0.5f * diff));
             }
 
             if (OverallDifficulty is { } od && _defaultOverallDifficulty is { } defaultOd)
             {
                 float diff = od - defaultOd;
-                multiplier *= diff >= 0f
-                    ? 1f + 0.005f * (float)System.Math.Pow(diff, 1.3)
-                    : 2f / (1f + (float)System.Math.Exp(-0.25f * diff));
+                multiplier *=
+                    diff >= 0f
+                        ? 1f + 0.005f * (float)System.Math.Pow(diff, 1.3)
+                        : 2f / (1f + (float)System.Math.Exp(-0.25f * diff));
             }
 
             return multiplier;
@@ -57,7 +62,11 @@ public sealed class ReferenceModDifficultyAdjust(
         _defaultOverallDifficulty = difficulty.OverallDifficulty;
     }
 
-    public void ApplyToDifficulty(GameMode mode, ReferenceBeatmapDifficulty difficulty, IEnumerable<ReferenceMod> mods)
+    public void ApplyToDifficulty(
+        GameMode mode,
+        ReferenceBeatmapDifficulty difficulty,
+        IEnumerable<ReferenceMod> mods
+    )
     {
         difficulty.DifficultyCircleSize = CircleSize ?? difficulty.DifficultyCircleSize;
         difficulty.GameplayCircleSize = CircleSize ?? difficulty.GameplayCircleSize;
@@ -71,14 +80,20 @@ public sealed class ReferenceModDifficultyAdjust(
                 ApproachRate.Value,
                 ReferenceDifficultyTiming.PreemptMax,
                 ReferenceDifficultyTiming.PreemptMid,
-                ReferenceDifficultyTiming.PreemptMin);
-            float trackRate = ReferenceModApplicator.CalculateRateWithMods(mods, double.PositiveInfinity);
+                ReferenceDifficultyTiming.PreemptMin
+            );
+            float trackRate = ReferenceModApplicator.CalculateRateWithMods(
+                mods,
+                double.PositiveInfinity
+            );
 
-            difficulty.ApproachRate = (float)ReferenceBeatmapDifficulty.InverseDifficultyRange(
-                preempt * trackRate,
-                ReferenceDifficultyTiming.PreemptMax,
-                ReferenceDifficultyTiming.PreemptMid,
-                ReferenceDifficultyTiming.PreemptMin);
+            difficulty.ApproachRate = (float)
+                ReferenceBeatmapDifficulty.InverseDifficultyRange(
+                    preempt * trackRate,
+                    ReferenceDifficultyTiming.PreemptMax,
+                    ReferenceDifficultyTiming.PreemptMid,
+                    ReferenceDifficultyTiming.PreemptMin
+                );
         }
     }
 }

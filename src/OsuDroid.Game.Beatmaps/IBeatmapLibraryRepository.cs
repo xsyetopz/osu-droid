@@ -12,9 +12,22 @@ public interface IBeatmapLibraryRepository
 
     void ClearBeatmapOptions();
 
-    void UpdateStarRatings(string md5, string setDirectory, string filename, float? droidStarRating, float? standardStarRating);
+    void UpdateStarRatings(
+        string md5,
+        string setDirectory,
+        string filename,
+        float? droidStarRating,
+        float? standardStarRating
+    );
 
-    void UpdateOnlineMetadata(string setDirectory, long beatmapId, string version, int? status, float? droidStarRating, float? standardStarRating);
+    void UpdateOnlineMetadata(
+        string setDirectory,
+        long beatmapId,
+        string version,
+        int? status,
+        float? droidStarRating,
+        float? standardStarRating
+    );
 
     long GetDifficultyMetadata(string key);
 

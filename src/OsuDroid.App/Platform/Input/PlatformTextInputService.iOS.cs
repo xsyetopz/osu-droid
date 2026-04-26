@@ -86,7 +86,8 @@ public sealed partial class PlatformTextInputService
             bounds.X / scale,
             bounds.Y / scale,
             Math.Max(44d, bounds.Width / scale),
-            Math.Max(44d, bounds.Height / scale));
+            Math.Max(44d, bounds.Height / scale)
+        );
     }
 
     private void OnIosEditingChanged(object? sender, EventArgs args) =>
@@ -115,7 +116,9 @@ public sealed partial class PlatformTextInputService
         Log("ios-search-fallback-open");
         try
         {
-            var result = await KeyboardInput.Show(request.Title ?? string.Empty, string.Empty, request.Text, false).ConfigureAwait(false);
+            var result = await KeyboardInput
+                .Show(request.Title ?? string.Empty, string.Empty, request.Text, false)
+                .ConfigureAwait(false);
             RunOnMainThread(() =>
             {
                 if (!ReferenceEquals(activeRequest, request))
@@ -151,16 +154,17 @@ public sealed partial class PlatformTextInputService
             if (KeyboardInput.IsVisible)
                 KeyboardInput.Cancel(string.Empty);
         }
-        catch (Exception)
-        {
-        }
+        catch (Exception) { }
     }
 
     private static UIWindow? FindActiveWindow()
     {
         foreach (var scene in UIApplication.SharedApplication.ConnectedScenes)
         {
-            if (scene is not UIWindowScene windowScene || scene.ActivationState != UISceneActivationState.ForegroundActive)
+            if (
+                scene is not UIWindowScene windowScene
+                || scene.ActivationState != UISceneActivationState.ForegroundActive
+            )
                 continue;
 
             UIWindow? activeWindow = null;

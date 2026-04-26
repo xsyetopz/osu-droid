@@ -12,5 +12,13 @@ public static partial class DroidUiMetrics
     public const float AndroidSidebarRadius = 15f * DpScale;
     public const float ControlColumnWidth = 280f * DpScale;
     public const float ControlGap = 18f * DpScale;
-    public const float InputRowHeight = RowPadding * 2f + RowTitleSize + 4f + 6f * DpScale + RowSummarySize + 4f + InputGap + InputHeight;
+    public const float InputRowHeight =
+        RowPadding * 2f
+        + RowTitleSize
+        + 4f
+        + 6f * DpScale
+        + RowSummarySize
+        + 4f
+        + InputGap
+        + InputHeight;
 }

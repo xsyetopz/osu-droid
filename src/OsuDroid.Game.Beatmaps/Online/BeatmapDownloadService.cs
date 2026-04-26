@@ -7,7 +7,8 @@ namespace OsuDroid.Game.Beatmaps.Online;
 public sealed class BeatmapDownloadService(
     DroidGamePathLayout paths,
     IBeatmapMirrorClient mirrorClient,
-    IBeatmapProcessingService? beatmapProcessingService = null) : IBeatmapDownloadService
+    IBeatmapProcessingService? beatmapProcessingService = null
+) : IBeatmapDownloadService
 {
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly object _stateGate = new();
@@ -38,19 +39,23 @@ public sealed class BeatmapDownloadService(
         {
             activeDownloadCancellation?.Cancel();
         }
-        catch (ObjectDisposedException)
-        {
-        }
+        catch (ObjectDisposedException) { }
     }
 
-    public async Task<BeatmapDownloadResult> DownloadAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken)
+    public async Task<BeatmapDownloadResult> DownloadAsync(
+        BeatmapMirrorSet beatmapSet,
+        bool withVideo,
+        CancellationToken cancellationToken
+    )
     {
         if (!await _gate.WaitAsync(0, cancellationToken).ConfigureAwait(false))
         {
             return BeatmapDownloadResult.Failed("Another beatmap is already downloading.");
         }
 
-        using var linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var linkedCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+            cancellationToken
+        );
         string? downloadPath = null;
         SetActiveDownload(linkedCancellation);
         long sessionId = NextSessionId();
@@ -58,22 +63,55 @@ public sealed class BeatmapDownloadService(
         try
         {
             Directory.CreateDirectory(paths.Downloads);
-            string archiveName = BeatmapImportService.SanitizeArchiveName($"{beatmapSet.Id} {beatmapSet.Artist} - {beatmapSet.Title}{(withVideo ? string.Empty : " [no video]")}");
+            string archiveName = BeatmapImportService.SanitizeArchiveName(
+                $"{beatmapSet.Id} {beatmapSet.Artist} - {beatmapSet.Title}{(withVideo ? string.Empty : " [no video]")}"
+            );
             string destination = Path.Combine(paths.Downloads, archiveName + ".osz");
             downloadPath = destination + ".download";
             TryDeleteFile(downloadPath);
 
-            SetState(new BeatmapDownloadState(beatmapSet.Id, archiveName, new BeatmapDownloadProgress(0, null, BeatmapDownloadPhase.Connecting), IsActive: true, SessionId: sessionId));
-            var progress = new InlineDownloadProgress(downloadProgress => UpdateActiveProgress(sessionId, downloadProgress));
-            await mirrorClient.DownloadAsync(mirrorClient.CreateDownloadUri(beatmapSet.Mirror, beatmapSet.Id, withVideo), downloadPath, progress, linkedCancellation.Token).ConfigureAwait(false);
+            SetState(
+                new BeatmapDownloadState(
+                    beatmapSet.Id,
+                    archiveName,
+                    new BeatmapDownloadProgress(0, null, BeatmapDownloadPhase.Connecting),
+                    IsActive: true,
+                    SessionId: sessionId
+                )
+            );
+            var progress = new InlineDownloadProgress(downloadProgress =>
+                UpdateActiveProgress(sessionId, downloadProgress)
+            );
+            await mirrorClient
+                .DownloadAsync(
+                    mirrorClient.CreateDownloadUri(beatmapSet.Mirror, beatmapSet.Id, withVideo),
+                    downloadPath,
+                    progress,
+                    linkedCancellation.Token
+                )
+                .ConfigureAwait(false);
             if (!IsValidOsz(downloadPath))
             {
                 TryDeleteFile(downloadPath);
-                SetTerminalState(sessionId, new BeatmapDownloadState(ErrorMessage: "Downloaded beatmap archive is invalid.", SessionId: sessionId));
+                SetTerminalState(
+                    sessionId,
+                    new BeatmapDownloadState(
+                        ErrorMessage: "Downloaded beatmap archive is invalid.",
+                        SessionId: sessionId
+                    )
+                );
                 return BeatmapDownloadResult.Failed("Downloaded beatmap archive is invalid.");
             }
 
-            SetState(new BeatmapDownloadState(beatmapSet.Id, archiveName, new BeatmapDownloadProgress(0, null, BeatmapDownloadPhase.Importing), IsActive: true, SessionId: sessionId));
+            SetState(
+                new BeatmapDownloadState(
+                    beatmapSet.Id,
+                    archiveName,
+                    new BeatmapDownloadProgress(0, null, BeatmapDownloadPhase.Importing),
+                    IsActive: true,
+                    SessionId: sessionId
+                )
+            );
             File.Move(downloadPath, destination, overwrite: true);
             beatmapProcessingService?.EnqueueArchive(destination, CreateOnlineMetadata(beatmapSet));
             SetTerminalState(sessionId, new BeatmapDownloadState(SessionId: sessionId));
@@ -82,13 +120,19 @@ public sealed class BeatmapDownloadService(
         catch (OperationCanceledException)
         {
             TryDeleteFile(downloadPath);
-            SetTerminalState(sessionId, new BeatmapDownloadState(ErrorMessage: "Download canceled.", SessionId: sessionId));
+            SetTerminalState(
+                sessionId,
+                new BeatmapDownloadState(ErrorMessage: "Download canceled.", SessionId: sessionId)
+            );
             return BeatmapDownloadResult.Failed("Download canceled.");
         }
         catch (Exception exception)
         {
             TryDeleteFile(downloadPath);
-            SetTerminalState(sessionId, new BeatmapDownloadState(ErrorMessage: exception.Message, SessionId: sessionId));
+            SetTerminalState(
+                sessionId,
+                new BeatmapDownloadState(ErrorMessage: exception.Message, SessionId: sessionId)
+            );
             return BeatmapDownloadResult.Failed(exception.Message);
         }
         finally
@@ -144,20 +188,28 @@ public sealed class BeatmapDownloadService(
         }
     }
 
-    private static BeatmapOnlineMetadata CreateOnlineMetadata(BeatmapMirrorSet beatmapSet) => new(
-        beatmapSet.Id,
-        beatmapSet.Status,
-        beatmapSet.Beatmaps
-            .Where(beatmap => beatmap.Mode == 0 && beatmap.StarRating > 0)
-            .Select(beatmap => new BeatmapOnlineDifficultyMetadata(beatmap.Id, beatmap.Version, beatmap.StarRating))
-            .ToArray());
+    private static BeatmapOnlineMetadata CreateOnlineMetadata(BeatmapMirrorSet beatmapSet) =>
+        new(
+            beatmapSet.Id,
+            beatmapSet.Status,
+            beatmapSet
+                .Beatmaps.Where(beatmap => beatmap.Mode == 0 && beatmap.StarRating > 0)
+                .Select(beatmap => new BeatmapOnlineDifficultyMetadata(
+                    beatmap.Id,
+                    beatmap.Version,
+                    beatmap.StarRating
+                ))
+                .ToArray()
+        );
 
     private static bool IsValidOsz(string archivePath)
     {
         try
         {
             using ZipArchive archive = ZipFile.OpenRead(archivePath);
-            return archive.Entries.Any(entry => entry.FullName.EndsWith(".osu", StringComparison.OrdinalIgnoreCase));
+            return archive.Entries.Any(entry =>
+                entry.FullName.EndsWith(".osu", StringComparison.OrdinalIgnoreCase)
+            );
         }
         catch (Exception)
         {
@@ -179,12 +231,11 @@ public sealed class BeatmapDownloadService(
                 File.Delete(path);
             }
         }
-        catch (Exception)
-        {
-        }
+        catch (Exception) { }
     }
 
-    private sealed class InlineDownloadProgress(Action<BeatmapDownloadProgress> report) : IProgress<BeatmapDownloadProgress>
+    private sealed class InlineDownloadProgress(Action<BeatmapDownloadProgress> report)
+        : IProgress<BeatmapDownloadProgress>
     {
         public void Report(BeatmapDownloadProgress progress) => report(progress);
     }

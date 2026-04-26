@@ -19,9 +19,15 @@ public sealed class DroidGamePathLayoutTests
         Assert.That(layout.Songs, Is.EqualTo(Path.Combine(Path.GetFullPath(root), "Songs")));
         Assert.That(layout.Skin, Is.EqualTo(Path.Combine(Path.GetFullPath(root), "Skin")));
         Assert.That(layout.Scores, Is.EqualTo(Path.Combine(Path.GetFullPath(root), "Scores")));
-        Assert.That(layout.Databases, Is.EqualTo(Path.Combine(Path.GetFullPath(root), "databases")));
+        Assert.That(
+            layout.Databases,
+            Is.EqualTo(Path.Combine(Path.GetFullPath(root), "databases"))
+        );
         Assert.That(layout.Log, Is.EqualTo(Path.Combine(Path.GetFullPath(root), "Log")));
-        Assert.That(layout.Downloads, Is.EqualTo(Path.Combine(Path.GetFullPath(cache), "Downloads")));
+        Assert.That(
+            layout.Downloads,
+            Is.EqualTo(Path.Combine(Path.GetFullPath(cache), "Downloads"))
+        );
         Assert.That(layout.NoMedia, Is.EqualTo(Path.Combine(Path.GetFullPath(root), ".nomedia")));
     }
 
@@ -37,8 +43,14 @@ public sealed class DroidGamePathLayoutTests
     [Test]
     public void EnsureDirectoriesCreatesAndroidCompatibleRoots()
     {
-        string root = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"layout-create-{Guid.NewGuid():N}");
-        string cache = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"layout-cache-{Guid.NewGuid():N}");
+        string root = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"layout-create-{Guid.NewGuid():N}"
+        );
+        string cache = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"layout-cache-{Guid.NewGuid():N}"
+        );
         var layout = new DroidGamePathLayout(new DroidPathRoots(root, cache));
 
         layout.EnsureDirectories();
@@ -59,7 +71,10 @@ public sealed class DroidGamePathLayoutTests
     [Test]
     public void AppDataRootsUseOsuDroidDirectoryNameAndMigrateOldName()
     {
-        string parent = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"path-roots-{Guid.NewGuid():N}");
+        string parent = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"path-roots-{Guid.NewGuid():N}"
+        );
         string oldRoot = Path.Combine(parent, DroidPathRoots.HyphenatedCoreDirectoryName);
         string cache = Path.Combine(parent, "Caches");
         Directory.CreateDirectory(oldRoot);
@@ -67,7 +82,10 @@ public sealed class DroidGamePathLayoutTests
 
         var roots = DroidPathRoots.FromAppDataDirectory(parent, cache);
 
-        Assert.That(roots.CoreRoot, Is.EqualTo(Path.Combine(parent, DroidPathRoots.CoreDirectoryName)));
+        Assert.That(
+            roots.CoreRoot,
+            Is.EqualTo(Path.Combine(parent, DroidPathRoots.CoreDirectoryName))
+        );
         Assert.That(Directory.Exists(oldRoot), Is.False);
         Assert.That(File.Exists(Path.Combine(roots.CoreRoot, "marker.txt")), Is.True);
 

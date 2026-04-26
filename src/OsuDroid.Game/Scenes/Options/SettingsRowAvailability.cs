@@ -5,4 +5,3 @@ internal enum SettingsRowAvailability
     Implemented,
     Locked,
 }
-

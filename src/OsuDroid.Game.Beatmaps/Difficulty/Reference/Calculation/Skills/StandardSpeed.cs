@@ -20,15 +20,19 @@ internal sealed class StandardSpeed(IEnumerable<Mod> mods) : StandardStrainSkill
     {
         return ObjectStrains.Count == 0 || maxStrain == 0d
             ? 0d
-            : ObjectStrains.Sum(strain => 1d / (1 + System.Math.Exp(-(strain / maxStrain * 12 - 6))));
+            : ObjectStrains.Sum(strain =>
+                1d / (1 + System.Math.Exp(-(strain / maxStrain * 12 - 6)))
+            );
     }
 
-    public double CountTopWeightedSliders() => StrainUtils.CountTopWeightedSliders(sliderStrains, difficulty);
+    public double CountTopWeightedSliders() =>
+        StrainUtils.CountTopWeightedSliders(sliderStrains, difficulty);
 
     protected override double StrainValueAt(StandardDifficultyHitObject current)
     {
         currentStrain *= StrainDecay(current.StrainTime);
-        currentStrain += StandardSpeedEvaluator.EvaluateDifficultyOf(current, Mods) * SkillMultiplier;
+        currentStrain +=
+            StandardSpeedEvaluator.EvaluateDifficultyOf(current, Mods) * SkillMultiplier;
         currentRhythm = StandardRhythmEvaluator.EvaluateDifficultyOf(current);
         double totalStrain = currentStrain * currentRhythm;
 
@@ -43,8 +47,10 @@ internal sealed class StandardSpeed(IEnumerable<Mod> mods) : StandardStrainSkill
         return totalStrain;
     }
 
-    protected override double CalculateInitialStrain(double time, StandardDifficultyHitObject current) =>
-        currentStrain * currentRhythm * StrainDecay(time - current.Previous(0)!.StartTime);
+    protected override double CalculateInitialStrain(
+        double time,
+        StandardDifficultyHitObject current
+    ) => currentStrain * currentRhythm * StrainDecay(time - current.Previous(0)!.StartTime);
 
     private static double StrainDecay(double ms) => System.Math.Pow(StrainDecayBase, ms / 1000d);
 }

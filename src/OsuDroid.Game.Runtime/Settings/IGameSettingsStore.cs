@@ -14,4 +14,3 @@ public interface IGameSettingsStore
 
     void SetString(string key, string value);
 }
-

@@ -1,5 +1,6 @@
 using OsuDroid.Game.UI.Actions;
 using OsuDroid.Game.UI.Geometry;
+
 namespace OsuDroid.Game.UI.Elements;
 
 public static class UiElementFactory
@@ -13,7 +14,9 @@ public static class UiElementFactory
         float cornerRadius = 0f,
         bool isEnabled = true,
         UiCornerMode cornerMode = UiCornerMode.All,
-        bool clipToBounds = false) => new(
+        bool clipToBounds = false
+    ) =>
+        new(
             id,
             UiElementKind.Fill,
             bounds,
@@ -23,7 +26,8 @@ public static class UiElementFactory
             IsEnabled: isEnabled,
             CornerRadius: cornerRadius,
             CornerMode: cornerMode,
-            ClipToBounds: clipToBounds);
+            ClipToBounds: clipToBounds
+        );
 
     public static UiElementSnapshot Sprite(
         string id,
@@ -37,7 +41,9 @@ public static class UiElementFactory
         float rotationOriginX = 0.5f,
         float rotationOriginY = 0.5f,
         UiSpriteFit spriteFit = UiSpriteFit.Stretch,
-        UiRect? spriteSource = null) => new(
+        UiRect? spriteSource = null
+    ) =>
+        new(
             id,
             UiElementKind.Sprite,
             bounds,
@@ -50,7 +56,8 @@ public static class UiElementFactory
             RotationOriginX: rotationOriginX,
             RotationOriginY: rotationOriginY,
             SpriteFit: spriteFit,
-            SpriteSource: spriteSource);
+            SpriteSource: spriteSource
+        );
 
     public static UiElementSnapshot MaterialIcon(
         string id,
@@ -59,7 +66,9 @@ public static class UiElementFactory
         UiColor color,
         float alpha = 1f,
         UiAction action = UiAction.None,
-        bool isEnabled = true) => new(
+        bool isEnabled = true
+    ) =>
+        new(
             id,
             UiElementKind.MaterialIcon,
             bounds,
@@ -67,7 +76,8 @@ public static class UiElementFactory
             alpha,
             Action: action,
             IsEnabled: isEnabled,
-            MaterialIcon: icon);
+            MaterialIcon: icon
+        );
 
     public static UiElementSnapshot Icon(
         string id,
@@ -76,7 +86,9 @@ public static class UiElementFactory
         UiColor color,
         float alpha = 1f,
         UiAction action = UiAction.None,
-        bool isEnabled = true) => new(
+        bool isEnabled = true
+    ) =>
+        new(
             id,
             UiElementKind.Icon,
             bounds,
@@ -84,7 +96,8 @@ public static class UiElementFactory
             alpha,
             Action: action,
             IsEnabled: isEnabled,
-            Icon: icon);
+            Icon: icon
+        );
 
     public static UiElementSnapshot ProgressRing(
         string id,
@@ -95,7 +108,9 @@ public static class UiElementFactory
         float rotationDegrees = 0f,
         float alpha = 1f,
         UiAction action = UiAction.None,
-        bool isEnabled = true) => new(
+        bool isEnabled = true
+    ) =>
+        new(
             id,
             UiElementKind.ProgressRing,
             bounds,
@@ -104,7 +119,8 @@ public static class UiElementFactory
             Action: action,
             IsEnabled: isEnabled,
             RotationDegrees: rotationDegrees,
-            ProgressRing: new UiProgressRing(strokeWidth, sweepDegrees));
+            ProgressRing: new UiProgressRing(strokeWidth, sweepDegrees)
+        );
 
     public static UiElementSnapshot Text(
         string id,
@@ -120,7 +136,9 @@ public static class UiElementFactory
         UiTextVerticalAlignment verticalAlignment = UiTextVerticalAlignment.Top,
         float alpha = 1f,
         bool clipToBounds = false,
-        UiTextAutoScroll? autoScroll = null) => new(
+        UiTextAutoScroll? autoScroll = null
+    ) =>
+        new(
             id,
             UiElementKind.Text,
             bounds,
@@ -128,7 +146,15 @@ public static class UiElementFactory
             alpha,
             Action: action,
             Text: text,
-            TextStyle: new UiTextStyle(size, bold, alignment, underline, verticalAlignment, autoScroll),
+            TextStyle: new UiTextStyle(
+                size,
+                bold,
+                alignment,
+                underline,
+                verticalAlignment,
+                autoScroll
+            ),
             IsEnabled: isEnabled,
-            ClipToBounds: clipToBounds || autoScroll is not null);
+            ClipToBounds: clipToBounds || autoScroll is not null
+        );
 }

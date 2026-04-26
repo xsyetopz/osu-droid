@@ -18,11 +18,12 @@ public sealed partial class SongSelectSceneTests
     {
         public DifficultyAlgorithm Algorithm => DifficultyAlgorithm.Droid;
 
-        public BeatmapInfo EnsureCalculated(BeatmapInfo beatmap) => beatmap with
-        {
-            DroidStarRating = beatmap.DroidStarRating ?? 6.5f,
-            StandardStarRating = beatmap.StandardStarRating ?? 6.6f,
-        };
+        public BeatmapInfo EnsureCalculated(BeatmapInfo beatmap) =>
+            beatmap with
+            {
+                DroidStarRating = beatmap.DroidStarRating ?? 6.5f,
+                StandardStarRating = beatmap.StandardStarRating ?? 6.6f,
+            };
 
         public DifficultyVersionState EnsureCalculatorVersions() => default;
     }

@@ -7,7 +7,10 @@ public sealed class UiAssetManifest
     public UiAssetManifest(IEnumerable<UiAssetEntry> entries)
     {
         ArgumentNullException.ThrowIfNull(entries);
-        _entriesByName = entries.ToDictionary(static entry => entry.LogicalName, StringComparer.Ordinal);
+        _entriesByName = entries.ToDictionary(
+            static entry => entry.LogicalName,
+            StringComparer.Ordinal
+        );
     }
 
     public IReadOnlyCollection<UiAssetEntry> Entries => _entriesByName.Values;

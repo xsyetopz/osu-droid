@@ -5,7 +5,10 @@ namespace OsuDroid.Game.Beatmaps.Difficulty.Reference.Calculation.Evaluators;
 
 internal static class StandardFlashlightEvaluator
 {
-    public static double EvaluateDifficultyOf(StandardDifficultyHitObject current, IEnumerable<Mod> mods)
+    public static double EvaluateDifficultyOf(
+        StandardDifficultyHitObject current,
+        IEnumerable<Mod> mods
+    )
     {
         if (current.Obj is Spinner)
         {
@@ -26,17 +29,28 @@ internal static class StandardFlashlightEvaluator
 
             if (currentObject.Obj is not Spinner)
             {
-                double jumpDistance = current.Obj.DifficultyStackedPosition.DistanceTo(currentObject.Obj.DifficultyStackedEndPosition);
+                double jumpDistance = current.Obj.DifficultyStackedPosition.DistanceTo(
+                    currentObject.Obj.DifficultyStackedEndPosition
+                );
                 if (i == 0)
                 {
                     smallDistNerf = System.Math.Min(1d, jumpDistance / 75d);
                 }
 
-                double stackNerf = System.Math.Min(1d, currentObject.LazyJumpDistance / scalingFactor / 25d);
-                double opacityBonus = 1 + 0.4 * (1 - current.OpacityAt(currentObject.Obj.StartTime, mods));
-                result += stackNerf * opacityBonus * scalingFactor * jumpDistance / cumulativeStrainTime;
+                double stackNerf = System.Math.Min(
+                    1d,
+                    currentObject.LazyJumpDistance / scalingFactor / 25d
+                );
+                double opacityBonus =
+                    1 + 0.4 * (1 - current.OpacityAt(currentObject.Obj.StartTime, mods));
+                result +=
+                    stackNerf * opacityBonus * scalingFactor * jumpDistance / cumulativeStrainTime;
 
-                if (currentObject.Angle.HasValue && current.Angle.HasValue && System.Math.Abs(currentObject.Angle.Value - current.Angle.Value) < 0.02)
+                if (
+                    currentObject.Angle.HasValue
+                    && current.Angle.HasValue
+                    && System.Math.Abs(currentObject.Angle.Value - current.Angle.Value) < 0.02
+                )
                 {
                     angleRepeatCount += System.Math.Max(0d, 1 - 0.1 * i);
                 }
@@ -58,7 +72,10 @@ internal static class StandardFlashlightEvaluator
         if (current.Obj is Slider slider)
         {
             double pixelTravelDistance = current.LazyTravelDistance / scalingFactor;
-            sliderBonus = System.Math.Pow(System.Math.Max(0d, pixelTravelDistance / current.TravelTime - 0.5), 0.5);
+            sliderBonus = System.Math.Pow(
+                System.Math.Max(0d, pixelTravelDistance / current.TravelTime - 0.5),
+                0.5
+            );
             sliderBonus *= pixelTravelDistance;
             sliderBonus /= slider.RepeatCount + 1;
         }

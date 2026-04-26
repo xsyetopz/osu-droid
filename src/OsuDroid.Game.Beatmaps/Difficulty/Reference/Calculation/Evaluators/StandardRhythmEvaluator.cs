@@ -33,7 +33,10 @@ internal static class StandardRhythmEvaluator
         int rhythmStart = 0;
         int historicalNoteCount = System.Math.Min(current.Index, HistoryObjectsMax);
 
-        while (rhythmStart < historicalNoteCount - 2 && current.StartTime - current.Previous(rhythmStart)!.StartTime < HistoryTimeMax)
+        while (
+            rhythmStart < historicalNoteCount - 2
+            && current.StartTime - current.Previous(rhythmStart)!.StartTime < HistoryTimeMax
+        )
         {
             ++rhythmStart;
         }
@@ -44,7 +47,8 @@ internal static class StandardRhythmEvaluator
         for (int i = rhythmStart; i >= 1; --i)
         {
             DifficultyHitObject currentObject = current.Previous(i - 1)!;
-            double timeDecay = (HistoryTimeMax - (current.StartTime - currentObject.StartTime)) / HistoryTimeMax;
+            double timeDecay =
+                (HistoryTimeMax - (current.StartTime - currentObject.StartTime)) / HistoryTimeMax;
             double noteDecay = (historicalNoteCount - i) / (double)historicalNoteCount;
             double currentHistoricalDecay = System.Math.Min(noteDecay, timeDecay);
 
@@ -52,11 +56,24 @@ internal static class StandardRhythmEvaluator
             double prevDelta = System.Math.Max(1e-7, prevObject.DeltaTime);
             double lastDelta = System.Math.Max(1e-7, lastObject.DeltaTime);
 
-            double deltaDifference = System.Math.Max(prevDelta, currentDelta) / System.Math.Min(prevDelta, currentDelta);
-            double deltaDifferenceFraction = deltaDifference - System.Math.Truncate(deltaDifference);
-            double currentRatio = 1 + RhythmRatioMultiplier * System.Math.Min(0.5, DifficultyCalculationUtils.SmoothstepBellCurve(deltaDifferenceFraction));
+            double deltaDifference =
+                System.Math.Max(prevDelta, currentDelta) / System.Math.Min(prevDelta, currentDelta);
+            double deltaDifferenceFraction =
+                deltaDifference - System.Math.Truncate(deltaDifference);
+            double currentRatio =
+                1
+                + RhythmRatioMultiplier
+                    * System.Math.Min(
+                        0.5,
+                        DifficultyCalculationUtils.SmoothstepBellCurve(deltaDifferenceFraction)
+                    );
             double differenceMultiplier = System.Math.Clamp(2 - deltaDifference / 8, 0, 1);
-            double windowPenalty = System.Math.Clamp((System.Math.Abs(prevDelta - currentDelta) - deltaDifferenceEpsilon) / deltaDifferenceEpsilon, 0, 1);
+            double windowPenalty = System.Math.Clamp(
+                (System.Math.Abs(prevDelta - currentDelta) - deltaDifferenceEpsilon)
+                    / deltaDifferenceEpsilon,
+                0,
+                1
+            );
             double effectiveRatio = windowPenalty * currentRatio * differenceMultiplier;
 
             if (firstDeltaSwitch)
@@ -82,7 +99,10 @@ internal static class StandardRhythmEvaluator
                         effectiveRatio /= 2;
                     }
 
-                    if (lastDelta > prevDelta + deltaDifferenceEpsilon && prevDelta > currentDelta + deltaDifferenceEpsilon)
+                    if (
+                        lastDelta > prevDelta + deltaDifferenceEpsilon
+                        && prevDelta > currentDelta + deltaDifferenceEpsilon
+                    )
                     {
                         effectiveRatio /= 8;
                     }
@@ -109,7 +129,11 @@ internal static class StandardRhythmEvaluator
 
                         effectiveRatio *= System.Math.Min(
                             3d / islandCount,
-                            System.Math.Pow(1d / islandCount, DifficultyCalculationUtils.Logistic(island.Delta, 58.33, 0.24, 2.75)));
+                            System.Math.Pow(
+                                1d / islandCount,
+                                DifficultyCalculationUtils.Logistic(island.Delta, 58.33, 0.24, 2.75)
+                            )
+                        );
                         break;
                     }
 
@@ -119,7 +143,8 @@ internal static class StandardRhythmEvaluator
                     }
 
                     effectiveRatio *= 1 - prevObject.GetDoubletapness(prevObject.Next(0)) * 0.75;
-                    rhythmComplexitySum += System.Math.Sqrt(effectiveRatio * startRatio) * currentHistoricalDecay;
+                    rhythmComplexitySum +=
+                        System.Math.Sqrt(effectiveRatio * startRatio) * currentHistoricalDecay;
                     startRatio = effectiveRatio;
                     previousIsland = island;
 
@@ -152,6 +177,8 @@ internal static class StandardRhythmEvaluator
             prevObject = currentObject;
         }
 
-        return System.Math.Sqrt(4 + rhythmComplexitySum * RhythmOverallMultiplier) / 2 * (1 - current.GetDoubletapness(current.Next(0)));
+        return System.Math.Sqrt(4 + rhythmComplexitySum * RhythmOverallMultiplier)
+            / 2
+            * (1 - current.GetDoubletapness(current.Next(0)));
     }
 }

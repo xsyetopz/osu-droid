@@ -1,4 +1,5 @@
 using OsuDroid.Game.UI.Geometry;
+
 namespace OsuDroid.Game.UI.Assets;
 
 public sealed record UiAssetEntry(
@@ -6,4 +7,5 @@ public sealed record UiAssetEntry(
     string ContentName,
     UiAssetKind Kind,
     UiAssetProvenance Provenance,
-    UiSize NativeSize);
+    UiSize NativeSize
+);

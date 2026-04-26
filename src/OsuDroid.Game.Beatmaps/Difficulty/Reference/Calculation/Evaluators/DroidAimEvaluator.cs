@@ -16,7 +16,9 @@ internal static class DroidAimEvaluator
 
     public static double EvaluateDifficultyOf(DroidDifficultyHitObject current, bool withSliders)
     {
-        return current.Obj is Spinner || current.IsOverlapping(true) ? 0d : SnapAimStrainOf(current, withSliders) + FlowAimStrainOf(current);
+        return current.Obj is Spinner || current.IsOverlapping(true)
+            ? 0d
+            : SnapAimStrainOf(current, withSliders) + FlowAimStrainOf(current);
     }
 
     private static double SnapAimStrainOf(DroidDifficultyHitObject current, bool withSliders)
@@ -62,32 +64,79 @@ internal static class DroidAimEvaluator
             double lastAngle = last.Angle.Value;
             double angleBonus = System.Math.Min(currentVelocity, prevVelocity);
 
-            if (System.Math.Max(current.StrainTime, last.StrainTime) < 1.25 * System.Math.Min(current.StrainTime, last.StrainTime))
+            if (
+                System.Math.Max(current.StrainTime, last.StrainTime)
+                < 1.25 * System.Math.Min(current.StrainTime, last.StrainTime)
+            )
             {
                 acuteAngleBonus = CalculateAcuteAngleBonus(currentAngle);
-                acuteAngleBonus *= 0.08 + 0.92 * (1 - System.Math.Min(acuteAngleBonus, System.Math.Pow(CalculateAcuteAngleBonus(lastAngle), 3)));
                 acuteAngleBonus *=
-                    angleBonus *
-                    DifficultyCalculationUtils.Smootherstep(DifficultyCalculationUtils.MillisecondsToBpm(current.StrainTime, 2), 300, 400) *
-                    DifficultyCalculationUtils.Smootherstep(current.LazyJumpDistance, diameter, diameter * 2d);
+                    0.08
+                    + 0.92
+                        * (
+                            1
+                            - System.Math.Min(
+                                acuteAngleBonus,
+                                System.Math.Pow(CalculateAcuteAngleBonus(lastAngle), 3)
+                            )
+                        );
+                acuteAngleBonus *=
+                    angleBonus
+                    * DifficultyCalculationUtils.Smootherstep(
+                        DifficultyCalculationUtils.MillisecondsToBpm(current.StrainTime, 2),
+                        300,
+                        400
+                    )
+                    * DifficultyCalculationUtils.Smootherstep(
+                        current.LazyJumpDistance,
+                        diameter,
+                        diameter * 2d
+                    );
             }
 
             wideAngleBonus = CalculateWideAngleBonus(currentAngle);
-            wideAngleBonus *= 1 - System.Math.Min(wideAngleBonus, System.Math.Pow(CalculateWideAngleBonus(lastAngle), 3));
-            wideAngleBonus *= angleBonus * DifficultyCalculationUtils.Smootherstep(current.LazyJumpDistance, 0, diameter);
+            wideAngleBonus *=
+                1
+                - System.Math.Min(
+                    wideAngleBonus,
+                    System.Math.Pow(CalculateWideAngleBonus(lastAngle), 3)
+                );
+            wideAngleBonus *=
+                angleBonus
+                * DifficultyCalculationUtils.Smootherstep(current.LazyJumpDistance, 0, diameter);
 
             wiggleBonus =
-                angleBonus *
-                DifficultyCalculationUtils.Smootherstep(current.LazyJumpDistance, radius, diameter) *
-                System.Math.Pow(Interpolation.ReverseLinear(current.LazyJumpDistance, diameter * 3d, diameter), 1.8) *
-                DifficultyCalculationUtils.Smootherstep(currentAngle, DegreesToRadians(110), DegreesToRadians(60)) *
-                DifficultyCalculationUtils.Smootherstep(last.LazyJumpDistance, radius, diameter) *
-                System.Math.Pow(Interpolation.ReverseLinear(last.LazyJumpDistance, diameter * 3d, diameter), 1.8) *
-                DifficultyCalculationUtils.Smootherstep(lastAngle, DegreesToRadians(110), DegreesToRadians(60));
+                angleBonus
+                * DifficultyCalculationUtils.Smootherstep(
+                    current.LazyJumpDistance,
+                    radius,
+                    diameter
+                )
+                * System.Math.Pow(
+                    Interpolation.ReverseLinear(current.LazyJumpDistance, diameter * 3d, diameter),
+                    1.8
+                )
+                * DifficultyCalculationUtils.Smootherstep(
+                    currentAngle,
+                    DegreesToRadians(110),
+                    DegreesToRadians(60)
+                )
+                * DifficultyCalculationUtils.Smootherstep(last.LazyJumpDistance, radius, diameter)
+                * System.Math.Pow(
+                    Interpolation.ReverseLinear(last.LazyJumpDistance, diameter * 3d, diameter),
+                    1.8
+                )
+                * DifficultyCalculationUtils.Smootherstep(
+                    lastAngle,
+                    DegreesToRadians(110),
+                    DegreesToRadians(60)
+                );
 
             if (last2 is not null)
             {
-                float distanceSquared = last2.Obj.DifficultyStackedPosition.DistanceSquaredTo(last.Obj.DifficultyStackedPosition);
+                float distanceSquared = last2.Obj.DifficultyStackedPosition.DistanceSquaredTo(
+                    last.Obj.DifficultyStackedPosition
+                );
                 if (distanceSquared < 1f)
                 {
                     double distance = System.Math.Sqrt(distanceSquared);
@@ -102,13 +151,22 @@ internal static class DroidAimEvaluator
             currentVelocity = (current.LazyJumpDistance + last.TravelDistance) / current.StrainTime;
 
             double distanceRatio = DifficultyCalculationUtils.Smoothstep(
-                System.Math.Abs(prevVelocity - currentVelocity) / System.Math.Max(prevVelocity, currentVelocity),
+                System.Math.Abs(prevVelocity - currentVelocity)
+                    / System.Math.Max(prevVelocity, currentVelocity),
                 0,
-                1);
+                1
+            );
 
-            double overlapVelocityBuff = System.Math.Min(125 / System.Math.Min(current.StrainTime, last.StrainTime), System.Math.Abs(prevVelocity - currentVelocity));
+            double overlapVelocityBuff = System.Math.Min(
+                125 / System.Math.Min(current.StrainTime, last.StrainTime),
+                System.Math.Abs(prevVelocity - currentVelocity)
+            );
             velocityChangeBonus = overlapVelocityBuff * distanceRatio;
-            velocityChangeBonus *= System.Math.Pow(System.Math.Min(current.StrainTime, last.StrainTime) / System.Math.Max(current.StrainTime, last.StrainTime), 2);
+            velocityChangeBonus *= System.Math.Pow(
+                System.Math.Min(current.StrainTime, last.StrainTime)
+                    / System.Math.Max(current.StrainTime, last.StrainTime),
+                2
+            );
         }
 
         if (last.Obj is Slider)
@@ -118,7 +176,10 @@ internal static class DroidAimEvaluator
 
         strain += wiggleBonus * WiggleMultiplier;
         strain += velocityChangeBonus * VelocityChangeMultiplier;
-        strain += System.Math.Max(acuteAngleBonus * AcuteAngleMultiplier, wideAngleBonus * WideAngleMultiplier);
+        strain += System.Math.Max(
+            acuteAngleBonus * AcuteAngleMultiplier,
+            wideAngleBonus * WideAngleMultiplier
+        );
         strain *= current.SmallCircleBonus;
 
         if (withSliders)
@@ -137,9 +198,18 @@ internal static class DroidAimEvaluator
             speedBonus += 0.75 * System.Math.Pow((MinSpeedBonus - current.StrainTime) / 40d, 2);
         }
 
-        double travelDistance = (current.Previous(0) as DroidDifficultyHitObject)?.TravelDistance ?? 0d;
-        double shortDistancePenalty = System.Math.Pow(System.Math.Min(SingleSpacingThreshold, travelDistance + current.MinimumJumpDistance) / SingleSpacingThreshold, 3.5);
-        return 200 * speedBonus * System.Math.Sqrt(current.SmallCircleBonus) * shortDistancePenalty / current.StrainTime;
+        double travelDistance =
+            (current.Previous(0) as DroidDifficultyHitObject)?.TravelDistance ?? 0d;
+        double shortDistancePenalty = System.Math.Pow(
+            System.Math.Min(SingleSpacingThreshold, travelDistance + current.MinimumJumpDistance)
+                / SingleSpacingThreshold,
+            3.5
+        );
+        return 200
+            * speedBonus
+            * System.Math.Sqrt(current.SmallCircleBonus)
+            * shortDistancePenalty
+            / current.StrainTime;
     }
 
     private static double CalculateWideAngleBonus(double angle) =>

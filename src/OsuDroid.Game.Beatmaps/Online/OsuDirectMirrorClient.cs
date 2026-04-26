@@ -17,9 +17,17 @@ public interface IBeatmapMirrorClient
 
     Uri CreatePreviewUri(BeatmapMirrorKind mirror, long beatmapId);
 
-    Task<IReadOnlyList<BeatmapMirrorSet>> SearchAsync(BeatmapMirrorSearchRequest request, CancellationToken cancellationToken);
+    Task<IReadOnlyList<BeatmapMirrorSet>> SearchAsync(
+        BeatmapMirrorSearchRequest request,
+        CancellationToken cancellationToken
+    );
 
-    Task DownloadAsync(Uri source, string destinationPath, IProgress<BeatmapDownloadProgress>? progress, CancellationToken cancellationToken);
+    Task DownloadAsync(
+        Uri source,
+        string destinationPath,
+        IProgress<BeatmapDownloadProgress>? progress,
+        CancellationToken cancellationToken
+    );
 }
 
 public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirrorClient
@@ -35,9 +43,10 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
 
     public Uri CreateSearchUri(BeatmapMirrorSearchRequest request)
     {
-        Uri endpoint = request.Mirror == BeatmapMirrorKind.Catboy
-            ? new Uri(s_catboyBaseUri, "api/v2/search")
-            : new Uri(s_osuDirectBaseUri, "api/v2/search");
+        Uri endpoint =
+            request.Mirror == BeatmapMirrorKind.Catboy
+                ? new Uri(s_catboyBaseUri, "api/v2/search")
+                : new Uri(s_osuDirectBaseUri, "api/v2/search");
 
         var parameters = new Dictionary<string, string?>
         {
@@ -58,17 +67,25 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
 
         if (request.Status is not null)
         {
-            parameters["status"] = ((int)request.Status.Value).ToString(CultureInfo.InvariantCulture);
+            parameters["status"] = ((int)request.Status.Value).ToString(
+                CultureInfo.InvariantCulture
+            );
         }
 
         var builder = new UriBuilder(endpoint)
         {
-            Query = string.Join('&', parameters.Select(pair => $"{Uri.EscapeDataString(pair.Key)}={Uri.EscapeDataString(pair.Value ?? string.Empty)}"))
+            Query = string.Join(
+                '&',
+                parameters.Select(pair =>
+                    $"{Uri.EscapeDataString(pair.Key)}={Uri.EscapeDataString(pair.Value ?? string.Empty)}"
+                )
+            ),
         };
         return builder.Uri;
     }
 
-    public Uri CreateDownloadUri(long beatmapSetId, bool withVideo) => CreateDownloadUri(BeatmapMirrorKind.OsuDirect, beatmapSetId, withVideo);
+    public Uri CreateDownloadUri(long beatmapSetId, bool withVideo) =>
+        CreateDownloadUri(BeatmapMirrorKind.OsuDirect, beatmapSetId, withVideo);
 
     public Uri CreateDownloadUri(BeatmapMirrorKind mirror, long beatmapSetId, bool withVideo)
     {
@@ -81,51 +98,89 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
         return withVideo ? uri : new Uri(uri, "?noVideo=1");
     }
 
-    public Uri CreatePreviewUri(BeatmapMirrorKind mirror, long beatmapId) => mirror == BeatmapMirrorKind.Catboy
-        ? new Uri(s_catboyBaseUri, $"preview/audio/{beatmapId}")
-        : new Uri(s_osuDirectBaseUri, $"api/media/preview/{beatmapId}");
+    public Uri CreatePreviewUri(BeatmapMirrorKind mirror, long beatmapId) =>
+        mirror == BeatmapMirrorKind.Catboy
+            ? new Uri(s_catboyBaseUri, $"preview/audio/{beatmapId}")
+            : new Uri(s_osuDirectBaseUri, $"api/media/preview/{beatmapId}");
 
-    public async Task<IReadOnlyList<BeatmapMirrorSet>> SearchAsync(BeatmapMirrorSearchRequest request, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<BeatmapMirrorSet>> SearchAsync(
+        BeatmapMirrorSearchRequest request,
+        CancellationToken cancellationToken
+    )
     {
         using var message = new HttpRequestMessage(HttpMethod.Get, CreateSearchUri(request));
         message.Headers.UserAgent.Add(new ProductInfoHeaderValue("Chrome", "Android"));
-        using HttpResponseMessage response = await httpClient.SendAsync(message, cancellationToken).ConfigureAwait(false);
+        using HttpResponseMessage response = await httpClient
+            .SendAsync(message, cancellationToken)
+            .ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
-        using Stream stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        using JsonDocument document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
+        using Stream stream = await response
+            .Content.ReadAsStreamAsync(cancellationToken)
+            .ConfigureAwait(false);
+        using JsonDocument document = await JsonDocument
+            .ParseAsync(stream, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
         return ParseSearchResponse(request.Mirror, document.RootElement);
     }
 
-    public async Task DownloadAsync(Uri source, string destinationPath, IProgress<BeatmapDownloadProgress>? progress, CancellationToken cancellationToken)
+    public async Task DownloadAsync(
+        Uri source,
+        string destinationPath,
+        IProgress<BeatmapDownloadProgress>? progress,
+        CancellationToken cancellationToken
+    )
     {
         Directory.CreateDirectory(Path.GetDirectoryName(destinationPath) ?? ".");
         using var message = new HttpRequestMessage(HttpMethod.Get, source);
         message.Headers.UserAgent.Add(new ProductInfoHeaderValue("Chrome", "Android"));
-        using HttpResponseMessage response = await httpClient.SendAsync(message, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+        using HttpResponseMessage response = await httpClient
+            .SendAsync(message, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+            .ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
         long? totalBytes = response.Content.Headers.ContentLength;
-        using Stream sourceStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using Stream sourceStream = await response
+            .Content.ReadAsStreamAsync(cancellationToken)
+            .ConfigureAwait(false);
         using FileStream fileStream = File.Create(destinationPath);
         byte[] buffer = new byte[81920];
         var stopwatch = Stopwatch.StartNew();
         long bytesReceived = 0;
         int read;
 
-        while ((read = await sourceStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) > 0)
+        while (
+            (read = await sourceStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false))
+            > 0
+        )
         {
-            await fileStream.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
+            await fileStream
+                .WriteAsync(buffer.AsMemory(0, read), cancellationToken)
+                .ConfigureAwait(false);
             bytesReceived += read;
-            double speed = stopwatch.Elapsed.TotalSeconds > 0 ? bytesReceived / stopwatch.Elapsed.TotalSeconds : 0;
-            progress?.Report(new BeatmapDownloadProgress(bytesReceived, totalBytes, BeatmapDownloadPhase.Downloading, speed));
+            double speed =
+                stopwatch.Elapsed.TotalSeconds > 0
+                    ? bytesReceived / stopwatch.Elapsed.TotalSeconds
+                    : 0;
+            progress?.Report(
+                new BeatmapDownloadProgress(
+                    bytesReceived,
+                    totalBytes,
+                    BeatmapDownloadPhase.Downloading,
+                    speed
+                )
+            );
         }
     }
 
-    private static List<BeatmapMirrorSet> ParseSearchResponse(BeatmapMirrorKind mirror, JsonElement root)
+    private static List<BeatmapMirrorSet> ParseSearchResponse(
+        BeatmapMirrorKind mirror,
+        JsonElement root
+    )
     {
         var sets = new List<BeatmapMirrorSet>();
-        JsonElement array = root.ValueKind == JsonValueKind.Array
-            ? root
-            : root.TryGetProperty("beatmapsets", out JsonElement beatmapsets) ? beatmapsets : root;
+        JsonElement array =
+            root.ValueKind == JsonValueKind.Array ? root
+            : root.TryGetProperty("beatmapsets", out JsonElement beatmapsets) ? beatmapsets
+            : root;
 
         if (array.ValueKind != JsonValueKind.Array)
         {
@@ -136,7 +191,10 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
         {
             long id = GetInt64(setElement, "id");
             var beatmaps = new List<BeatmapMirrorBeatmap>();
-            if (setElement.TryGetProperty("beatmaps", out JsonElement beatmapsElement) && beatmapsElement.ValueKind == JsonValueKind.Array)
+            if (
+                setElement.TryGetProperty("beatmaps", out JsonElement beatmapsElement)
+                && beatmapsElement.ValueKind == JsonValueKind.Array
+            )
             {
                 foreach (JsonElement beatmapElement in beatmapsElement.EnumerateArray())
                 {
@@ -146,20 +204,23 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
                         continue;
                     }
 
-                    beatmaps.Add(new BeatmapMirrorBeatmap(
-                        Id: GetInt64(beatmapElement, "id"),
-                        Version: GetString(beatmapElement, "version"),
-                        StarRating: GetSingle(beatmapElement, "difficulty_rating"),
-                        ApproachRate: GetSingle(beatmapElement, "ar"),
-                        CircleSize: GetSingle(beatmapElement, "cs"),
-                        HpDrainRate: GetSingle(beatmapElement, "drain"),
-                        OverallDifficulty: GetSingle(beatmapElement, "accuracy"),
-                        Bpm: GetSingle(beatmapElement, "bpm"),
-                        HitLength: GetInt32(beatmapElement, "hit_length"),
-                        CircleCount: GetInt32(beatmapElement, "count_circles"),
-                        SliderCount: GetInt32(beatmapElement, "count_sliders"),
-                        SpinnerCount: GetInt32(beatmapElement, "count_spinners"),
-                        Mode: mode));
+                    beatmaps.Add(
+                        new BeatmapMirrorBeatmap(
+                            Id: GetInt64(beatmapElement, "id"),
+                            Version: GetString(beatmapElement, "version"),
+                            StarRating: GetSingle(beatmapElement, "difficulty_rating"),
+                            ApproachRate: GetSingle(beatmapElement, "ar"),
+                            CircleSize: GetSingle(beatmapElement, "cs"),
+                            HpDrainRate: GetSingle(beatmapElement, "drain"),
+                            OverallDifficulty: GetSingle(beatmapElement, "accuracy"),
+                            Bpm: GetSingle(beatmapElement, "bpm"),
+                            HitLength: GetInt32(beatmapElement, "hit_length"),
+                            CircleCount: GetInt32(beatmapElement, "count_circles"),
+                            SliderCount: GetInt32(beatmapElement, "count_sliders"),
+                            SpinnerCount: GetInt32(beatmapElement, "count_spinners"),
+                            Mode: mode
+                        )
+                    );
                 }
             }
 
@@ -168,72 +229,106 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
                 continue;
             }
 
-            sets.Add(new BeatmapMirrorSet(
-                Mirror: mirror,
-                Id: id,
-                Title: GetString(setElement, "title"),
-                TitleUnicode: GetString(setElement, "title_unicode"),
-                Artist: GetString(setElement, "artist"),
-                ArtistUnicode: GetString(setElement, "artist_unicode"),
-                Status: ToRankedStatus(GetInt32(setElement, "ranked")),
-                Creator: GetString(setElement, "creator"),
-                CoverUrl: TryGetCoverUrl(mirror, id, setElement),
-                HasVideo: GetBoolean(setElement, "video"),
-                Beatmaps: beatmaps.OrderBy(beatmap => beatmap.StarRating).ToArray()));
+            sets.Add(
+                new BeatmapMirrorSet(
+                    Mirror: mirror,
+                    Id: id,
+                    Title: GetString(setElement, "title"),
+                    TitleUnicode: GetString(setElement, "title_unicode"),
+                    Artist: GetString(setElement, "artist"),
+                    ArtistUnicode: GetString(setElement, "artist_unicode"),
+                    Status: ToRankedStatus(GetInt32(setElement, "ranked")),
+                    Creator: GetString(setElement, "creator"),
+                    CoverUrl: TryGetCoverUrl(mirror, id, setElement),
+                    HasVideo: GetBoolean(setElement, "video"),
+                    Beatmaps: beatmaps.OrderBy(beatmap => beatmap.StarRating).ToArray()
+                )
+            );
         }
 
         return sets;
     }
 
-    private static string? TryGetCoverUrl(BeatmapMirrorKind mirror, long setId, JsonElement setElement)
+    private static string? TryGetCoverUrl(
+        BeatmapMirrorKind mirror,
+        long setId,
+        JsonElement setElement
+    )
     {
         return mirror == BeatmapMirrorKind.Catboy
-            ? setId > 0 ? $"https://assets.ppy.sh/beatmaps/{setId}/covers/card.jpg" : null
-            : !setElement.TryGetProperty("covers", out JsonElement covers) || covers.ValueKind != JsonValueKind.Object
-            ? null
-            : covers.TryGetProperty("card", out JsonElement card) && card.ValueKind == JsonValueKind.String ? card.GetString() : null;
+            ? setId > 0
+                ? $"https://assets.ppy.sh/beatmaps/{setId}/covers/card.jpg"
+                : null
+            : !setElement.TryGetProperty("covers", out JsonElement covers)
+            || covers.ValueKind != JsonValueKind.Object
+                ? null
+                : covers.TryGetProperty("card", out JsonElement card)
+                && card.ValueKind == JsonValueKind.String
+                    ? card.GetString()
+                    : null;
     }
 
-    private static string ToApiSort(BeatmapMirrorSort sort) => sort switch
-    {
-        BeatmapMirrorSort.Title => "title",
-        BeatmapMirrorSort.Artist => "artist",
-        BeatmapMirrorSort.Bpm => "beatmaps.bpm",
-        BeatmapMirrorSort.DifficultyRating => "beatmaps.difficulty_rating",
-        BeatmapMirrorSort.HitLength => "beatmaps.hit_length",
-        BeatmapMirrorSort.PassCount => "beatmaps.passcount",
-        BeatmapMirrorSort.PlayCount => "beatmaps.playcount",
-        BeatmapMirrorSort.TotalLength => "beatmaps.total_length",
-        BeatmapMirrorSort.FavouriteCount => "favourite_count",
-        BeatmapMirrorSort.LastUpdated => "last_updated",
-        BeatmapMirrorSort.RankedDate => "ranked_date",
-        BeatmapMirrorSort.SubmittedDate => "submitted_date",
-        _ => "ranked_date",
-    };
+    private static string ToApiSort(BeatmapMirrorSort sort) =>
+        sort switch
+        {
+            BeatmapMirrorSort.Title => "title",
+            BeatmapMirrorSort.Artist => "artist",
+            BeatmapMirrorSort.Bpm => "beatmaps.bpm",
+            BeatmapMirrorSort.DifficultyRating => "beatmaps.difficulty_rating",
+            BeatmapMirrorSort.HitLength => "beatmaps.hit_length",
+            BeatmapMirrorSort.PassCount => "beatmaps.passcount",
+            BeatmapMirrorSort.PlayCount => "beatmaps.playcount",
+            BeatmapMirrorSort.TotalLength => "beatmaps.total_length",
+            BeatmapMirrorSort.FavouriteCount => "favourite_count",
+            BeatmapMirrorSort.LastUpdated => "last_updated",
+            BeatmapMirrorSort.RankedDate => "ranked_date",
+            BeatmapMirrorSort.SubmittedDate => "submitted_date",
+            _ => "ranked_date",
+        };
 
-    private static string ToApiOrder(BeatmapMirrorOrder order) => order == BeatmapMirrorOrder.Ascending ? "asc" : "desc";
+    private static string ToApiOrder(BeatmapMirrorOrder order) =>
+        order == BeatmapMirrorOrder.Ascending ? "asc" : "desc";
 
-    private static BeatmapRankedStatus ToRankedStatus(int value) => value switch
-    {
-        1 => BeatmapRankedStatus.Ranked,
-        2 => BeatmapRankedStatus.Approved,
-        3 => BeatmapRankedStatus.Qualified,
-        4 => BeatmapRankedStatus.Loved,
-        0 => BeatmapRankedStatus.Pending,
-        -1 => BeatmapRankedStatus.WorkInProgress,
-        -2 => BeatmapRankedStatus.Graveyard,
-        _ => BeatmapRankedStatus.Pending,
-    };
+    private static BeatmapRankedStatus ToRankedStatus(int value) =>
+        value switch
+        {
+            1 => BeatmapRankedStatus.Ranked,
+            2 => BeatmapRankedStatus.Approved,
+            3 => BeatmapRankedStatus.Qualified,
+            4 => BeatmapRankedStatus.Loved,
+            0 => BeatmapRankedStatus.Pending,
+            -1 => BeatmapRankedStatus.WorkInProgress,
+            -2 => BeatmapRankedStatus.Graveyard,
+            _ => BeatmapRankedStatus.Pending,
+        };
 
-    private static long GetInt64(JsonElement element, string name) => element.TryGetProperty(name, out JsonElement property) && property.TryGetInt64(out long value) ? value : 0L;
+    private static long GetInt64(JsonElement element, string name) =>
+        element.TryGetProperty(name, out JsonElement property)
+        && property.TryGetInt64(out long value)
+            ? value
+            : 0L;
 
-    private static int GetInt32(JsonElement element, string name) => element.TryGetProperty(name, out JsonElement property) && property.TryGetInt32(out int value) ? value : 0;
+    private static int GetInt32(JsonElement element, string name) =>
+        element.TryGetProperty(name, out JsonElement property)
+        && property.TryGetInt32(out int value)
+            ? value
+            : 0;
 
-    private static float GetSingle(JsonElement element, string name) => element.TryGetProperty(name, out JsonElement property) && property.TryGetSingle(out float value) ? value : 0f;
+    private static float GetSingle(JsonElement element, string name) =>
+        element.TryGetProperty(name, out JsonElement property)
+        && property.TryGetSingle(out float value)
+            ? value
+            : 0f;
 
-    private static string GetString(JsonElement element, string name) => element.TryGetProperty(name, out JsonElement property) && property.ValueKind == JsonValueKind.String ? property.GetString() ?? string.Empty : string.Empty;
+    private static string GetString(JsonElement element, string name) =>
+        element.TryGetProperty(name, out JsonElement property)
+        && property.ValueKind == JsonValueKind.String
+            ? property.GetString() ?? string.Empty
+            : string.Empty;
 
-    private static bool GetBoolean(JsonElement element, string name) => element.TryGetProperty(name, out JsonElement property) && property.ValueKind == JsonValueKind.True;
+    private static bool GetBoolean(JsonElement element, string name) =>
+        element.TryGetProperty(name, out JsonElement property)
+        && property.ValueKind == JsonValueKind.True;
 
     private static int GetMode(JsonElement element)
     {
@@ -271,12 +366,13 @@ public sealed class OsuDirectMirrorClient(HttpClient httpClient) : IBeatmapMirro
         return 0;
     }
 
-    private static int ParseModeString(string? value) => value?.Trim().ToLowerInvariant() switch
-    {
-        null or "" or "osu" or "standard" or "0" => 0,
-        "taiko" or "1" => 1,
-        "fruits" or "catch" or "ctb" or "2" => 2,
-        "mania" or "3" => 3,
-        _ => -1,
-    };
+    private static int ParseModeString(string? value) =>
+        value?.Trim().ToLowerInvariant() switch
+        {
+            null or "" or "osu" or "standard" or "0" => 0,
+            "taiko" or "1" => 1,
+            "fruits" or "catch" or "ctb" or "2" => 2,
+            "mania" or "3" => 3,
+            _ => -1,
+        };
 }

@@ -23,7 +23,9 @@ internal sealed class BeatmapControlPoints
 
         foreach (int divisor in PredefinedDivisors)
         {
-            double distanceFromSnap = System.Math.Abs(time - GetClosestSnappedTime(timingPoint, time, divisor));
+            double distanceFromSnap = System.Math.Abs(
+                time - GetClosestSnappedTime(timingPoint, time, divisor)
+            );
             if (Precision.DefinitelyBigger(closestTime, distanceFromSnap))
             {
                 closestDivisor = divisor;
@@ -34,10 +36,18 @@ internal sealed class BeatmapControlPoints
         return closestDivisor;
     }
 
-    private static double GetClosestSnappedTime(TimingControlPoint timingPoint, double time, int beatDivisor)
+    private static double GetClosestSnappedTime(
+        TimingControlPoint timingPoint,
+        double time,
+        int beatDivisor
+    )
     {
         double beatLength = timingPoint.MillisecondsPerBeat / beatDivisor;
-        int beats = (int)System.Math.Round((System.Math.Max(time, 0) - timingPoint.Time) / beatLength, MidpointRounding.AwayFromZero);
+        int beats = (int)
+            System.Math.Round(
+                (System.Math.Max(time, 0) - timingPoint.Time) / beatLength,
+                MidpointRounding.AwayFromZero
+            );
         double snappedTime = timingPoint.Time + beats * beatLength;
         return snappedTime >= 0 ? snappedTime : snappedTime + beatLength;
     }

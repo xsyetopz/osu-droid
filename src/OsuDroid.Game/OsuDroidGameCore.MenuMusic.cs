@@ -55,13 +55,17 @@ public sealed partial class OsuDroidGameCore
         }
     }
 
-    private IEnumerable<MenuTrack> CreateMenuPlaylist(BeatmapLibrarySnapshot snapshot) => snapshot.Sets
-        .SelectMany(set => set.Beatmaps
-            .Where(static beatmap => !string.IsNullOrWhiteSpace(beatmap.AudioFilename))
-            .Select(beatmap => (Set: set, Beatmap: beatmap)))
-        .Select(pair => CreateMenuTrack(pair.Set, pair.Beatmap))
-        .Where(track => File.Exists(track.AudioPath))
-        .OrderBy(_ => _random.Next());
+    private IEnumerable<MenuTrack> CreateMenuPlaylist(BeatmapLibrarySnapshot snapshot) =>
+        snapshot
+            .Sets.SelectMany(set =>
+                set.Beatmaps.Where(static beatmap =>
+                        !string.IsNullOrWhiteSpace(beatmap.AudioFilename)
+                    )
+                    .Select(beatmap => (Set: set, Beatmap: beatmap))
+            )
+            .Select(pair => CreateMenuTrack(pair.Set, pair.Beatmap))
+            .Where(track => File.Exists(track.AudioPath))
+            .OrderBy(_ => _random.Next());
 
     private MenuTrack CreateMenuTrack(BeatmapSetInfo set, BeatmapInfo beatmap)
     {
@@ -74,14 +78,19 @@ public sealed partial class OsuDroidGameCore
             (int)Math.Clamp(beatmap.Length, 0L, int.MaxValue),
             beatmap.MostCommonBpm,
             set.Directory,
-            beatmap.Filename);
+            beatmap.Filename
+        );
     }
 
-    private void PreserveDownloaderMusic() => _preservedDownloaderMusicState = _musicController.State;
+    private void PreserveDownloaderMusic() =>
+        _preservedDownloaderMusicState = _musicController.State;
 
     private void RestoreDownloaderMusic()
     {
-        if (!_menuMusicPreviewEnabled || _preservedDownloaderMusicState is not { IsPlaying: true } state)
+        if (
+            !_menuMusicPreviewEnabled
+            || _preservedDownloaderMusicState is not { IsPlaying: true } state
+        )
         {
             return;
         }
@@ -106,8 +115,12 @@ public sealed partial class OsuDroidGameCore
             snapshot = _beatmapLibrary.Load();
         }
 
-        BeatmapSetInfo? set = snapshot.Sets.FirstOrDefault(candidate => string.Equals(candidate.Directory, setDirectory, StringComparison.Ordinal));
-        BeatmapInfo? beatmap = set?.Beatmaps.FirstOrDefault(candidate => string.Equals(candidate.Filename, beatmapFilename, StringComparison.Ordinal));
+        BeatmapSetInfo? set = snapshot.Sets.FirstOrDefault(candidate =>
+            string.Equals(candidate.Directory, setDirectory, StringComparison.Ordinal)
+        );
+        BeatmapInfo? beatmap = set?.Beatmaps.FirstOrDefault(candidate =>
+            string.Equals(candidate.Filename, beatmapFilename, StringComparison.Ordinal)
+        );
         if (set is null || beatmap is null)
         {
             return false;
@@ -123,7 +136,9 @@ public sealed partial class OsuDroidGameCore
         return true;
     }
 
-    private static string DisplayTitle(BeatmapInfo beatmap) => string.IsNullOrWhiteSpace(beatmap.TitleUnicode) ? beatmap.Title : beatmap.TitleUnicode;
+    private static string DisplayTitle(BeatmapInfo beatmap) =>
+        string.IsNullOrWhiteSpace(beatmap.TitleUnicode) ? beatmap.Title : beatmap.TitleUnicode;
 
-    private static string DisplayArtist(BeatmapInfo beatmap) => string.IsNullOrWhiteSpace(beatmap.ArtistUnicode) ? beatmap.Artist : beatmap.ArtistUnicode;
+    private static string DisplayArtist(BeatmapInfo beatmap) =>
+        string.IsNullOrWhiteSpace(beatmap.ArtistUnicode) ? beatmap.Artist : beatmap.ArtistUnicode;
 }

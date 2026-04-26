@@ -45,6 +45,7 @@ bootstrap:
 
 restore:
 	dotnet restore $(SOLUTION)
+	dotnet tool restore
 
 build:
 	dotnet build $(SOLUTION) --warnaserror $(DOTNET_BUILD_FLAGS)
@@ -56,6 +57,8 @@ test-no-build:
 	dotnet test $(GAME_TEST_PROJECT) --no-build --verbosity normal
 
 format:
+	dotnet tool restore
+	dotnet csharpier format .
 	dotnet format $(SOLUTION)
 
 architecture-check:
@@ -71,6 +74,8 @@ stale-term-check:
 	python3 scripts/dev/check-stale-terms.py
 
 check: architecture-check boundary-check localization-check stale-term-check
+	dotnet tool restore
+	dotnet csharpier check .
 	dotnet format $(SOLUTION) --verify-no-changes --verbosity diagnostic
 
 clean:

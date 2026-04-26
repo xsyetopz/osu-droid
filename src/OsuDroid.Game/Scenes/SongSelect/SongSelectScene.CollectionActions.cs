@@ -52,12 +52,15 @@ public sealed partial class SongSelectScene
     public void FocusBeatmapOptionsSearch(VirtualViewport viewport)
     {
         UiRect bounds = BeatmapOptionsSearchBounds(viewport);
-        _textInputService.RequestTextInput(new TextInputRequest(
-            searchQuery,
-            SetBeatmapOptionsSearchQuery,
-            SetBeatmapOptionsSearchQuery,
-            viewport.ToSurface(bounds),
-            () => { }));
+        _textInputService.RequestTextInput(
+            new TextInputRequest(
+                searchQuery,
+                SetBeatmapOptionsSearchQuery,
+                SetBeatmapOptionsSearchQuery,
+                viewport.ToSurface(bounds),
+                () => { }
+            )
+        );
     }
 
     public void SetBeatmapOptionsSearchQuery(string text)
@@ -74,7 +77,10 @@ public sealed partial class SongSelectScene
 
     public DifficultyAlgorithm ToggleBeatmapOptionsAlgorithm()
     {
-        DifficultyAlgorithm next = _displayAlgorithm == DifficultyAlgorithm.Droid ? DifficultyAlgorithm.Standard : DifficultyAlgorithm.Droid;
+        DifficultyAlgorithm next =
+            _displayAlgorithm == DifficultyAlgorithm.Droid
+                ? DifficultyAlgorithm.Standard
+                : DifficultyAlgorithm.Droid;
         SetDisplayAlgorithm(next);
         return _displayAlgorithm;
     }
@@ -103,14 +109,19 @@ public sealed partial class SongSelectScene
             return;
         }
 
-        int index = _visibleCollectionIndices[visibleSlot] >= 0 ? _visibleCollectionIndices[visibleSlot] : visibleSlot;
+        int index =
+            _visibleCollectionIndices[visibleSlot] >= 0
+                ? _visibleCollectionIndices[visibleSlot]
+                : visibleSlot;
         if (index == 0)
         {
             collectionFilter = null;
         }
         else
         {
-            IReadOnlyList<BeatmapCollection> collections = library.GetCollections(SelectedSet?.Directory);
+            IReadOnlyList<BeatmapCollection> collections = library.GetCollections(
+                SelectedSet?.Directory
+            );
             int collectionIndex = index - 1;
             if (collectionIndex < 0 || collectionIndex >= collections.Count)
             {
@@ -118,7 +129,11 @@ public sealed partial class SongSelectScene
             }
 
             BeatmapCollection collection = collections[collectionIndex];
-            collectionFilter = string.Equals(collectionFilter, collection.Name, StringComparison.Ordinal)
+            collectionFilter = string.Equals(
+                collectionFilter,
+                collection.Name,
+                StringComparison.Ordinal
+            )
                 ? null
                 : collection.Name;
         }
@@ -131,12 +146,15 @@ public sealed partial class SongSelectScene
     public void FocusNewCollectionInput(VirtualViewport viewport)
     {
         UiRect bounds = CollectionsNewFolderBounds(viewport);
-        _textInputService.RequestTextInput(new TextInputRequest(
-            string.Empty,
-            _ => { },
-            CreateCollection,
-            viewport.ToSurface(bounds),
-            () => { }));
+        _textInputService.RequestTextInput(
+            new TextInputRequest(
+                string.Empty,
+                _ => { },
+                CreateCollection,
+                viewport.ToSurface(bounds),
+                () => { }
+            )
+        );
     }
 
     public void ToggleCollection(int visibleSlot)
@@ -171,7 +189,11 @@ public sealed partial class SongSelectScene
 
         library.DeleteCollection(_collectionPendingDelete);
         _collectionPendingDelete = null;
-        collectionScrollY = Math.Clamp(collectionScrollY, 0f, MaxCollectionScroll(VirtualViewport.AndroidReferenceLandscape));
+        collectionScrollY = Math.Clamp(
+            collectionScrollY,
+            0f,
+            MaxCollectionScroll(VirtualViewport.AndroidReferenceLandscape)
+        );
     }
 
     public void CancelDeleteCollection() => _collectionPendingDelete = null;

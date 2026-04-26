@@ -4,7 +4,8 @@ internal sealed class SampleControlPoint(
     double time,
     SampleBank sampleBank,
     int sampleVolume,
-    int customSampleBank) : ControlPoint(time)
+    int customSampleBank
+) : ControlPoint(time)
 {
     public SampleBank SampleBank { get; } = sampleBank;
 
@@ -13,8 +14,8 @@ internal sealed class SampleControlPoint(
     public int CustomSampleBank { get; } = customSampleBank;
 
     public override bool IsRedundant(ControlPoint existing) =>
-        existing is SampleControlPoint sampleControlPoint &&
-        SampleBank == sampleControlPoint.SampleBank &&
-        SampleVolume == sampleControlPoint.SampleVolume &&
-        CustomSampleBank == sampleControlPoint.CustomSampleBank;
+        existing is SampleControlPoint sampleControlPoint
+        && SampleBank == sampleControlPoint.SampleBank
+        && SampleVolume == sampleControlPoint.SampleVolume
+        && CustomSampleBank == sampleControlPoint.CustomSampleBank;
 }

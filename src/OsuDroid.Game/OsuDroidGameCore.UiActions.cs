@@ -14,15 +14,20 @@ public sealed partial class OsuDroidGameCore
         if (HandleIndexedUiAction(action, viewport))
         {
             PlayPendingOptionsSfx();
-            PerfDiagnostics.Log("core.handleUiAction", start, $"action={action} indexed=true scene={_activeScene}");
+            PerfDiagnostics.Log(
+                "core.handleUiAction",
+                start,
+                $"action={action} indexed=true scene={_activeScene}"
+            );
             return;
         }
 
-        _ = HandleMainMenuUiAction(action) ||
-            HandleDownloaderUiAction(action, viewport) ||
-            HandleSongSelectUiAction(action, viewport) ||
-            HandleModSelectUiAction(action, viewport) ||
-            HandleOptionsUiAction(action, viewport);
+        _ =
+            HandleMainMenuUiAction(action)
+            || HandleDownloaderUiAction(action, viewport)
+            || HandleSongSelectUiAction(action, viewport)
+            || HandleModSelectUiAction(action, viewport)
+            || HandleOptionsUiAction(action, viewport);
 
         PerfDiagnostics.Log("core.handleUiAction", start, $"action={action} scene={_activeScene}");
     }
@@ -34,7 +39,11 @@ public sealed partial class OsuDroidGameCore
             return;
         }
 
-        if (_activeScene == ActiveScene.MainMenu && action == UiAction.MainMenuThird && !_mainMenu.IsSecondMenu)
+        if (
+            _activeScene == ActiveScene.MainMenu
+            && action == UiAction.MainMenuThird
+            && !_mainMenu.IsSecondMenu
+        )
         {
             _activeMenuSfxPlayer.Play("seeya");
         }
@@ -58,7 +67,12 @@ public sealed partial class OsuDroidGameCore
             return true;
         }
 
-        if (UiActionGroups.TryGetDownloaderDetailsDifficultyIndex(action, out int downloaderDetailsDifficultyIndex))
+        if (
+            UiActionGroups.TryGetDownloaderDetailsDifficultyIndex(
+                action,
+                out int downloaderDetailsDifficultyIndex
+            )
+        )
         {
             _beatmapDownloader.SelectDetailsDifficulty(downloaderDetailsDifficultyIndex);
             return true;
@@ -71,35 +85,58 @@ public sealed partial class OsuDroidGameCore
             return true;
         }
 
-        if (UiActionGroups.TryGetSongSelectDifficultyIndex(action, out int songSelectDifficultyIndex))
+        if (
+            UiActionGroups.TryGetSongSelectDifficultyIndex(
+                action,
+                out int songSelectDifficultyIndex
+            )
+        )
         {
             _songSelect.SelectDifficulty(songSelectDifficultyIndex);
             _mainMenu.SetNowPlaying(_musicController.State);
             return true;
         }
 
-        if (UiActionGroups.TryGetSongSelectCollectionToggleIndex(action, out int songSelectCollectionToggleIndex))
+        if (
+            UiActionGroups.TryGetSongSelectCollectionToggleIndex(
+                action,
+                out int songSelectCollectionToggleIndex
+            )
+        )
         {
             _songSelect.HandleCollectionPrimaryAction(songSelectCollectionToggleIndex);
             return true;
         }
 
-        if (UiActionGroups.TryGetSongSelectCollectionDeleteIndex(action, out int songSelectCollectionDeleteIndex))
+        if (
+            UiActionGroups.TryGetSongSelectCollectionDeleteIndex(
+                action,
+                out int songSelectCollectionDeleteIndex
+            )
+        )
         {
             _songSelect.RequestDeleteCollection(songSelectCollectionDeleteIndex);
             return true;
         }
 
-        if (UiActionGroups.TryGetOptionsRowIndex(action, out _) && _activeScene == ActiveScene.Options)
+        if (
+            UiActionGroups.TryGetOptionsRowIndex(action, out _)
+            && _activeScene == ActiveScene.Options
+        )
         {
             _options.HandleAction(action, viewport);
             ApplyChangedOptionsSetting(_options.ConsumeChangedSettingKey());
             return true;
         }
 
-        if (UiActionGroups.TryGetModSelectToggleIndex(action, out int modSelectToggleIndex) && _activeScene == ActiveScene.ModSelect)
+        if (
+            UiActionGroups.TryGetModSelectToggleIndex(action, out int modSelectToggleIndex)
+            && _activeScene == ActiveScene.ModSelect
+        )
         {
-            _activeMenuSfxPlayer.Play(_modSelect.ToggleMod(modSelectToggleIndex) ? "check-on" : "check-off");
+            _activeMenuSfxPlayer.Play(
+                _modSelect.ToggleMod(modSelectToggleIndex) ? "check-on" : "check-off"
+            );
             return true;
         }
 

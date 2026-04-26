@@ -17,12 +17,15 @@ namespace OsuDroid.Game;
 public sealed partial class OsuDroidGameCore
 {
     private OnlineProfilePanelState? CreateOnlinePanelState(OnlineProfileSnapshot? profile) =>
-            _settingsStore.GetBool("stayOnline", false) ? OnlineProfilePanelState.FromOptionalProfile(profile) : null;
+        _settingsStore.GetBool("stayOnline", false)
+            ? OnlineProfilePanelState.FromOptionalProfile(profile)
+            : null;
 
-
-
-
-    public void AttachPlatformServices(ITextInputService? platformTextInputService, IBeatmapPreviewPlayer? platformPreviewPlayer, IMenuSfxPlayer? platformMenuSfxPlayer = null)
+    public void AttachPlatformServices(
+        ITextInputService? platformTextInputService,
+        IBeatmapPreviewPlayer? platformPreviewPlayer,
+        IMenuSfxPlayer? platformMenuSfxPlayer = null
+    )
     {
         if (platformTextInputService is not null)
         {
@@ -40,14 +43,19 @@ public sealed partial class OsuDroidGameCore
         }
     }
 
+    public static OsuDroidGameCore Create(
+        string corePath,
+        string buildType,
+        string displayVersion = "1.0",
+        bool showStartupScene = false
+    ) => Create(DroidPathRoots.FromCoreRoot(corePath), buildType, displayVersion, showStartupScene);
 
-
-    public static OsuDroidGameCore Create(string corePath, string buildType, string displayVersion = "1.0", bool showStartupScene = false) =>
-            Create(DroidPathRoots.FromCoreRoot(corePath), buildType, displayVersion, showStartupScene);
-
-
-
-    public static OsuDroidGameCore Create(DroidPathRoots pathRoots, string buildType, string displayVersion = "1.0", bool showStartupScene = false)
+    public static OsuDroidGameCore Create(
+        DroidPathRoots pathRoots,
+        string buildType,
+        string displayVersion = "1.0",
+        bool showStartupScene = false
+    )
     {
         var pathLayout = new DroidGamePathLayout(pathRoots);
         pathLayout.EnsureDirectories();
@@ -55,30 +63,56 @@ public sealed partial class OsuDroidGameCore
         database.EnsureCreated();
         BeatmapLibrary library = CreateBeatmapLibrary(database, pathLayout);
         var mirrorClient = new OsuDirectMirrorClient(new HttpClient());
-        var _settingsStore = new JsonGameSettingsStore(Path.Combine(pathLayout.CoreRoot, "config", "settings.json"));
+        var _settingsStore = new JsonGameSettingsStore(
+            Path.Combine(pathLayout.CoreRoot, "config", "settings.json")
+        );
         var importService = new BeatmapImportService(pathLayout, library);
-        var processingService = new BeatmapProcessingService(pathLayout, importService, library, _settingsStore);
-        var downloadService = new BeatmapDownloadService(pathLayout, mirrorClient, processingService);
-        return new OsuDroidGameCore(new GameServices(database, pathLayout, buildType, displayVersion, BeatmapLibrary: library, BeatmapImportService: importService, BeatmapProcessingService: processingService, BeatmapDownloadService: downloadService, BeatmapMirrorClient: mirrorClient, SettingsStore: _settingsStore, ShowStartupScene: showStartupScene));
+        var processingService = new BeatmapProcessingService(
+            pathLayout,
+            importService,
+            library,
+            _settingsStore
+        );
+        var downloadService = new BeatmapDownloadService(
+            pathLayout,
+            mirrorClient,
+            processingService
+        );
+        return new OsuDroidGameCore(
+            new GameServices(
+                database,
+                pathLayout,
+                buildType,
+                displayVersion,
+                BeatmapLibrary: library,
+                BeatmapImportService: importService,
+                BeatmapProcessingService: processingService,
+                BeatmapDownloadService: downloadService,
+                BeatmapMirrorClient: mirrorClient,
+                SettingsStore: _settingsStore,
+                ShowStartupScene: showStartupScene
+            )
+        );
     }
 
-
-
-    private static BeatmapLibrary CreateBeatmapLibrary(DroidDatabase database, DroidGamePathLayout pathLayout)
+    private static BeatmapLibrary CreateBeatmapLibrary(
+        DroidDatabase database,
+        DroidGamePathLayout pathLayout
+    )
     {
         var repository = new BeatmapLibraryRepository(database);
         return new BeatmapLibrary(pathLayout, repository);
     }
 
-
-
     private BootstrapLoadingProgress CreateBeatmapProcessingProgress()
     {
         BeatmapProcessingState state = _beatmapProcessingService.State;
-        return new BootstrapLoadingProgress(state.Percent, state.StatusText, BootstrapLoadingKind.BeatmapProcessing);
+        return new BootstrapLoadingProgress(
+            state.Percent,
+            state.StatusText,
+            BootstrapLoadingKind.BeatmapProcessing
+        );
     }
-
-
 
     private void ApplyOptionsRuntimeSettings()
     {
@@ -88,19 +122,16 @@ public sealed partial class OsuDroidGameCore
         ApplyOnlinePanelSetting();
     }
 
-
-
-    private DifficultyAlgorithm ReadDifficultyAlgorithmSetting() => _settingsStore.GetInt("difficultyAlgorithm", 0) == 1 ? DifficultyAlgorithm.Standard : DifficultyAlgorithm.Droid;
-
-
+    private DifficultyAlgorithm ReadDifficultyAlgorithmSetting() =>
+        _settingsStore.GetInt("difficultyAlgorithm", 0) == 1
+            ? DifficultyAlgorithm.Standard
+            : DifficultyAlgorithm.Droid;
 
     private static string CurrentUpdateLanguageCode()
     {
         string language = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
         return string.IsNullOrWhiteSpace(language) ? "en" : language;
     }
-
-
 
     private void AttachTextInputService(ITextInputService service)
     {
@@ -116,8 +147,6 @@ public sealed partial class OsuDroidGameCore
         _modSelect.SetTextInputService(service);
     }
 
-
-
     private void AttachPreviewPlayer(IBeatmapPreviewPlayer player)
     {
         if (ReferenceEquals(_previewPlayer, player))
@@ -130,7 +159,10 @@ public sealed partial class OsuDroidGameCore
         _musicController.SetPreviewPlayer(player);
         _songSelect.SetPreviewPlayer(player);
         _beatmapDownloader.SetPreviewPlayer(player);
-        if (!_menuMusicPreviewEnabled || string.IsNullOrWhiteSpace(_musicController.State.ArtistTitle))
+        if (
+            !_menuMusicPreviewEnabled
+            || string.IsNullOrWhiteSpace(_musicController.State.ArtistTitle)
+        )
         {
             return;
         }
@@ -145,8 +177,6 @@ public sealed partial class OsuDroidGameCore
         _mainMenu.SetNowPlaying(_musicController.State);
     }
 
-
-
     private void AttachMenuSfxPlayer(IMenuSfxPlayer player)
     {
         if (ReferenceEquals(_activeMenuSfxPlayer, player))
@@ -157,7 +187,4 @@ public sealed partial class OsuDroidGameCore
         _activeMenuSfxPlayer = player;
         ApplyEffectVolumeSetting();
     }
-
-
-
 }

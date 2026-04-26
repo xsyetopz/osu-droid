@@ -7,4 +7,5 @@ public sealed record MenuNowPlayingState(
     int LengthMilliseconds = 0,
     float Bpm = 0f,
     string? BeatmapSetDirectory = null,
-    string? BeatmapFilename = null);
+    string? BeatmapFilename = null
+);

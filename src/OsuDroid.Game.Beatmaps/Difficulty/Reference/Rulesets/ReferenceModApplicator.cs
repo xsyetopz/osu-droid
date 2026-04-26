@@ -23,10 +23,13 @@ public static class ReferenceModApplicator
         ReferenceBeatmapDifficulty difficulty,
         GameMode mode,
         IEnumerable<ReferenceMod> mods,
-        bool withRateChange = false)
+        bool withRateChange = false
+    )
     {
         var materializedMods = mods as IReadOnlyList<ReferenceMod> ?? mods.ToArray();
-        var adjustmentMods = materializedMods.OfType<IReferenceModFacilitatesAdjustment>().ToArray();
+        var adjustmentMods = materializedMods
+            .OfType<IReferenceModFacilitatesAdjustment>()
+            .ToArray();
 
         foreach (var mod in materializedMods.OfType<IReferenceModApplicableToDifficulty>())
         {
@@ -45,17 +48,21 @@ public static class ReferenceModApplicator
 
         float trackRate = CalculateRateWithMods(materializedMods, double.PositiveInfinity);
 
-        double preempt = ReferenceBeatmapDifficulty.DifficultyRange(
-            difficulty.ApproachRate,
-            ReferenceDifficultyTiming.PreemptMax,
-            ReferenceDifficultyTiming.PreemptMid,
-            ReferenceDifficultyTiming.PreemptMin) / trackRate;
+        double preempt =
+            ReferenceBeatmapDifficulty.DifficultyRange(
+                difficulty.ApproachRate,
+                ReferenceDifficultyTiming.PreemptMax,
+                ReferenceDifficultyTiming.PreemptMid,
+                ReferenceDifficultyTiming.PreemptMin
+            ) / trackRate;
 
-        difficulty.ApproachRate = (float)ReferenceBeatmapDifficulty.InverseDifficultyRange(
-            preempt,
-            ReferenceDifficultyTiming.PreemptMax,
-            ReferenceDifficultyTiming.PreemptMid,
-            ReferenceDifficultyTiming.PreemptMin);
+        difficulty.ApproachRate = (float)
+            ReferenceBeatmapDifficulty.InverseDifficultyRange(
+                preempt,
+                ReferenceDifficultyTiming.PreemptMax,
+                ReferenceDifficultyTiming.PreemptMid,
+                ReferenceDifficultyTiming.PreemptMin
+            );
 
         bool isPrecise = materializedMods.Any(mod => mod is ReferenceModPrecise);
         ReferenceHitWindow hitWindow = isPrecise
@@ -66,6 +73,7 @@ public static class ReferenceModApplicator
         difficulty.OverallDifficulty = (float)(
             isPrecise
                 ? ReferencePreciseDroidHitWindow.HitWindow300ToOverallDifficulty(greatWindow)
-                : ReferenceDroidHitWindow.HitWindow300ToOverallDifficulty(greatWindow));
+                : ReferenceDroidHitWindow.HitWindow300ToOverallDifficulty(greatWindow)
+        );
     }
 }

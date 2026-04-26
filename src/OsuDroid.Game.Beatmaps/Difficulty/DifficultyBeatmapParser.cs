@@ -1,4 +1,5 @@
 using System.Globalization;
+
 namespace OsuDroid.Game.Beatmaps.Difficulty;
 
 internal static class DifficultyBeatmapParser
@@ -72,13 +73,18 @@ internal static class DifficultyBeatmapParser
             float y = ParseFloat(fields[1]);
             long time = ParseLong(fields[2]);
             int type = ParseInt(fields[3]);
-            DifficultyObjectKind kind = (type & 2) != 0
-                ? DifficultyObjectKind.Slider
-                : (type & 8) != 0
-                    ? DifficultyObjectKind.Spinner
-                    : DifficultyObjectKind.Circle;
-            float pixelLength = kind == DifficultyObjectKind.Slider && fields.Length > 7 ? ParseFloat(fields[7]) : 0f;
-            length = kind == DifficultyObjectKind.Spinner && fields.Length > 5 ? Math.Max(length, ParseLong(fields[5])) : Math.Max(length, time);
+            DifficultyObjectKind kind =
+                (type & 2) != 0 ? DifficultyObjectKind.Slider
+                : (type & 8) != 0 ? DifficultyObjectKind.Spinner
+                : DifficultyObjectKind.Circle;
+            float pixelLength =
+                kind == DifficultyObjectKind.Slider && fields.Length > 7
+                    ? ParseFloat(fields[7])
+                    : 0f;
+            length =
+                kind == DifficultyObjectKind.Spinner && fields.Length > 5
+                    ? Math.Max(length, ParseLong(fields[5]))
+                    : Math.Max(length, time);
 
             objects.Add(new DifficultyObject(x, y, time, kind, pixelLength));
         }
@@ -94,12 +100,27 @@ internal static class DifficultyBeatmapParser
         }
 
         _ = hp;
-        return new DifficultyBeatmap(ar, od, cs, length, objects.OrderBy(obj => obj.Time).ToArray());
+        return new DifficultyBeatmap(
+            ar,
+            od,
+            cs,
+            length,
+            objects.OrderBy(obj => obj.Time).ToArray()
+        );
     }
 
-    private static int ParseInt(string? text) => int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed) ? parsed : 0;
+    private static int ParseInt(string? text) =>
+        int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed)
+            ? parsed
+            : 0;
 
-    private static long ParseLong(string? text) => long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out long parsed) ? parsed : 0L;
+    private static long ParseLong(string? text) =>
+        long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out long parsed)
+            ? parsed
+            : 0L;
 
-    private static float ParseFloat(string? text) => float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed) ? parsed : 0f;
+    private static float ParseFloat(string? text) =>
+        float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed)
+            ? parsed
+            : 0f;
 }

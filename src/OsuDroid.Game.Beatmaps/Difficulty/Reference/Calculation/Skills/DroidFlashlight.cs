@@ -3,7 +3,8 @@ using OsuDroid.Game.Beatmaps.Difficulty.Reference.Mods;
 
 namespace OsuDroid.Game.Beatmaps.Difficulty.Reference.Calculation.Skills;
 
-internal sealed class DroidFlashlight(IEnumerable<Mod> mods, bool withSliders) : DroidStrainSkill(mods)
+internal sealed class DroidFlashlight(IEnumerable<Mod> mods, bool withSliders)
+    : DroidStrainSkill(mods)
 {
     protected override double StarsPerDouble => 1.06;
 
@@ -22,15 +23,20 @@ internal sealed class DroidFlashlight(IEnumerable<Mod> mods, bool withSliders) :
     protected override double StrainValueAt(DroidDifficultyHitObject current)
     {
         currentStrain *= StrainDecay(current.DeltaTime);
-        currentStrain += DroidFlashlightEvaluator.EvaluateDifficultyOf(current, Mods, WithSliders) * SkillMultiplier;
+        currentStrain +=
+            DroidFlashlightEvaluator.EvaluateDifficultyOf(current, Mods, WithSliders)
+            * SkillMultiplier;
         ObjectStrains.Add(currentStrain);
         return currentStrain;
     }
 
-    protected override double CalculateInitialStrain(double time, DroidDifficultyHitObject current) =>
-        currentStrain * StrainDecay(time - current.Previous(0)!.StartTime);
+    protected override double CalculateInitialStrain(
+        double time,
+        DroidDifficultyHitObject current
+    ) => currentStrain * StrainDecay(time - current.Previous(0)!.StartTime);
 
     private static double StrainDecay(double ms) => System.Math.Pow(StrainDecayBase, ms / 1000d);
 
-    public static new double DifficultyToPerformance(double difficulty) => System.Math.Pow(difficulty, 1.6) * 25;
+    public static new double DifficultyToPerformance(double difficulty) =>
+        System.Math.Pow(difficulty, 1.6) * 25;
 }

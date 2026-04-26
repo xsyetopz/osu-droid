@@ -25,7 +25,8 @@ public sealed partial class PlatformTextInputService
         isUpdatingText = false;
         editText.Visibility = ViewStates.Visible;
         editText.RequestFocus();
-        var input = (InputMethodManager?)Platform.CurrentActivity?.GetSystemService(Context.InputMethodService);
+        var input = (InputMethodManager?)
+            Platform.CurrentActivity?.GetSystemService(Context.InputMethodService);
         input?.ShowSoftInput(editText, ShowFlags.Implicit);
     }
 
@@ -62,7 +63,8 @@ public sealed partial class PlatformTextInputService
         editText.SetY(bounds.Y);
         editText.LayoutParameters = new ViewGroup.LayoutParams(
             Math.Max(44, (int)MathF.Round(bounds.Width)),
-            Math.Max(44, (int)MathF.Round(bounds.Height)));
+            Math.Max(44, (int)MathF.Round(bounds.Height))
+        );
     }
 
     private void OnAndroidTextChanged(object? sender, Android.Text.TextChangedEventArgs args)

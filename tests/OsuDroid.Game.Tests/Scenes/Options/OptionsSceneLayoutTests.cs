@@ -12,18 +12,21 @@ namespace OsuDroid.Game.Tests;
 
 public sealed partial class OptionsSceneTests
 {
-
     [Test]
     public void OptionsSceneUsesFullScreenAndroidSettingsLayout()
     {
         var scene = new OptionsScene(new GameLocalizer());
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot frame = scene
+            .CreateSnapshot(VirtualViewport.FromSurface(1280, 720))
+            .UiFrame;
 
         UiElementSnapshot root = frame.Elements.Single(element => element.Id == "options-root");
         UiElementSnapshot appBar = frame.Elements.Single(element => element.Id == "options-appbar");
         UiElementSnapshot back = frame.Elements.Single(element => element.Id == "options-back-hit");
         UiElementSnapshot backIcon = frame.Elements.Single(element => element.Id == "options-back");
-        UiElementSnapshot selectedSection = frame.Elements.Single(element => element.Id == "options-section-selected");
+        UiElementSnapshot selectedSection = frame.Elements.Single(element =>
+            element.Id == "options-section-selected"
+        );
 
         Assert.That(root.Bounds, Is.EqualTo(new UiRect(0f, 0f, 1280f, 720f)));
         Assert.That(root.Color, Is.EqualTo(UiColor.Opaque(19, 19, 26)));
@@ -31,38 +34,98 @@ public sealed partial class OptionsSceneTests
         Assert.That(back.Action, Is.EqualTo(UiAction.OptionsBack));
         Assert.That(backIcon.Kind, Is.EqualTo(UiElementKind.MaterialIcon));
         Assert.That(backIcon.MaterialIcon, Is.EqualTo(UiMaterialIcon.ArrowBack));
-        Assert.That(backIcon.Bounds, Is.EqualTo(new UiRect(16f * DroidUiMetrics.DpScale, 16f * DroidUiMetrics.DpScale, DroidUiMetrics.SectionIconSize, DroidUiMetrics.SectionIconSize)));
-        Assert.That(selectedSection.Bounds, Is.EqualTo(new UiRect(DroidUiMetrics.ContentPaddingX, DroidUiMetrics.ContentTop, DroidUiMetrics.SectionRailWidth, DroidUiMetrics.SectionHeight)));
+        Assert.That(
+            backIcon.Bounds,
+            Is.EqualTo(
+                new UiRect(
+                    16f * DroidUiMetrics.DpScale,
+                    16f * DroidUiMetrics.DpScale,
+                    DroidUiMetrics.SectionIconSize,
+                    DroidUiMetrics.SectionIconSize
+                )
+            )
+        );
+        Assert.That(
+            selectedSection.Bounds,
+            Is.EqualTo(
+                new UiRect(
+                    DroidUiMetrics.ContentPaddingX,
+                    DroidUiMetrics.ContentTop,
+                    DroidUiMetrics.SectionRailWidth,
+                    DroidUiMetrics.SectionHeight
+                )
+            )
+        );
         Assert.That(frame.Elements.Any(element => element.Id == "options-panel"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "options-close-hit"), Is.False);
     }
+
     [Test]
     public void OptionsSceneUsesMaterialIconsForSettingsControls()
     {
         var scene = new OptionsScene(new GameLocalizer());
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot frame = scene
+            .CreateSnapshot(VirtualViewport.FromSurface(1280, 720))
+            .UiFrame;
 
-        Assert.That(frame.Elements.Single(element => element.Id == "options-back").MaterialIcon, Is.EqualTo(UiMaterialIcon.ArrowBack));
-        Assert.That(frame.Elements.Single(element => element.Id == "options-section-0-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.ViewGridOutline));
-        Assert.That(frame.Elements.Single(element => element.Id == "options-section-1-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.GamepadVariantOutline));
-        Assert.That(frame.Elements.Single(element => element.Id == "options-section-2-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.MonitorDashboard));
-        Assert.That(frame.Elements.Single(element => element.Id == "options-section-3-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.Headphones));
-        Assert.That(frame.Elements.Single(element => element.Id == "options-section-4-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.LibraryMusic));
-        Assert.That(frame.Elements.Single(element => element.Id == "options-section-5-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.GestureTapButton));
-        Assert.That(frame.Elements.Single(element => element.Id == "options-section-6-icon").MaterialIcon, Is.EqualTo(UiMaterialIcon.Cogs));
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "options-back").MaterialIcon,
+            Is.EqualTo(UiMaterialIcon.ArrowBack)
+        );
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "options-section-0-icon").MaterialIcon,
+            Is.EqualTo(UiMaterialIcon.ViewGridOutline)
+        );
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "options-section-1-icon").MaterialIcon,
+            Is.EqualTo(UiMaterialIcon.GamepadVariantOutline)
+        );
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "options-section-2-icon").MaterialIcon,
+            Is.EqualTo(UiMaterialIcon.MonitorDashboard)
+        );
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "options-section-3-icon").MaterialIcon,
+            Is.EqualTo(UiMaterialIcon.Headphones)
+        );
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "options-section-4-icon").MaterialIcon,
+            Is.EqualTo(UiMaterialIcon.LibraryMusic)
+        );
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "options-section-5-icon").MaterialIcon,
+            Is.EqualTo(UiMaterialIcon.GestureTapButton)
+        );
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "options-section-6-icon").MaterialIcon,
+            Is.EqualTo(UiMaterialIcon.Cogs)
+        );
     }
+
     [Test]
     public void OptionsSceneDrawsAndroidRowsAndInteractiveControls()
     {
         var scene = new OptionsScene(new GameLocalizer());
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot frame = scene
+            .CreateSnapshot(VirtualViewport.FromSurface(1280, 720))
+            .UiFrame;
 
         UiElementSnapshot row = frame.Elements.Single(element => element.Id == "options-row-0");
-        UiElementSnapshot rowLabel = frame.Elements.Single(element => element.Id == "options-row-0-label");
-        UiElementSnapshot rowSummary = frame.Elements.Single(element => element.Id == "options-row-0-summary");
-        UiElementSnapshot firstCheckbox = frame.Elements.Single(element => element.Id == "options-row-0-checkbox");
-        UiElementSnapshot secondCheckbox = frame.Elements.Single(element => element.Id == "options-row-1-checkbox");
-        UiElementSnapshot selectDropdown = frame.Elements.Single(element => element.Id == "options-row-2-dropdown");
+        UiElementSnapshot rowLabel = frame.Elements.Single(element =>
+            element.Id == "options-row-0-label"
+        );
+        UiElementSnapshot rowSummary = frame.Elements.Single(element =>
+            element.Id == "options-row-0-summary"
+        );
+        UiElementSnapshot firstCheckbox = frame.Elements.Single(element =>
+            element.Id == "options-row-0-checkbox"
+        );
+        UiElementSnapshot secondCheckbox = frame.Elements.Single(element =>
+            element.Id == "options-row-1-checkbox"
+        );
+        UiElementSnapshot selectDropdown = frame.Elements.Single(element =>
+            element.Id == "options-row-2-dropdown"
+        );
 
         Assert.That(row.IsEnabled, Is.True);
         Assert.That(row.Action, Is.EqualTo(UiAction.OptionsToggleServerConnection));
@@ -93,8 +156,14 @@ public sealed partial class OptionsSceneTests
         UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
 
         Assert.That(scene.GetBoolValue("showfirstapproachcircle"), Is.EqualTo(initial));
-        Assert.That(frame.Elements.Single(element => element.Id == "options-row-0-lock").Kind, Is.EqualTo(UiElementKind.MaterialIcon));
-        Assert.That(frame.Elements.Single(element => element.Id == "options-row-0").IsEnabled, Is.False);
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "options-row-0-lock").Kind,
+            Is.EqualTo(UiElementKind.MaterialIcon)
+        );
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "options-row-0").IsEnabled,
+            Is.False
+        );
     }
 
     [Test]
@@ -127,6 +196,7 @@ public sealed partial class OptionsSceneTests
         Assert.That(frame.Elements.Any(element => element.Id == "options-row-1-lock"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "options-row-7-lock"), Is.False);
     }
+
     [Test]
     public void OptionsSceneDrawsSliderInputButtonAndDisabledRows()
     {
@@ -136,34 +206,66 @@ public sealed partial class OptionsSceneTests
         scene.HandleAction(UiAction.OptionsSectionAudio, viewport);
         UiFrameSnapshot audioFrame = scene.CreateSnapshot(viewport).UiFrame;
 
-        Assert.That(audioFrame.Elements.Any(element => element.Id.EndsWith("-slider-track", StringComparison.Ordinal)), Is.True);
-        Assert.That(audioFrame.Elements.Any(element => element.Id.EndsWith("-slider-fill", StringComparison.Ordinal)), Is.True);
-        Assert.That(audioFrame.Elements.Any(element => element.Id.EndsWith("-slider-thumb", StringComparison.Ordinal)), Is.True);
+        Assert.That(
+            audioFrame.Elements.Any(element =>
+                element.Id.EndsWith("-slider-track", StringComparison.Ordinal)
+            ),
+            Is.True
+        );
+        Assert.That(
+            audioFrame.Elements.Any(element =>
+                element.Id.EndsWith("-slider-fill", StringComparison.Ordinal)
+            ),
+            Is.True
+        );
+        Assert.That(
+            audioFrame.Elements.Any(element =>
+                element.Id.EndsWith("-slider-thumb", StringComparison.Ordinal)
+            ),
+            Is.True
+        );
 
         scene.HandleAction(UiAction.OptionsSectionGeneral, viewport);
         scene.Scroll(180f, viewport);
         UiFrameSnapshot generalFrame = scene.CreateSnapshot(viewport).UiFrame;
-        UiElementSnapshot input = generalFrame.Elements.First(element => element.Id.EndsWith("-input", StringComparison.Ordinal));
+        UiElementSnapshot input = generalFrame.Elements.First(element =>
+            element.Id.EndsWith("-input", StringComparison.Ordinal)
+        );
 
         string inputRowId = input.Id[..input.Id.LastIndexOf("-input", StringComparison.Ordinal)];
-        UiElementSnapshot inputRow = generalFrame.Elements.Single(element => element.Id == inputRowId);
-        UiElementSnapshot inputSummary = generalFrame.Elements.Single(element => element.Id == inputRowId + "-summary");
+        UiElementSnapshot inputRow = generalFrame.Elements.Single(element =>
+            element.Id == inputRowId
+        );
+        UiElementSnapshot inputSummary = generalFrame.Elements.Single(element =>
+            element.Id == inputRowId + "-summary"
+        );
 
         Assert.That(input.Bounds.Height, Is.EqualTo(DroidUiMetrics.InputHeight));
         Assert.That(DroidUiMetrics.InputRowHeight, Is.GreaterThan(100f * DroidUiMetrics.DpScale));
         Assert.That(input.Bounds.Y, Is.GreaterThan(inputSummary.Bounds.Bottom));
-        Assert.That(input.Bounds.Bottom, Is.LessThanOrEqualTo(inputRow.Bounds.Bottom - DroidUiMetrics.RowPadding + 0.01f));
+        Assert.That(
+            input.Bounds.Bottom,
+            Is.LessThanOrEqualTo(inputRow.Bounds.Bottom - DroidUiMetrics.RowPadding + 0.01f)
+        );
     }
+
     [Test]
     public void OptionsSceneAdvancedDirectoriesUseAndroidRowsWithoutFakeUnavailableText()
     {
-        var defaults = new OptionsPathDefaults("/tmp/osu!droid", "/tmp/osu!droid/Skin", "/tmp/osu!droid/Songs");
+        var defaults = new OptionsPathDefaults(
+            "/tmp/osu!droid",
+            "/tmp/osu!droid/Skin",
+            "/tmp/osu!droid/Songs"
+        );
         var scene = new OptionsScene(new GameLocalizer(), pathDefaults: defaults);
         var viewport = VirtualViewport.FromSurface(1280, 720);
 
         scene.HandleAction(UiAction.OptionsSectionAdvanced, viewport);
         UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
-        string?[] texts = frame.Elements.Where(element => element.Kind == UiElementKind.Text).Select(element => element.Text).ToArray();
+        string?[] texts = frame
+            .Elements.Where(element => element.Kind == UiElementKind.Text)
+            .Select(element => element.Text)
+            .ToArray();
 
         Assert.That(scene.ActiveRows, Does.Contain("Main directory"));
         Assert.That(scene.ActiveRows, Does.Contain("Skin directory"));
@@ -174,24 +276,43 @@ public sealed partial class OptionsSceneTests
         Assert.That(texts, Does.Contain(defaults.SkinTopPath));
         Assert.That(texts, Does.Contain(defaults.SongsDirectory));
     }
+
     [Test]
     public void OptionsSceneSelectRowsKeepValueAndDropdownOnRight()
     {
         var scene = new OptionsScene(new GameLocalizer());
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot frame = scene
+            .CreateSnapshot(VirtualViewport.FromSurface(1280, 720))
+            .UiFrame;
 
         UiElementSnapshot row = frame.Elements.Single(element => element.Id == "options-row-2");
-        UiElementSnapshot summary = frame.Elements.Single(element => element.Id == "options-row-2-summary");
-        UiElementSnapshot value = frame.Elements.Single(element => element.Id == "options-row-2-value");
-        UiElementSnapshot dropdown = frame.Elements.Single(element => element.Id == "options-row-2-dropdown");
+        UiElementSnapshot summary = frame.Elements.Single(element =>
+            element.Id == "options-row-2-summary"
+        );
+        UiElementSnapshot value = frame.Elements.Single(element =>
+            element.Id == "options-row-2-value"
+        );
+        UiElementSnapshot dropdown = frame.Elements.Single(element =>
+            element.Id == "options-row-2-dropdown"
+        );
 
         Assert.That(summary.Bounds.Right, Is.LessThan(value.Bounds.X));
         Assert.That(value.Bounds.Right, Is.LessThanOrEqualTo(dropdown.Bounds.X));
         Assert.That(value.TextStyle!.Alignment, Is.EqualTo(UiTextAlignment.Right));
-        Assert.That(dropdown.Bounds.X, Is.GreaterThan(row.Bounds.Right - DroidUiMetrics.RowPadding - DroidUiMetrics.SectionIconSize - 0.01f));
-        Assert.That(dropdown.Bounds.Y + dropdown.Bounds.Height / 2f, Is.EqualTo(row.Bounds.Y + row.Bounds.Height / 2f).Within(0.001f));
+        Assert.That(
+            dropdown.Bounds.X,
+            Is.GreaterThan(
+                row.Bounds.Right
+                    - DroidUiMetrics.RowPadding
+                    - DroidUiMetrics.SectionIconSize
+                    - 0.01f
+            )
+        );
+        Assert.That(
+            dropdown.Bounds.Y + dropdown.Bounds.Height / 2f,
+            Is.EqualTo(row.Bounds.Y + row.Bounds.Height / 2f).Within(0.001f)
+        );
     }
-
 }
 
 internal sealed class MemorySettingsStore : IGameSettingsStore
@@ -200,11 +321,14 @@ internal sealed class MemorySettingsStore : IGameSettingsStore
     private readonly Dictionary<string, int> _intValues = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _stringValues = new(StringComparer.Ordinal);
 
-    public bool GetBool(string key, bool defaultValue) => _boolValues.GetValueOrDefault(key, defaultValue);
+    public bool GetBool(string key, bool defaultValue) =>
+        _boolValues.GetValueOrDefault(key, defaultValue);
 
-    public int GetInt(string key, int defaultValue) => _intValues.GetValueOrDefault(key, defaultValue);
+    public int GetInt(string key, int defaultValue) =>
+        _intValues.GetValueOrDefault(key, defaultValue);
 
-    public string GetString(string key, string defaultValue) => _stringValues.GetValueOrDefault(key, defaultValue);
+    public string GetString(string key, string defaultValue) =>
+        _stringValues.GetValueOrDefault(key, defaultValue);
 
     public void SetBool(string key, bool value) => _boolValues[key] = value;
 
@@ -219,7 +343,5 @@ internal sealed class CapturingTextInputService : ITextInputService
 
     public void RequestTextInput(TextInputRequest request) => ActiveRequest = request;
 
-    public void HideTextInput()
-    {
-    }
+    public void HideTextInput() { }
 }

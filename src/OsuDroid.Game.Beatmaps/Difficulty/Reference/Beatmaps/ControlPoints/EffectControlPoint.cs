@@ -5,6 +5,5 @@ internal sealed class EffectControlPoint(double time, bool isKiai) : ControlPoin
     public bool IsKiai { get; } = isKiai;
 
     public override bool IsRedundant(ControlPoint existing) =>
-        existing is EffectControlPoint effectControlPoint &&
-        IsKiai == effectControlPoint.IsKiai;
+        existing is EffectControlPoint effectControlPoint && IsKiai == effectControlPoint.IsKiai;
 }

@@ -56,12 +56,16 @@ internal abstract class StrainSkill<TObject>(IEnumerable<Mod> mods) : Skill<TObj
         double consistentTopStrain = difficulty / 10d;
         return consistentTopStrain == 0d
             ? ObjectStrains.Count
-            : ObjectStrains.Sum(strain => 1.1d / (1 + System.Math.Exp(-10 * (strain / consistentTopStrain - 0.88))));
+            : ObjectStrains.Sum(strain =>
+                1.1d / (1 + System.Math.Exp(-10 * (strain / consistentTopStrain - 0.88)))
+            );
     }
 
     protected void ReduceHighestStrainPeaks(List<double> peaks)
     {
-        int[] highestIndices = Enumerable.Repeat(-1, System.Math.Min(peaks.Count, ReducedSectionCount)).ToArray();
+        int[] highestIndices = Enumerable
+            .Repeat(-1, System.Math.Min(peaks.Count, ReducedSectionCount))
+            .ToArray();
         if (highestIndices.Length == 0)
         {
             return;
@@ -77,7 +81,10 @@ internal abstract class StrainSkill<TObject>(IEnumerable<Mod> mods) : Skill<TObj
                 continue;
             }
 
-            int insertionIndex = Array.FindIndex(highestIndices, index => strain > (index > -1 ? peaks[index] : 0d));
+            int insertionIndex = Array.FindIndex(
+                highestIndices,
+                index => strain > (index > -1 ? peaks[index] : 0d)
+            );
             for (int j = highestIndices.Length - 1; j > insertionIndex; --j)
             {
                 highestIndices[j] = highestIndices[j - 1];
@@ -94,7 +101,9 @@ internal abstract class StrainSkill<TObject>(IEnumerable<Mod> mods) : Skill<TObj
                 continue;
             }
 
-            double scale = System.Math.Log10(Interpolation.Linear(1d, 10d, i / (double)ReducedSectionCount));
+            double scale = System.Math.Log10(
+                Interpolation.Linear(1d, 10d, i / (double)ReducedSectionCount)
+            );
             peaks[index] *= Interpolation.Linear(ReducedSectionBaseline, 1d, scale);
         }
     }

@@ -18,9 +18,11 @@ internal sealed class Beatmap
 
     public BeatmapHitObjects HitObjects { get; set; } = new([]);
 
-    public DroidPlayableBeatmap CreateDroidPlayableBeatmap(IEnumerable<Mod>? mods) => new(this, GameMode.Droid, mods);
+    public DroidPlayableBeatmap CreateDroidPlayableBeatmap(IEnumerable<Mod>? mods) =>
+        new(this, GameMode.Droid, mods);
 
-    public StandardPlayableBeatmap CreateStandardPlayableBeatmap(IEnumerable<Mod>? mods) => new(this, GameMode.Standard, mods);
+    public StandardPlayableBeatmap CreateStandardPlayableBeatmap(IEnumerable<Mod>? mods) =>
+        new(this, GameMode.Standard, mods);
 }
 
 internal sealed class BeatmapHitObjects(IReadOnlyList<HitObject> objects)
@@ -64,7 +66,8 @@ internal abstract class PlayableBeatmap
             beatmap.Difficulty.DifficultyCircleSize,
             beatmap.Difficulty.ApproachRate,
             beatmap.Difficulty.OverallDifficulty,
-            beatmap.Difficulty.HealthDrainRate)
+            beatmap.Difficulty.HealthDrainRate
+        )
         {
             GameplayCircleSize = beatmap.Difficulty.GameplayCircleSize,
             SliderMultiplier = beatmap.Difficulty.SliderMultiplier,
@@ -73,7 +76,8 @@ internal abstract class PlayableBeatmap
 
         ControlPoints = beatmap.ControlPoints;
         Mods = new ModCollection(mods);
-        SpeedMultiplier = Mods.Values.OfType<IReferenceModApplicableToTrackRate>()
+        SpeedMultiplier = Mods
+            .Values.OfType<IReferenceModApplicableToTrackRate>()
             .Aggregate(1f, static (rate, mod) => mod.ApplyToRate(double.PositiveInfinity, rate));
 
         foreach (var difficultyAdjust in Mods.Values.OfType<ReferenceModDifficultyAdjust>())
@@ -85,12 +89,20 @@ internal abstract class PlayableBeatmap
             Difficulty,
             mode,
             Mods.Values.OfType<ReferenceMod>(),
-            withRateChange: true);
+            withRateChange: true
+        );
 
-        HitObject[] objects = beatmap.HitObjects.Objects.Select(obj => CloneAndApply(obj, Difficulty, ControlPoints, mode)).ToArray();
+        HitObject[] objects = beatmap
+            .HitObjects.Objects.Select(obj => CloneAndApply(obj, Difficulty, ControlPoints, mode))
+            .ToArray();
         ApplyStacking(objects, beatmap.FormatVersion, beatmap.StackLeniency);
         HitObjects = new BeatmapHitObjects(objects);
-        MaxCombo = HitObjects.CircleCount + HitObjects.SliderCount + HitObjects.Objects.OfType<Slider>().Sum(static slider => slider.NestedHitObjects.Count - 1);
+        MaxCombo =
+            HitObjects.CircleCount
+            + HitObjects.SliderCount
+            + HitObjects
+                .Objects.OfType<Slider>()
+                .Sum(static slider => slider.NestedHitObjects.Count - 1);
     }
 
     public ReferenceBeatmapDifficulty Difficulty { get; }
@@ -105,14 +117,26 @@ internal abstract class PlayableBeatmap
 
     public int MaxCombo { get; }
 
-    private static HitObject CloneAndApply(HitObject obj, ReferenceBeatmapDifficulty difficulty, BeatmapControlPoints controlPoints, GameMode mode)
+    private static HitObject CloneAndApply(
+        HitObject obj,
+        ReferenceBeatmapDifficulty difficulty,
+        BeatmapControlPoints controlPoints,
+        GameMode mode
+    )
     {
         HitObject clone = obj switch
         {
             HitCircle circle => new HitCircle(circle.StartTime, circle.Position),
             Spinner spinner => new Spinner(spinner.StartTime, spinner.EndTime, spinner.Position),
-            Slider slider => new Slider(slider.StartTime, slider.Position, slider.RepeatCount, slider.Path),
-            _ => throw new InvalidOperationException($"Unsupported hit object {obj.GetType().Name}."),
+            Slider slider => new Slider(
+                slider.StartTime,
+                slider.Position,
+                slider.RepeatCount,
+                slider.Path
+            ),
+            _ => throw new InvalidOperationException(
+                $"Unsupported hit object {obj.GetType().Name}."
+            ),
         };
 
         clone.ApplyDefaults(difficulty, controlPoints, mode);
@@ -167,13 +191,21 @@ internal abstract class PlayableBeatmap
                         break;
                     }
 
-                    if (objectN is Slider && objectN.EndPosition.DistanceSquaredTo(objectI.Position) < stackDistanceSquared)
+                    if (
+                        objectN is Slider
+                        && objectN.EndPosition.DistanceSquaredTo(objectI.Position)
+                            < stackDistanceSquared
+                    )
                     {
-                        int offset = objectI.DifficultyStackHeight - objectN.DifficultyStackHeight + 1;
+                        int offset =
+                            objectI.DifficultyStackHeight - objectN.DifficultyStackHeight + 1;
                         for (int j = n + 1; j <= i; j++)
                         {
                             HitObject objectJ = objects[j];
-                            if (objectN.EndPosition.DistanceSquaredTo(objectJ.Position) < stackDistanceSquared)
+                            if (
+                                objectN.EndPosition.DistanceSquaredTo(objectJ.Position)
+                                < stackDistanceSquared
+                            )
                             {
                                 objectJ.DifficultyStackHeight -= offset;
                             }
@@ -204,7 +236,10 @@ internal abstract class PlayableBeatmap
                         break;
                     }
 
-                    if (objectN.EndPosition.DistanceSquaredTo(objectI.Position) < stackDistanceSquared)
+                    if (
+                        objectN.EndPosition.DistanceSquaredTo(objectI.Position)
+                        < stackDistanceSquared
+                    )
                     {
                         objectN.DifficultyStackHeight = objectI.DifficultyStackHeight + 1;
                         objectI = objectN;
@@ -243,7 +278,10 @@ internal abstract class PlayableBeatmap
                     current.DifficultyStackHeight++;
                     startTime = objects[j].StartTime;
                 }
-                else if (objects[j].Position.DistanceSquaredTo(current.EndPosition) < stackDistanceSquared)
+                else if (
+                    objects[j].Position.DistanceSquaredTo(current.EndPosition)
+                    < stackDistanceSquared
+                )
                 {
                     sliderStack++;
                     objects[j].DifficultyStackHeight -= sliderStack;
@@ -253,14 +291,18 @@ internal abstract class PlayableBeatmap
         }
     }
 
-    private static double CalculateStackThreshold(HitObject hitObject, double stackLeniency) => (int)hitObject.TimePreempt * stackLeniency;
+    private static double CalculateStackThreshold(HitObject hitObject, double stackLeniency) =>
+        (int)hitObject.TimePreempt * stackLeniency;
 }
 
 internal sealed class DroidPlayableBeatmap(Beatmap beatmap, GameMode mode, IEnumerable<Mod>? mods)
     : PlayableBeatmap(beatmap, mode, mods);
 
-internal sealed class StandardPlayableBeatmap(Beatmap beatmap, GameMode mode, IEnumerable<Mod>? mods)
-    : PlayableBeatmap(beatmap, mode, mods);
+internal sealed class StandardPlayableBeatmap(
+    Beatmap beatmap,
+    GameMode mode,
+    IEnumerable<Mod>? mods
+) : PlayableBeatmap(beatmap, mode, mods);
 
 internal static class ReferenceBeatmapParser
 {
@@ -278,8 +320,15 @@ internal static class ReferenceBeatmapParser
                 continue;
             }
 
-            if (line.StartsWith("osu file format v", StringComparison.OrdinalIgnoreCase) &&
-                int.TryParse(line["osu file format v".Length..], NumberStyles.Integer, CultureInfo.InvariantCulture, out int formatVersion))
+            if (
+                line.StartsWith("osu file format v", StringComparison.OrdinalIgnoreCase)
+                && int.TryParse(
+                    line["osu file format v".Length..],
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture,
+                    out int formatVersion
+                )
+            )
             {
                 beatmap.FormatVersion = formatVersion;
                 continue;
@@ -313,7 +362,9 @@ internal static class ReferenceBeatmapParser
             }
         }
 
-        beatmap.HitObjects = new BeatmapHitObjects(hitObjects.OrderBy(static obj => obj.StartTime).ToArray());
+        beatmap.HitObjects = new BeatmapHitObjects(
+            hitObjects.OrderBy(static obj => obj.StartTime).ToArray()
+        );
         return beatmap;
     }
 
@@ -382,11 +433,23 @@ internal static class ReferenceBeatmapParser
 
         if (uninherited)
         {
-            controlPoints.Timing.Add(new TimingControlPoint(time, beatLength, fields.Length > 2 ? ParseInt(fields[2]) : 4));
+            controlPoints.Timing.Add(
+                new TimingControlPoint(
+                    time,
+                    beatLength,
+                    fields.Length > 2 ? ParseInt(fields[2]) : 4
+                )
+            );
         }
         else if (beatLength < 0)
         {
-            controlPoints.Difficulty.Add(new DifficultyControlPoint(time, System.Math.Clamp(-100.0 / beatLength, 0.1, 10.0), true));
+            controlPoints.Difficulty.Add(
+                new DifficultyControlPoint(
+                    time,
+                    System.Math.Clamp(-100.0 / beatLength, 0.1, 10.0),
+                    true
+                )
+            );
         }
     }
 
@@ -408,19 +471,28 @@ internal static class ReferenceBeatmapParser
             return new Slider(time, position, System.Math.Max(1, ParseInt(fields[6])), path);
         }
 
-        return (type & 8) != 0 && fields.Length > 5 ? new Spinner(time, ParseDouble(fields[5]), position) : new HitCircle(time, position);
+        return (type & 8) != 0 && fields.Length > 5
+            ? new Spinner(time, ParseDouble(fields[5]), position)
+            : new HitCircle(time, position);
     }
 
-    private static SliderPath ParseSliderPath(ReferenceVector2 startPosition, string encoded, double expectedDistance)
+    private static SliderPath ParseSliderPath(
+        ReferenceVector2 startPosition,
+        string encoded,
+        double expectedDistance
+    )
     {
         string[] parts = encoded.Split('|', StringSplitOptions.RemoveEmptyEntries);
-        SliderPathType pathType = parts.Length == 0 ? SliderPathType.Bezier : parts[0] switch
-        {
-            "L" => SliderPathType.Linear,
-            "P" => SliderPathType.PerfectCurve,
-            "C" => SliderPathType.Catmull,
-            _ => SliderPathType.Bezier,
-        };
+        SliderPathType pathType =
+            parts.Length == 0
+                ? SliderPathType.Bezier
+                : parts[0] switch
+                {
+                    "L" => SliderPathType.Linear,
+                    "P" => SliderPathType.PerfectCurve,
+                    "C" => SliderPathType.Catmull,
+                    _ => SliderPathType.Bezier,
+                };
 
         var points = new List<ReferenceVector2> { new(0, 0) };
         foreach (string part in parts.Skip(1))
@@ -428,16 +500,30 @@ internal static class ReferenceBeatmapParser
             string[] xy = part.Split(':');
             if (xy.Length == 2)
             {
-                points.Add(new ReferenceVector2(ParseFloat(xy[0]) - startPosition.X, ParseFloat(xy[1]) - startPosition.Y));
+                points.Add(
+                    new ReferenceVector2(
+                        ParseFloat(xy[0]) - startPosition.X,
+                        ParseFloat(xy[1]) - startPosition.Y
+                    )
+                );
             }
         }
 
         return new SliderPath(pathType, points, expectedDistance);
     }
 
-    private static int ParseInt(string? text) => int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed) ? parsed : 0;
+    private static int ParseInt(string? text) =>
+        int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed)
+            ? parsed
+            : 0;
 
-    private static float ParseFloat(string? text) => float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed) ? parsed : 0f;
+    private static float ParseFloat(string? text) =>
+        float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed)
+            ? parsed
+            : 0f;
 
-    private static double ParseDouble(string? text) => double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out double parsed) ? parsed : 0d;
+    private static double ParseDouble(string? text) =>
+        double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out double parsed)
+            ? parsed
+            : 0d;
 }

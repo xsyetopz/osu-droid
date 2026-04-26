@@ -5,10 +5,10 @@ namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
 {
-
     private sealed class FakeBeatmapProcessingService : IBeatmapProcessingService
     {
-        public BeatmapProcessingState State { get; private set; } = new(true, 35, "Processing beatmaps...");
+        public BeatmapProcessingState State { get; private set; } =
+            new(true, 35, "Processing beatmaps...");
 
         public int StartCalls { get; private set; }
 
@@ -16,9 +16,7 @@ public sealed partial class UiCompatibilityTests
 
         public bool HasPendingWork() => _completedSnapshot is null;
 
-        public void EnqueueArchive(string archivePath, BeatmapOnlineMetadata? metadata = null)
-        {
-        }
+        public void EnqueueArchive(string archivePath, BeatmapOnlineMetadata? metadata = null) { }
 
         public void Start() => StartCalls++;
 
@@ -49,13 +47,9 @@ public sealed partial class UiCompatibilityTests
 
         public bool HasPendingWork() => false;
 
-        public void EnqueueArchive(string archivePath, BeatmapOnlineMetadata? metadata = null)
-        {
-        }
+        public void EnqueueArchive(string archivePath, BeatmapOnlineMetadata? metadata = null) { }
 
-        public void Start()
-        {
-        }
+        public void Start() { }
 
         public bool TryConsumeCompletedSnapshot(out BeatmapLibrarySnapshot snapshot)
         {

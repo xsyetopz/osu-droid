@@ -13,13 +13,23 @@ public sealed partial class BeatmapDownloaderScene
     {
         var elements = new List<UiElementSnapshot>
         {
-            Fill("downloader-background", new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight), s_background),
+            Fill(
+                "downloader-background",
+                new UiRect(0f, 0f, viewport.VirtualWidth, viewport.VirtualHeight),
+                s_background
+            ),
         };
 
         AddCards(elements, viewport);
 
         DroidSceneChrome.AddAppBar(elements, "downloader", viewport.VirtualWidth, s_appBar);
-        DroidSceneChrome.AddBackButton(elements, "downloader", UiAction.DownloaderBack, s_appBar, s_white);
+        DroidSceneChrome.AddBackButton(
+            elements,
+            "downloader",
+            UiAction.DownloaderBack,
+            s_appBar,
+            s_white
+        );
         AddTopBar(elements, viewport);
 
         if (_filtersOpen)
@@ -51,30 +61,118 @@ public sealed partial class BeatmapDownloaderScene
         float searchRight = searchBounds.Right;
         BeatmapMirrorDefinition currentMirror = MirrorDefinition(_mirror);
 
-        elements.Add(Fill("downloader-search", searchBounds, s_field, 1f, UiAction.DownloaderSearchBox, Radius));
+        elements.Add(
+            Fill(
+                "downloader-search",
+                searchBounds,
+                s_field,
+                1f,
+                UiAction.DownloaderSearchBox,
+                Radius
+            )
+        );
         if (_isSearchFocused)
         {
-            elements.Add(Fill("downloader-search-focus", searchBounds, s_white, 0.16f, UiAction.DownloaderSearchBox, Radius));
+            elements.Add(
+                Fill(
+                    "downloader-search-focus",
+                    searchBounds,
+                    s_white,
+                    0.16f,
+                    UiAction.DownloaderSearchBox,
+                    Radius
+                )
+            );
         }
 
-        elements.Add(Text("downloader-search-text", string.IsNullOrWhiteSpace(_query) ? _localizer["BeatmapDownloader_SearchPlaceholder"] : _query, searchBounds.X + 14f * Dp, searchBounds.Y + 7f * Dp, searchBounds.Width - 56f * Dp, 22f * Dp, 14f * Dp, string.IsNullOrWhiteSpace(_query) ? s_muted : s_white, UiTextAlignment.Left, UiAction.DownloaderSearchBox));
-        elements.Add(MaterialIcon("downloader-search-icon", UiMaterialIcon.Search, new UiRect(searchBounds.Right - 36f * Dp, searchBounds.Y + 6f * Dp, 24f * Dp, 24f * Dp), s_muted, 1f, UiAction.DownloaderSearchBox));
+        elements.Add(
+            Text(
+                "downloader-search-text",
+                string.IsNullOrWhiteSpace(_query)
+                    ? _localizer["BeatmapDownloader_SearchPlaceholder"]
+                    : _query,
+                searchBounds.X + 14f * Dp,
+                searchBounds.Y + 7f * Dp,
+                searchBounds.Width - 56f * Dp,
+                22f * Dp,
+                14f * Dp,
+                string.IsNullOrWhiteSpace(_query) ? s_muted : s_white,
+                UiTextAlignment.Left,
+                UiAction.DownloaderSearchBox
+            )
+        );
+        elements.Add(
+            MaterialIcon(
+                "downloader-search-icon",
+                UiMaterialIcon.Search,
+                new UiRect(
+                    searchBounds.Right - 36f * Dp,
+                    searchBounds.Y + 6f * Dp,
+                    24f * Dp,
+                    24f * Dp
+                ),
+                s_muted,
+                1f,
+                UiAction.DownloaderSearchBox
+            )
+        );
 
         if (_isSearching)
         {
-            elements.Add(ProgressRing("downloader-searching-indicator", new UiRect(DroidUiMetrics.AppBarHeight + 14f * Dp, 18f * Dp, 20f * Dp, 20f * Dp), s_white, 3f * Dp, 96f, _loadingIndicatorRotationDegrees));
+            elements.Add(
+                ProgressRing(
+                    "downloader-searching-indicator",
+                    new UiRect(
+                        DroidUiMetrics.AppBarHeight + 14f * Dp,
+                        18f * Dp,
+                        20f * Dp,
+                        20f * Dp
+                    ),
+                    s_white,
+                    3f * Dp,
+                    96f,
+                    _loadingIndicatorRotationDegrees
+                )
+            );
         }
 
         float filtersX = searchRight + 6f * Dp;
         if (!_isSearching && _hasSearchError)
         {
-            elements.Add(MaterialIcon("downloader-refresh", UiMaterialIcon.Refresh, new UiRect(filtersX + 14f * Dp, 16f * Dp, 24f * Dp, 24f * Dp), s_white, 1f, UiAction.DownloaderRefresh));
+            elements.Add(
+                MaterialIcon(
+                    "downloader-refresh",
+                    UiMaterialIcon.Refresh,
+                    new UiRect(filtersX + 14f * Dp, 16f * Dp, 24f * Dp, 24f * Dp),
+                    s_white,
+                    1f,
+                    UiAction.DownloaderRefresh
+                )
+            );
             filtersX += 52f * Dp;
         }
 
-        AddCompoundButton(elements, "downloader-filters", new UiRect(filtersX, 4f * Dp, filtersWidth, 48f * Dp), _localizer["BeatmapDownloader_Filters"], UiAction.DownloaderFilters, UiMaterialIcon.Tune, null, _filtersOpen ? DroidUiTheme.Controls.DropdownSelected : s_appBar, _filtersOpen ? 15f * Dp : 0f);
+        AddCompoundButton(
+            elements,
+            "downloader-filters",
+            new UiRect(filtersX, 4f * Dp, filtersWidth, 48f * Dp),
+            _localizer["BeatmapDownloader_Filters"],
+            UiAction.DownloaderFilters,
+            UiMaterialIcon.Tune,
+            null,
+            _filtersOpen ? DroidUiTheme.Controls.DropdownSelected : s_appBar,
+            _filtersOpen ? 15f * Dp : 0f
+        );
 
         float mirrorX = filtersX + filtersWidth;
-        AddCompoundSpriteButton(elements, "downloader-mirror", new UiRect(mirrorX, 4f * Dp, mirrorWidth, 48f * Dp), currentMirror.Description, MirrorLogoAsset(_mirror), UiAction.DownloaderMirror, UiMaterialIcon.ArrowDropDown);
+        AddCompoundSpriteButton(
+            elements,
+            "downloader-mirror",
+            new UiRect(mirrorX, 4f * Dp, mirrorWidth, 48f * Dp),
+            currentMirror.Description,
+            MirrorLogoAsset(_mirror),
+            UiAction.DownloaderMirror,
+            UiMaterialIcon.ArrowDropDown
+        );
     }
 }

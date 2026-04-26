@@ -3,16 +3,18 @@ using OsuDroid.Game.Scenes.MainMenu;
 using OsuDroid.Game.UI.Assets;
 using OsuDroid.Game.UI.Elements;
 using OsuDroid.Game.UI.Geometry;
+
 namespace OsuDroid.Game.Tests;
 
 public sealed partial class UiCompatibilityTests
 {
-
     [Test]
     public void MainMenuDoesNotDrawProfileBadgeWhenServerConnectionIsOff()
     {
         var scene = new MainMenuScene();
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot frame = scene
+            .CreateSnapshot(VirtualViewport.FromSurface(1280, 720))
+            .UiFrame;
 
         Assert.That(frame.Elements.Any(element => element.Id == "profile-panel"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "profile-player"), Is.False);
@@ -22,7 +24,9 @@ public sealed partial class UiCompatibilityTests
     public void MainMenuDrawsOnlinePanelAboveLogoWhenServerConnectionIsOn()
     {
         var scene = new MainMenuScene(onlinePanelState: OnlineProfilePanelState.Connecting);
-        var elements = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame.Elements.ToList();
+        var elements = scene
+            .CreateSnapshot(VirtualViewport.FromSurface(1280, 720))
+            .UiFrame.Elements.ToList();
 
         int logoIndex = elements.FindIndex(element => element.Id == "logo");
         int panelIndex = elements.FindIndex(element => element.Id == "profile-panel");
@@ -36,15 +40,43 @@ public sealed partial class UiCompatibilityTests
     public void MainMenuOnlinePanelUsesAndroidOnlinePanelGeometry()
     {
         var scene = new MainMenuScene(onlinePanelState: OnlineProfilePanelState.Connecting);
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        UiFrameSnapshot frame = scene
+            .CreateSnapshot(VirtualViewport.FromSurface(1280, 720))
+            .UiFrame;
 
         UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "profile-panel");
-        UiElementSnapshot avatarFooter = frame.Elements.Single(element => element.Id == "profile-avatar-footer");
+        UiElementSnapshot avatarFooter = frame.Elements.Single(element =>
+            element.Id == "profile-avatar-footer"
+        );
 
-        Assert.That(panel.Bounds, Is.EqualTo(new UiRect(MainMenuScene.OnlinePanelX, MainMenuScene.OnlinePanelY, MainMenuScene.OnlinePanelWidth, MainMenuScene.OnlinePanelHeight)));
-        Assert.That(avatarFooter.Bounds, Is.EqualTo(new UiRect(MainMenuScene.OnlinePanelX, MainMenuScene.OnlinePanelY, MainMenuScene.OnlinePanelAvatarFooterSize, MainMenuScene.OnlinePanelAvatarFooterSize)));
-        UiElementSnapshot message = frame.Elements.Single(element => element.Id == "profile-message");
-        UiElementSnapshot submessage = frame.Elements.Single(element => element.Id == "profile-submessage");
+        Assert.That(
+            panel.Bounds,
+            Is.EqualTo(
+                new UiRect(
+                    MainMenuScene.OnlinePanelX,
+                    MainMenuScene.OnlinePanelY,
+                    MainMenuScene.OnlinePanelWidth,
+                    MainMenuScene.OnlinePanelHeight
+                )
+            )
+        );
+        Assert.That(
+            avatarFooter.Bounds,
+            Is.EqualTo(
+                new UiRect(
+                    MainMenuScene.OnlinePanelX,
+                    MainMenuScene.OnlinePanelY,
+                    MainMenuScene.OnlinePanelAvatarFooterSize,
+                    MainMenuScene.OnlinePanelAvatarFooterSize
+                )
+            )
+        );
+        UiElementSnapshot message = frame.Elements.Single(element =>
+            element.Id == "profile-message"
+        );
+        UiElementSnapshot submessage = frame.Elements.Single(element =>
+            element.Id == "profile-submessage"
+        );
 
         Assert.That(panel.Color, Is.EqualTo(new UiColor(51, 51, 51, 128)));
         Assert.That(avatarFooter.Color, Is.EqualTo(new UiColor(51, 51, 51, 204)));
@@ -63,12 +95,29 @@ public sealed partial class UiCompatibilityTests
     [Test]
     public void MainMenuLoggedInProfileBadgeShowsPerformanceAndAccuracy()
     {
-        var scene = new MainMenuScene(onlinePanelState: new OnlineProfilePanelState(new OnlineProfileSnapshot("Player", DroidAssets.EmptyAvatar, Rank: 42, PerformancePoints: 12345, Accuracy: 98.76f)));
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        var scene = new MainMenuScene(
+            onlinePanelState: new OnlineProfilePanelState(
+                new OnlineProfileSnapshot(
+                    "Player",
+                    DroidAssets.EmptyAvatar,
+                    Rank: 42,
+                    PerformancePoints: 12345,
+                    Accuracy: 98.76f
+                )
+            )
+        );
+        UiFrameSnapshot frame = scene
+            .CreateSnapshot(VirtualViewport.FromSurface(1280, 720))
+            .UiFrame;
 
-        Assert.That(frame.Elements.Single(element => element.Id == "profile-player").Text, Is.EqualTo("Player"));
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "profile-player").Text,
+            Is.EqualTo("Player")
+        );
         UiElementSnapshot rank = frame.Elements.Single(element => element.Id == "profile-rank");
-        UiElementSnapshot performance = frame.Elements.Single(element => element.Id == "profile-pp");
+        UiElementSnapshot performance = frame.Elements.Single(element =>
+            element.Id == "profile-pp"
+        );
         UiElementSnapshot accuracy = frame.Elements.Single(element => element.Id == "profile-acc");
 
         Assert.That(rank.Text, Is.EqualTo("#42"));
@@ -87,7 +136,9 @@ public sealed partial class UiCompatibilityTests
     public void MainMenuProfileBadgeStaysTopLeftOnWidePhoneViewport()
     {
         var scene = new MainMenuScene(onlinePanelState: OnlineProfilePanelState.Connecting);
-        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(2532, 1170)).UiFrame;
+        UiFrameSnapshot frame = scene
+            .CreateSnapshot(VirtualViewport.FromSurface(2532, 1170))
+            .UiFrame;
 
         UiElementSnapshot panel = frame.Elements.Single(element => element.Id == "profile-panel");
 

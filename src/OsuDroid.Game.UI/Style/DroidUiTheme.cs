@@ -1,4 +1,5 @@
 using OsuDroid.Game.UI.Geometry;
+
 namespace OsuDroid.Game.UI.Style;
 
 public static class DroidUiTheme
@@ -53,5 +54,6 @@ public static class DroidUiTheme
             (byte)Math.Clamp((int)MathF.Round(color.Red * scalar), 0, 255),
             (byte)Math.Clamp((int)MathF.Round(color.Green * scalar), 0, 255),
             (byte)Math.Clamp((int)MathF.Round(color.Blue * scalar), 0, 255),
-            color.Alpha);
+            color.Alpha
+        );
 }

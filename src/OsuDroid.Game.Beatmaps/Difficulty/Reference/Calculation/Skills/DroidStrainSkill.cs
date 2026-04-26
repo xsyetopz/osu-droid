@@ -2,7 +2,8 @@ using OsuDroid.Game.Beatmaps.Difficulty.Reference.Mods;
 
 namespace OsuDroid.Game.Beatmaps.Difficulty.Reference.Calculation.Skills;
 
-internal abstract class DroidStrainSkill(IEnumerable<Mod> mods) : StrainSkill<DroidDifficultyHitObject>(mods)
+internal abstract class DroidStrainSkill(IEnumerable<Mod> mods)
+    : StrainSkill<DroidDifficultyHitObject>(mods)
 {
     protected abstract double StarsPerDouble { get; }
 
@@ -21,9 +22,13 @@ internal abstract class DroidStrainSkill(IEnumerable<Mod> mods) : StrainSkill<Dr
         List<double> peaks = CurrentStrainPeaks;
         ReduceHighestStrainPeaks(peaks);
         double starsPerDoubleLog2 = System.Math.Log2(StarsPerDouble);
-        difficulty = System.Math.Pow(peaks.Sum(strain => System.Math.Pow(strain, 1 / starsPerDoubleLog2)), starsPerDoubleLog2);
+        difficulty = System.Math.Pow(
+            peaks.Sum(strain => System.Math.Pow(strain, 1 / starsPerDoubleLog2)),
+            starsPerDoubleLog2
+        );
         return difficulty;
     }
 
-    protected override double CalculateCurrentSectionStart(DroidDifficultyHitObject current) => current.StartTime;
+    protected override double CalculateCurrentSectionStart(DroidDifficultyHitObject current) =>
+        current.StartTime;
 }

@@ -14,6 +14,7 @@ csharp_style_namespace_declarations = file_scoped:warning
 csharp_using_directive_placement = outside_namespace:warning
 dotnet_sort_system_directives_first = true
 dotnet_separate_import_directive_groups = false
+max_line_length = 100
 ## --------------------------------------------------------------------------------
 csharp_style_var_for_built_in_types = false:warning
 csharp_style_var_when_type_is_apparent = true:warning
@@ -144,6 +145,7 @@ dotnet_diagnostic.IDE0130.severity = warning  # Namespace does not match folder 
 
 [*.{xml,csproj,props,targets,resx}]
 indent_size = 2
+max_line_length = 100
 
 [*.{json,yml,yaml}]
 indent_size = 2

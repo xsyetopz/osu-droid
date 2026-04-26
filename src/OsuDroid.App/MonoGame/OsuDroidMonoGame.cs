@@ -45,7 +45,8 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         touchRouter = new MonoGameTouchRouter(core);
         graphics = new GraphicsDeviceManager(this)
         {
-            SupportedOrientations = XnaDisplayOrientation.LandscapeLeft | XnaDisplayOrientation.LandscapeRight,
+            SupportedOrientations =
+                XnaDisplayOrientation.LandscapeLeft | XnaDisplayOrientation.LandscapeRight,
             IsFullScreen = true,
             PreferMultiSampling = true,
         };
@@ -58,7 +59,8 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         Content.RootDirectory = "Content";
         graphics = new GraphicsDeviceManager(this)
         {
-            SupportedOrientations = XnaDisplayOrientation.LandscapeLeft | XnaDisplayOrientation.LandscapeRight,
+            SupportedOrientations =
+                XnaDisplayOrientation.LandscapeLeft | XnaDisplayOrientation.LandscapeRight,
             IsFullScreen = true,
             PreferMultiSampling = true,
         };
@@ -116,7 +118,11 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         core.Update(gameTime.ElapsedGameTime);
         var frameStart = PerfDiagnostics.Start();
         frame = CreateCurrentFrame();
-        PerfDiagnostics.Log("monoGame.createCurrentFrame", frameStart, $"elements={frame.Elements.Count}");
+        PerfDiagnostics.Log(
+            "monoGame.createCurrentFrame",
+            frameStart,
+            $"elements={frame.Elements.Count}"
+        );
         OpenPendingExternalUrl();
         base.Update(gameTime);
     }
@@ -129,8 +135,13 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         if (spriteBatch is not null && renderer is not null)
         {
             var drawMetrics = showRenderDiagnostics ? new RenderCacheMetrics() : null;
-            var drawStart = showRenderDiagnostics || PerfDiagnostics.Enabled ? Stopwatch.GetTimestamp() : 0L;
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.LinearClamp);
+            var drawStart =
+                showRenderDiagnostics || PerfDiagnostics.Enabled ? Stopwatch.GetTimestamp() : 0L;
+            spriteBatch.Begin(
+                SpriteSortMode.Deferred,
+                BlendState.NonPremultiplied,
+                SamplerState.LinearClamp
+            );
             renderer.Draw(spriteBatch, frame, drawMetrics);
 
             if (showRenderDiagnostics)
@@ -155,7 +166,12 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         graphics.ApplyChanges();
 
         if (GraphicsDevice is not null)
-            GraphicsDevice.Viewport = new Viewport(0, 0, backBufferSize.Width, backBufferSize.Height);
+            GraphicsDevice.Viewport = new Viewport(
+                0,
+                0,
+                backBufferSize.Width,
+                backBufferSize.Height
+            );
     }
 
     private BackBufferSize GetPreferredBackBufferSize()
@@ -168,9 +184,9 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         var height = (int)Math.Round(Math.Min(nativeBounds.Width, nativeBounds.Height));
 
         platformDisplayLog =
-            $"iosNative={nativeBounds.Width:0}x{nativeBounds.Height:0} " +
-            $"iosLogical={logicalBounds.Width:0.###}x{logicalBounds.Height:0.###} " +
-            $"iosNativeScale={screen.NativeScale:0.###}";
+            $"iosNative={nativeBounds.Width:0}x{nativeBounds.Height:0} "
+            + $"iosLogical={logicalBounds.Width:0.###}x{logicalBounds.Height:0.###} "
+            + $"iosNativeScale={screen.NativeScale:0.###}";
 
         return new BackBufferSize(width, height);
 #else
@@ -187,9 +203,16 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
     {
         var viewport = VirtualViewport.FromSurface(
             GraphicsDevice.Viewport.Width,
-            GraphicsDevice.Viewport.Height);
+            GraphicsDevice.Viewport.Height
+        );
         if (core is null)
-            return BootstrapLoadingScene.CreateSnapshot(viewport, bootstrapper?.Progress ?? new BootstrapLoadingProgress(0, "Loading skin..."), bootstrapElapsed).UiFrame;
+            return BootstrapLoadingScene
+                .CreateSnapshot(
+                    viewport,
+                    bootstrapper?.Progress ?? new BootstrapLoadingProgress(0, "Loading skin..."),
+                    bootstrapElapsed
+                )
+                .UiFrame;
 
         return core.CreateFrame(viewport).UiFrame;
     }
@@ -198,8 +221,15 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
     {
         var viewport = VirtualViewport.FromSurface(
             GraphicsDevice.Viewport.Width,
-            GraphicsDevice.Viewport.Height);
-        return BootstrapLoadingScene.CreateSnapshot(viewport, bootstrapper?.Progress ?? new BootstrapLoadingProgress(0, "Loading skin..."), bootstrapElapsed).UiFrame;
+            GraphicsDevice.Viewport.Height
+        );
+        return BootstrapLoadingScene
+            .CreateSnapshot(
+                viewport,
+                bootstrapper?.Progress ?? new BootstrapLoadingProgress(0, "Loading skin..."),
+                bootstrapElapsed
+            )
+            .UiFrame;
     }
 
     private RenderBoundsDiagnostics CreateRenderDiagnostics()
@@ -211,7 +241,8 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
             displayMode.Width,
             displayMode.Height,
             graphics.PreferredBackBufferWidth,
-            graphics.PreferredBackBufferHeight);
+            graphics.PreferredBackBufferHeight
+        );
     }
 
     private void LogRenderBoundsIfChanged(string phase)
@@ -220,13 +251,14 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
             return;
 
         var diagnostics = CreateRenderDiagnostics();
-        var platformDisplay = platformDisplayLog ?? $"display={diagnostics.DisplayWidth}x{diagnostics.DisplayHeight}";
+        var platformDisplay =
+            platformDisplayLog ?? $"display={diagnostics.DisplayWidth}x{diagnostics.DisplayHeight}";
         var message =
-            $"osu!droid render-bounds phase={phase} " +
-            $"viewport={diagnostics.ViewportBounds.Width}x{diagnostics.ViewportBounds.Height}+{diagnostics.ViewportBounds.X},{diagnostics.ViewportBounds.Y} " +
-            $"client={diagnostics.ClientBounds.Width}x{diagnostics.ClientBounds.Height}+{diagnostics.ClientBounds.X},{diagnostics.ClientBounds.Y} " +
-            $"{platformDisplay} " +
-            $"backbuffer={diagnostics.PreferredBackBufferWidth}x{diagnostics.PreferredBackBufferHeight}";
+            $"osu!droid render-bounds phase={phase} "
+            + $"viewport={diagnostics.ViewportBounds.Width}x{diagnostics.ViewportBounds.Height}+{diagnostics.ViewportBounds.X},{diagnostics.ViewportBounds.Y} "
+            + $"client={diagnostics.ClientBounds.Width}x{diagnostics.ClientBounds.Height}+{diagnostics.ClientBounds.X},{diagnostics.ClientBounds.Y} "
+            + $"{platformDisplay} "
+            + $"backbuffer={diagnostics.PreferredBackBufferWidth}x{diagnostics.PreferredBackBufferHeight}";
 
         if (message == lastRenderBoundsLog)
             return;
@@ -254,7 +286,9 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         if (showRenderDiagnostics && (metrics.WarmupElements > 0 || metrics.HasCacheMisses))
         {
             var elapsed = Stopwatch.GetElapsedTime(start);
-            Console.WriteLine($"osu!droid render-cache phase=active-warmup elapsedMs={elapsed.TotalMilliseconds:0.###} {metrics}");
+            Console.WriteLine(
+                $"osu!droid render-cache phase=active-warmup elapsedMs={elapsed.TotalMilliseconds:0.###} {metrics}"
+            );
         }
 
         var viewport = activeFrame.Viewport;
@@ -274,7 +308,9 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         if (showRenderDiagnostics && (metrics.WarmupElements > 0 || metrics.HasCacheMisses))
         {
             var elapsed = Stopwatch.GetElapsedTime(start);
-            Console.WriteLine($"osu!droid render-cache phase=warmup elapsedMs={elapsed.TotalMilliseconds:0.###} {metrics}");
+            Console.WriteLine(
+                $"osu!droid render-cache phase=warmup elapsedMs={elapsed.TotalMilliseconds:0.###} {metrics}"
+            );
         }
     }
 
@@ -287,7 +323,9 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
         if (elapsed < DrawLogThreshold && !metrics.HasCacheMisses)
             return;
 
-        Console.WriteLine($"osu!droid render-cache phase=draw elapsedMs={elapsed.TotalMilliseconds:0.###} {metrics}");
+        Console.WriteLine(
+            $"osu!droid render-cache phase=draw elapsedMs={elapsed.TotalMilliseconds:0.###} {metrics}"
+        );
     }
 
     private void OpenPendingExternalUrl()
@@ -306,16 +344,14 @@ public sealed class OsuDroidMonoGame : Microsoft.Xna.Framework.Game
     {
 #if DEBUG
         var enabled = Environment.GetEnvironmentVariable(RenderDiagnosticsEnvironmentVariable);
-        return string.Equals(enabled, "1", StringComparison.Ordinal) ||
-               string.Equals(enabled, "true", StringComparison.OrdinalIgnoreCase) ||
-               string.Equals(enabled, "yes", StringComparison.OrdinalIgnoreCase);
+        return string.Equals(enabled, "1", StringComparison.Ordinal)
+            || string.Equals(enabled, "true", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(enabled, "yes", StringComparison.OrdinalIgnoreCase);
 #else
         return false;
 #endif
     }
 
     private readonly record struct BackBufferSize(int Width, int Height);
-
-
 }
 #endif

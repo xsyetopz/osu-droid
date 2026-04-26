@@ -29,15 +29,20 @@ internal readonly record struct ReferenceVector2(float X, float Y)
         return dx * dx + dy * dy;
     }
 
-    public static ReferenceVector2 operator *(ReferenceVector2 left, ReferenceVector2 right) => new(left.X * right.X, left.Y * right.Y);
+    public static ReferenceVector2 operator *(ReferenceVector2 left, ReferenceVector2 right) =>
+        new(left.X * right.X, left.Y * right.Y);
 
-    public static ReferenceVector2 operator *(ReferenceVector2 vector, int scaleFactor) => vector * (float)scaleFactor;
+    public static ReferenceVector2 operator *(ReferenceVector2 vector, int scaleFactor) =>
+        vector * (float)scaleFactor;
 
-    public static ReferenceVector2 operator *(ReferenceVector2 vector, float scaleFactor) => new(vector.X * scaleFactor, vector.Y * scaleFactor);
+    public static ReferenceVector2 operator *(ReferenceVector2 vector, float scaleFactor) =>
+        new(vector.X * scaleFactor, vector.Y * scaleFactor);
 
-    public static ReferenceVector2 operator *(ReferenceVector2 vector, double scaleFactor) => vector * (float)scaleFactor;
+    public static ReferenceVector2 operator *(ReferenceVector2 vector, double scaleFactor) =>
+        vector * (float)scaleFactor;
 
-    public static ReferenceVector2 operator /(ReferenceVector2 vector, int divideFactor) => vector / (float)divideFactor;
+    public static ReferenceVector2 operator /(ReferenceVector2 vector, int divideFactor) =>
+        vector / (float)divideFactor;
 
     public static ReferenceVector2 operator /(ReferenceVector2 vector, float divideFactor)
     {
@@ -46,15 +51,20 @@ internal readonly record struct ReferenceVector2(float X, float Y)
             : new ReferenceVector2(vector.X / divideFactor, vector.Y / divideFactor);
     }
 
-    public static ReferenceVector2 operator /(ReferenceVector2 vector, double divideFactor) => vector / (float)divideFactor;
+    public static ReferenceVector2 operator /(ReferenceVector2 vector, double divideFactor) =>
+        vector / (float)divideFactor;
 
-    public static ReferenceVector2 operator +(ReferenceVector2 vector, float value) => new(vector.X + value, vector.Y + value);
+    public static ReferenceVector2 operator +(ReferenceVector2 vector, float value) =>
+        new(vector.X + value, vector.Y + value);
 
-    public static ReferenceVector2 operator +(ReferenceVector2 left, ReferenceVector2 right) => new(left.X + right.X, left.Y + right.Y);
+    public static ReferenceVector2 operator +(ReferenceVector2 left, ReferenceVector2 right) =>
+        new(left.X + right.X, left.Y + right.Y);
 
-    public static ReferenceVector2 operator -(ReferenceVector2 vector, float value) => new(vector.X - value, vector.Y - value);
+    public static ReferenceVector2 operator -(ReferenceVector2 vector, float value) =>
+        new(vector.X - value, vector.Y - value);
 
-    public static ReferenceVector2 operator -(ReferenceVector2 left, ReferenceVector2 right) => new(left.X - right.X, left.Y - right.Y);
+    public static ReferenceVector2 operator -(ReferenceVector2 left, ReferenceVector2 right) =>
+        new(left.X - right.X, left.Y - right.Y);
 
     public static ReferenceVector2 operator -(ReferenceVector2 vector) => new(-vector.X, -vector.Y);
 

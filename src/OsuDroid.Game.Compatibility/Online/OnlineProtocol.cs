@@ -13,7 +13,8 @@ public sealed record ReplayUploadRequest(
     IReadOnlyDictionary<string, string> Fields,
     string ReplayFieldName,
     string ReplayFileName,
-    string ReplayPath);
+    string ReplayPath
+);
 
 public enum BeatmapLeaderboardScoringMode
 {
@@ -23,23 +24,31 @@ public enum BeatmapLeaderboardScoringMode
 
 public static class OnlineProtocol
 {
-    public static OnlineRequest CreateLoginRequest(string username, string password) => new(
-        OsuDroidOnlineConstants.Endpoint + "login.php",
-        new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["username"] = username,
-            ["password"] = OnlinePasswordHasher.HashPassword(password),
-            ["version"] = OsuDroidOnlineConstants.OnlineVersion,
-        });
+    public static OnlineRequest CreateLoginRequest(string username, string password) =>
+        new(
+            OsuDroidOnlineConstants.Endpoint + "login.php",
+            new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["username"] = username,
+                ["password"] = OnlinePasswordHasher.HashPassword(password),
+                ["version"] = OsuDroidOnlineConstants.OnlineVersion,
+            }
+        );
 
-    public static OnlineRequest CreateLeaderboardRequest(string beatmapMd5, long userId, BeatmapLeaderboardScoringMode mode) => new(
-        OsuDroidOnlineConstants.Endpoint + "getrank.php",
-        new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["hash"] = beatmapMd5,
-            ["uid"] = userId.ToString(CultureInfo.InvariantCulture),
-            ["type"] = mode == BeatmapLeaderboardScoringMode.PerformancePoints ? "pp" : "score",
-        });
+    public static OnlineRequest CreateLeaderboardRequest(
+        string beatmapMd5,
+        long userId,
+        BeatmapLeaderboardScoringMode mode
+    ) =>
+        new(
+            OsuDroidOnlineConstants.Endpoint + "getrank.php",
+            new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["hash"] = beatmapMd5,
+                ["uid"] = userId.ToString(CultureInfo.InvariantCulture),
+                ["type"] = mode == BeatmapLeaderboardScoringMode.PerformancePoints ? "pp" : "score",
+            }
+        );
 
     public static ReplayUploadRequest CreateReplayUploadRequest(
         long userId,
@@ -48,7 +57,8 @@ public static class OnlineProtocol
         string beatmapMd5,
         string scoreData,
         string replayPath,
-        string replayChecksum)
+        string replayChecksum
+    )
     {
         string replayFileName = Path.GetFileName(replayPath);
         return new ReplayUploadRequest(
@@ -65,16 +75,21 @@ public static class OnlineProtocol
             },
             "replayFile",
             replayFileName,
-            replayPath);
+            replayPath
+        );
     }
 
     public static string GetReplayUrl(int playId, BeatmapLeaderboardScoringMode mode)
     {
-        string folder = mode == BeatmapLeaderboardScoringMode.PerformancePoints ? "bestpp" : "upload";
+        string folder =
+            mode == BeatmapLeaderboardScoringMode.PerformancePoints ? "bestpp" : "upload";
         return $"{OsuDroidOnlineConstants.Endpoint}{folder}/{playId}.odr";
     }
 
-    public static MultipartFormDataContent ToMultipartContent(ReplayUploadRequest request, Stream replayStream)
+    public static MultipartFormDataContent ToMultipartContent(
+        ReplayUploadRequest request,
+        Stream replayStream
+    )
     {
         var content = new MultipartFormDataContent();
 

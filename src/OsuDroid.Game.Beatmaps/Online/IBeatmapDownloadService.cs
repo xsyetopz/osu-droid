@@ -4,8 +4,11 @@ public interface IBeatmapDownloadService
 {
     BeatmapDownloadState State { get; }
 
-    Task<BeatmapDownloadResult> DownloadAsync(BeatmapMirrorSet beatmapSet, bool withVideo, CancellationToken cancellationToken);
+    Task<BeatmapDownloadResult> DownloadAsync(
+        BeatmapMirrorSet beatmapSet,
+        bool withVideo,
+        CancellationToken cancellationToken
+    );
 
     void CancelActiveDownload();
 }
-

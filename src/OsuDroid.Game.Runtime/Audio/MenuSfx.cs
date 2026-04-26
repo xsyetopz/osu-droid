@@ -9,11 +9,7 @@ public interface IMenuSfxPlayer
 
 public sealed class NoOpMenuSfxPlayer : IMenuSfxPlayer
 {
-    public void Play(string key)
-    {
-    }
+    public void Play(string key) { }
 
-    public void SetVolume(float normalizedVolume)
-    {
-    }
+    public void SetVolume(float normalizedVolume) { }
 }

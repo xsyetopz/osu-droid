@@ -6,12 +6,19 @@ internal sealed class UiIndexedActionMap
     private readonly int _count;
     private readonly (UiAction Action, int Index)[] _aliases;
 
-    public UiIndexedActionMap(UiAction _firstAction, UiAction lastAction, params (UiAction Action, int Index)[] _aliases)
+    public UiIndexedActionMap(
+        UiAction _firstAction,
+        UiAction lastAction,
+        params (UiAction Action, int Index)[] _aliases
+    )
     {
         int span = (int)lastAction - (int)_firstAction;
         if (span < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(lastAction), "Last action must be greater than or equal to first action.");
+            throw new ArgumentOutOfRangeException(
+                nameof(lastAction),
+                "Last action must be greater than or equal to first action."
+            );
         }
 
         this._firstAction = _firstAction;
@@ -22,7 +29,10 @@ internal sealed class UiIndexedActionMap
         {
             if ((uint)alias.Index >= (uint)_count)
             {
-                throw new ArgumentOutOfRangeException(nameof(_aliases), $"Alias index {alias.Index} is out of range.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(_aliases),
+                    $"Alias index {alias.Index} is out of range."
+                );
             }
         }
     }

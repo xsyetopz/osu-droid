@@ -4,7 +4,8 @@ public sealed record BeatmapPreviewPlaybackSnapshot(
     string? Source = null,
     bool IsPlaying = false,
     int PositionMilliseconds = 0,
-    int DurationMilliseconds = 0);
+    int DurationMilliseconds = 0
+);
 
 public interface IBeatmapPreviewPlayer
 {
@@ -37,29 +38,17 @@ public sealed class NoOpBeatmapPreviewPlayer : IBeatmapPreviewPlayer
 
     public BeatmapPreviewPlaybackSnapshot PlaybackSnapshot { get; } = new();
 
-    public void Play(string audioPath, int previewTimeMilliseconds)
-    {
-    }
+    public void Play(string audioPath, int previewTimeMilliseconds) { }
 
-    public void Play(Uri previewUri)
-    {
-    }
+    public void Play(Uri previewUri) { }
 
-    public void PausePreview()
-    {
-    }
+    public void PausePreview() { }
 
-    public void ResumePreview()
-    {
-    }
+    public void ResumePreview() { }
 
-    public void StopPreview()
-    {
-    }
+    public void StopPreview() { }
 
-    public void SetVolume(float normalizedVolume)
-    {
-    }
+    public void SetVolume(float normalizedVolume) { }
 
     public bool TryReadSpectrum1024(float[] destination) => false;
 }

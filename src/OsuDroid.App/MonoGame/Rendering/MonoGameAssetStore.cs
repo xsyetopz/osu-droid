@@ -5,12 +5,19 @@ using OsuDroid.Game.UI;
 
 namespace OsuDroid.App.MonoGame.Rendering;
 
-internal sealed class MonoGameAssetStore(GraphicsDevice graphicsDevice, ContentManager contentManager)
+internal sealed class MonoGameAssetStore(
+    GraphicsDevice graphicsDevice,
+    ContentManager contentManager
+)
 {
     private readonly Dictionary<string, Texture2D> textures = new(StringComparer.Ordinal);
     private readonly ExternalTextureCache externalTextures = new(graphicsDevice);
 
-    public Texture2D? GetTexture(UiAssetManifest manifest, string logicalName, RenderCacheMetrics? metrics = null)
+    public Texture2D? GetTexture(
+        UiAssetManifest manifest,
+        string logicalName,
+        RenderCacheMetrics? metrics = null
+    )
     {
         if (textures.TryGetValue(logicalName, out var cachedTexture))
             return cachedTexture;
@@ -26,8 +33,12 @@ internal sealed class MonoGameAssetStore(GraphicsDevice graphicsDevice, ContentM
 
     public Texture2D? TryGetExternalTexture(string path) => externalTextures.TryGet(path);
 
-    public void RequestExternalTexture(string path, int maxWidth, int maxHeight, RenderCacheMetrics? metrics = null) =>
-        externalTextures.Request(path, maxWidth, maxHeight, metrics);
+    public void RequestExternalTexture(
+        string path,
+        int maxWidth,
+        int maxHeight,
+        RenderCacheMetrics? metrics = null
+    ) => externalTextures.Request(path, maxWidth, maxHeight, metrics);
 
     public void UploadReadyExternalTextures(RenderCacheMetrics? metrics = null) =>
         externalTextures.UploadReady(metrics);

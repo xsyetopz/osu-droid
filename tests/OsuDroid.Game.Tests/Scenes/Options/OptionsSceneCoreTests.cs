@@ -17,7 +17,6 @@ namespace OsuDroid.Game.Tests;
 
 public sealed partial class OptionsSceneTests
 {
-
     [Test]
     public void OptionsSceneWarmupSnapshotDoesNotMutateActiveSectionOrScroll()
     {
@@ -26,7 +25,10 @@ public sealed partial class OptionsSceneTests
         scene.HandleAction(UiAction.OptionsSectionAudio, viewport);
         scene.Scroll(160f, viewport);
 
-        GameFrameSnapshot warmup = scene.CreateSnapshotForSection(OptionsSection.Advanced, viewport);
+        GameFrameSnapshot warmup = scene.CreateSnapshotForSection(
+            OptionsSection.Advanced,
+            viewport
+        );
         GameFrameSnapshot active = scene.CreateSnapshot(viewport);
 
         Assert.That(warmup.SelectedIndex, Is.EqualTo((int)OptionsSection.Advanced));
@@ -34,24 +36,39 @@ public sealed partial class OptionsSceneTests
         Assert.That(scene.ContentScrollOffset, Is.GreaterThan(0f));
         Assert.That(active.SelectedIndex, Is.EqualTo((int)OptionsSection.Audio));
     }
+
     [Test]
     public void CoreRoutesMainMenuOptionsToOptionsSceneBackAndScrolls()
     {
-        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"options-core-{Guid.NewGuid():N}");
+        string path = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"options-core-{Guid.NewGuid():N}"
+        );
         try
         {
             var core = OsuDroidGameCore.Create(path, "debug");
             var viewport = VirtualViewport.FromSurface(1280, 720);
-            var contentPoint = new UiPoint(DroidUiMetrics.ContentPaddingX + DroidUiMetrics.SectionRailWidth + DroidUiMetrics.ListGap + 10f, DroidUiMetrics.ContentTop);
+            var contentPoint = new UiPoint(
+                DroidUiMetrics.ContentPaddingX
+                    + DroidUiMetrics.SectionRailWidth
+                    + DroidUiMetrics.ListGap
+                    + 10f,
+                DroidUiMetrics.ContentTop
+            );
             core.TapMainMenuCookie();
             core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
 
-            Assert.That(core.TapMainMenu(MainMenuButtonSlot.Second), Is.EqualTo(MainMenuRoute.Settings));
+            Assert.That(
+                core.TapMainMenu(MainMenuButtonSlot.Second),
+                Is.EqualTo(MainMenuRoute.Settings)
+            );
             Assert.That(core.CreateFrame(viewport).Scene, Is.EqualTo("Options"));
 
-            UiElementSnapshot beforeScroll = core.CreateFrame(viewport).UiFrame.Elements.Single(element => element.Id == "options-row-0");
+            UiElementSnapshot beforeScroll = core.CreateFrame(viewport)
+                .UiFrame.Elements.Single(element => element.Id == "options-row-0");
             core.ScrollActiveScene(160f, contentPoint, viewport);
-            UiElementSnapshot afterScroll = core.CreateFrame(viewport).UiFrame.Elements.Single(element => element.Id == "options-row-0");
+            UiElementSnapshot afterScroll = core.CreateFrame(viewport)
+                .UiFrame.Elements.Single(element => element.Id == "options-row-0");
             Assert.That(afterScroll.Bounds.Y, Is.LessThan(beforeScroll.Bounds.Y));
 
             core.HandleUiAction(UiAction.OptionsBack);
@@ -66,10 +83,14 @@ public sealed partial class OptionsSceneTests
             }
         }
     }
+
     [Test]
     public void CoreWarmupFramesIncludeMainMenuAboutAndEveryOptionsSection()
     {
-        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"options-warmup-{Guid.NewGuid():N}");
+        string path = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"options-warmup-{Guid.NewGuid():N}"
+        );
         try
         {
             var core = OsuDroidGameCore.Create(path, "debug");
@@ -80,10 +101,17 @@ public sealed partial class OptionsSceneTests
                 .Where(frame => frame.Elements.Any(element => element.Id == "options-root"))
                 .ToArray();
             UiAction[] selectedActions = optionFrames
-                .Select(frame => frame.Elements.Single(element => element.Id == "options-section-selected").Action)
+                .Select(frame =>
+                    frame
+                        .Elements.Single(element => element.Id == "options-section-selected")
+                        .Action
+                )
                 .ToArray();
 
-            Assert.That(frames.Any(frame => frame.Elements.Any(element => element.Id == "about-panel")), Is.True);
+            Assert.That(
+                frames.Any(frame => frame.Elements.Any(element => element.Id == "about-panel")),
+                Is.True
+            );
             Assert.That(optionFrames.Length, Is.EqualTo(OptionsScene.AllSections.Count));
             Assert.That(selectedActions, Does.Contain(UiAction.OptionsSectionGeneral));
             Assert.That(selectedActions, Does.Contain(UiAction.OptionsSectionAdvanced));
@@ -96,10 +124,14 @@ public sealed partial class OptionsSceneTests
             }
         }
     }
+
     [Test]
     public void CoreWarmupFramesDoNotChangeActiveScene()
     {
-        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"options-warmup-scene-{Guid.NewGuid():N}");
+        string path = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"options-warmup-scene-{Guid.NewGuid():N}"
+        );
         try
         {
             var core = OsuDroidGameCore.Create(path, "debug");
@@ -132,7 +164,10 @@ public sealed partial class OptionsSceneTests
     [Test]
     public void CoreAppliesOptionsVolumeSlidersToRuntimeAudioPlayers()
     {
-        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"options-volume-{Guid.NewGuid():N}");
+        string path = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"options-volume-{Guid.NewGuid():N}"
+        );
         try
         {
             var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(path));
@@ -141,14 +176,19 @@ public sealed partial class OptionsSceneTests
             database.EnsureCreated();
             var preview = new RecordingPreviewPlayer();
             var sfx = new RecordingMenuSfxPlayer();
-            var core = new OsuDroidGameCore(new GameServices(
-                database,
-                paths,
-                "debug",
-                "1.0",
-                BeatmapPreviewPlayer: preview,
-                MenuSfxPlayer: sfx,
-                SettingsStore: new JsonGameSettingsStore(Path.Combine(paths.CoreRoot, "config", "settings.json"))));
+            var core = new OsuDroidGameCore(
+                new GameServices(
+                    database,
+                    paths,
+                    "debug",
+                    "1.0",
+                    BeatmapPreviewPlayer: preview,
+                    MenuSfxPlayer: sfx,
+                    SettingsStore: new JsonGameSettingsStore(
+                        Path.Combine(paths.CoreRoot, "config", "settings.json")
+                    )
+                )
+            );
             var viewport = VirtualViewport.FromSurface(1280, 720);
 
             core.TapMainMenuCookie();
@@ -173,24 +213,32 @@ public sealed partial class OptionsSceneTests
     [Test]
     public void CoreBacksUpAndRestoresNonSensitiveOptions()
     {
-        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"options-backup-{Guid.NewGuid():N}");
+        string path = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"options-backup-{Guid.NewGuid():N}"
+        );
         try
         {
             var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(path));
             paths.EnsureDirectories();
             var database = new DroidDatabase(paths.GetDatabasePath("debug"));
             database.EnsureCreated();
-            var settings = new JsonGameSettingsStore(Path.Combine(paths.CoreRoot, "config", "settings.json"));
+            var settings = new JsonGameSettingsStore(
+                Path.Combine(paths.CoreRoot, "config", "settings.json")
+            );
             settings.SetInt("bgmvolume", 50);
             settings.SetString("onlinePassword", "secret");
             var preview = new RecordingPreviewPlayer();
-            var core = new OsuDroidGameCore(new GameServices(
-                database,
-                paths,
-                "debug",
-                "1.0",
-                BeatmapPreviewPlayer: preview,
-                SettingsStore: settings));
+            var core = new OsuDroidGameCore(
+                new GameServices(
+                    database,
+                    paths,
+                    "debug",
+                    "1.0",
+                    BeatmapPreviewPlayer: preview,
+                    SettingsStore: settings
+                )
+            );
             var viewport = VirtualViewport.FromSurface(1280, 720);
 
             core.TapMainMenuCookie();
@@ -208,7 +256,10 @@ public sealed partial class OptionsSceneTests
             Assert.That(backup, Does.Not.Contain("onlinePassword"));
             Assert.That(settings.GetInt("bgmvolume", 0), Is.EqualTo(50));
             Assert.That(preview.Volume, Is.EqualTo(0.5f).Within(0.001f));
-            Assert.That(frame.Elements.Single(element => element.Id == "options-status-message").Text, Is.EqualTo("Successfully imported the options file"));
+            Assert.That(
+                frame.Elements.Single(element => element.Id == "options-status-message").Text,
+                Is.EqualTo("Successfully imported the options file")
+            );
         }
         finally
         {
@@ -222,7 +273,10 @@ public sealed partial class OptionsSceneTests
     [Test]
     public void CoreClearsBeatmapCacheAndMapSpecificProperties()
     {
-        string path = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"options-clear-{Guid.NewGuid():N}");
+        string path = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"options-clear-{Guid.NewGuid():N}"
+        );
         try
         {
             var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(path));
@@ -246,8 +300,14 @@ public sealed partial class OptionsSceneTests
 
             Assert.That(repository.LoadLibrary().Sets, Is.Empty);
             Assert.That(repository.GetDifficultyMetadata("test"), Is.Zero);
-            Assert.That(cacheFrame.Elements.Single(element => element.Id == "options-status-message").Text, Is.EqualTo("Cache cleared"));
-            Assert.That(repository.GetBeatmapOptions("1 Artist - Title"), Is.EqualTo(new BeatmapOptions("1 Artist - Title")));
+            Assert.That(
+                cacheFrame.Elements.Single(element => element.Id == "options-status-message").Text,
+                Is.EqualTo("Cache cleared")
+            );
+            Assert.That(
+                repository.GetBeatmapOptions("1 Artist - Title"),
+                Is.EqualTo(new BeatmapOptions("1 Artist - Title"))
+            );
         }
         finally
         {
@@ -258,40 +318,40 @@ public sealed partial class OptionsSceneTests
         }
     }
 
-    private static BeatmapInfo CreateBeatmap() => new(
-        "Easy.osu",
-        "1 Artist - Title",
-        "md5",
-        null,
-        "audio.mp3",
-        null,
-        null,
-        1,
-        "Title",
-        string.Empty,
-        "Artist",
-        string.Empty,
-        "Mapper",
-        "Easy",
-        string.Empty,
-        string.Empty,
-        0,
-        5,
-        5,
-        5,
-        5,
-        1,
-        1,
-        120,
-        120,
-        120,
-        1000,
-        0,
-        1,
-        0,
-        0,
-        1,
-        false);
-
-
+    private static BeatmapInfo CreateBeatmap() =>
+        new(
+            "Easy.osu",
+            "1 Artist - Title",
+            "md5",
+            null,
+            "audio.mp3",
+            null,
+            null,
+            1,
+            "Title",
+            string.Empty,
+            "Artist",
+            string.Empty,
+            "Mapper",
+            "Easy",
+            string.Empty,
+            string.Empty,
+            0,
+            5,
+            5,
+            5,
+            5,
+            1,
+            1,
+            120,
+            120,
+            120,
+            1000,
+            0,
+            1,
+            0,
+            0,
+            1,
+            false
+        );
 }

@@ -7,5 +7,6 @@ public interface IReferenceModApplicableToDifficulty
     void ApplyToDifficulty(
         GameMode mode,
         ReferenceBeatmapDifficulty difficulty,
-        IEnumerable<IReferenceModFacilitatesAdjustment> adjustmentMods);
+        IEnumerable<IReferenceModFacilitatesAdjustment> adjustmentMods
+    );
 }

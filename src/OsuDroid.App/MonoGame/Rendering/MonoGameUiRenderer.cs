@@ -8,7 +8,10 @@ using XnaRect = Microsoft.Xna.Framework.Rectangle;
 
 namespace OsuDroid.App.MonoGame.Rendering;
 
-internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, ContentManager contentManager)
+internal sealed partial class MonoGameUiRenderer(
+    GraphicsDevice graphicsDevice,
+    ContentManager contentManager
+)
 {
     private const int DiagnosticsBorderThickness = 6;
     private const int DiagnosticsMarkerSize = 36;
@@ -19,7 +22,11 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
     private readonly MonoGameTextStore textStore = new(graphicsDevice);
     private Texture2D? pixel;
 
-    public void Draw(SpriteBatch spriteBatch, UiFrameSnapshot frame, RenderCacheMetrics? metrics = null)
+    public void Draw(
+        SpriteBatch spriteBatch,
+        UiFrameSnapshot frame,
+        RenderCacheMetrics? metrics = null
+    )
     {
         pixel ??= CreatePixel(graphicsDevice);
 
@@ -42,7 +49,8 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
                     metrics,
                     element.RotationDegrees,
                     element.RotationOriginX,
-                    element.RotationOriginY);
+                    element.RotationOriginY
+                );
                 continue;
             }
 
@@ -57,7 +65,14 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
             {
                 if (element.MaterialIcon is not null)
                 {
-                    var iconTexture = iconStore.GetIcon(element.MaterialIcon.Value, destination.Width, destination.Height, element.Color, element.Alpha, metrics);
+                    var iconTexture = iconStore.GetIcon(
+                        element.MaterialIcon.Value,
+                        destination.Width,
+                        destination.Height,
+                        element.Color,
+                        element.Alpha,
+                        metrics
+                    );
                     spriteBatch.Draw(iconTexture, destination, XnaColor.White);
                 }
                 continue;
@@ -73,8 +88,19 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
                         element.ProgressRing.StrokeWidth * frame.Viewport.Scale,
                         element.ProgressRing.SweepDegrees,
                         color,
-                        metrics);
-                    DrawSprite(spriteBatch, ringTexture, destination, XnaColor.White, element.RotationDegrees, UiSpriteFit.Stretch, element.RotationOriginX, element.RotationOriginY, null);
+                        metrics
+                    );
+                    DrawSprite(
+                        spriteBatch,
+                        ringTexture,
+                        destination,
+                        XnaColor.White,
+                        element.RotationDegrees,
+                        UiSpriteFit.Stretch,
+                        element.RotationOriginX,
+                        element.RotationOriginY,
+                        null
+                    );
                 }
                 continue;
             }
@@ -91,9 +117,22 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
                         continue;
                 }
 
-                var texture = textStore.GetTexture(element.Text, element.TextStyle, element.Color, element.Alpha, frame.Viewport.Scale, metrics);
+                var texture = textStore.GetTexture(
+                    element.Text,
+                    element.TextStyle,
+                    element.Color,
+                    element.Alpha,
+                    frame.Viewport.Scale,
+                    metrics
+                );
                 var textDestination = element.ClipToBounds
-                    ? DrawClippedTextTexture(spriteBatch, texture, destination, element.TextStyle, frame.Viewport.Scale)
+                    ? DrawClippedTextTexture(
+                        spriteBatch,
+                        texture,
+                        destination,
+                        element.TextStyle,
+                        frame.Viewport.Scale
+                    )
                     : FitTextTexture(texture, destination, element.TextStyle);
                 if (!element.ClipToBounds)
                     spriteBatch.Draw(texture, textDestination, XnaColor.White);
@@ -102,15 +141,33 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
                 continue;
             }
 
-            var textureAsset = element.ExternalAssetPath is not null
-                ? assetStore.TryGetExternalTexture(element.ExternalAssetPath)
-                : element.AssetName is null ? null : assetStore.GetTexture(frame.AssetManifest, element.AssetName, metrics);
+            var textureAsset =
+                element.ExternalAssetPath is not null
+                    ? assetStore.TryGetExternalTexture(element.ExternalAssetPath)
+                : element.AssetName is null ? null
+                : assetStore.GetTexture(frame.AssetManifest, element.AssetName, metrics);
             if (textureAsset is not null)
-                DrawSpriteClipped(spriteBatch, textureAsset, destination, clip, color, element.RotationDegrees, element.SpriteFit, element.RotationOriginX, element.RotationOriginY, element.SpriteSource);
+                DrawSpriteClipped(
+                    spriteBatch,
+                    textureAsset,
+                    destination,
+                    clip,
+                    color,
+                    element.RotationDegrees,
+                    element.SpriteFit,
+                    element.RotationOriginX,
+                    element.RotationOriginY,
+                    element.SpriteSource
+                );
         }
     }
 
-    public int WarmUp(UiFrameSnapshot frame, int startElementIndex, DateTime deadline, RenderCacheMetrics metrics)
+    public int WarmUp(
+        UiFrameSnapshot frame,
+        int startElementIndex,
+        DateTime deadline,
+        RenderCacheMetrics metrics
+    )
     {
         pixel ??= CreatePixel(graphicsDevice);
         var elementIndex = Math.Max(0, startElementIndex);
@@ -131,7 +188,8 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
         return elementIndex;
     }
 
-    public void PreloadStatic(UiAssetManifest manifest, RenderCacheMetrics? metrics = null) => assetStore.Preload(manifest, metrics);
+    public void PreloadStatic(UiAssetManifest manifest, RenderCacheMetrics? metrics = null) =>
+        assetStore.Preload(manifest, metrics);
 
     public void DrawDiagnostics(SpriteBatch spriteBatch, RenderBoundsDiagnostics diagnostics)
     {
@@ -139,7 +197,12 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
 
         var viewportBounds = diagnostics.ViewportBounds;
         DrawBorder(spriteBatch, viewportBounds, XnaColor.Red, DiagnosticsBorderThickness);
-        DrawBorder(spriteBatch, ClampToViewport(diagnostics.ClientBounds, viewportBounds), XnaColor.Lime, DiagnosticsBorderThickness);
+        DrawBorder(
+            spriteBatch,
+            ClampToViewport(diagnostics.ClientBounds, viewportBounds),
+            XnaColor.Lime,
+            DiagnosticsBorderThickness
+        );
         DrawCornerMarkers(spriteBatch, viewportBounds, XnaColor.Blue);
     }
 
@@ -158,7 +221,5 @@ internal sealed partial class MonoGameUiRenderer(GraphicsDevice graphicsDevice, 
         texture.SetData([XnaColor.White]);
         return texture;
     }
-
-
-    }
+}
 #endif

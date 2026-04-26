@@ -62,11 +62,16 @@ internal abstract class ControlPointManager<T>(T defaultControlPoint) : IEnumera
         }
 
         int startIndex = System.Math.Max(0, FindInsertionIndex(start) - 1);
-        int endIndex = System.Math.Clamp(FindInsertionIndex(end), startIndex + 1, ControlPoints.Count);
+        int endIndex = System.Math.Clamp(
+            FindInsertionIndex(end),
+            startIndex + 1,
+            ControlPoints.Count
+        );
         return ControlPoints.GetRange(startIndex, endIndex - startIndex);
     }
 
-    protected T BinarySearchWithFallback(double time, T? fallback = null) => BinarySearch(time) ?? fallback ?? DefaultControlPoint;
+    protected T BinarySearchWithFallback(double time, T? fallback = null) =>
+        BinarySearch(time) ?? fallback ?? DefaultControlPoint;
 
     protected T? BinarySearch(double time)
     {

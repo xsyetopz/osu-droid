@@ -6,7 +6,11 @@ namespace OsuDroid.Game.Beatmaps.Import;
 
 public interface IBeatmapImportService
 {
-    BeatmapImportResult ImportOsz(string oszPath, bool deleteArchiveAfterImport = true, BeatmapOnlineMetadata? onlineMetadata = null);
+    BeatmapImportResult ImportOsz(
+        string oszPath,
+        bool deleteArchiveAfterImport = true,
+        BeatmapOnlineMetadata? onlineMetadata = null
+    );
 }
 
 public sealed record BeatmapImportResult(bool IsSuccess, string? SetDirectory, string? ErrorMessage)
@@ -16,9 +20,14 @@ public sealed record BeatmapImportResult(bool IsSuccess, string? SetDirectory, s
     public static BeatmapImportResult Failed(string errorMessage) => new(false, null, errorMessage);
 }
 
-public sealed partial class BeatmapImportService(DroidGamePathLayout paths, IBeatmapLibrary library) : IBeatmapImportService
+public sealed partial class BeatmapImportService(DroidGamePathLayout paths, IBeatmapLibrary library)
+    : IBeatmapImportService
 {
-    public BeatmapImportResult ImportOsz(string oszPath, bool deleteArchiveAfterImport = true, BeatmapOnlineMetadata? onlineMetadata = null)
+    public BeatmapImportResult ImportOsz(
+        string oszPath,
+        bool deleteArchiveAfterImport = true,
+        BeatmapOnlineMetadata? onlineMetadata = null
+    )
     {
         if (!File.Exists(oszPath))
         {
@@ -111,9 +120,7 @@ public sealed partial class BeatmapImportService(DroidGamePathLayout paths, IBea
 
             File.Move(path, badZipPath);
         }
-        catch (Exception)
-        {
-        }
+        catch (Exception) { }
     }
 
     private static void TryDeleteDirectory(string directory)
@@ -125,9 +132,7 @@ public sealed partial class BeatmapImportService(DroidGamePathLayout paths, IBea
                 Directory.Delete(directory, true);
             }
         }
-        catch (Exception)
-        {
-        }
+        catch (Exception) { }
     }
 
     [GeneratedRegex("[\\\"*/:<>?\\\\|]", RegexOptions.CultureInvariant)]

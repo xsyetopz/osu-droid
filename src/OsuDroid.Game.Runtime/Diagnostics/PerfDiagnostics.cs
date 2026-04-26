@@ -19,18 +19,20 @@ public static class PerfDiagnostics
         }
 
         TimeSpan elapsed = Stopwatch.GetElapsedTime(startTimestamp);
-        Console.WriteLine(details is null
-            ? $"osu!droid perf phase={phase} elapsedMs={elapsed.TotalMilliseconds:0.###}"
-            : $"osu!droid perf phase={phase} elapsedMs={elapsed.TotalMilliseconds:0.###} {details}");
+        Console.WriteLine(
+            details is null
+                ? $"osu!droid perf phase={phase} elapsedMs={elapsed.TotalMilliseconds:0.###}"
+                : $"osu!droid perf phase={phase} elapsedMs={elapsed.TotalMilliseconds:0.###} {details}"
+        );
     }
 
     private static bool IsEnabled()
     {
 #if DEBUG
         string? value = Environment.GetEnvironmentVariable(EnvironmentVariable);
-        return string.Equals(value, "1", StringComparison.Ordinal) ||
-               string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) ||
-               string.Equals(value, "yes", StringComparison.OrdinalIgnoreCase);
+        return string.Equals(value, "1", StringComparison.Ordinal)
+            || string.Equals(value, "true", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(value, "yes", StringComparison.OrdinalIgnoreCase);
 #else
         return false;
 #endif
