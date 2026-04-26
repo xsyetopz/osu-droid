@@ -102,6 +102,90 @@ public sealed partial class SongSelectSceneTests
         Assert.That(favoriteIcon.MaterialIcon, Is.EqualTo(UiMaterialIcon.Heart));
         Assert.That(favoriteIcon.Color, Is.EqualTo(UiColor.Opaque(243, 115, 115)));
     }
+
+    [Test]
+    public void BeatmapOptionsSearchMatchesOsuDroidMetadataAndStatTokens()
+    {
+        BeatmapInfo filteredOut = CreateBeatmap("Easy", null, 1.5f, setDirectory: "1 Artist - Title") with
+        {
+            StandardStarRating = 1.5f,
+            ApproachRate = 6f,
+            OverallDifficulty = 5f,
+            CircleSize = 4f,
+            HpDrainRate = 5f,
+            Id = 111,
+        };
+        BeatmapInfo matched = CreateBeatmap("Insane", null, 3.5f, setId: 2, setDirectory: "2 Other - Song", title: "Song", artist: "Other") with
+        {
+            StandardStarRating = 3.5f,
+            ApproachRate = 9f,
+            OverallDifficulty = 8f,
+            CircleSize = 4f,
+            HpDrainRate = 7f,
+            Id = 222,
+            Tags = "stream jump",
+            Source = "source-tag",
+        };
+        var scene = new SongSelectScene(
+            new FakeLibrary(new BeatmapLibrarySnapshot([
+                new BeatmapSetInfo(1, "1 Artist - Title", [filteredOut]),
+                new BeatmapSetInfo(2, "2 Other - Song", [matched]),
+            ])),
+            new NoOpMenuMusicController(),
+            new FakeDifficultyService(),
+            CreateSongsRoot("audio.mp3"));
+
+        scene.Enter();
+        scene.OpenBeatmapOptions();
+        scene.SetBeatmapOptionsSearchQuery("stream ar>8 od>=8 hp=7 star>3 222 insane");
+
+        UiFrameSnapshot frame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+
+        Assert.That(frame.Elements.Any(element => element.Text?.Contains("Artist - Title", StringComparison.Ordinal) == true), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Text?.Contains("Other - Song", StringComparison.Ordinal) == true), Is.True);
+        Assert.That(scene.SelectedBeatmap?.SetDirectory, Is.EqualTo("2 Other - Song"));
+    }
+
+    [Test]
+    public void BeatmapOptionsSortUsesOsuDroidSingleDifficultyRowsForStarAndLengthOrders()
+    {
+        BeatmapInfo low = CreateBeatmap("Low", null, 1.5f, setDirectory: "1 First", title: "First", artist: "Artist") with
+        {
+            BpmMax = 120f,
+            DroidStarRating = 1.5f,
+            StandardStarRating = 1.6f,
+            Length = 120000,
+        };
+        BeatmapInfo high = CreateBeatmap("High", null, 4.5f, setDirectory: "1 First", title: "First", artist: "Artist") with
+        {
+            BpmMax = 240f,
+            DroidStarRating = 4.5f,
+            StandardStarRating = 4.6f,
+            Length = 240000,
+        };
+        var scene = new SongSelectScene(
+            new FakeLibrary(new BeatmapLibrarySnapshot([
+                new BeatmapSetInfo(1, "1 First", [low, high]),
+            ])),
+            new NoOpMenuMusicController(),
+            new FakeDifficultyService(),
+            CreateSongsRoot("audio.mp3"));
+
+        scene.Enter();
+        scene.OpenBeatmapOptions();
+        for (int index = 0; index < 4; index++)
+        {
+            scene.CycleBeatmapOptionsSort();
+        }
+
+        scene.CycleBeatmapOptionsSort();
+
+        UiFrameSnapshot droidStarsFrame = scene.CreateSnapshot(VirtualViewport.FromSurface(1280, 720)).UiFrame;
+        Assert.That(scene.SelectedBeatmap?.Version, Is.EqualTo("High"));
+        Assert.That(droidStarsFrame.Elements.Single(element => element.Id == "songselect-diff-row-0-title").Text, Does.Contain("High"));
+        Assert.That(droidStarsFrame.Elements.Any(element => element.Id == "songselect-diff-row-1-title"), Is.False);
+    }
+
     [Test]
     public void FolderFilterPopupUsesOsuDroidBottomAnchoredCollectionsPanel()
     {

@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.Text;
+using System.Text.RegularExpressions;
 using OsuDroid.Game.Beatmaps;
 using OsuDroid.Game.Runtime.Diagnostics;
 using OsuDroid.Game.UI.Geometry;
@@ -7,6 +9,8 @@ namespace OsuDroid.Game.Scenes.SongSelect;
 
 public sealed partial class SongSelectScene
 {
+    private static readonly Regex s_filterStatPattern = new("(ar|od|cs|hp|star)(=|<|>|<=|>=)(\\d+)", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
 #pragma warning disable IDE0072 // Sort mode defaults to Title for unknown values.
     private BeatmapOptions? CurrentOptions()
     {
@@ -37,7 +41,7 @@ public sealed partial class SongSelectScene
             sets = sets.Where(set => directories.Contains(set.Directory));
         }
 
-        _visibleSnapshot = SortDifficultyRows(new BeatmapLibrarySnapshot(SortSets(sets).ToArray()));
+        _visibleSnapshot = CreateVisibleSnapshot(sets);
         if (_visibleSnapshot.Sets.Count == 0)
         {
             selectedSetIndex = -1;
@@ -74,25 +78,97 @@ public sealed partial class SongSelectScene
 
     private bool SetMatchesSearch(BeatmapSetInfo set)
     {
-        foreach (BeatmapInfo beatmap in set.Beatmaps)
+        if (string.IsNullOrEmpty(searchQuery))
         {
-            if (ContainsSearch(beatmap.Title) ||
-                ContainsSearch(beatmap.TitleUnicode) ||
-                ContainsSearch(beatmap.Artist) ||
-                ContainsSearch(beatmap.ArtistUnicode) ||
-                ContainsSearch(beatmap.Creator) ||
-                ContainsSearch(beatmap.Version) ||
-                ContainsSearch(beatmap.Tags) ||
-                ContainsSearch(beatmap.Source))
+            return true;
+        }
+
+        BeatmapInfo? first = set.Beatmaps.FirstOrDefault();
+        if (first is null)
+        {
+            return false;
+        }
+
+        string text = BuildSearchText(set, first);
+        foreach (string token in searchQuery.ToLowerInvariant().Split(' '))
+        {
+            Match stat = s_filterStatPattern.Match(token);
+            bool visible = stat.Success
+                ? set.Beatmaps.Any(beatmap => BeatmapStatMatches(beatmap, stat.Groups[1].Value, stat.Groups[2].Value, stat.Groups[3].Value))
+                : text.Contains(token, StringComparison.Ordinal);
+            if (!visible)
             {
-                return true;
+                return false;
             }
         }
 
-        return ContainsSearch(set.Directory);
+        return true;
     }
 
-    private bool ContainsSearch(string value) => value.Contains(searchQuery, StringComparison.OrdinalIgnoreCase);
+    private static string BuildSearchText(BeatmapSetInfo set, BeatmapInfo first)
+    {
+        var builder = new StringBuilder();
+        builder.Append(first.Title);
+        builder.Append(' ');
+        builder.Append(first.Artist);
+        builder.Append(' ');
+        builder.Append(first.Creator);
+        builder.Append(' ');
+        builder.Append(first.Tags);
+        builder.Append(' ');
+        builder.Append(first.Source);
+        builder.Append(' ');
+        builder.Append(first.Id?.ToString(CultureInfo.InvariantCulture) ?? string.Empty);
+        for (int index = set.Beatmaps.Count - 1; index >= 0; index--)
+        {
+            builder.Append(' ');
+            builder.Append(set.Beatmaps[index].Version);
+        }
+
+        return builder.ToString().ToLowerInvariant();
+    }
+
+    private static bool BeatmapStatMatches(BeatmapInfo beatmap, string key, string operation, string value)
+    {
+        float threshold = float.Parse(value, CultureInfo.InvariantCulture);
+        float actual = key switch
+        {
+            "ar" => beatmap.ApproachRate,
+            "od" => beatmap.OverallDifficulty,
+            "cs" => beatmap.CircleSize,
+            "hp" => beatmap.HpDrainRate,
+            "star" => beatmap.StandardStarRating ?? 0f,
+            _ => float.NaN,
+        };
+        return operation switch
+        {
+            "=" => actual == threshold,
+            "<" => actual < threshold,
+            ">" => actual > threshold,
+            "<=" => actual <= threshold,
+            ">=" => actual >= threshold,
+            _ => false,
+        };
+    }
+
+    private BeatmapLibrarySnapshot CreateVisibleSnapshot(IEnumerable<BeatmapSetInfo> sets)
+    {
+        BeatmapSetInfo[] source = sortMode is SongSelectSortMode.DroidStars or SongSelectSortMode.StandardStars or SongSelectSortMode.Length
+            ? FlattenSingleDifficultySets(sets).ToArray()
+            : sets.ToArray();
+        return SortDifficultyRows(new BeatmapLibrarySnapshot(SortSets(source).ToArray()));
+    }
+
+    private static IEnumerable<BeatmapSetInfo> FlattenSingleDifficultySets(IEnumerable<BeatmapSetInfo> sets)
+    {
+        foreach (BeatmapSetInfo set in sets)
+        {
+            foreach (BeatmapInfo beatmap in set.Beatmaps)
+            {
+                yield return set with { Beatmaps = [beatmap] };
+            }
+        }
+    }
 
     private IEnumerable<BeatmapSetInfo> SortSets(IEnumerable<BeatmapSetInfo> sets) => sortMode switch
     {
@@ -103,10 +179,10 @@ public sealed partial class SongSelectScene
             .OrderBy(set => set.Beatmaps.FirstOrDefault()?.Creator ?? string.Empty, StringComparer.OrdinalIgnoreCase)
             .ThenBy(set => set.Beatmaps.FirstOrDefault()?.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase),
         SongSelectSortMode.Date => sets.OrderByDescending(set => set.Beatmaps.Max(beatmap => beatmap.DateImported)),
-        SongSelectSortMode.Bpm => sets.OrderBy(set => set.Beatmaps.FirstOrDefault()?.MostCommonBpm ?? 0f),
-        SongSelectSortMode.DroidStars => sets.OrderBy(set => set.Beatmaps.Max(beatmap => beatmap.DroidStarRating ?? 0f)),
-        SongSelectSortMode.StandardStars => sets.OrderBy(set => set.Beatmaps.Max(beatmap => beatmap.StandardStarRating ?? 0f)),
-        SongSelectSortMode.Length => sets.OrderBy(set => set.Beatmaps.FirstOrDefault()?.Length ?? 0L),
+        SongSelectSortMode.Bpm => sets.OrderByDescending(set => set.Beatmaps.FirstOrDefault()?.BpmMax ?? 0f),
+        SongSelectSortMode.DroidStars => sets.OrderByDescending(set => set.Beatmaps.FirstOrDefault()?.DroidStarRating ?? 0f),
+        SongSelectSortMode.StandardStars => sets.OrderByDescending(set => set.Beatmaps.FirstOrDefault()?.StandardStarRating ?? 0f),
+        SongSelectSortMode.Length => sets.OrderByDescending(set => set.Beatmaps.FirstOrDefault()?.Length ?? 0L),
         _ => sets
                     .OrderBy(set => set.Beatmaps.FirstOrDefault()?.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase)
                     .ThenBy(set => set.Beatmaps.FirstOrDefault()?.Artist ?? string.Empty, StringComparer.OrdinalIgnoreCase),
