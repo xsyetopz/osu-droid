@@ -26,6 +26,7 @@ public sealed record UiElementSnapshot(
     bool ClipToBounds = false,
     UiRect? SpriteSource = null,
     UiMeasuredTextAnchor? MeasuredTextAnchor = null,
+    UiMeasuredTextBox? MeasuredTextBox = null,
     UiProgressRing? ProgressRing = null,
     UiRect? ClipBounds = null
 );
@@ -35,6 +36,13 @@ public sealed record UiMeasuredTextAnchor(
     UiTextStyle TextStyle,
     float RightX,
     float LeftPadding
+);
+
+public sealed record UiMeasuredTextBox(
+    string Text,
+    UiTextStyle TextStyle,
+    float WidthPadding,
+    float HeightPadding
 );
 
 public sealed record UiProgressRing(float StrokeWidth, float SweepDegrees);

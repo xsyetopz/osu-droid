@@ -74,22 +74,75 @@ public sealed partial class UiCompatibilityTests
         UiElementSnapshot message = frame.Elements.Single(element =>
             element.Id == "profile-message"
         );
-        UiElementSnapshot submessage = frame.Elements.Single(element =>
-            element.Id == "profile-submessage"
-        );
 
         Assert.That(panel.Color, Is.EqualTo(new UiColor(51, 51, 51, 128)));
         Assert.That(avatarFooter.Color, Is.EqualTo(new UiColor(51, 51, 51, 204)));
         Assert.That(message.Text, Is.EqualTo("Logging in..."));
+        Assert.That(message.TextStyle?.Size, Is.EqualTo(35f));
+        Assert.That(message.Bounds.Height, Is.EqualTo(44f));
         Assert.That(message.Bounds.X, Is.EqualTo(115f));
         Assert.That(message.Bounds.Y, Is.EqualTo(10f));
-        Assert.That(submessage.Text, Is.EqualTo("Connecting to server..."));
-        Assert.That(submessage.Bounds.X, Is.EqualTo(115f));
-        Assert.That(submessage.Bounds.Y, Is.EqualTo(65f));
+        Assert.That(frame.Elements.Any(element => element.Id == "profile-submessage"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "profile-avatar"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "profile-player"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "profile-pp"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "profile-acc"), Is.False);
+    }
+
+    [Test]
+    public void MainMenuOnlinePanelShowsLoginFailureState()
+    {
+        var scene = new MainMenuScene(
+            onlinePanelState: OnlineProfilePanelState.Failed("Wrong name or password")
+        );
+        UiFrameSnapshot frame = scene
+            .CreateSnapshot(VirtualViewport.FromSurface(1280, 720))
+            .UiFrame;
+
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "profile-message").Text,
+            Is.EqualTo("Cannot log in")
+        );
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "profile-message").TextStyle?.Size,
+            Is.EqualTo(35f)
+        );
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "profile-submessage").Text,
+            Is.EqualTo("Wrong name or password")
+        );
+        UiElementSnapshot submessage = frame.Elements.Single(element =>
+            element.Id == "profile-submessage"
+        );
+        Assert.That(submessage.TextStyle?.Size, Is.EqualTo(21f));
+        Assert.That(submessage.Bounds.Height, Is.EqualTo(30f));
+    }
+
+    [Test]
+    public void MainMenuOnlinePanelShowsRetryState()
+    {
+        var scene = new MainMenuScene(onlinePanelState: OnlineProfilePanelState.Retrying());
+        UiFrameSnapshot frame = scene
+            .CreateSnapshot(VirtualViewport.FromSurface(1280, 720))
+            .UiFrame;
+
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "profile-message").Text,
+            Is.EqualTo("Login failed")
+        );
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "profile-message").TextStyle?.Size,
+            Is.EqualTo(35f)
+        );
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "profile-submessage").Text,
+            Is.EqualTo("Retrying in 5 sec")
+        );
+        UiElementSnapshot submessage = frame.Elements.Single(element =>
+            element.Id == "profile-submessage"
+        );
+        Assert.That(submessage.TextStyle?.Size, Is.EqualTo(21f));
+        Assert.That(submessage.Bounds.Height, Is.EqualTo(30f));
     }
 
     [Test]
@@ -114,6 +167,9 @@ public sealed partial class UiCompatibilityTests
             frame.Elements.Single(element => element.Id == "profile-player").Text,
             Is.EqualTo("Player")
         );
+        UiElementSnapshot player = frame.Elements.Single(element => element.Id == "profile-player");
+        Assert.That(player.TextStyle?.Size, Is.EqualTo(35f));
+        Assert.That(player.Bounds.Height, Is.EqualTo(44f));
         UiElementSnapshot rank = frame.Elements.Single(element => element.Id == "profile-rank");
         UiElementSnapshot performance = frame.Elements.Single(element =>
             element.Id == "profile-pp"
@@ -125,11 +181,52 @@ public sealed partial class UiCompatibilityTests
         Assert.That(rank.Color, Is.EqualTo(new UiColor(153, 153, 153, 230)));
         Assert.That(rank.TextStyle?.Alignment, Is.EqualTo(UiTextAlignment.Right));
         Assert.That(performance.Text, Is.EqualTo("Performance: 12,345pp"));
+        Assert.That(performance.TextStyle?.Size, Is.EqualTo(21f));
+        Assert.That(performance.Bounds.Height, Is.EqualTo(30f));
         Assert.That(performance.Bounds.X, Is.EqualTo(125f));
         Assert.That(performance.Bounds.Y, Is.EqualTo(55f));
         Assert.That(accuracy.Text, Is.EqualTo("Accuracy: 98.76%"));
+        Assert.That(accuracy.TextStyle?.Size, Is.EqualTo(21f));
+        Assert.That(accuracy.Bounds.Height, Is.EqualTo(30f));
         Assert.That(accuracy.Bounds.X, Is.EqualTo(125f));
         Assert.That(accuracy.Bounds.Y, Is.EqualTo(80f));
+    }
+
+    [Test]
+    public void MainMenuProfileBadgeSuppressesAvatarWhenOptionIsOff()
+    {
+        var scene = new MainMenuScene(
+            onlinePanelState: new OnlineProfilePanelState(
+                new OnlineProfileSnapshot(
+                    "Player",
+                    DroidAssets.EmptyAvatar,
+                    AvatarPath: "/tmp/avatar.png",
+                    PerformancePoints: 12345
+                ),
+                LoadAvatar: false
+            )
+        );
+        UiFrameSnapshot frame = scene
+            .CreateSnapshot(VirtualViewport.FromSurface(1280, 720))
+            .UiFrame;
+
+        Assert.That(frame.Elements.Any(element => element.Id == "profile-avatar"), Is.False);
+        Assert.That(
+            frame.Elements.Single(element => element.Id == "profile-player").Text,
+            Is.EqualTo("Player")
+        );
+        Assert.That(frame.Elements.Any(element => element.Id == "profile-avatar-footer"), Is.True);
+    }
+
+    [Test]
+    public void OnlineProfilePanelStateKeepsAnnouncementOption()
+    {
+        OnlineProfilePanelState state = OnlineProfilePanelState.FromOptionalProfile(
+            new OnlineProfileSnapshot("Player"),
+            receiveAnnouncements: false
+        )!;
+
+        Assert.That(state.ReceiveAnnouncements, Is.False);
     }
 
     [Test]

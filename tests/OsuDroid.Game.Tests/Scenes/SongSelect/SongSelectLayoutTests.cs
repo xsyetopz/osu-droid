@@ -191,9 +191,14 @@ public sealed partial class SongSelectSceneTests
             frame.Elements.Single(element => element.Id == "songselect-score-message").Text,
             Is.EqualTo("Logging in...")
         );
+        UiElementSnapshot scoreMessage = frame.Elements.Single(element =>
+            element.Id == "songselect-score-message"
+        );
+        Assert.That(scoreMessage.TextStyle?.Size, Is.EqualTo(35f));
+        Assert.That(scoreMessage.Bounds.Height, Is.EqualTo(44f));
         Assert.That(
-            frame.Elements.Single(element => element.Id == "songselect-score-submessage").Text,
-            Is.EqualTo("Connecting to server...")
+            frame.Elements.Any(element => element.Id == "songselect-score-submessage"),
+            Is.False
         );
         Assert.That(
             frame.Elements.Any(element => element.Id == "songselect-score-avatar"),

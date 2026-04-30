@@ -14,22 +14,82 @@ public sealed record OnlineProfileSnapshot(
     float? Accuracy = null
 );
 
+public enum OnlineProfilePanelKind
+{
+    LoggingIn,
+    Retrying,
+    Failed,
+    LoggedIn,
+}
+
 public sealed record OnlineProfilePanelState(
     OnlineProfileSnapshot? Profile = null,
     string Message = "Logging in...",
-    string Submessage = "Connecting to server..."
+    string Submessage = "",
+    bool LoadAvatar = true,
+    bool ReceiveAnnouncements = true,
+    OnlineProfilePanelKind Kind = OnlineProfilePanelKind.LoggingIn
 )
 {
-    public static OnlineProfilePanelState Connecting { get; } = new();
+    public static OnlineProfilePanelState Connecting { get; } = LoggingIn();
 
-    public static OnlineProfilePanelState? FromOptionalProfile(OnlineProfileSnapshot? profile) =>
+    public static OnlineProfilePanelState LoggingIn(
+        bool loadAvatar = true,
+        bool receiveAnnouncements = true
+    ) =>
+        new(
+            LoadAvatar: loadAvatar,
+            ReceiveAnnouncements: receiveAnnouncements,
+            Kind: OnlineProfilePanelKind.LoggingIn
+        );
+
+    public static OnlineProfilePanelState Retrying(
+        bool loadAvatar = true,
+        bool receiveAnnouncements = true
+    ) =>
+        new(
+            Message: "Login failed",
+            Submessage: "Retrying in 5 sec",
+            LoadAvatar: loadAvatar,
+            ReceiveAnnouncements: receiveAnnouncements,
+            Kind: OnlineProfilePanelKind.Retrying
+        );
+
+    public static OnlineProfilePanelState Failed(
+        string failureMessage,
+        bool loadAvatar = true,
+        bool receiveAnnouncements = true
+    ) =>
+        new(
+            Message: "Cannot log in",
+            Submessage: failureMessage,
+            LoadAvatar: loadAvatar,
+            ReceiveAnnouncements: receiveAnnouncements,
+            Kind: OnlineProfilePanelKind.Failed
+        );
+
+    public static OnlineProfilePanelState? FromOptionalProfile(
+        OnlineProfileSnapshot? profile,
+        bool loadAvatar = true,
+        bool receiveAnnouncements = true
+    ) =>
         profile is not null && !string.IsNullOrWhiteSpace(profile.Username)
-            ? new OnlineProfilePanelState(profile)
-            : Connecting;
+            ? new OnlineProfilePanelState(
+                profile,
+                LoadAvatar: loadAvatar,
+                ReceiveAnnouncements: receiveAnnouncements,
+                Kind: OnlineProfilePanelKind.LoggedIn
+            )
+            : LoggingIn(loadAvatar, receiveAnnouncements);
 }
 
 public static class OnlineProfilePanelSnapshots
 {
+    private const float CaptionTextSize = 35f;
+    private const float CaptionTextBoundsHeight = 44f;
+    private const float SmallTextSize = 21f;
+    private const float SmallTextBoundsHeight = 30f;
+
     private static readonly UiColor s_panel = DroidUiColors.OnlineProfilePanel;
     private static readonly UiColor s_footer = DroidUiColors.OnlineProfileFooter;
     private static readonly UiColor s_white = DroidUiColors.TextPrimary;
@@ -74,39 +134,56 @@ public static class OnlineProfilePanelSnapshots
                 new UiElementSnapshot(
                     idPrefix + "-message",
                     UiElementKind.Text,
-                    new UiRect(bounds.X + 110f, bounds.Y + 5f, bounds.Width - 120f, 28f),
+                    new UiRect(
+                        bounds.X + 110f,
+                        bounds.Y + 5f,
+                        bounds.Width - 120f,
+                        CaptionTextBoundsHeight
+                    ),
                     s_white,
                     1f,
                     Text: state.Message,
-                    TextStyle: new UiTextStyle(16f)
+                    TextStyle: new UiTextStyle(CaptionTextSize)
                 )
             );
 
-            elements.Add(
-                new UiElementSnapshot(
-                    idPrefix + "-submessage",
-                    UiElementKind.Text,
-                    new UiRect(bounds.X + 110f, bounds.Y + 60f, bounds.Width - 120f, 40f),
-                    s_white,
-                    1f,
-                    Text: state.Submessage,
-                    TextStyle: new UiTextStyle(14f)
-                )
-            );
+            if (!string.IsNullOrEmpty(state.Submessage))
+            {
+                elements.Add(
+                    new UiElementSnapshot(
+                        idPrefix + "-submessage",
+                        UiElementKind.Text,
+                        new UiRect(
+                            bounds.X + 110f,
+                            bounds.Y + 60f,
+                            bounds.Width - 120f,
+                            SmallTextBoundsHeight
+                        ),
+                        s_white,
+                        1f,
+                        Text: state.Submessage,
+                        TextStyle: new UiTextStyle(SmallTextSize)
+                    )
+                );
+            }
+
             return;
         }
 
-        elements.Add(
-            new UiElementSnapshot(
-                idPrefix + "-avatar",
-                UiElementKind.Sprite,
-                avatarBounds,
-                s_white,
-                1f,
-                profile.AvatarAssetName ?? DroidAssets.EmptyAvatar,
-                ExternalAssetPath: profile.AvatarPath
-            )
-        );
+        if (state.LoadAvatar)
+        {
+            elements.Add(
+                new UiElementSnapshot(
+                    idPrefix + "-avatar",
+                    UiElementKind.Sprite,
+                    avatarBounds,
+                    s_white,
+                    1f,
+                    profile.AvatarAssetName ?? DroidAssets.EmptyAvatar,
+                    ExternalAssetPath: profile.AvatarPath
+                )
+            );
+        }
 
         elements.Add(
             new UiElementSnapshot(
@@ -116,12 +193,12 @@ public static class OnlineProfilePanelSnapshots
                     bounds.X + avatarSize + 10f,
                     bounds.Y + 5f,
                     bounds.Width - avatarSize - 20f,
-                    28f
+                    CaptionTextBoundsHeight
                 ),
                 s_white,
                 1f,
                 Text: profile.Username,
-                TextStyle: new UiTextStyle(16f)
+                TextStyle: new UiTextStyle(CaptionTextSize)
             )
         );
 
@@ -150,12 +227,12 @@ public static class OnlineProfilePanelSnapshots
                         bounds.X + avatarSize + 10f,
                         bounds.Y + 50f,
                         bounds.Width - avatarSize - 20f,
-                        24f
+                        SmallTextBoundsHeight
                     ),
                     s_secondary,
                     1f,
                     Text: "Performance: " + pp.ToString("N0", CultureInfo.InvariantCulture) + "pp",
-                    TextStyle: new UiTextStyle(18f)
+                    TextStyle: new UiTextStyle(SmallTextSize)
                 )
             );
         }
@@ -170,14 +247,14 @@ public static class OnlineProfilePanelSnapshots
                         bounds.X + avatarSize + 10f,
                         bounds.Y + 75f,
                         bounds.Width - avatarSize - 20f,
-                        24f
+                        SmallTextBoundsHeight
                     ),
                     s_secondary,
                     1f,
                     Text: "Accuracy: "
                         + accuracy.ToString("0.00", CultureInfo.InvariantCulture)
                         + "%",
-                    TextStyle: new UiTextStyle(18f)
+                    TextStyle: new UiTextStyle(SmallTextSize)
                 )
             );
         }

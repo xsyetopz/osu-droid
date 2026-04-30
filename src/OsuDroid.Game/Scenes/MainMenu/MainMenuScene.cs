@@ -63,8 +63,8 @@ public sealed partial class MainMenuScene(
 
     private const float ButtonExpandOffset = 100f;
     private const float ButtonCollapseOffset = 50f;
-    private const float VersionPillTextSize = 16f;
-    private const float VersionPillTextHeight = 24f;
+    private const float VersionPillTextSize = 21f;
+    private const float VersionPillTextHeight = 30f;
     private const float AboutPanelWidth = 500f;
     private const float AboutPanelHeight = 526f;
     private const float AboutPanelRadius = 14f;

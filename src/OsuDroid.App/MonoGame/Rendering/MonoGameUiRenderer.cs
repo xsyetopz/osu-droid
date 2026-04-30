@@ -33,6 +33,7 @@ internal sealed partial class MonoGameUiRenderer(
         foreach (var element in frame.Elements)
         {
             var destination = ToSurfaceRect(frame, element);
+            destination = ApplyMeasuredTextBox(frame, element, destination);
             destination = ApplyMeasuredTextAnchor(frame, element, destination);
             var clip = ToSurfaceClipRect(frame, element);
             var color = ToXnaColor(element.Color, element.Alpha);

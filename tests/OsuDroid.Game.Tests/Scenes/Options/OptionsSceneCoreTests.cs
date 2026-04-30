@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using OsuDroid.Game.Beatmaps;
 using OsuDroid.Game.Compatibility.Database;
+using OsuDroid.Game.Compatibility.Online;
 using OsuDroid.Game.Composition;
 using OsuDroid.Game.Localization;
 using OsuDroid.Game.Runtime.Paths;
@@ -211,6 +212,260 @@ public sealed partial class OptionsSceneTests
     }
 
     [Test]
+    public void CoreAppliesGeneralOnlinePanelOptionsToRuntimeScenes()
+    {
+        string path = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"options-online-{Guid.NewGuid():N}"
+        );
+        try
+        {
+            var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(path));
+            paths.EnsureDirectories();
+            var database = new DroidDatabase(paths.GetDatabasePath("debug"));
+            database.EnsureCreated();
+            var settings = new JsonGameSettingsStore(
+                Path.Combine(paths.CoreRoot, "config", "settings.json")
+            );
+            settings.SetBool("stayOnline", true);
+            settings.SetBool("loadAvatar", true);
+            settings.SetBool("receiveAnnouncements", false);
+            var core = new OsuDroidGameCore(
+                new GameServices(
+                    database,
+                    paths,
+                    "debug",
+                    SettingsStore: settings,
+                    OnlineProfile: new OnlineProfileSnapshot("Player", "emptyavatar")
+                )
+            );
+            var viewport = VirtualViewport.FromSurface(1280, 720);
+
+            Assert.That(
+                core.CreateFrame(viewport)
+                    .UiFrame.Elements.Any(element => element.Id == "profile-avatar"),
+                Is.True
+            );
+
+            core.TapMainMenuCookie();
+            core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
+            _ = core.TapMainMenu(MainMenuButtonSlot.Second);
+            core.HandleUiAction(UiAction.OptionsActiveRow1, viewport);
+            core.HandleUiAction(UiAction.OptionsBack, viewport);
+            UiFrameSnapshot frame = core.CreateFrame(viewport).UiFrame;
+
+            Assert.That(settings.GetBool("loadAvatar", true), Is.False);
+            Assert.That(frame.Elements.Any(element => element.Id == "profile-avatar"), Is.False);
+            Assert.That(
+                frame.Elements.Single(element => element.Id == "profile-player").Text,
+                Is.EqualTo("Player")
+            );
+        }
+        finally
+        {
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }
+        }
+    }
+
+    [Test]
+    public async Task CoreAppliesOnlineAccountInputAfterTextSubmission()
+    {
+        string path = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"options-account-{Guid.NewGuid():N}"
+        );
+        try
+        {
+            var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(path));
+            paths.EnsureDirectories();
+            var database = new DroidDatabase(paths.GetDatabasePath("debug"));
+            database.EnsureCreated();
+            var settings = new JsonGameSettingsStore(
+                Path.Combine(paths.CoreRoot, "config", "settings.json")
+            );
+            settings.SetBool("stayOnline", true);
+            settings.SetString("onlinePassword", "password");
+            var textInput = new CapturingTextInputService();
+            var loginClient = new RecordingOnlineLoginClient(
+                OnlineLoginResult.Success(CreateLoginProfile("Player"))
+            );
+            var core = new OsuDroidGameCore(
+                new GameServices(
+                    database,
+                    paths,
+                    "debug",
+                    SettingsStore: settings,
+                    TextInputService: textInput,
+                    OnlineLoginClient: loginClient
+                )
+            );
+            var viewport = VirtualViewport.FromSurface(1280, 720);
+
+            Assert.That(
+                core.CreateFrame(viewport)
+                    .UiFrame.Elements.Any(element => element.Id == "profile-player"),
+                Is.False
+            );
+
+            core.TapMainMenuCookie();
+            core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
+            _ = core.TapMainMenu(MainMenuButtonSlot.Second);
+            core.HandleUiAction(UiAction.OptionsActiveRow3, viewport);
+            textInput.ActiveRequest!.OnSubmitted("Player");
+            core.HandleUiAction(UiAction.OptionsBack, viewport);
+            await WaitUntil(() =>
+                    core.CreateFrame(viewport)
+                        .UiFrame.Elements.Any(element => element.Id == "profile-player")
+                )
+                .ConfigureAwait(false);
+            UiFrameSnapshot frame = core.CreateFrame(viewport).UiFrame;
+
+            Assert.That(settings.GetString("onlineUsername", string.Empty), Is.EqualTo("Player"));
+            Assert.That(loginClient.LastUsername, Is.EqualTo("Player"));
+            Assert.That(loginClient.LastPassword, Is.EqualTo("password"));
+            Assert.That(
+                frame.Elements.Single(element => element.Id == "profile-player").Text,
+                Is.EqualTo("Player")
+            );
+        }
+        finally
+        {
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }
+        }
+    }
+
+    [Test]
+    public async Task CorePublishesOnlineLoginFailure()
+    {
+        string path = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"options-login-fail-{Guid.NewGuid():N}"
+        );
+        try
+        {
+            var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(path));
+            paths.EnsureDirectories();
+            var database = new DroidDatabase(paths.GetDatabasePath("debug"));
+            database.EnsureCreated();
+            var settings = new JsonGameSettingsStore(
+                Path.Combine(paths.CoreRoot, "config", "settings.json")
+            );
+            settings.SetBool("stayOnline", true);
+            settings.SetString("onlineUsername", "Player");
+            settings.SetString("onlinePassword", "wrong");
+            var core = new OsuDroidGameCore(
+                new GameServices(
+                    database,
+                    paths,
+                    "debug",
+                    SettingsStore: settings,
+                    OnlineLoginClient: new RecordingOnlineLoginClient(
+                        OnlineLoginResult.Failure("Wrong name or password")
+                    )
+                )
+            );
+            var viewport = VirtualViewport.FromSurface(1280, 720);
+
+            await WaitUntil(() =>
+                    core.CreateFrame(viewport)
+                        .UiFrame.Elements.Any(element =>
+                            element.Id == "profile-message" && element.Text == "Cannot log in"
+                        )
+                )
+                .ConfigureAwait(false);
+            UiFrameSnapshot frame = core.CreateFrame(viewport).UiFrame;
+
+            Assert.That(
+                frame.Elements.Single(element => element.Id == "profile-message").Text,
+                Is.EqualTo("Cannot log in")
+            );
+            Assert.That(
+                frame.Elements.Single(element => element.Id == "profile-submessage").Text,
+                Is.EqualTo("Wrong name or password")
+            );
+        }
+        finally
+        {
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }
+        }
+    }
+
+    [Test]
+    public async Task CoreKeepsLoggingInUntilOnlineLoginCompletes()
+    {
+        string path = Path.Combine(
+            TestContext.CurrentContext.WorkDirectory,
+            $"options-login-pending-{Guid.NewGuid():N}"
+        );
+        try
+        {
+            var paths = new DroidGamePathLayout(DroidPathRoots.FromCoreRoot(path));
+            paths.EnsureDirectories();
+            var database = new DroidDatabase(paths.GetDatabasePath("debug"));
+            database.EnsureCreated();
+            var settings = new JsonGameSettingsStore(
+                Path.Combine(paths.CoreRoot, "config", "settings.json")
+            );
+            settings.SetBool("stayOnline", true);
+            settings.SetString("onlineUsername", "Player");
+            settings.SetString("onlinePassword", "password");
+            var loginClient = new RecordingOnlineLoginClient();
+            var core = new OsuDroidGameCore(
+                new GameServices(
+                    database,
+                    paths,
+                    "debug",
+                    SettingsStore: settings,
+                    OnlineLoginClient: loginClient
+                )
+            );
+            var viewport = VirtualViewport.FromSurface(1280, 720);
+
+            await WaitUntil(() => loginClient.LoginCalls == 1).ConfigureAwait(false);
+            UiFrameSnapshot loggingFrame = core.CreateFrame(viewport).UiFrame;
+
+            Assert.That(
+                loggingFrame.Elements.Single(element => element.Id == "profile-message").Text,
+                Is.EqualTo("Logging in...")
+            );
+            Assert.That(
+                loggingFrame.Elements.Any(element => element.Id == "profile-submessage"),
+                Is.False
+            );
+
+            loginClient.Complete(OnlineLoginResult.Success(CreateLoginProfile("Player")));
+            await WaitUntil(() =>
+                    core.CreateFrame(viewport)
+                        .UiFrame.Elements.Any(element => element.Id == "profile-player")
+                )
+                .ConfigureAwait(false);
+
+            Assert.That(
+                core.CreateFrame(viewport)
+                    .UiFrame.Elements.Single(element => element.Id == "profile-player")
+                    .Text,
+                Is.EqualTo("Player")
+            );
+        }
+        finally
+        {
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }
+        }
+    }
+
+    [Test]
     public void CoreBacksUpAndRestoresNonSensitiveOptions()
     {
         string path = Path.Combine(
@@ -227,6 +482,7 @@ public sealed partial class OptionsSceneTests
                 Path.Combine(paths.CoreRoot, "config", "settings.json")
             );
             settings.SetInt("bgmvolume", 50);
+            settings.SetString("onlineUsername", "player");
             settings.SetString("onlinePassword", "secret");
             var preview = new RecordingPreviewPlayer();
             var core = new OsuDroidGameCore(
@@ -253,6 +509,7 @@ public sealed partial class OptionsSceneTests
 
             string backup = File.ReadAllText(Path.Combine(paths.CoreRoot, "osudroid.cfg"));
             Assert.That(backup, Does.Contain("\"bgmvolume\""));
+            Assert.That(backup, Does.Not.Contain("onlineUsername"));
             Assert.That(backup, Does.Not.Contain("onlinePassword"));
             Assert.That(settings.GetInt("bgmvolume", 0), Is.EqualTo(50));
             Assert.That(preview.Volume, Is.EqualTo(0.5f).Within(0.001f));

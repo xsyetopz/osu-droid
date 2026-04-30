@@ -28,6 +28,7 @@ public sealed record GameServices(
     IBeatmapDifficultyService? BeatmapDifficultyService = null,
     IGameSettingsStore? SettingsStore = null,
     IMenuSfxPlayer? MenuSfxPlayer = null,
+    IOnlineLoginClient? OnlineLoginClient = null,
     OnlineProfileSnapshot? OnlineProfile = null,
     bool ShowStartupScene = false
 )

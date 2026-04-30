@@ -39,6 +39,7 @@ public sealed partial class OsuDroidGameCore
     private readonly ModSelectScene _modSelect;
     private readonly IBeatmapLibrary _beatmapLibrary;
     private readonly IBeatmapProcessingService _beatmapProcessingService;
+    private readonly IOnlineLoginClient _onlineLoginClient;
 #pragma warning disable CA1859 // Keep injectable interfaces for tests and platform service ownership.
     private readonly IMenuMusicController _musicController;
     private readonly IGameSettingsStore _settingsStore;
@@ -55,6 +56,9 @@ public sealed partial class OsuDroidGameCore
     private MenuNowPlayingState? _preservedDownloaderMusicState;
     private string? _pendingSongSelectBeatmapSetDirectory;
     private string? _pendingSongSelectBeatmapFilename;
+    private CancellationTokenSource? _onlineLoginCancellation;
+    private OnlineProfileSnapshot? _onlineProfile;
+    private int _onlineLoginGeneration;
 
     public OsuDroidGameCore(GameServices services)
     {
@@ -66,8 +70,10 @@ public sealed partial class OsuDroidGameCore
             );
         _settingsBackupService = new GameSettingsBackupService(services.Paths, _settingsStore);
         _menuMusicPreviewEnabled = _settingsStore.GetBool("musicpreview", true);
+        _onlineLoginClient = services.OnlineLoginClient ?? new OsuDroidOnlineLoginClient();
+        _onlineProfile = services.OnlineProfile;
         var localizer = new GameLocalizer();
-        OnlineProfilePanelState? onlinePanelState = CreateOnlinePanelState(services.OnlineProfile);
+        OnlineProfilePanelState? onlinePanelState = CreateOnlinePanelState(_onlineProfile);
         _startup = new StartupScene();
         _mainMenu = new MainMenuScene(
             services.DisplayVersion,
@@ -79,7 +85,9 @@ public sealed partial class OsuDroidGameCore
         _options = new OptionsScene(
             localizer,
             _settingsStore,
-            pathDefaults: OptionsPathDefaults.FromPaths(services.Paths)
+            services.TextInputService,
+            pathDefaults: OptionsPathDefaults.FromPaths(services.Paths),
+            settingChanged: ApplyChangedOptionsSetting
         );
         _textInputService = services.TextInputService ?? new NoOpTextInputService();
         _previewPlayer = services.BeatmapPreviewPlayer ?? new NoOpBeatmapPreviewPlayer();

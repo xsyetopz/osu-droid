@@ -151,6 +151,14 @@ public sealed partial class UiCompatibilityTests
 
         Assert.That(versionPill.Action, Is.EqualTo(UiAction.MainMenuVersionPill));
         Assert.That(versionText.Text, Is.EqualTo("osu!droid 9.9"));
+        Assert.That(versionText.TextStyle?.Size, Is.EqualTo(21f));
+        Assert.That(versionText.Bounds.X, Is.EqualTo(versionPill.Bounds.X + 10f));
+        Assert.That(versionText.Bounds.Y, Is.EqualTo(versionPill.Bounds.Y + 2f));
+        Assert.That(versionPill.MeasuredTextBox, Is.Not.Null);
+        Assert.That(versionPill.MeasuredTextBox?.Text, Is.EqualTo("osu!droid 9.9"));
+        Assert.That(versionPill.MeasuredTextBox?.TextStyle.Size, Is.EqualTo(21f));
+        Assert.That(versionPill.MeasuredTextBox?.WidthPadding, Is.EqualTo(20f));
+        Assert.That(versionPill.MeasuredTextBox?.HeightPadding, Is.EqualTo(4f));
         Assert.That(versionPill.Bounds, Is.EqualTo(scene.GetVersionPillBounds(viewport)));
 
         scene.OpenAboutDialog();

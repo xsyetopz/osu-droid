@@ -18,7 +18,11 @@ public sealed partial class OsuDroidGameCore
 {
     private OnlineProfilePanelState? CreateOnlinePanelState(OnlineProfileSnapshot? profile) =>
         _settingsStore.GetBool("stayOnline", false)
-            ? OnlineProfilePanelState.FromOptionalProfile(profile)
+            ? OnlineProfilePanelState.FromOptionalProfile(
+                profile,
+                _settingsStore.GetBool("loadAvatar", false),
+                _settingsStore.GetBool("receiveAnnouncements", true)
+            )
             : null;
 
     public void AttachPlatformServices(

@@ -243,21 +243,24 @@ public sealed partial class OptionsScene
                 GetStringValue(row.Key),
                 text =>
                 {
-                    string value = NormalizeInputValue(row, text);
-                    _stringValues[row.Key] = value;
-                    _settingsStore?.SetString(row.Key, value);
-                    _changedSettingKey = row.Key;
+                    CompleteInputChange(row, text);
                 },
                 text =>
                 {
-                    string value = NormalizeInputValue(row, text);
-                    _stringValues[row.Key] = value;
-                    _settingsStore?.SetString(row.Key, value);
-                    _changedSettingKey = row.Key;
+                    CompleteInputChange(row, text);
                 },
                 rowBounds
             )
         );
+    }
+
+    private void CompleteInputChange(SettingsRow row, string? text)
+    {
+        string value = NormalizeInputValue(row, text);
+        _stringValues[row.Key] = value;
+        _settingsStore?.SetString(row.Key, value);
+        _changedSettingKey = row.Key;
+        _settingChanged?.Invoke(row.Key);
     }
 
     private string NormalizeInputValue(SettingsRow row, string? value) =>

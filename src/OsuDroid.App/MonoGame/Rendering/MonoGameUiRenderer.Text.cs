@@ -75,6 +75,30 @@ internal sealed partial class MonoGameUiRenderer
             : (int)Math.Min(maxScroll, scrollSeconds * speed);
     }
 
+    private XnaRect ApplyMeasuredTextBox(
+        UiFrameSnapshot frame,
+        UiElementSnapshot element,
+        XnaRect destination
+    )
+    {
+        if (element.MeasuredTextBox is not { } box)
+            return destination;
+
+        var textTexture = textStore.GetTexture(
+            box.Text,
+            box.TextStyle,
+            UiColor.Opaque(255, 255, 255),
+            1f,
+            frame.Viewport.Scale
+        );
+        return destination with
+        {
+            Width = textTexture.Width + (int)MathF.Round(box.WidthPadding * frame.Viewport.Scale),
+            Height =
+                textTexture.Height + (int)MathF.Round(box.HeightPadding * frame.Viewport.Scale),
+        };
+    }
+
     private XnaRect ApplyMeasuredTextAnchor(
         UiFrameSnapshot frame,
         UiElementSnapshot element,

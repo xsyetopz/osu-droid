@@ -262,6 +262,7 @@ public sealed partial class MainMenuScene
     {
         string text = GetVersionText();
         UiRect bounds = CreateVersionPillBounds(viewport, text);
+        var textStyle = new UiTextStyle(VersionPillTextSize);
         elements.Add(
             new UiElementSnapshot(
                 "version-pill",
@@ -270,7 +271,13 @@ public sealed partial class MainMenuScene
                 s_translucentBlack,
                 1f,
                 Action: UiAction.MainMenuVersionPill,
-                CornerRadius: VersionPillCornerRadius
+                CornerRadius: VersionPillCornerRadius,
+                MeasuredTextBox: new UiMeasuredTextBox(
+                    text,
+                    textStyle,
+                    VersionPillTextXInset * 2f,
+                    VersionPillTextYInset * 2f
+                )
             )
         );
 
@@ -287,7 +294,7 @@ public sealed partial class MainMenuScene
                 s_white,
                 1f,
                 Text: text,
-                TextStyle: new UiTextStyle(VersionPillTextSize)
+                TextStyle: textStyle
             )
         );
     }

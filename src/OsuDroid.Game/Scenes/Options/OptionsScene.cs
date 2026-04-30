@@ -26,6 +26,7 @@ public sealed partial class OptionsScene
     private readonly GameLocalizer _localizer;
     private readonly IGameSettingsStore? _settingsStore;
     private readonly OptionsPathDefaults _pathDefaults;
+    private readonly Action<string>? _settingChanged;
     private ITextInputService _textInputService;
     private OptionsSection _activeSection;
     private float _contentScrollOffset;
@@ -45,12 +46,14 @@ public sealed partial class OptionsScene
         GameLocalizer localizer,
         IGameSettingsStore? settingsStore = null,
         ITextInputService? textInputService = null,
-        OptionsPathDefaults? pathDefaults = null
+        OptionsPathDefaults? pathDefaults = null,
+        Action<string>? settingChanged = null
     )
     {
         _localizer = localizer;
         _settingsStore = settingsStore;
         _pathDefaults = pathDefaults ?? OptionsPathDefaults.Empty;
+        _settingChanged = settingChanged;
         _textInputService = textInputService ?? new NoOpTextInputService();
         ReloadValuesFromStore();
     }

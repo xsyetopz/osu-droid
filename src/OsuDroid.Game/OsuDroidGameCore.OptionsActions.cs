@@ -48,6 +48,13 @@ public sealed partial class OsuDroidGameCore
                 ApplyDifficultyAlgorithmSetting();
                 break;
             case "stayOnline":
+            case "loadAvatar":
+            case "receiveAnnouncements":
+                ApplyOnlinePanelSetting();
+                break;
+            case "onlineUsername":
+            case "onlinePassword":
+                _onlineProfile = null;
                 ApplyOnlinePanelSetting();
                 break;
             case "registerAcc":
@@ -142,13 +149,6 @@ public sealed partial class OsuDroidGameCore
         _beatmapDownloader.SetPreferNoVideoDownloads(
             _options.GetBoolValue("preferNoVideoDownloads")
         );
-
-    private void ApplyOnlinePanelSetting()
-    {
-        OnlineProfilePanelState? state = CreateOnlinePanelState(Services.OnlineProfile);
-        _mainMenu.SetOnlinePanelState(state);
-        _songSelect.SetOnlinePanelState(state);
-    }
 
     private void ApplyRoute(MainMenuRoute route)
     {
