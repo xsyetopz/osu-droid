@@ -61,6 +61,7 @@ public sealed partial class ModSelectScene
             ModStatDirection.Increased => DroidUiTheme.ModMenu.StatIncreased,
             ModStatDirection.Decreased => DroidUiTheme.ModMenu.StatDecreased,
             ModStatDirection.DifficultyAdjust => DroidUiTheme.ModMenu.StatDifficultyAdjust,
+            ModStatDirection.Unchanged => s_text,
             _ => s_text,
         };
 

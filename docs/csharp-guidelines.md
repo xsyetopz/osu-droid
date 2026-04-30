@@ -29,7 +29,8 @@
 
 ## Architecture Audit
 - Run `python3 scripts/dev/architecture_audit.py --write docs/architecture-audit.md` before adding large scenes/subsystems.
-- Treat `god-file:candidate`, `too-many-methods`, and `wide-public-surface` in source files as cleanup triggers.
+- Treat `god-file:candidate`, `file-too-large`, `too-many-methods`, and `wide-public-surface` in source files as cleanup triggers.
+- Use 1000 non-comment logical LOC as the large-file cleanup point and 2000 LOC as the hard file-size ceiling.
 - Test files may exceed thresholds when they preserve regression evidence, but split them when they block maintainability.
 
 ## Runtime Paths

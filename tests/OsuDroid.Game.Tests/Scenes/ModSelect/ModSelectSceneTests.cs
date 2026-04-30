@@ -325,7 +325,7 @@ public sealed partial class ModSelectSceneTests
     }
 
     [Test]
-    public void CatalogUsesLegacyPlayableSectionOrder()
+    public void CatalogUsesOsuDroidPlayableSectionOrder()
     {
         string[] expected =
         [
@@ -471,7 +471,7 @@ public sealed partial class ModSelectSceneTests
     }
 
     [Test]
-    public void ModStatsExposeLegacySongSelectLineDirections()
+    public void ModStatsExposeOsuDroidSongSelectLineDirections()
     {
         BeatmapInfo beatmap = TestBeatmap();
 

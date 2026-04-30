@@ -450,18 +450,12 @@ public sealed partial class ModSelectScene
 
     private static string NormalizeSettingRawValue(ModSettingDescriptor setting, string raw)
     {
-        if (setting.Kind == ModSettingKind.Toggle)
-        {
-            return string.Equals(raw, "true", StringComparison.OrdinalIgnoreCase)
+        return setting.Kind == ModSettingKind.Toggle
+            ? string.Equals(raw, "true", StringComparison.OrdinalIgnoreCase)
                 ? "true"
-                : "false";
-        }
-
-        if (setting.IsNullable && string.Equals(raw, "null", StringComparison.OrdinalIgnoreCase))
-        {
-            return "null";
-        }
-
-        return raw;
+                : "false"
+            : setting.IsNullable && string.Equals(raw, "null", StringComparison.OrdinalIgnoreCase)
+                ? "null"
+                : raw;
     }
 }

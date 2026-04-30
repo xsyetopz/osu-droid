@@ -52,9 +52,9 @@ public sealed partial class OptionsScene
         float activeSectionScrollOffset
     )
     {
-        for (int i = 0; i < s_sections.Length; i++)
+        for (int i = 0; i < OptionsCatalog.Sections.Length; i++)
         {
-            SettingsSection section = s_sections[i];
+            SettingsSection section = OptionsCatalog.Sections[i];
             bool isSelected = section.Section == selectedSectionValue;
             float y = ContentTop + i * SectionStep - activeSectionScrollOffset;
             var bounds = new UiRect(ContentPaddingX, y, SectionRailWidth, SectionHeight);

@@ -12,7 +12,8 @@ public sealed partial class OptionsScene
     public static float MaxContentScrollOffset(VirtualViewport viewport) =>
         Math.Max(
             0f,
-            CalculateStaticContentHeight(s_generalCategories, viewport) - VisibleContentHeight(viewport)
+            CalculateStaticContentHeight(OptionsCatalog.GeneralCategories, viewport)
+                - VisibleContentHeight(viewport)
         );
 
     public static float MaxSectionScrollOffset(VirtualViewport viewport) =>

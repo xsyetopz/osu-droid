@@ -208,6 +208,7 @@ public sealed partial class SongSelectScene
             ModStatDirection.Increased => DroidUiTheme.ModMenu.SongSelectIncreased,
             ModStatDirection.Decreased => DroidUiTheme.ModMenu.SongSelectDecreased,
             ModStatDirection.DifficultyAdjust => DroidUiTheme.ModMenu.StatDifficultyAdjust,
+            ModStatDirection.Unchanged => s_white,
             _ => s_white,
         };
 }

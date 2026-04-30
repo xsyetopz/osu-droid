@@ -11,7 +11,7 @@ public sealed partial class OptionsScene
         categories.Sum(category => CategoryTopMargin + CalculateCategoryHeight(category));
 
     private static float CalculateSectionHeight() =>
-        32f * DpScale + s_sections.Length * SectionStep + 32f * DpScale;
+        32f * DpScale + OptionsCatalog.Sections.Length * SectionStep + 32f * DpScale;
 
     private float CalculateCategoryHeight(SettingsCategory category) =>
         CategoryHeaderHeight + category.Rows.Sum(GetRowHeight);
@@ -56,7 +56,7 @@ public sealed partial class OptionsScene
     {
         float listWidth = ActiveListWidth(_lastViewport);
         float reservedControlWidth =
-            row.Kind == SettingsRowKind.Input || row.Kind == SettingsRowKind.Slider ? 0f
+            row.Kind is SettingsRowKind.Input or SettingsRowKind.Slider ? 0f
             : row.Kind == SettingsRowKind.Select ? 150f * DpScale
             : 96f * DpScale;
         return Math.Max(80f * DpScale, listWidth - RowPadding * 3f - reservedControlWidth);

@@ -65,6 +65,8 @@ public static class ModStatCalculator
                     cs = (float)(NullableNumber(acronym, "cs", state) ?? cs);
                     hp = (float)(NullableNumber(acronym, "hp", state) ?? hp);
                     break;
+                default:
+                    break;
             }
         }
 
@@ -130,18 +132,10 @@ public static class ModStatCalculator
         bool forceDifficultyAdjust = false
     )
     {
-        if (forceDifficultyAdjust && Math.Abs(initialValue - finalValue) > 0.001f)
-        {
-            return ModStatDirection.DifficultyAdjust;
-        }
-
-        if (initialValue < finalValue - 0.001f)
-        {
-            return ModStatDirection.Increased;
-        }
-
-        return initialValue > finalValue + 0.001f
-            ? ModStatDirection.Decreased
+        return forceDifficultyAdjust && Math.Abs(initialValue - finalValue) > 0.001f
+                ? ModStatDirection.DifficultyAdjust
+            : initialValue < finalValue - 0.001f ? ModStatDirection.Increased
+            : initialValue > finalValue + 0.001f ? ModStatDirection.Decreased
             : ModStatDirection.Unchanged;
     }
 
@@ -203,6 +197,10 @@ public static class ModStatCalculator
             ModSettingKind.Toggle => setting.DefaultBoolean ? "true" : "false",
             ModSettingKind.Choice => setting.EnumValues?.FirstOrDefault() ?? string.Empty,
             ModSettingKind.OptionalSlider or ModSettingKind.OptionalWholeNumber => "null",
+            ModSettingKind.Slider => setting.DefaultValue.ToString(CultureInfo.InvariantCulture),
+            ModSettingKind.WholeNumber => setting.DefaultValue.ToString(
+                CultureInfo.InvariantCulture
+            ),
             _ => setting.DefaultValue.ToString(CultureInfo.InvariantCulture),
         };
 

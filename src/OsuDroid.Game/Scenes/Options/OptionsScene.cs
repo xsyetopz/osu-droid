@@ -64,19 +64,21 @@ public sealed partial class OptionsScene
     public float SectionScrollOffset => _sectionScrollOffset;
 
     public IReadOnlyList<string> Sections =>
-        s_sections.Select(section => _localizer.Get(section.Key)).ToArray();
+        OptionsCatalog.Sections.Select(section => _localizer.Get(section.Key)).ToArray();
 
     public static IReadOnlyList<OptionsSection> AllSections =>
-        s_sections.Select(section => section.Section).ToArray();
+        OptionsCatalog.Sections.Select(section => section.Section).ToArray();
 
     public IReadOnlyList<string> GeneralRows =>
-        s_generalCategories
-            .SelectMany(category => category.Rows)
+        OptionsCatalog
+            .GeneralCategories.SelectMany(category => category.Rows)
             .Select(row => _localizer.Get(row.TitleKey))
             .ToArray();
 
     public IReadOnlyList<string> GeneralCategories =>
-        s_generalCategories.Select(category => _localizer.Get(category.TitleKey)).ToArray();
+        OptionsCatalog
+            .GeneralCategories.Select(category => _localizer.Get(category.TitleKey))
+            .ToArray();
 
     public IReadOnlyList<string> ActiveRows =>
         ActiveSectionData

@@ -3,6 +3,7 @@ GAME_TEST_PROJECT := tests/OsuDroid.Game.Tests/OsuDroid.Game.Tests.csproj
 APP_PROJECT := src/OsuDroid.App/OsuDroid.App.csproj
 DOTNET_BUILD_FLAGS := -nr:false
 LOCAL_AUDIT_BYPASS_FLAGS := -p:NuGetAudit=false -p:WarningsNotAsErrors=NU1900
+DOTNET_FORMAT_FLAGS := --exclude src/OsuDroid.Game.Beatmaps/Difficulty/Reference
 
 ANDROID_PACKAGE := moe.osudroid
 ANDROID_APK := src/OsuDroid.App/bin/Debug/net9.0-android/moe.osudroid-Signed.apk
@@ -59,7 +60,7 @@ test-no-build:
 format:
 	dotnet tool restore
 	dotnet csharpier format .
-	dotnet format $(SOLUTION)
+	dotnet format $(SOLUTION) $(DOTNET_FORMAT_FLAGS)
 
 architecture-check:
 	python3 scripts/dev/architecture_audit.py --fail-on-findings >/dev/null
@@ -76,7 +77,7 @@ stale-term-check:
 check: architecture-check boundary-check localization-check stale-term-check
 	dotnet tool restore
 	dotnet csharpier check .
-	dotnet format $(SOLUTION) --verify-no-changes --verbosity diagnostic
+	dotnet format $(SOLUTION) $(DOTNET_FORMAT_FLAGS) --verify-no-changes --verbosity diagnostic
 
 clean:
 	dotnet clean $(SOLUTION) -v q

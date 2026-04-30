@@ -12,7 +12,12 @@ public sealed class OsuDroidLocalizationParityTests
     [
         "src/OsuDroid.Game/Scenes/MainMenu/MainMenuScene.About.cs",
         "src/OsuDroid.Game/Scenes/MainMenu/MainMenuScene.Controls.cs",
-        "src/OsuDroid.Game/Scenes/SongSelect/SongSelectScene.PopupLayout.cs",
+        "src/OsuDroid.Game/Scenes/SongSelect/SongSelectScene.BeatmapOptionsPanel.cs",
+        "src/OsuDroid.Game/Scenes/SongSelect/SongSelectScene.CollectionsPanel.cs",
+        "src/OsuDroid.Game/Scenes/SongSelect/SongSelectScene.ConfirmPanel.cs",
+        "src/OsuDroid.Game/Scenes/SongSelect/SongSelectScene.ModalLayout.cs",
+        "src/OsuDroid.Game/Scenes/SongSelect/SongSelectScene.PopupRows.cs",
+        "src/OsuDroid.Game/Scenes/SongSelect/SongSelectScene.PropertiesPanel.cs",
         "src/OsuDroid.Game/Scenes/BeatmapDownloader/BeatmapDownloaderScene.Cards.cs",
         "src/OsuDroid.Game/Scenes/BeatmapDownloader/BeatmapDownloaderScene.Details.cs",
         "src/OsuDroid.Game/Scenes/BeatmapDownloader/BeatmapDownloaderScene.Filters.cs",

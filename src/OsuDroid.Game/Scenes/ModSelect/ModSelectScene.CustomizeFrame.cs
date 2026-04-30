@@ -165,7 +165,7 @@ public sealed partial class ModSelectScene
 
         if (IsSliderSetting(setting))
         {
-            AddCustomizeSlider(elements, setting, raw, index, row, clip, rowAction);
+            AddCustomizeSlider(elements, setting, raw, index, clip, rowAction);
         }
         else if (setting.Kind == ModSettingKind.Toggle)
         {
@@ -210,7 +210,6 @@ public sealed partial class ModSelectScene
         ModSettingDescriptor setting,
         string raw,
         int index,
-        UiRect row,
         UiRect clip,
         UiAction action
     )
@@ -340,18 +339,17 @@ public sealed partial class ModSelectScene
 
     private static double SettingNumber(ModSettingDescriptor setting, string raw)
     {
-        if (string.Equals(raw, "null", StringComparison.OrdinalIgnoreCase))
-        {
-            return setting.DefaultValue == 0 ? setting.MinValue : setting.DefaultValue;
-        }
-
-        return double.TryParse(
-            raw,
-            System.Globalization.NumberStyles.Float,
-            System.Globalization.CultureInfo.InvariantCulture,
-            out double value
-        )
-            ? value
-            : setting.DefaultValue;
+        return string.Equals(raw, "null", StringComparison.OrdinalIgnoreCase)
+            ? setting.DefaultValue == 0
+                ? setting.MinValue
+                : setting.DefaultValue
+            : double.TryParse(
+                raw,
+                System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out double value
+            )
+                ? value
+                : setting.DefaultValue;
     }
 }

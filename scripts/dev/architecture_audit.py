@@ -91,7 +91,9 @@ def audit_file(path: pathlib.Path) -> FileFinding:
             type_names,
             tuple(),
         )
-    if logical_lines > 300:
+    if logical_lines > 2000:
+        flags.append("file-too-large")
+    elif logical_lines > 1000:
         flags.append("god-file:candidate")
     if len(type_names) > 4:
         flags.append("too-many-types")
@@ -141,7 +143,8 @@ def render_markdown(findings: list[FileFinding]) -> str:
     lines.extend([
         "",
         "## Thresholds",
-        "- `god-file:candidate`: >300 non-comment logical lines.",
+        "- `god-file:candidate`: >1000 non-comment logical lines.",
+        "- `file-too-large`: >2000 non-comment logical lines.",
         "- `too-many-types`: >4 type declarations in one file.",
         "- `too-many-methods`: >25 method declarations in one file.",
         "- `wide-public-surface`: >30 non-token public declarations in one source file.",

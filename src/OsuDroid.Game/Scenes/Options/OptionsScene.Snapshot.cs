@@ -23,7 +23,7 @@ public sealed partial class OptionsScene
     )
     {
         RememberViewport(viewport);
-        SettingsSection sectionData = s_sections.Single(settingsSection =>
+        SettingsSection sectionData = OptionsCatalog.Sections.Single(settingsSection =>
             settingsSection.Section == section
         );
         return CreateSnapshot(viewport, sectionData, 0f, 0f);
@@ -53,8 +53,10 @@ public sealed partial class OptionsScene
     }
 
     private SettingsSection ActiveSectionData =>
-        s_sections.Single(section => section.Section == _activeSection);
+        OptionsCatalog.Sections.Single(section => section.Section == _activeSection);
 
     private static IEnumerable<SettingsRow> AllRows() =>
-        s_sections.SelectMany(section => section.Categories).SelectMany(category => category.Rows);
+        OptionsCatalog
+            .Sections.SelectMany(section => section.Categories)
+            .SelectMany(category => category.Rows);
 }
