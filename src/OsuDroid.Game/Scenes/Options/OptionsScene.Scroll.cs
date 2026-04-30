@@ -10,7 +10,10 @@ public sealed partial class OptionsScene
         MaxContentScrollOffset(viewport);
 
     public static float MaxContentScrollOffset(VirtualViewport viewport) =>
-        Math.Max(0f, CalculateContentHeight(s_generalCategories) - VisibleContentHeight(viewport));
+        Math.Max(
+            0f,
+            CalculateStaticContentHeight(s_generalCategories, viewport) - VisibleContentHeight(viewport)
+        );
 
     public static float MaxSectionScrollOffset(VirtualViewport viewport) =>
         Math.Max(0f, CalculateSectionHeight() - VisibleContentHeight(viewport));
@@ -27,6 +30,7 @@ public sealed partial class OptionsScene
 
     public void Scroll(float deltaY, UiPoint point, VirtualViewport viewport)
     {
+        RememberViewport(viewport);
         if (_activeSliderRowIndex is not null)
         {
             return;
@@ -56,6 +60,7 @@ public sealed partial class OptionsScene
         double? timestampSeconds = null
     )
     {
+        RememberViewport(viewport);
         if (_activeSliderRowIndex is not null)
         {
             return false;
@@ -84,6 +89,7 @@ public sealed partial class OptionsScene
         double? timestampSeconds = null
     )
     {
+        RememberViewport(viewport);
         double timestamp = timestampSeconds ?? _elapsedSeconds;
         return _activeScrollTarget switch
         {
@@ -113,6 +119,7 @@ public sealed partial class OptionsScene
         double? timestampSeconds = null
     )
     {
+        RememberViewport(viewport);
         double timestamp = timestampSeconds ?? _elapsedSeconds;
         switch (_activeScrollTarget)
         {
@@ -150,6 +157,7 @@ public sealed partial class OptionsScene
 
     public bool TryBeginSliderDrag(string elementId, UiPoint point, VirtualViewport viewport)
     {
+        RememberViewport(viewport);
         if (!TryParseSliderRowIndex(elementId, out int rowIndex))
         {
             return false;
@@ -167,6 +175,7 @@ public sealed partial class OptionsScene
 
     public bool UpdateSliderDrag(UiPoint point, VirtualViewport viewport)
     {
+        RememberViewport(viewport);
         if (_activeSliderRowIndex is not int rowIndex)
         {
             return false;
@@ -193,6 +202,7 @@ public sealed partial class OptionsScene
 
     public void EndSliderDrag(UiPoint point, VirtualViewport viewport)
     {
+        RememberViewport(viewport);
         UpdateSliderDrag(point, viewport);
         _activeSliderRowIndex = null;
     }

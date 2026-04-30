@@ -23,6 +23,21 @@ public sealed partial class OsuDroidGameCore
 
     public bool TryBeginUiDrag(string elementId, UiPoint point, VirtualViewport viewport)
     {
+        if (_activeScene == ActiveScene.ModSelect)
+        {
+            bool modSelectCaptured = _modSelect.TryBeginCustomizeSliderDrag(
+                elementId,
+                point,
+                viewport
+            );
+            if (modSelectCaptured)
+            {
+                _songSelect.SetSelectedModState(_modSelect.CreateSelectionState());
+            }
+
+            return modSelectCaptured;
+        }
+
         if (_activeScene != ActiveScene.Options)
         {
             return false;
@@ -114,6 +129,16 @@ public sealed partial class OsuDroidGameCore
 
     public void UpdateUiDrag(UiPoint point, VirtualViewport viewport)
     {
+        if (_activeScene == ActiveScene.ModSelect)
+        {
+            if (_modSelect.UpdateCustomizeSliderDrag(point, viewport))
+            {
+                _songSelect.SetSelectedModState(_modSelect.CreateSelectionState());
+            }
+
+            return;
+        }
+
         if (_activeScene != ActiveScene.Options)
         {
             return;
@@ -129,6 +154,13 @@ public sealed partial class OsuDroidGameCore
 
     public void EndUiDrag(UiPoint point, VirtualViewport viewport)
     {
+        if (_activeScene == ActiveScene.ModSelect)
+        {
+            _modSelect.EndCustomizeSliderDrag(point, viewport);
+            _songSelect.SetSelectedModState(_modSelect.CreateSelectionState());
+            return;
+        }
+
         if (_activeScene != ActiveScene.Options)
         {
             return;

@@ -30,88 +30,6 @@ public sealed partial class UiCompatibilityTests
     }
 
     [Test]
-    public void GameCorePublishesExitRouteAfterMainMenuExitAnimation()
-    {
-        var database = new DroidDatabase(
-            Path.Combine(
-                TestContext.CurrentContext.WorkDirectory,
-                $"main-menu-exit-{Guid.NewGuid():N}.db"
-            )
-        );
-        database.EnsureCreated();
-        var music = new RecordingMenuMusicController();
-        var core = new OsuDroidGameCore(
-            new GameServices(
-                database,
-                new DroidGamePathLayout(
-                    DroidPathRoots.FromCoreRoot(TestContext.CurrentContext.WorkDirectory)
-                ),
-                "test",
-                "1.0",
-                MusicController: music
-            )
-        );
-
-        core.HandleUiAction(UiAction.MainMenuCookie);
-        core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
-        core.HandleUiAction(UiAction.MainMenuThird);
-
-        Assert.That(core.LastRoute, Is.EqualTo(MainMenuRoute.None));
-        Assert.That(
-            core.CreateFrame(VirtualViewport.FromSurface(1280, 720))
-                .UiFrame.Elements.Any(element => element.Id == "exit-dialog-panel"),
-            Is.True
-        );
-
-        core.HandleUiAction(UiAction.MainMenuExitConfirm);
-
-        core.Update(TimeSpan.FromMilliseconds(MainMenuScene.ExitAnimationMilliseconds));
-
-        Assert.That(core.LastRoute, Is.EqualTo(MainMenuRoute.Exit));
-        Assert.That(music.LastCommand, Is.EqualTo(MenuMusicCommand.Stop));
-    }
-
-    [Test]
-    public void GameCoreCanCancelMainMenuExitDialog()
-    {
-        var database = new DroidDatabase(
-            Path.Combine(
-                TestContext.CurrentContext.WorkDirectory,
-                $"main-menu-exit-cancel-{Guid.NewGuid():N}.db"
-            )
-        );
-        database.EnsureCreated();
-        var core = new OsuDroidGameCore(
-            new GameServices(
-                database,
-                new DroidGamePathLayout(
-                    DroidPathRoots.FromCoreRoot(TestContext.CurrentContext.WorkDirectory)
-                ),
-                "test",
-                "1.0"
-            )
-        );
-        var viewport = VirtualViewport.FromSurface(1280, 720);
-
-        core.HandleUiAction(UiAction.MainMenuCookie);
-        core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
-        core.HandleUiAction(UiAction.MainMenuThird);
-        core.HandleUiAction(UiAction.MainMenuExitCancel);
-        core.Update(TimeSpan.FromMilliseconds(MainMenuScene.ExitAnimationMilliseconds));
-
-        Assert.That(core.LastRoute, Is.EqualTo(MainMenuRoute.None));
-        Assert.That(
-            core.CreateFrame(viewport)
-                .UiFrame.Elements.Any(element => element.Id == "exit-dialog-panel"),
-            Is.False
-        );
-        Assert.That(
-            core.CreateFrame(viewport).UiFrame.Elements.Any(element => element.Id == "menu-0"),
-            Is.True
-        );
-    }
-
-    [Test]
     public void MainMenuReturnTransitionFadesPreviousBackgroundLikeAndroidSongMenuBack()
     {
         var scene = new MainMenuScene();
@@ -267,38 +185,6 @@ public sealed partial class UiCompatibilityTests
             about.Elements.Single(element => element.Id == "about-close").Action,
             Is.EqualTo(UiAction.MainMenuAboutClose)
         );
-    }
-
-    [Test]
-    public void MainMenuThirdButtonPlaysSeeyaOnFirstMenu()
-    {
-        var database = new DroidDatabase(
-            Path.Combine(
-                TestContext.CurrentContext.WorkDirectory,
-                $"main-menu-sfx-seeya-{Guid.NewGuid():N}.db"
-            )
-        );
-        database.EnsureCreated();
-        var recorder = new RecordingMenuSfxPlayer();
-        var core = new OsuDroidGameCore(
-            new GameServices(
-                database,
-                new DroidGamePathLayout(
-                    DroidPathRoots.FromCoreRoot(TestContext.CurrentContext.WorkDirectory)
-                ),
-                "test",
-                "1.0"
-            )
-        );
-        core.AttachPlatformServices(
-            platformTextInputService: null,
-            platformPreviewPlayer: null,
-            recorder
-        );
-
-        core.HandleUiAction(UiAction.MainMenuThird);
-
-        Assert.That(recorder.Keys, Is.EqualTo(new[] { "seeya" }));
     }
 
     [Test]

@@ -62,26 +62,20 @@ require_device() {
   fi
 }
 
-resolve_signing_from_profile() {
-  if [ -z "$IOS_PROVISIONING_PROFILE" ]; then
-    return 0
-  fi
-
-  if [ ! -f "$IOS_PROVISIONING_PROFILE" ]; then
-    echo "IOS_PROVISIONING_PROFILE not found: $IOS_PROVISIONING_PROFILE" >&2
-    exit 1
-  fi
-
-  signing_settings="$("$IOS_SIGNING_HELPER" resolve-build-settings "$IOS_PROVISIONING_PROFILE" "$IOS_BUNDLE_ID" "$IOS_DEVICE_ID" "$IOS_CODESIGN_KEY")"
+resolve_signing() {
+  signing_settings="$("$IOS_SIGNING_HELPER" auto-build-settings "$IOS_BUNDLE_ID" "$IOS_DEVICE_ID" "$IOS_PROVISIONING_PROFILE" "$IOS_CODESIGN_KEY" "$IOS_TEAM_ID")"
+  RESOLVED_PROFILE="$(printf '%s\n' "$signing_settings" | sed -n 's/^IOS_PROVISIONING_PROFILE=//p')"
   CODESIGN_PROVISION="$(printf '%s\n' "$signing_settings" | sed -n 's/^CODESIGN_PROVISION=//p')"
   CODESIGN_TEAM_ID="$(printf '%s\n' "$signing_settings" | sed -n 's/^CODESIGN_TEAM_ID=//p')"
   CODESIGN_KEY="$(printf '%s\n' "$signing_settings" | sed -n 's/^CODESIGN_KEY=//p')"
 
-  if [ -z "$CODESIGN_PROVISION" ] || [ -z "$CODESIGN_TEAM_ID" ] || [ -z "$CODESIGN_KEY" ]; then
-    echo "Failed to resolve signing settings from IOS_PROVISIONING_PROFILE." >&2
+  if [ -z "$CODESIGN_TEAM_ID" ] || [ -z "$CODESIGN_KEY" ]; then
+    echo "Failed to resolve iOS signing settings." >&2
+    echo "$signing_settings" >&2
     exit 1
   fi
 
+  IOS_PROVISIONING_PROFILE="$RESOLVED_PROFILE"
   IOS_TEAM_ID="$CODESIGN_TEAM_ID"
   IOS_CODESIGN_KEY="$CODESIGN_KEY"
 }
@@ -109,13 +103,9 @@ if [ "${1:-}" = "--print-app-path" ]; then
   exit 0
 fi
 
-require_value "$IOS_CODESIGN_KEY" "IOS_CODESIGN_KEY" "IOS_CODESIGN_KEY='Apple Development: Your Name (TEAMID)' ./scripts/build-ios-device.sh"
-if [ -z "$IOS_PROVISIONING_PROFILE" ]; then
-  require_value "$IOS_TEAM_ID" "IOS_TEAM_ID" "IOS_TEAM_ID=TEAMID ./scripts/build-ios-device.sh"
-fi
 require_xcode
 require_device
-resolve_signing_from_profile
+resolve_signing
 
 if [ -n "${CODESIGN_PROVISION:-}" ]; then
   dotnet build "$PROJECT" \

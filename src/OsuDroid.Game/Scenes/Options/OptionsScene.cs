@@ -39,6 +39,7 @@ public sealed partial class OptionsScene
     private OptionsScrollTarget? _activeScrollTarget;
     private readonly KineticScrollState _contentScroll = new(KineticScrollAxis.Vertical);
     private readonly KineticScrollState _sectionScroll = new(KineticScrollAxis.Vertical);
+    private VirtualViewport _lastViewport = VirtualViewport.AndroidReferenceLandscape;
 
     public OptionsScene(
         GameLocalizer localizer,
@@ -149,14 +150,14 @@ public sealed partial class OptionsScene
             () => _contentScrollOffset,
             value => _contentScrollOffset = value,
             0f,
-            MaxActiveContentScrollOffset(VirtualViewport.AndroidReferenceLandscape)
+            MaxActiveContentScrollOffset(_lastViewport)
         );
         _sectionScroll.Update(
             elapsedSeconds,
             () => _sectionScrollOffset,
             value => _sectionScrollOffset = value,
             0f,
-            MaxSectionScrollOffset(VirtualViewport.AndroidReferenceLandscape)
+            MaxSectionScrollOffset(_lastViewport)
         );
 
         if (_statusMessageKey is not null)
@@ -168,6 +169,8 @@ public sealed partial class OptionsScene
             }
         }
     }
+
+    private void RememberViewport(VirtualViewport viewport) => _lastViewport = viewport;
 
     public string? ConsumePendingSfxKey()
     {

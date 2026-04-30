@@ -5,6 +5,43 @@ namespace OsuDroid.Game.Tests;
 
 public sealed partial class ModSelectSceneTests
 {
+    private static BeatmapInfo TestBeatmap() =>
+        new(
+            "Easy.osu",
+            "1 Artist - Title",
+            "md5",
+            null,
+            "audio.mp3",
+            null,
+            null,
+            1,
+            "Title",
+            string.Empty,
+            "Artist",
+            string.Empty,
+            "Mapper",
+            "Easy",
+            string.Empty,
+            string.Empty,
+            0,
+            7,
+            7,
+            5,
+            7,
+            4.62f,
+            4.62f,
+            195,
+            195,
+            195,
+            238000,
+            0,
+            258,
+            221,
+            1,
+            480,
+            false
+        );
+
     private sealed class NoPendingBeatmapProcessingService : IBeatmapProcessingService
     {
         public BeatmapProcessingState State { get; } = new();

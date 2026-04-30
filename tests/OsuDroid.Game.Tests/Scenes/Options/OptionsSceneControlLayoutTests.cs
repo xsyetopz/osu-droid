@@ -16,7 +16,7 @@ public sealed partial class OptionsSceneTests
         var scene = new OptionsScene(new GameLocalizer());
         var viewport = VirtualViewport.FromSurface(1280, 720);
 
-        scene.HandleAction(UiAction.OptionsRow2, viewport);
+        scene.HandleAction(UiAction.OptionsActiveRow2, viewport);
         UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
 
         UiElementSnapshot value = frame.Elements.Single(element =>
@@ -160,7 +160,7 @@ public sealed partial class OptionsSceneTests
             Does.Contain("/custom-core")
         );
 
-        scene.HandleAction(UiAction.OptionsRow0, viewport);
+        scene.HandleAction(UiAction.OptionsActiveRow0, viewport);
         Assert.That(textInput.ActiveRequest!.Text, Is.EqualTo("/custom-core"));
         textInput.ActiveRequest!.OnSubmitted(string.Empty);
 

@@ -11,58 +11,58 @@ public sealed partial class UiCompatibilityTests
         AssertRoundTrip(
             8,
             static (int index, out UiAction action) =>
-                UiActionGroups.TryGetDownloaderCardAction(index, out action),
+                UiActionGroups.TryGetDownloaderResultCardSlotAction(index, out action),
             static (UiAction action, out int index) =>
-                UiActionGroups.TryGetDownloaderCardIndex(action, out index)
+                UiActionGroups.TryGetDownloaderResultCardSlotIndex(action, out index)
         );
         AssertRoundTrip(
             8,
             static (int index, out UiAction action) =>
-                UiActionGroups.TryGetDownloaderPreviewAction(index, out action),
+                UiActionGroups.TryGetDownloaderResultPreviewSlotAction(index, out action),
             static (UiAction action, out int index) =>
-                UiActionGroups.TryGetDownloaderPreviewIndex(action, out index)
+                UiActionGroups.TryGetDownloaderResultPreviewSlotIndex(action, out index)
         );
         AssertRoundTrip(
             16,
             static (int index, out UiAction action) =>
-                UiActionGroups.TryGetDownloaderDetailsDifficultyAction(index, out action),
+                UiActionGroups.TryGetDownloaderDetailsDifficultySlotAction(index, out action),
             static (UiAction action, out int index) =>
-                UiActionGroups.TryGetDownloaderDetailsDifficultyIndex(action, out index)
+                UiActionGroups.TryGetDownloaderDetailsDifficultySlotIndex(action, out index)
         );
         AssertRoundTrip(
             8,
             static (int index, out UiAction action) =>
-                UiActionGroups.TryGetSongSelectSetAction(index, out action),
+                UiActionGroups.TryGetSongSelectVisibleSetSlotAction(index, out action),
             static (UiAction action, out int index) =>
-                UiActionGroups.TryGetSongSelectSetIndex(action, out index)
+                UiActionGroups.TryGetSongSelectVisibleSetSlotIndex(action, out index)
         );
         AssertRoundTrip(
             16,
             static (int index, out UiAction action) =>
-                UiActionGroups.TryGetSongSelectDifficultyAction(index, out action),
+                UiActionGroups.TryGetSongSelectVisibleDifficultySlotAction(index, out action),
             static (UiAction action, out int index) =>
-                UiActionGroups.TryGetSongSelectDifficultyIndex(action, out index)
+                UiActionGroups.TryGetSongSelectVisibleDifficultySlotIndex(action, out index)
         );
         AssertRoundTrip(
             8,
             static (int index, out UiAction action) =>
-                UiActionGroups.TryGetSongSelectCollectionToggleAction(index, out action),
+                UiActionGroups.TryGetSongSelectCollectionToggleSlotAction(index, out action),
             static (UiAction action, out int index) =>
-                UiActionGroups.TryGetSongSelectCollectionToggleIndex(action, out index)
+                UiActionGroups.TryGetSongSelectCollectionToggleSlotIndex(action, out index)
         );
         AssertRoundTrip(
             8,
             static (int index, out UiAction action) =>
-                UiActionGroups.TryGetSongSelectCollectionDeleteAction(index, out action),
+                UiActionGroups.TryGetSongSelectCollectionDeleteSlotAction(index, out action),
             static (UiAction action, out int index) =>
-                UiActionGroups.TryGetSongSelectCollectionDeleteIndex(action, out index)
+                UiActionGroups.TryGetSongSelectCollectionDeleteSlotIndex(action, out index)
         );
         AssertRoundTrip(
             64,
             static (int index, out UiAction action) =>
-                UiActionGroups.TryGetOptionsRowAction(index, out action),
+                UiActionGroups.TryGetOptionsActiveRowAction(index, out action),
             static (UiAction action, out int index) =>
-                UiActionGroups.TryGetOptionsRowIndex(action, out index)
+                UiActionGroups.TryGetOptionsActiveRowIndex(action, out index)
         );
     }
 
@@ -70,21 +70,27 @@ public sealed partial class UiCompatibilityTests
     public void SongSelectFirstSetAliasResolvesToSetZero()
     {
         Assert.That(
-            UiActionGroups.TryGetSongSelectSetIndex(UiAction.SongSelectFirstSet, out int index),
+            UiActionGroups.TryGetSongSelectVisibleSetSlotIndex(
+                UiAction.SongSelectFirstSet,
+                out int index
+            ),
             Is.True
         );
         Assert.That(index, Is.Zero);
-        Assert.That(UiActionGroups.TryGetSongSelectSetAction(index, out UiAction action), Is.True);
-        Assert.That(action, Is.EqualTo(UiAction.SongSelectSet0));
+        Assert.That(
+            UiActionGroups.TryGetSongSelectVisibleSetSlotAction(index, out UiAction action),
+            Is.True
+        );
+        Assert.That(action, Is.EqualTo(UiAction.SongSelectVisibleSetSlot0));
     }
 
     [Test]
     public void IndexedActionMapsRejectOutOfRangeIndex()
     {
-        Assert.That(UiActionGroups.TryGetDownloaderCardAction(-1, out _), Is.False);
-        Assert.That(UiActionGroups.TryGetDownloaderCardAction(8, out _), Is.False);
-        Assert.That(UiActionGroups.TryGetOptionsRowAction(-1, out _), Is.False);
-        Assert.That(UiActionGroups.TryGetOptionsRowAction(64, out _), Is.False);
+        Assert.That(UiActionGroups.TryGetDownloaderResultCardSlotAction(-1, out _), Is.False);
+        Assert.That(UiActionGroups.TryGetDownloaderResultCardSlotAction(8, out _), Is.False);
+        Assert.That(UiActionGroups.TryGetOptionsActiveRowAction(-1, out _), Is.False);
+        Assert.That(UiActionGroups.TryGetOptionsActiveRowAction(64, out _), Is.False);
     }
 
     private delegate bool TryGetActionByIndex(int index, out UiAction action);

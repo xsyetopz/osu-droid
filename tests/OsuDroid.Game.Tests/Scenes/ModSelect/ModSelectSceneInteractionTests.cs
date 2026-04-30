@@ -128,8 +128,8 @@ public sealed partial class ModSelectSceneTests
             element.Id == "modselect-search-icon"
         );
         Assert.That(icon.SpriteFit, Is.EqualTo(UiSpriteFit.Contain));
-        Assert.That(icon.Bounds.Width, Is.EqualTo(52f));
-        Assert.That(icon.Bounds.Height, Is.EqualTo(28f));
+        Assert.That(icon.Bounds.Width, Is.EqualTo(32f));
+        Assert.That(icon.Bounds.Height, Is.EqualTo(32f));
     }
 
     [Test]

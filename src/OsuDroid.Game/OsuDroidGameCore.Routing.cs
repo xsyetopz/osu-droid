@@ -64,7 +64,7 @@ public sealed partial class OsuDroidGameCore
     {
         if (
             _activeScene == ActiveScene.ModSelect
-            && UiActionGroups.TryGetModSelectPresetIndex(action, out int presetIndex)
+            && UiActionGroups.TryGetModSelectPresetSlotIndex(action, out int presetIndex)
         )
         {
             bool opened = _modSelect.OpenPresetDeleteDialog(presetIndex);
@@ -78,7 +78,7 @@ public sealed partial class OsuDroidGameCore
 
         if (
             _activeScene != ActiveScene.SongSelect
-            || !UiActionGroups.TryGetSongSelectDifficultyIndex(action, out int index)
+            || !UiActionGroups.TryGetSongSelectVisibleDifficultySlotIndex(action, out int index)
         )
         {
             return false;

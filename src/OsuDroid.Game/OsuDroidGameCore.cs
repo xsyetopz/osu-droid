@@ -138,6 +138,7 @@ public sealed partial class OsuDroidGameCore
             localizer: localizer
         );
         _modSelect = new ModSelectScene(_settingsStore, _textInputService, localizer);
+        _songSelect.SetSelectedModState(_modSelect.CreateSelectionState());
         ApplyOptionsRuntimeSettings();
         _activeScene = services.ShowStartupScene ? ActiveScene.Startup : ActiveScene.MainMenu;
         QueueStartupPlaylist(_beatmapLibrary, _activeScene != ActiveScene.Startup);

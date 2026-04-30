@@ -36,11 +36,7 @@ public sealed partial class OptionsScene
         }
 
         float titleHeight = RowTitleSize + 4f;
-        float summaryHeight = RowSummarySize + 4f;
-        float textBlockHeight = titleHeight + summaryHeight + 6f * DpScale;
-        float textTop = row.Kind is SettingsRowKind.Input or SettingsRowKind.Slider
-            ? bounds.Y + RowPadding
-            : bounds.Y + (bounds.Height - textBlockHeight) / 2f;
+        string summaryText = GetSummaryText(row);
         float reservedControlWidth =
             row.Kind == SettingsRowKind.Slider ? 0f
             : row.Kind == SettingsRowKind.Select ? 150f * DpScale
@@ -49,6 +45,11 @@ public sealed partial class OptionsScene
             row.Kind == SettingsRowKind.Input
                 ? bounds.Width - RowPadding * 2f
                 : Math.Max(80f * DpScale, bounds.Width - RowPadding * 3f - reservedControlWidth);
+        float summaryHeight = SummaryLineCount(row, textWidth) * SummaryLineHeight;
+        float textBlockHeight = titleHeight + summaryHeight + 6f * DpScale;
+        float textTop = row.Kind is SettingsRowKind.Input or SettingsRowKind.Slider
+            ? bounds.Y + RowPadding
+            : bounds.Y + (bounds.Height - textBlockHeight) / 2f;
         UiColor textColor = row.IsEnabled ? s_disabledWhite : s_secondaryText;
         elements.Add(
             Text(
@@ -63,28 +64,46 @@ public sealed partial class OptionsScene
                 rowAlpha * 0.94f,
                 true,
                 rowAction,
-                isInteractive
+                isInteractive,
+                clipToBounds: false
             )
         );
-        string summaryText = GetSummaryText(row);
         if (!string.IsNullOrEmpty(summaryText))
         {
-            elements.Add(
-                Text(
+            if (row.Kind == SettingsRowKind.Input)
+            {
+                elements.Add(
+                    Text(
+                        $"options-row-{index}-summary",
+                        summaryText,
+                        bounds.X + RowPadding,
+                        textTop + titleHeight + 6f * DpScale,
+                        textWidth,
+                        SummaryLineHeight,
+                        RowSummarySize,
+                        s_secondaryText,
+                        rowAlpha * 0.86f,
+                        false,
+                        rowAction,
+                        isInteractive,
+                        clipToBounds: true
+                    )
+                );
+            }
+            else
+            {
+                AddWrappedSummary(
+                    elements,
                     $"options-row-{index}-summary",
                     summaryText,
                     bounds.X + RowPadding,
                     textTop + titleHeight + 6f * DpScale,
                     textWidth,
-                    summaryHeight,
-                    RowSummarySize,
-                    s_secondaryText,
                     rowAlpha * 0.86f,
-                    false,
                     rowAction,
                     isInteractive
-                )
-            );
+                );
+            }
         }
 
         if (row.Kind == SettingsRowKind.Checkbox)
@@ -214,7 +233,8 @@ public sealed partial class OptionsScene
                     false,
                     rowAction,
                     isInteractive,
-                    UiTextAlignment.Right
+                    UiTextAlignment.Right,
+                    clipToBounds: true
                 )
             );
         }
@@ -282,7 +302,8 @@ public sealed partial class OptionsScene
                     0.85f * alpha,
                     false,
                     rowAction,
-                    isInteractive
+                    isInteractive,
+                    clipToBounds: true
                 )
             );
         }
@@ -303,9 +324,10 @@ public sealed partial class OptionsScene
         float alpha = row.IsEnabled ? (row.IsLocked ? 0.72f : 1f) : 0.5f;
         float textAlpha = row.IsEnabled ? 1f : 0.5f;
         float titleHeight = RowTitleSize + 4f;
-        float summaryHeight = IsLongSummarySlider(row)
-            ? LongSliderSummaryLineCount * SliderSummaryLineHeight + SliderSummaryParagraphGap
-            : SliderSummaryLineHeight;
+        int summaryLineCount = SummaryLineCount(row, bounds.Width);
+        float summaryHeight =
+            Math.Max(1, summaryLineCount) * SliderSummaryLineHeight
+            + (summaryLineCount > 1 ? SliderSummaryParagraphGap : 0f);
         float containerX = bounds.X + SeekbarContainerMarginX;
         float containerWidth = bounds.Width - SeekbarContainerMarginX * 2f;
         float valueWidth = 72f * DpScale;
@@ -338,7 +360,8 @@ public sealed partial class OptionsScene
                 textAlpha * 0.94f,
                 true,
                 rowAction,
-                isInteractive
+                isInteractive,
+                clipToBounds: false
             )
         );
         string summaryText = GetSummaryText(row);
@@ -372,7 +395,8 @@ public sealed partial class OptionsScene
                 false,
                 rowAction,
                 isInteractive,
-                UiTextAlignment.Right
+                UiTextAlignment.Right,
+                clipToBounds: true
             )
         );
         elements.Add(
@@ -423,27 +447,6 @@ public sealed partial class OptionsScene
         bool enabled
     )
     {
-        if (!IsLongSummarySlider(row))
-        {
-            elements.Add(
-                Text(
-                    id,
-                    summary,
-                    x,
-                    y,
-                    width,
-                    SliderSummaryLineHeight,
-                    RowSummarySize,
-                    s_secondaryText,
-                    alpha,
-                    false,
-                    action,
-                    enabled
-                )
-            );
-            return;
-        }
-
         int elementIndex = 0;
         float lineY = y;
         foreach (string line in WrapText(summary, RowSummarySize, width))
@@ -468,7 +471,8 @@ public sealed partial class OptionsScene
                     alpha,
                     false,
                     action,
-                    enabled
+                    enabled,
+                    clipToBounds: true
                 )
             );
             lineY += SliderSummaryLineHeight;
@@ -526,10 +530,23 @@ public sealed partial class OptionsScene
             return;
         }
 
-        float lockSize = 18f * DpScale;
+        elements.Add(
+            Fill(
+                $"options-row-{index}-locked-overlay",
+                bounds,
+                s_rootBackground,
+                0.22f,
+                UiAction.None,
+                row.IsBottom ? AndroidRoundedRectRadius : 0f,
+                false,
+                row.IsBottom ? UiCornerMode.Bottom : UiCornerMode.None
+            )
+        );
+
+        float lockSize = 26f * DpScale;
         var lockBounds = new UiRect(
-            bounds.Right - RowPadding - lockSize,
-            bounds.Y + 10f * DpScale,
+            bounds.X + (bounds.Width - lockSize) / 2f,
+            bounds.Y + (bounds.Height - lockSize) / 2f,
             lockSize,
             lockSize
         );
@@ -538,11 +555,56 @@ public sealed partial class OptionsScene
                 $"options-row-{index}-lock",
                 UiMaterialIcon.Lock,
                 lockBounds,
-                s_secondaryText,
+                s_disabledWhite,
                 0.82f,
                 UiAction.None,
                 false
             )
         );
+    }
+
+    private static void AddWrappedSummary(
+        List<UiElementSnapshot> elements,
+        string id,
+        string summary,
+        float x,
+        float y,
+        float width,
+        float alpha,
+        UiAction action,
+        bool enabled
+    )
+    {
+        int elementIndex = 0;
+        float lineY = y;
+        foreach (string line in WrapText(summary, RowSummarySize, width))
+        {
+            if (line.Length == 0)
+            {
+                lineY += SummaryLineHeight;
+                continue;
+            }
+
+            string lineId = elementIndex == 0 ? id : $"{id}-{elementIndex}";
+            elements.Add(
+                Text(
+                    lineId,
+                    line,
+                    x,
+                    lineY,
+                    width,
+                    SummaryLineHeight,
+                    RowSummarySize,
+                    s_secondaryText,
+                    alpha,
+                    false,
+                    action,
+                    enabled,
+                    clipToBounds: true
+                )
+            );
+            lineY += SummaryLineHeight;
+            elementIndex++;
+        }
     }
 }

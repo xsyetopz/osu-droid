@@ -1,9 +1,11 @@
 using OsuDroid.Game.Beatmaps;
 using OsuDroid.Game.Runtime.Diagnostics;
+using OsuDroid.Game.Scenes.ModSelect;
 using OsuDroid.Game.UI.Actions;
 using OsuDroid.Game.UI.Assets;
 using OsuDroid.Game.UI.Elements;
 using OsuDroid.Game.UI.Geometry;
+using OsuDroid.Game.UI.Style;
 
 namespace OsuDroid.Game.Scenes.SongSelect;
 
@@ -128,6 +130,7 @@ public sealed partial class SongSelectScene
 
     private void AddTopPanelText(List<UiElementSnapshot> elements, BeatmapInfo beatmap)
     {
+        ModStatSnapshot stats = AdjustedStats(beatmap);
         float titleY = 2f;
         elements.Add(
             Text(
@@ -166,7 +169,7 @@ public sealed partial class SongSelectScene
                 1024f,
                 26f,
                 18f,
-                s_white
+                SongSelectStatColor(stats.BpmDirection)
             )
         );
 
@@ -194,8 +197,17 @@ public sealed partial class SongSelectScene
                 1024f,
                 24f,
                 18f,
-                s_white
+                SongSelectStatColor(stats.DifficultyLineDirection)
             )
         );
     }
+
+    private static UiColor SongSelectStatColor(ModStatDirection direction) =>
+        direction switch
+        {
+            ModStatDirection.Increased => DroidUiTheme.ModMenu.SongSelectIncreased,
+            ModStatDirection.Decreased => DroidUiTheme.ModMenu.SongSelectDecreased,
+            ModStatDirection.DifficultyAdjust => DroidUiTheme.ModMenu.StatDifficultyAdjust,
+            _ => s_white,
+        };
 }

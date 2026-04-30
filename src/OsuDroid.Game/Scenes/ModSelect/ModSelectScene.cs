@@ -47,6 +47,9 @@ public sealed partial class ModSelectScene
     private readonly IGameSettingsStore _settingsStore;
     private readonly GameLocalizer _localizer;
     private readonly HashSet<string> _selectedAcronyms = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Dictionary<string, string>> _modSettings = new(
+        StringComparer.OrdinalIgnoreCase
+    );
     private readonly Dictionary<string, float> _sectionScrolls = new(StringComparer.Ordinal);
     private readonly List<ModPreset> _presets = [];
     private ITextInputService _textInputService;
@@ -69,6 +72,8 @@ public sealed partial class ModSelectScene
     private VirtualViewport _lastViewport = VirtualViewport.AndroidReferenceLandscape;
     private bool _isPresetFormOpen;
     private bool _isPresetDeleteDialogOpen;
+    private bool _isCustomizeOpen;
+    private int? _activeCustomizeSliderIndex;
     private string _presetNameInput = string.Empty;
     private int _pendingPresetDeleteIndex = -1;
 
@@ -82,27 +87,37 @@ public sealed partial class ModSelectScene
         _textInputService = textInputService;
         _localizer = localizer ?? new GameLocalizer();
         LoadSelectedMods();
+        LoadModSettings();
         LoadPresets();
     }
 
     public IReadOnlyCollection<string> SelectedAcronyms => _selectedAcronyms;
 
-    public float ScoreMultiplier =>
-        ModCatalog
-            .Entries.Where(entry => _selectedAcronyms.Contains(entry.Acronym))
-            .Aggregate(1f, (multiplier, entry) => multiplier * entry.ScoreMultiplier);
+    public float ScoreMultiplier => CurrentStats().ScoreMultiplier;
 
-    public bool IsRanked =>
-        _selectedAcronyms.Count == 0
-        || ModCatalog
-            .Entries.Where(entry => _selectedAcronyms.Contains(entry.Acronym))
-            .All(entry => entry.IsRanked);
+    public bool IsRanked => CurrentStats().IsRanked;
 
     public bool IsPresetDialogOpen => _isPresetFormOpen || _isPresetDeleteDialogOpen;
 
     public void SetTextInputService(ITextInputService service) => _textInputService = service;
 
     public void SetSelectedBeatmap(BeatmapInfo? beatmap) => _selectedBeatmap = beatmap;
+
+    public ModSelectionState CreateSelectionState() =>
+        new(
+            ModCatalog
+                .Entries.Select(entry => entry.Acronym)
+                .Where(_selectedAcronyms.Contains)
+                .ToArray(),
+            _modSettings.ToDictionary(
+                pair => pair.Key,
+                pair => (IReadOnlyDictionary<string, string>)pair.Value,
+                StringComparer.OrdinalIgnoreCase
+            )
+        );
+
+    private ModStatSnapshot CurrentStats() =>
+        ModStatCalculator.FromBeatmap(_selectedBeatmap, CreateSelectionState());
 
     public GameFrameSnapshot CreateSnapshot(VirtualViewport viewport) =>
         new("ModSelect", "Mods", "osu!droid mod menu", [], 0, false, CreateUiFrame(viewport));

@@ -46,7 +46,7 @@ public sealed partial class BeatmapDownloaderTests
                     )
                 )!
                 .Action,
-            Is.EqualTo(UiAction.DownloaderDetailsDifficulty0)
+            Is.EqualTo(UiAction.DownloaderDetailsDifficultySlot0)
         );
         Assert.That(selectedGlyph.Text, Is.EqualTo("⦿"));
         Assert.That(selectedGlyph.Kind, Is.EqualTo(UiElementKind.Text));
@@ -59,7 +59,7 @@ public sealed partial class BeatmapDownloaderTests
                     )
                 )!
                 .Action,
-            Is.EqualTo(UiAction.DownloaderDetailsDifficulty0)
+            Is.EqualTo(UiAction.DownloaderDetailsDifficultySlot0)
         );
     }
 

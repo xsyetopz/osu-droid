@@ -10,8 +10,8 @@ public sealed partial class ModSelectSceneTests
     {
         core.HandleUiAction(UiAction.MainMenuCookie);
         core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
-        core.HandleUiAction(UiAction.MainMenuFirst);
-        core.HandleUiAction(UiAction.MainMenuFirst);
+        core.HandleUiAction(UiAction.MainMenuPrimaryButton);
+        core.HandleUiAction(UiAction.MainMenuPrimaryButton);
     }
 
     private static BeatmapInfo CreateBeatmap() =>

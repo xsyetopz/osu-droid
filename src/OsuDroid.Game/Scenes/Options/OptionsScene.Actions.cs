@@ -38,12 +38,14 @@ public sealed partial class OptionsScene
         _contentScrollOffset = 0f;
         if (viewport is { } actualViewport)
         {
+            RememberViewport(actualViewport);
             ClampScroll(actualViewport);
         }
     }
 
     public void HandleAction(UiAction action, VirtualViewport viewport)
     {
+        RememberViewport(viewport);
         OptionsSection? selectedSection = SectionForAction(action);
 
         if (selectedSection is { } section)
@@ -65,7 +67,7 @@ public sealed partial class OptionsScene
             return;
         }
 
-        if (UiActionGroups.TryGetOptionsRowIndex(action, out int rowIndex))
+        if (UiActionGroups.TryGetOptionsActiveRowIndex(action, out int rowIndex))
         {
             HandleRowAction(rowIndex, viewport);
         }

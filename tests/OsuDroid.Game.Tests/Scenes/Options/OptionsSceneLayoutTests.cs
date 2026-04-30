@@ -132,6 +132,11 @@ public sealed partial class OptionsSceneTests
         Assert.That(row.Color, Is.EqualTo(UiColor.Opaque(22, 22, 34)));
         Assert.That(rowLabel.Text, Is.EqualTo("Server Connection"));
         Assert.That(rowSummary.Text, Is.EqualTo("Connect to osu!droid server"));
+        Assert.That(
+            rowSummary.TextStyle!.Size,
+            Is.EqualTo(DroidUiMetrics.RowSummarySize).Within(0.001f)
+        );
+        Assert.That(rowSummary.ClipToBounds, Is.True);
         Assert.That(rowLabel.Bounds.Y, Is.GreaterThan(row.Bounds.Y));
         Assert.That(rowSummary.Bounds.Y, Is.GreaterThan(rowLabel.Bounds.Y));
         Assert.That(frame.Elements.Any(element => element.Id == "options-row-0-lock"), Is.False);
@@ -152,7 +157,7 @@ public sealed partial class OptionsSceneTests
         scene.HandleAction(UiAction.OptionsSectionGameplay, viewport);
         bool initial = scene.GetBoolValue("showfirstapproachcircle");
 
-        scene.HandleAction(UiAction.OptionsRow0, viewport);
+        scene.HandleAction(UiAction.OptionsActiveRow0, viewport);
         UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
 
         Assert.That(scene.GetBoolValue("showfirstapproachcircle"), Is.EqualTo(initial));
@@ -160,10 +165,32 @@ public sealed partial class OptionsSceneTests
             frame.Elements.Single(element => element.Id == "options-row-0-lock").Kind,
             Is.EqualTo(UiElementKind.MaterialIcon)
         );
-        Assert.That(
-            frame.Elements.Single(element => element.Id == "options-row-0").IsEnabled,
-            Is.False
+        UiElementSnapshot row = frame.Elements.Single(element => element.Id == "options-row-0");
+        UiElementSnapshot lockOverlay = frame.Elements.Single(element =>
+            element.Id == "options-row-0-locked-overlay"
         );
+        UiElementSnapshot lockIcon = frame.Elements.Single(element =>
+            element.Id == "options-row-0-lock"
+        );
+        UiElementSnapshot summary = frame.Elements.Single(element =>
+            element.Id == "options-row-0-summary"
+        );
+
+        Assert.That(
+            lockIcon.Bounds.X + lockIcon.Bounds.Width / 2f,
+            Is.EqualTo(row.Bounds.X + row.Bounds.Width / 2f).Within(0.001f)
+        );
+        Assert.That(
+            lockIcon.Bounds.Y + lockIcon.Bounds.Height / 2f,
+            Is.EqualTo(row.Bounds.Y + row.Bounds.Height / 2f).Within(0.001f)
+        );
+        Assert.That(lockOverlay.Bounds, Is.EqualTo(row.Bounds));
+        Assert.That(row.IsEnabled, Is.False);
+        Assert.That(
+            summary.TextStyle!.Size,
+            Is.EqualTo(DroidUiMetrics.RowSummarySize).Within(0.001f)
+        );
+        Assert.That(summary.ClipToBounds, Is.True);
     }
 
     [Test]

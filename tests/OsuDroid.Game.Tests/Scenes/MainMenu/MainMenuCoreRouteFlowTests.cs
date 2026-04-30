@@ -170,8 +170,8 @@ public sealed partial class UiCompatibilityTests
 
         core.HandleUiAction(UiAction.MainMenuCookie);
         core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
-        core.HandleUiAction(UiAction.MainMenuFirst);
-        core.HandleUiAction(UiAction.MainMenuFirst);
+        core.HandleUiAction(UiAction.MainMenuPrimaryButton);
+        core.HandleUiAction(UiAction.MainMenuPrimaryButton);
 
         GameFrameSnapshot processingFrame = core.CreateFrame(
             VirtualViewport.FromSurface(1280, 720)
@@ -257,7 +257,7 @@ public sealed partial class UiCompatibilityTests
     {
         core.HandleUiAction(UiAction.MainMenuCookie);
         core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
-        core.HandleUiAction(UiAction.MainMenuFirst);
-        core.HandleUiAction(UiAction.MainMenuFirst);
+        core.HandleUiAction(UiAction.MainMenuPrimaryButton);
+        core.HandleUiAction(UiAction.MainMenuPrimaryButton);
     }
 }

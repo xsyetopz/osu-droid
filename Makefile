@@ -14,6 +14,7 @@ IOS_VERIFY_INSTALL_SCRIPT := scripts/verify-ios-install.sh
 IOS_UNINSTALL_SCRIPT := scripts/uninstall-ios-device.sh
 IOS_DOCTOR_SCRIPT := scripts/doctor-ios-device.sh
 IOS_XCODE_SCRIPT := scripts/xcode-ios-device.sh
+IOS_SIGNING_SCRIPT := scripts/ios-signing.sh
 IOS_APP_PATH_SCRIPT := $(IOS_BUILD_SCRIPT) --print-app-path
 IOS_DEVELOPER_DIR ?= /Applications/Xcode_26.3.app/Contents/Developer
 IOS_PROVISIONING_PROFILE ?=
@@ -32,12 +33,11 @@ endif
 	build-android build-ios verify-android-bass \
 	verify-ios-bundle \
 	install-android uninstall-android reinstall-android launch-android \
-	install-ios uninstall-ios reinstall-ios launch-ios doctor-ios xcode-ios \
+	install-ios uninstall-ios reinstall-ios launch-ios doctor-ios xcode-ios ios-signing \
 	run-android run-ios
 
 require-ios-signing:
-	@[ -n "$(IOS_CODESIGN_KEY)" ] || (echo "IOS_CODESIGN_KEY is required. Discover it with: security find-identity -v -p codesigning"; exit 1)
-	@[ -n "$(IOS_TEAM_ID)" ] || [ -n "$(IOS_PROVISIONING_PROFILE)" ] || (echo "IOS_TEAM_ID is required unless IOS_PROVISIONING_PROFILE is provided."; exit 1)
+	@IOS_BUNDLE_ID="$(IOS_BUNDLE_ID)" IOS_DEVICE_ID="$(IOS_DEVICE_ID)" IOS_PROVISIONING_PROFILE="$(IOS_PROVISIONING_PROFILE)" IOS_CODESIGN_KEY="$(IOS_CODESIGN_KEY)" IOS_TEAM_ID="$(IOS_TEAM_ID)" ./$(IOS_SIGNING_SCRIPT) doctor-auto
 
 bootstrap:
 	./scripts/bootstrap-third-party.sh
@@ -90,7 +90,7 @@ build-android:
 verify-android-bass:
 	@echo "BASS verification skipped: MonoGame build does not package osu-framework BASS natives."
 
-build-ios: require-ios-signing
+build-ios:
 	IOS_DEVELOPER_DIR="$(IOS_DEVELOPER_DIR)" IOS_PROVISIONING_PROFILE="$(IOS_PROVISIONING_PROFILE)" IOS_CODESIGN_KEY="$(IOS_CODESIGN_KEY)" IOS_TEAM_ID="$(IOS_TEAM_ID)" ./$(IOS_BUILD_SCRIPT)
 
 verify-ios-bundle:
@@ -141,6 +141,9 @@ launch-ios:
 doctor-ios:
 	@[ -n "$(IOS_DEVICE_ID)" ] || (echo "IOS_DEVICE_ID is required. Example: make doctor-ios IOS_DEVICE_ID=<device-id>"; exit 1)
 	@IOS_DEVELOPER_DIR="$(IOS_DEVELOPER_DIR)" IOS_DEVICE_ID="$(IOS_DEVICE_ID)" ./$(IOS_DOCTOR_SCRIPT)
+
+ios-signing:
+	@IOS_BUNDLE_ID="$(IOS_BUNDLE_ID)" IOS_DEVICE_ID="$(IOS_DEVICE_ID)" IOS_PROVISIONING_PROFILE="$(IOS_PROVISIONING_PROFILE)" IOS_CODESIGN_KEY="$(IOS_CODESIGN_KEY)" IOS_TEAM_ID="$(IOS_TEAM_ID)" ./$(IOS_SIGNING_SCRIPT) doctor-auto
 
 xcode-ios:
 	@IOS_DEVELOPER_DIR="$(IOS_DEVELOPER_DIR)" IOS_DEVICE_ID="$(IOS_DEVICE_ID)" IOS_BUNDLE_ID="$(IOS_BUNDLE_ID)" ./$(IOS_XCODE_SCRIPT)

@@ -13,7 +13,8 @@ public sealed partial class ModSelectScene
         string label,
         string value,
         float x,
-        float y
+        float y,
+        ModStatDirection direction = ModStatDirection.Unchanged
     )
     {
         float labelWidth = TextWidth(label, 16f) + 24f;
@@ -47,12 +48,21 @@ public sealed partial class ModSelectScene
                 value,
                 new UiRect(x + labelWidth + 12f, y + 9f, valueWidth - 24f, 24f),
                 16f,
-                s_text,
+                StatColor(direction),
                 alignment: UiTextAlignment.Center
             )
         );
         return x + width;
     }
+
+    private static UiColor StatColor(ModStatDirection direction) =>
+        direction switch
+        {
+            ModStatDirection.Increased => DroidUiTheme.ModMenu.StatIncreased,
+            ModStatDirection.Decreased => DroidUiTheme.ModMenu.StatDecreased,
+            ModStatDirection.DifficultyAdjust => DroidUiTheme.ModMenu.StatDifficultyAdjust,
+            _ => s_text,
+        };
 
     private static UiElementSnapshot WithoutAction(UiElementSnapshot element) =>
         element with

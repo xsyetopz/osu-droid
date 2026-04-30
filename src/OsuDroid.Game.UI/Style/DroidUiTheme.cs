@@ -35,6 +35,11 @@ public static class DroidUiTheme
         public static readonly UiColor ClearButton = new(52, 33, 33, 255);
         public static readonly UiColor Ranked = new(131, 223, 107, 255);
         public static readonly UiColor RankedText = new(22, 22, 34, 255);
+        public static readonly UiColor StatIncreased = new(247, 131, 131, 255);
+        public static readonly UiColor StatDecreased = new(64, 207, 93, 255);
+        public static readonly UiColor StatDifficultyAdjust = new(255, 180, 0, 255);
+        public static readonly UiColor SongSelectIncreased = new(205, 85, 85, 255);
+        public static readonly UiColor SongSelectDecreased = new(46, 139, 87, 255);
     }
 
     public static class Scroll

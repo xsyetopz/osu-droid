@@ -39,7 +39,7 @@
 - Cookie returns to center over `1s` with bounce-out easing.
 - Cookie heartbeat uses a `1000ms` beat: scale `1.0 -> 1.07` over `0.9 beat`, then `1.07 -> 1.0` over `0.07 beat`.
 - Cookie overlay is a separate logo copy above the main logo with static `1.07` scale and `0.2` alpha; heartbeat scales only the main logo.
-- Exit delays the route until Android's `3s` fade-out finishes.
+- Exit button opens the confirm dialog first. Confirm plays `seeya`, stops menu music, then delays the route until Android's `3s` fade-out finishes.
 - Song Select back-to-main scenery is `MainScene.loadTimingPoints`: attach the selected beatmap/menu background behind `lastBackground`, then fade `lastBackground` from `1 -> 0` over `1.5s`.
 - Press tint belongs to Android source elements that call `setColor(0.7f, 0.7f, 0.7f)`: menu buttons, music buttons, downloader tab. Cookie press does not tint.
 - Accepted static main-menu placement is frozen: logo/menu button positions should not move while polishing music, badge, version, or animation layers.

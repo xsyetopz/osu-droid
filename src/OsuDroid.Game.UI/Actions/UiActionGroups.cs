@@ -2,38 +2,38 @@ namespace OsuDroid.Game.UI.Actions;
 
 public static class UiActionGroups
 {
-    private static readonly UiIndexedActionMap s_downloaderCards = new(
-        UiAction.DownloaderCard0,
-        UiAction.DownloaderCard7
+    private static readonly UiIndexedActionMap s_downloaderResultCardSlots = new(
+        UiAction.DownloaderResultCardSlot0,
+        UiAction.DownloaderResultCardSlot7
     );
-    private static readonly UiIndexedActionMap s_downloaderPreviews = new(
-        UiAction.DownloaderPreview0,
-        UiAction.DownloaderPreview7
+    private static readonly UiIndexedActionMap s_downloaderResultPreviewSlots = new(
+        UiAction.DownloaderResultPreviewSlot0,
+        UiAction.DownloaderResultPreviewSlot7
     );
-    private static readonly UiIndexedActionMap s_downloaderDetailsDifficulties = new(
-        UiAction.DownloaderDetailsDifficulty0,
-        UiAction.DownloaderDetailsDifficulty15
+    private static readonly UiIndexedActionMap s_downloaderDetailsDifficultySlots = new(
+        UiAction.DownloaderDetailsDifficultySlot0,
+        UiAction.DownloaderDetailsDifficultySlot15
     );
-    private static readonly UiIndexedActionMap s_songSelectSets = new(
-        UiAction.SongSelectSet0,
-        UiAction.SongSelectSet7,
+    private static readonly UiIndexedActionMap s_songSelectVisibleSetSlots = new(
+        UiAction.SongSelectVisibleSetSlot0,
+        UiAction.SongSelectVisibleSetSlot7,
         (UiAction.SongSelectFirstSet, 0)
     );
-    private static readonly UiIndexedActionMap s_songSelectDifficulties = new(
-        UiAction.SongSelectDifficulty0,
-        UiAction.SongSelectDifficulty15
+    private static readonly UiIndexedActionMap s_songSelectVisibleDifficultySlots = new(
+        UiAction.SongSelectVisibleDifficultySlot0,
+        UiAction.SongSelectVisibleDifficultySlot15
     );
-    private static readonly UiIndexedActionMap s_songSelectCollectionToggles = new(
-        UiAction.SongSelectCollectionToggle0,
-        UiAction.SongSelectCollectionToggle7
+    private static readonly UiIndexedActionMap s_songSelectCollectionToggleSlots = new(
+        UiAction.SongSelectCollectionToggleSlot0,
+        UiAction.SongSelectCollectionToggleSlot7
     );
-    private static readonly UiIndexedActionMap s_songSelectCollectionDeletes = new(
-        UiAction.SongSelectCollectionDelete0,
-        UiAction.SongSelectCollectionDelete7
+    private static readonly UiIndexedActionMap s_songSelectCollectionDeleteSlots = new(
+        UiAction.SongSelectCollectionDeleteSlot0,
+        UiAction.SongSelectCollectionDeleteSlot7
     );
-    private static readonly UiIndexedActionMap s_optionsRows = new(
-        UiAction.OptionsRow0,
-        UiAction.OptionsRow63
+    private static readonly UiIndexedActionMap s_optionsActiveRows = new(
+        UiAction.OptionsActiveRow0,
+        UiAction.OptionsActiveRow63
     );
     private static readonly UiIndexedActionMap s_optionsSections = new(
         UiAction.OptionsSectionGeneral,
@@ -51,68 +51,80 @@ public static class UiActionGroups
         UiAction.DownloaderStatusAll,
         UiAction.DownloaderStatusGraveyard
     );
-    private static readonly UiIndexedActionMap s_modSelectPresets = new(
-        UiAction.ModSelectPreset0,
-        UiAction.ModSelectPreset15
+    private static readonly UiIndexedActionMap s_modSelectPresetSlots = new(
+        UiAction.ModSelectPresetSlot0,
+        UiAction.ModSelectPresetSlot15
     );
-    private static readonly UiIndexedActionMap s_modSelectToggles = new(
-        UiAction.ModSelectToggle0,
-        UiAction.ModSelectToggle31
+    private static readonly UiIndexedActionMap s_modSelectCatalogModToggles = new(
+        UiAction.ModSelectCatalogModToggle0,
+        UiAction.ModSelectCatalogModToggle31
+    );
+    private static readonly UiIndexedActionMap s_modSelectCustomizeSettingDecreases = new(
+        UiAction.ModSelectCustomizeSettingDecrease0,
+        UiAction.ModSelectCustomizeSettingDecrease31
+    );
+    private static readonly UiIndexedActionMap s_modSelectCustomizeSettingIncreases = new(
+        UiAction.ModSelectCustomizeSettingIncrease0,
+        UiAction.ModSelectCustomizeSettingIncrease31
     );
 
-    public static bool TryGetDownloaderCardIndex(UiAction action, out int index) =>
-        s_downloaderCards.TryGetIndex(action, out index);
+    public static bool TryGetDownloaderResultCardSlotIndex(UiAction action, out int index) =>
+        s_downloaderResultCardSlots.TryGetIndex(action, out index);
 
-    public static bool TryGetDownloaderCardAction(int index, out UiAction action) =>
-        s_downloaderCards.TryGetAction(index, out action);
+    public static bool TryGetDownloaderResultCardSlotAction(int index, out UiAction action) =>
+        s_downloaderResultCardSlots.TryGetAction(index, out action);
 
-    public static bool TryGetDownloaderPreviewIndex(UiAction action, out int index) =>
-        s_downloaderPreviews.TryGetIndex(action, out index);
+    public static bool TryGetDownloaderResultPreviewSlotIndex(UiAction action, out int index) =>
+        s_downloaderResultPreviewSlots.TryGetIndex(action, out index);
 
-    public static bool TryGetDownloaderPreviewAction(int index, out UiAction action) =>
-        s_downloaderPreviews.TryGetAction(index, out action);
+    public static bool TryGetDownloaderResultPreviewSlotAction(int index, out UiAction action) =>
+        s_downloaderResultPreviewSlots.TryGetAction(index, out action);
 
-    public static bool TryGetDownloaderDetailsDifficultyIndex(UiAction action, out int index) =>
-        s_downloaderDetailsDifficulties.TryGetIndex(action, out index);
+    public static bool TryGetDownloaderDetailsDifficultySlotIndex(UiAction action, out int index) =>
+        s_downloaderDetailsDifficultySlots.TryGetIndex(action, out index);
 
-    public static bool TryGetDownloaderDetailsDifficultyAction(int index, out UiAction action) =>
-        s_downloaderDetailsDifficulties.TryGetAction(index, out action);
+    public static bool TryGetDownloaderDetailsDifficultySlotAction(
+        int index,
+        out UiAction action
+    ) => s_downloaderDetailsDifficultySlots.TryGetAction(index, out action);
 
-    public static bool TryGetSongSelectSetIndex(UiAction action, out int index) =>
-        s_songSelectSets.TryGetIndex(action, out index);
+    public static bool TryGetSongSelectVisibleSetSlotIndex(UiAction action, out int index) =>
+        s_songSelectVisibleSetSlots.TryGetIndex(action, out index);
 
-    public static bool TryGetSongSelectSetAction(int index, out UiAction action) =>
-        s_songSelectSets.TryGetAction(index, out action);
+    public static bool TryGetSongSelectVisibleSetSlotAction(int index, out UiAction action) =>
+        s_songSelectVisibleSetSlots.TryGetAction(index, out action);
 
-    public static bool TryGetSongSelectDifficultyIndex(UiAction action, out int index) =>
-        s_songSelectDifficulties.TryGetIndex(action, out index);
+    public static bool TryGetSongSelectVisibleDifficultySlotIndex(UiAction action, out int index) =>
+        s_songSelectVisibleDifficultySlots.TryGetIndex(action, out index);
 
-    public static bool TryGetSongSelectDifficultyAction(int index, out UiAction action) =>
-        s_songSelectDifficulties.TryGetAction(index, out action);
+    public static bool TryGetSongSelectVisibleDifficultySlotAction(
+        int index,
+        out UiAction action
+    ) => s_songSelectVisibleDifficultySlots.TryGetAction(index, out action);
 
-    public static bool TryGetSongSelectCollectionToggleIndex(UiAction action, out int index) =>
-        s_songSelectCollectionToggles.TryGetIndex(action, out index);
+    public static bool TryGetSongSelectCollectionToggleSlotIndex(UiAction action, out int index) =>
+        s_songSelectCollectionToggleSlots.TryGetIndex(action, out index);
 
-    public static bool TryGetSongSelectCollectionToggleAction(int index, out UiAction action) =>
-        s_songSelectCollectionToggles.TryGetAction(index, out action);
+    public static bool TryGetSongSelectCollectionToggleSlotAction(int index, out UiAction action) =>
+        s_songSelectCollectionToggleSlots.TryGetAction(index, out action);
 
-    public static bool TryGetSongSelectCollectionDeleteIndex(UiAction action, out int index) =>
-        s_songSelectCollectionDeletes.TryGetIndex(action, out index);
+    public static bool TryGetSongSelectCollectionDeleteSlotIndex(UiAction action, out int index) =>
+        s_songSelectCollectionDeleteSlots.TryGetIndex(action, out index);
 
-    public static bool TryGetSongSelectCollectionDeleteAction(int index, out UiAction action) =>
-        s_songSelectCollectionDeletes.TryGetAction(index, out action);
+    public static bool TryGetSongSelectCollectionDeleteSlotAction(int index, out UiAction action) =>
+        s_songSelectCollectionDeleteSlots.TryGetAction(index, out action);
 
-    public static bool TryGetOptionsRowIndex(UiAction action, out int index) =>
-        s_optionsRows.TryGetIndex(action, out index);
+    public static bool TryGetOptionsActiveRowIndex(UiAction action, out int index) =>
+        s_optionsActiveRows.TryGetIndex(action, out index);
 
-    public static bool TryGetOptionsRowAction(int index, out UiAction action) =>
-        s_optionsRows.TryGetAction(index, out action);
+    public static bool TryGetOptionsActiveRowAction(int index, out UiAction action) =>
+        s_optionsActiveRows.TryGetAction(index, out action);
 
     public static bool IsOptionsSection(UiAction action) => s_optionsSections.Contains(action);
 
     public static bool IsOptionsToggle(UiAction action) => s_optionsToggles.Contains(action);
 
-    public static bool IsOptionsRow(UiAction action) => s_optionsRows.Contains(action);
+    public static bool IsOptionsActiveRow(UiAction action) => s_optionsActiveRows.Contains(action);
 
     public static bool IsDownloaderSortChoice(UiAction action) =>
         s_downloaderSortChoices.Contains(action);
@@ -120,15 +132,35 @@ public static class UiActionGroups
     public static bool IsDownloaderStatusChoice(UiAction action) =>
         s_downloaderStatusChoices.Contains(action);
 
-    public static bool TryGetModSelectPresetIndex(UiAction action, out int index) =>
-        s_modSelectPresets.TryGetIndex(action, out index);
+    public static bool TryGetModSelectPresetSlotIndex(UiAction action, out int index) =>
+        s_modSelectPresetSlots.TryGetIndex(action, out index);
 
-    public static bool TryGetModSelectPresetAction(int index, out UiAction action) =>
-        s_modSelectPresets.TryGetAction(index, out action);
+    public static bool TryGetModSelectPresetSlotAction(int index, out UiAction action) =>
+        s_modSelectPresetSlots.TryGetAction(index, out action);
 
-    public static bool TryGetModSelectToggleIndex(UiAction action, out int index) =>
-        s_modSelectToggles.TryGetIndex(action, out index);
+    public static bool TryGetModSelectCatalogModToggleIndex(UiAction action, out int index) =>
+        s_modSelectCatalogModToggles.TryGetIndex(action, out index);
 
-    public static bool TryGetModSelectToggleAction(int index, out UiAction action) =>
-        s_modSelectToggles.TryGetAction(index, out action);
+    public static bool TryGetModSelectCatalogModToggleAction(int index, out UiAction action) =>
+        s_modSelectCatalogModToggles.TryGetAction(index, out action);
+
+    public static bool TryGetModSelectCustomizeSettingDecreaseIndex(
+        UiAction action,
+        out int index
+    ) => s_modSelectCustomizeSettingDecreases.TryGetIndex(action, out index);
+
+    public static bool TryGetModSelectCustomizeSettingDecreaseAction(
+        int index,
+        out UiAction action
+    ) => s_modSelectCustomizeSettingDecreases.TryGetAction(index, out action);
+
+    public static bool TryGetModSelectCustomizeSettingIncreaseIndex(
+        UiAction action,
+        out int index
+    ) => s_modSelectCustomizeSettingIncreases.TryGetIndex(action, out index);
+
+    public static bool TryGetModSelectCustomizeSettingIncreaseAction(
+        int index,
+        out UiAction action
+    ) => s_modSelectCustomizeSettingIncreases.TryGetAction(index, out action);
 }

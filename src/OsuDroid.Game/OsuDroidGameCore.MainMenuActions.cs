@@ -11,9 +11,10 @@ public sealed partial class OsuDroidGameCore
         action switch
         {
             UiAction.MainMenuCookie => Execute(TapMainMenuCookie),
-            UiAction.MainMenuFirst or UiAction.MainMenuSecond or UiAction.MainMenuThird => Execute(
-                () =>
-                    TapMainMenu(UiActionRouter.ToMainMenuSlot(action))
+            UiAction.MainMenuPrimaryButton
+            or UiAction.MainMenuSecondaryButton
+            or UiAction.MainMenuTertiaryButton => Execute(() =>
+                TapMainMenu(UiActionRouter.ToMainMenuSlot(action))
             ),
             UiAction.MainMenuVersionPill => Execute(_mainMenu.OpenAboutDialog),
             UiAction.MainMenuAboutClose => Execute(_mainMenu.CloseAboutDialog),
@@ -32,7 +33,7 @@ public sealed partial class OsuDroidGameCore
                 PendingExternalUrl = "https://discord.gg/nyD92cE"
             ),
             UiAction.MainMenuExitDialogPanel => true,
-            UiAction.MainMenuExitConfirm => Execute(_mainMenu.ConfirmExitDialog),
+            UiAction.MainMenuExitConfirm => ConfirmMainMenuExit(),
             UiAction.MainMenuExitCancel => Execute(_mainMenu.CancelExitDialog),
             UiAction.MainMenuBeatmapDownloader => Execute(() =>
             {
@@ -58,6 +59,19 @@ public sealed partial class OsuDroidGameCore
     {
         _musicController.Execute(command);
         _mainMenu.SetNowPlaying(_musicController.State);
+        return true;
+    }
+
+    private bool ConfirmMainMenuExit()
+    {
+        if (!_mainMenu.ConfirmExitDialog())
+        {
+            return false;
+        }
+
+        _musicController.Execute(MenuMusicCommand.Stop);
+        _mainMenu.SetNowPlaying(_musicController.State);
+        _activeMenuSfxPlayer.Play("seeya");
         return true;
     }
 }

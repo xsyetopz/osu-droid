@@ -18,34 +18,40 @@ public sealed partial class SongSelectScene
         );
 
     public static UiAction SetAction(int visibleSlot) =>
-        UiActionGroups.TryGetSongSelectSetAction(visibleSlot, out UiAction action)
+        UiActionGroups.TryGetSongSelectVisibleSetSlotAction(visibleSlot, out UiAction action)
             ? action
             : UiAction.None;
 
     public static int SetIndex(UiAction action) =>
-        UiActionGroups.TryGetSongSelectSetIndex(action, out int index) ? index : -1;
+        UiActionGroups.TryGetSongSelectVisibleSetSlotIndex(action, out int index) ? index : -1;
 
     public static UiAction DifficultyAction(int index) =>
-        UiActionGroups.TryGetSongSelectDifficultyAction(index, out UiAction action)
+        UiActionGroups.TryGetSongSelectVisibleDifficultySlotAction(index, out UiAction action)
             ? action
             : UiAction.None;
 
     public static int DifficultyIndex(UiAction action) =>
-        UiActionGroups.TryGetSongSelectDifficultyIndex(action, out int index) ? index : -1;
+        UiActionGroups.TryGetSongSelectVisibleDifficultySlotIndex(action, out int index)
+            ? index
+            : -1;
 
     public static UiAction CollectionToggleAction(int index) =>
-        UiActionGroups.TryGetSongSelectCollectionToggleAction(index, out UiAction action)
+        UiActionGroups.TryGetSongSelectCollectionToggleSlotAction(index, out UiAction action)
             ? action
             : UiAction.None;
 
     public static int CollectionToggleIndex(UiAction action) =>
-        UiActionGroups.TryGetSongSelectCollectionToggleIndex(action, out int index) ? index : -1;
+        UiActionGroups.TryGetSongSelectCollectionToggleSlotIndex(action, out int index)
+            ? index
+            : -1;
 
     public static UiAction CollectionDeleteAction(int index) =>
-        UiActionGroups.TryGetSongSelectCollectionDeleteAction(index, out UiAction action)
+        UiActionGroups.TryGetSongSelectCollectionDeleteSlotAction(index, out UiAction action)
             ? action
             : UiAction.None;
 
     public static int CollectionDeleteIndex(UiAction action) =>
-        UiActionGroups.TryGetSongSelectCollectionDeleteIndex(action, out int index) ? index : -1;
+        UiActionGroups.TryGetSongSelectCollectionDeleteSlotIndex(action, out int index)
+            ? index
+            : -1;
 }

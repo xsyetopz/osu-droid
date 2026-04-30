@@ -3,6 +3,7 @@ using OsuDroid.Game.Beatmaps;
 using OsuDroid.Game.Beatmaps.Difficulty;
 using OsuDroid.Game.Runtime.Audio;
 using OsuDroid.Game.Runtime.Diagnostics;
+using OsuDroid.Game.Scenes.ModSelect;
 using OsuDroid.Game.UI.Geometry;
 
 namespace OsuDroid.Game.Scenes.SongSelect;
@@ -316,8 +317,11 @@ public sealed partial class SongSelectScene
 
     private float? CurrentStarRating(BeatmapInfo beatmap) =>
         _displayAlgorithm == DifficultyAlgorithm.Standard
-            ? beatmap.StandardStarRating
-            : beatmap.DroidStarRating;
+            ? AdjustedStats(beatmap).StandardStarRating
+            : AdjustedStats(beatmap).DroidStarRating;
+
+    private ModStatSnapshot AdjustedStats(BeatmapInfo beatmap) =>
+        ModStatCalculator.FromBeatmap(beatmap, _selectedModState);
 
     private static float CalculateRowX(float centerY, VirtualViewport viewport) =>
         viewport.VirtualWidth / 1.85f
@@ -335,17 +339,18 @@ public sealed partial class SongSelectScene
 
     private string FormatLengthLine(BeatmapInfo beatmap)
     {
+        ModStatSnapshot stats = AdjustedStats(beatmap);
         string bpm =
-            Math.Abs(beatmap.BpmMax - beatmap.BpmMin) < 0.01f
-                ? beatmap.MostCommonBpm.ToString("0", CultureInfo.InvariantCulture)
+            Math.Abs(stats.BpmMax - stats.BpmMin) < 0.01f
+                ? stats.MostCommonBpm.ToString("0", CultureInfo.InvariantCulture)
                 : string.Create(
                     CultureInfo.InvariantCulture,
-                    $"{beatmap.BpmMin:0}-{beatmap.BpmMax:0} ({beatmap.MostCommonBpm:0})"
+                    $"{stats.BpmMin:0}-{stats.BpmMax:0} ({stats.MostCommonBpm:0})"
                 );
         return _localizer.Format(
             "SongSelect_DifficultyStats",
             TimeSpan
-                .FromMilliseconds(beatmap.Length)
+                .FromMilliseconds(stats.Length)
                 .ToString("m\\:ss", CultureInfo.InvariantCulture),
             bpm,
             beatmap.MaxCombo
@@ -363,13 +368,14 @@ public sealed partial class SongSelectScene
 
     private string FormatDifficultyLine(BeatmapInfo beatmap)
     {
+        ModStatSnapshot stats = AdjustedStats(beatmap);
         string stars = CurrentStarRating(beatmap) is float value ? FormatStatNumber(value) : "...";
         return _localizer.Format(
             "SongSelect_DifficultyAdvancedStats",
-            FormatStatNumber(beatmap.ApproachRate),
-            FormatStatNumber(beatmap.OverallDifficulty),
-            FormatStatNumber(beatmap.CircleSize),
-            FormatStatNumber(beatmap.HpDrainRate),
+            FormatStatNumber(stats.ApproachRate),
+            FormatStatNumber(stats.OverallDifficulty),
+            FormatStatNumber(stats.CircleSize),
+            FormatStatNumber(stats.HpDrainRate),
             stars
         );
     }

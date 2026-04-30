@@ -117,15 +117,16 @@ public sealed partial class MainMenuScene
 
     public void CloseAboutDialog() => _isAboutDialogOpen = false;
 
-    public void ConfirmExitDialog()
+    public bool ConfirmExitDialog()
     {
         if (!_isExitDialogOpen)
         {
-            return;
+            return false;
         }
 
         _isExitDialogOpen = false;
         _ = BeginExitAnimation();
+        return true;
     }
 
     public void CancelExitDialog()

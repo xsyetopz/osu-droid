@@ -21,9 +21,15 @@ internal sealed record ScrollDragTarget(
 
 public sealed partial class ModSelectScene
 {
+    private const string CustomizeModalDragKey = "customize-modal";
+
     public void Scroll(float deltaX, float deltaY, UiPoint startPoint, VirtualViewport viewport)
     {
         _lastViewport = viewport;
+        if (IsCustomizeModalOpen)
+        {
+            return;
+        }
         if (SelectedModsBounds().Contains(startPoint))
         {
             _selectedModsVelocityX = 0f;
@@ -77,6 +83,17 @@ public sealed partial class ModSelectScene
     {
         _lastViewport = viewport;
         double timestamp = timestampSeconds ?? _elapsedSeconds;
+        if (IsCustomizeModalOpen)
+        {
+            _dragTarget = new ScrollDragTarget(
+                CustomizeModalDragKey,
+                ModScrollAxis.Undecided,
+                point,
+                timestamp
+            );
+            return true;
+        }
+
         if (SelectedModsBounds().Contains(point) && MaxSelectedModsScroll() > 0f)
         {
             _selectedModsVelocityX = 0f;
@@ -139,6 +156,12 @@ public sealed partial class ModSelectScene
         float deltaX = target.LastPoint.X - point.X;
         float deltaY = target.LastPoint.Y - point.Y;
         float elapsed = Math.Max(1f / 120f, (float)(timestamp - target.LastTimestampSeconds));
+
+        if (target.Key == CustomizeModalDragKey)
+        {
+            _dragTarget = target with { LastPoint = point, LastTimestampSeconds = timestamp };
+            return true;
+        }
 
         if (target.Key == "selected")
         {

@@ -76,7 +76,7 @@ public sealed partial class UiCompatibilityTests
         var viewport = VirtualViewport.FromSurface(1280, 720);
         _ = ExpandedFrame(scene, viewport);
 
-        scene.Press(UiAction.MainMenuFirst);
+        scene.Press(UiAction.MainMenuPrimaryButton);
         UiElementSnapshot pressed = scene
             .CreateSnapshot(viewport)
             .UiFrame.Elements.Single(element => element.Id == "menu-0");

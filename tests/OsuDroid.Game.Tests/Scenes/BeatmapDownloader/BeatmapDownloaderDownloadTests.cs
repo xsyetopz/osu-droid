@@ -173,7 +173,7 @@ public sealed partial class BeatmapDownloaderTests
             SetSets(downloader, [CreateSet(hasVideo: true)]);
             SetCoreActiveScene(core, "BeatmapDownloader");
 
-            core.HandleUiAction(UiAction.DownloaderDownloadNoVideo0);
+            core.HandleUiAction(UiAction.DownloaderResultDownloadWithoutVideoSlot0);
             SpinUntil(() => downloadService.CallCount == 1);
 
             Assert.That(downloadService.LastWithVideo, Is.False);
@@ -295,7 +295,7 @@ public sealed partial class BeatmapDownloaderTests
             SetSets(downloader, [CreateSet()]);
 
             core.HandleUiAction(UiAction.MainMenuBeatmapDownloader);
-            core.HandleUiAction(UiAction.DownloaderDownload0);
+            core.HandleUiAction(UiAction.DownloaderResultDownloadSlot0);
             SpinUntil(() =>
             {
                 core.Update(TimeSpan.FromMilliseconds(16));

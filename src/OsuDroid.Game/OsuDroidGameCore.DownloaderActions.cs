@@ -105,22 +105,22 @@ public sealed partial class OsuDroidGameCore
         action
             is UiAction.DownloaderDownloadFirst
                 or UiAction.DownloaderDownloadFirstNoVideo
-                or UiAction.DownloaderDownload0
-                or UiAction.DownloaderDownload1
-                or UiAction.DownloaderDownload2
-                or UiAction.DownloaderDownload3
-                or UiAction.DownloaderDownload4
-                or UiAction.DownloaderDownload5
-                or UiAction.DownloaderDownload6
-                or UiAction.DownloaderDownload7
-                or UiAction.DownloaderDownloadNoVideo0
-                or UiAction.DownloaderDownloadNoVideo1
-                or UiAction.DownloaderDownloadNoVideo2
-                or UiAction.DownloaderDownloadNoVideo3
-                or UiAction.DownloaderDownloadNoVideo4
-                or UiAction.DownloaderDownloadNoVideo5
-                or UiAction.DownloaderDownloadNoVideo6
-                or UiAction.DownloaderDownloadNoVideo7;
+                or UiAction.DownloaderResultDownloadSlot0
+                or UiAction.DownloaderResultDownloadSlot1
+                or UiAction.DownloaderResultDownloadSlot2
+                or UiAction.DownloaderResultDownloadSlot3
+                or UiAction.DownloaderResultDownloadSlot4
+                or UiAction.DownloaderResultDownloadSlot5
+                or UiAction.DownloaderResultDownloadSlot6
+                or UiAction.DownloaderResultDownloadSlot7
+                or UiAction.DownloaderResultDownloadWithoutVideoSlot0
+                or UiAction.DownloaderResultDownloadWithoutVideoSlot1
+                or UiAction.DownloaderResultDownloadWithoutVideoSlot2
+                or UiAction.DownloaderResultDownloadWithoutVideoSlot3
+                or UiAction.DownloaderResultDownloadWithoutVideoSlot4
+                or UiAction.DownloaderResultDownloadWithoutVideoSlot5
+                or UiAction.DownloaderResultDownloadWithoutVideoSlot6
+                or UiAction.DownloaderResultDownloadWithoutVideoSlot7;
 
     private static bool Do(Action action)
     {

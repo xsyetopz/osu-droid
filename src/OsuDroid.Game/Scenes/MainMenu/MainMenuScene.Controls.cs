@@ -14,9 +14,24 @@ public sealed partial class MainMenuScene
             return;
         }
 
-        AddMenuButton(elements, 0, GetAndroidMainMenuButtonBounds(0), UiAction.MainMenuFirst);
-        AddMenuButton(elements, 1, GetAndroidMainMenuButtonBounds(1), UiAction.MainMenuSecond);
-        AddMenuButton(elements, 2, GetAndroidMainMenuButtonBounds(2), UiAction.MainMenuThird);
+        AddMenuButton(
+            elements,
+            0,
+            GetAndroidMainMenuButtonBounds(0),
+            UiAction.MainMenuPrimaryButton
+        );
+        AddMenuButton(
+            elements,
+            1,
+            GetAndroidMainMenuButtonBounds(1),
+            UiAction.MainMenuSecondaryButton
+        );
+        AddMenuButton(
+            elements,
+            2,
+            GetAndroidMainMenuButtonBounds(2),
+            UiAction.MainMenuTertiaryButton
+        );
     }
 
     private void AddMenuButton(

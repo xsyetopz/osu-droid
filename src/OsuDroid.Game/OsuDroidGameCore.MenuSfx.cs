@@ -20,23 +20,27 @@ public sealed partial class OsuDroidGameCore
         return UiActionGroups.IsOptionsSection(action)
             || UiActionGroups.IsDownloaderSortChoice(action)
             || UiActionGroups.IsDownloaderStatusChoice(action)
-            || UiActionGroups.TryGetDownloaderDetailsDifficultyIndex(action, out _)
-            || UiActionGroups.TryGetSongSelectDifficultyIndex(action, out _)
-            || UiActionGroups.TryGetSongSelectCollectionToggleIndex(action, out _)
+            || UiActionGroups.TryGetDownloaderDetailsDifficultySlotIndex(action, out _)
+            || UiActionGroups.TryGetSongSelectVisibleDifficultySlotIndex(action, out _)
+            || UiActionGroups.TryGetSongSelectCollectionToggleSlotIndex(action, out _)
                 ? "menuclick"
             : UiActionGroups.IsOptionsToggle(action)
-            || UiActionGroups.TryGetDownloaderCardIndex(action, out _)
-            || UiActionGroups.TryGetDownloaderPreviewIndex(action, out _)
-            || UiActionGroups.TryGetSongSelectCollectionDeleteIndex(action, out _)
-            || IsBetween(action, UiAction.DownloaderDownload0, UiAction.DownloaderDownloadNoVideo7)
-            || UiActionGroups.TryGetSongSelectSetIndex(action, out _)
+            || UiActionGroups.TryGetDownloaderResultCardSlotIndex(action, out _)
+            || UiActionGroups.TryGetDownloaderResultPreviewSlotIndex(action, out _)
+            || UiActionGroups.TryGetSongSelectCollectionDeleteSlotIndex(action, out _)
+            || IsBetween(
+                action,
+                UiAction.DownloaderResultDownloadSlot0,
+                UiAction.DownloaderResultDownloadWithoutVideoSlot7
+            )
+            || UiActionGroups.TryGetSongSelectVisibleSetSlotIndex(action, out _)
                 ? "menuhit"
             : action switch
             {
                 UiAction.MainMenuCookie
-                or UiAction.MainMenuFirst
-                or UiAction.MainMenuSecond
-                or UiAction.MainMenuThird => "menuhit",
+                or UiAction.MainMenuPrimaryButton
+                or UiAction.MainMenuSecondaryButton
+                or UiAction.MainMenuTertiaryButton => "menuhit",
                 UiAction.MainMenuBeatmapDownloader or UiAction.DownloaderDetailsPanel => "menuhit",
                 UiAction.DownloaderDetailsPreview
                 or UiAction.DownloaderDetailsDownload
@@ -56,7 +60,6 @@ public sealed partial class OsuDroidGameCore
                 or UiAction.SongSelectCollectionDeleteCancel => "menuback",
                 UiAction.SongSelectPropertiesDismiss or UiAction.SongSelectCollectionsClose =>
                     "menuback",
-                UiAction.MainMenuExitConfirm => "menuhit",
                 UiAction.MainMenuExitCancel => "menuback",
                 UiAction.MainMenuVersionPill
                 or UiAction.MainMenuAboutClose
@@ -110,5 +113,5 @@ public sealed partial class OsuDroidGameCore
     private static bool IsOptionsAction(UiAction action) =>
         UiActionGroups.IsOptionsSection(action)
         || UiActionGroups.IsOptionsToggle(action)
-        || UiActionGroups.IsOptionsRow(action);
+        || UiActionGroups.IsOptionsActiveRow(action);
 }

@@ -13,7 +13,7 @@ public sealed partial class OsuDroidGameCore
             {
                 UiAction.ModSelectBack => Do(BackFromModSelect),
                 UiAction.ModSelectClear => Do(_modSelect.Clear),
-                UiAction.ModSelectCustomize => true,
+                UiAction.ModSelectCustomize => Do(() => _modSelect.ToggleCustomizePanel()),
                 UiAction.ModSelectSearchBox => Do(() => _modSelect.FocusSearch(viewport)),
                 UiAction.ModSelectPresetAdd => Do(() => _modSelect.FocusPresetName(viewport)),
                 UiAction.ModSelectPresetNameInput => Do(() =>
@@ -24,12 +24,34 @@ public sealed partial class OsuDroidGameCore
                     _modSelect.CancelPresetDialog
                 ),
                 UiAction.ModSelectPresetDeleteConfirm => Do(_modSelect.ConfirmPresetDelete),
-                UiAction.ModSelectPresetBackdrop => true,
+                UiAction.ModSelectPresetBackdrop => Do(_modSelect.CloseCustomizePanel),
                 _ => false,
             }
             || (
-                UiActionGroups.TryGetModSelectPresetIndex(action, out int presetIndex)
+                UiActionGroups.TryGetModSelectPresetSlotIndex(action, out int presetIndex)
                 && Do(() => _modSelect.ActivatePreset(presetIndex))
+            )
+            || (
+                UiActionGroups.TryGetModSelectCustomizeSettingDecreaseIndex(
+                    action,
+                    out int decreaseIndex
+                )
+                && Do(() =>
+                {
+                    _modSelect.AdjustCustomizeSetting(decreaseIndex, -1);
+                    _songSelect.SetSelectedModState(_modSelect.CreateSelectionState());
+                })
+            )
+            || (
+                UiActionGroups.TryGetModSelectCustomizeSettingIncreaseIndex(
+                    action,
+                    out int increaseIndex
+                )
+                && Do(() =>
+                {
+                    _modSelect.FocusCustomizeSettingInput(increaseIndex, viewport);
+                    _songSelect.SetSelectedModState(_modSelect.CreateSelectionState());
+                })
             )
         );
 #pragma warning restore IDE0072
@@ -38,6 +60,7 @@ public sealed partial class OsuDroidGameCore
     {
         _modSelect.ClosePresetDialog();
         _textInputService.HideTextInput();
+        _songSelect.SetSelectedModState(_modSelect.CreateSelectionState());
         _activeScene = ActiveScene.SongSelect;
     }
 }

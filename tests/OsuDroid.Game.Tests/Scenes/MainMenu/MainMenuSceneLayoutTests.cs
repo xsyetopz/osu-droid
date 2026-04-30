@@ -31,7 +31,7 @@ public sealed partial class UiCompatibilityTests
                     )
                 )
                 ?.Action,
-            Is.EqualTo(UiAction.MainMenuFirst)
+            Is.EqualTo(UiAction.MainMenuPrimaryButton)
         );
     }
 

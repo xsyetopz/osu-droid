@@ -195,8 +195,8 @@ public sealed partial class OptionsSceneTests
             core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
             _ = core.TapMainMenu(MainMenuButtonSlot.Second);
             core.HandleUiAction(UiAction.OptionsSectionAudio, viewport);
-            core.HandleUiAction(UiAction.OptionsRow0, viewport);
-            core.HandleUiAction(UiAction.OptionsRow1, viewport);
+            core.HandleUiAction(UiAction.OptionsActiveRow0, viewport);
+            core.HandleUiAction(UiAction.OptionsActiveRow1, viewport);
 
             Assert.That(preview.Volume, Is.EqualTo(0f));
             Assert.That(sfx.Volume, Is.EqualTo(0f));
@@ -244,11 +244,11 @@ public sealed partial class OptionsSceneTests
             core.TapMainMenuCookie();
             core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
             _ = core.TapMainMenu(MainMenuButtonSlot.Second);
-            core.HandleUiAction(UiAction.OptionsRow8, viewport);
+            core.HandleUiAction(UiAction.OptionsActiveRow8, viewport);
             core.HandleUiAction(UiAction.OptionsSectionAudio, viewport);
-            core.HandleUiAction(UiAction.OptionsRow0, viewport);
+            core.HandleUiAction(UiAction.OptionsActiveRow0, viewport);
             core.HandleUiAction(UiAction.OptionsSectionGeneral, viewport);
-            core.HandleUiAction(UiAction.OptionsRow9, viewport);
+            core.HandleUiAction(UiAction.OptionsActiveRow9, viewport);
             UiFrameSnapshot frame = core.CreateFrame(viewport).UiFrame;
 
             string backup = File.ReadAllText(Path.Combine(paths.CoreRoot, "osudroid.cfg"));
@@ -294,9 +294,9 @@ public sealed partial class OptionsSceneTests
             core.Update(TimeSpan.FromMilliseconds(MainMenuScene.MenuExpandDurationMilliseconds));
             _ = core.TapMainMenu(MainMenuButtonSlot.Second);
             core.HandleUiAction(UiAction.OptionsSectionLibrary, viewport);
-            core.HandleUiAction(UiAction.OptionsRow7, viewport);
+            core.HandleUiAction(UiAction.OptionsActiveRow7, viewport);
             UiFrameSnapshot cacheFrame = core.CreateFrame(viewport).UiFrame;
-            core.HandleUiAction(UiAction.OptionsRow8, viewport);
+            core.HandleUiAction(UiAction.OptionsActiveRow8, viewport);
 
             Assert.That(repository.LoadLibrary().Sets, Is.Empty);
             Assert.That(repository.GetDifficultyMetadata("test"), Is.Zero);

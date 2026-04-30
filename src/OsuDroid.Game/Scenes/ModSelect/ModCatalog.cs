@@ -1,28 +1,23 @@
 using OsuDroid.Game.UI.Assets;
+using static OsuDroid.Game.Scenes.ModSelect.ModSettingPresets;
 
 namespace OsuDroid.Game.Scenes.ModSelect;
 
-public sealed record ModCatalogEntry(
-    string Acronym,
-    string Name,
-    string Description,
-    string SectionKey,
-    string AssetName,
-    float ScoreMultiplier = 1f,
-    bool HasCustomization = false,
-    bool IsRanked = false,
-    IReadOnlyList<string>? IncompatibleAcronyms = null
-);
-
 public static class ModCatalog
 {
+    private const string Reduction = "OsuDroidLanguagePack_mod_section_difficulty_reduction";
+    private const string Increase = "OsuDroidLanguagePack_mod_section_difficulty_increase";
+    private const string Automation = "OsuDroidLanguagePack_mod_section_difficulty_automation";
+    private const string Conversion = "OsuDroidLanguagePack_mod_section_difficulty_conversion";
+    private const string Fun = "OsuDroidLanguagePack_mod_section_fun";
+
     public static IReadOnlyList<ModCatalogEntry> Entries { get; } =
     [
         new(
             "EZ",
             "Easy",
             "Larger circles, more forgiving HP drain, less accuracy required, and three lives!",
-            "OsuDroidLanguagePack_mod_section_difficulty_reduction",
+            Reduction,
             DroidAssets.ModEasy,
             0.5f,
             IsRanked: true,
@@ -32,9 +27,8 @@ public static class ModCatalog
             "HT",
             "Half Time",
             "Less zoom...",
-            "OsuDroidLanguagePack_mod_section_difficulty_reduction",
+            Reduction,
             DroidAssets.ModHalfTime,
-            0.3f,
             IsRanked: true,
             IncompatibleAcronyms: ["DT", "NC"]
         ),
@@ -42,7 +36,7 @@ public static class ModCatalog
             "NF",
             "No Fail",
             "You can't fail, no matter what.",
-            "OsuDroidLanguagePack_mod_section_difficulty_reduction",
+            Reduction,
             DroidAssets.ModNoFail,
             0.5f,
             IsRanked: true,
@@ -52,7 +46,7 @@ public static class ModCatalog
             "RE",
             "Really Easy",
             "Everything just got easier...",
-            "OsuDroidLanguagePack_mod_section_difficulty_reduction",
+            Reduction,
             DroidAssets.ModReallyEasy,
             0.5f
         ),
@@ -60,9 +54,8 @@ public static class ModCatalog
             "DT",
             "Double Time",
             "Zoooooooooom...",
-            "OsuDroidLanguagePack_mod_section_difficulty_increase",
+            Increase,
             DroidAssets.ModDoubleTime,
-            1.12f,
             IsRanked: true,
             IncompatibleAcronyms: ["NC", "HT"]
         ),
@@ -70,38 +63,39 @@ public static class ModCatalog
             "FL",
             "Flashlight",
             "Restricted view area.",
-            "OsuDroidLanguagePack_mod_section_difficulty_increase",
+            Increase,
             DroidAssets.ModFlashlight,
             1.12f,
-            IsRanked: true
+            IsRanked: true,
+            Settings: FlashlightSettings()
         ),
         new(
             "HR",
             "Hard Rock",
             "Everything just got a bit harder...",
-            "OsuDroidLanguagePack_mod_section_difficulty_increase",
+            Increase,
             DroidAssets.ModHardRock,
             1.06f,
             IsRanked: true,
-            IncompatibleAcronyms: ["EZ", "MR"]
+            IncompatibleAcronyms: ["EZ"]
         ),
         new(
             "HD",
             "Hidden",
             "Play with no approach circles and fading circles/sliders.",
-            "OsuDroidLanguagePack_mod_section_difficulty_increase",
+            Increase,
             DroidAssets.ModHidden,
             1.06f,
             IsRanked: true,
+            Settings: HiddenSettings(),
             IncompatibleAcronyms: ["AD", "TC", "FR"]
         ),
         new(
             "NC",
             "Nightcore",
             "Uguuuuuuuu...",
-            "OsuDroidLanguagePack_mod_section_difficulty_increase",
+            Increase,
             DroidAssets.ModNightcore,
-            1.12f,
             IsRanked: true,
             IncompatibleAcronyms: ["DT", "HT"]
         ),
@@ -109,51 +103,43 @@ public static class ModCatalog
             "PF",
             "Perfect",
             "SS or quit.",
-            "OsuDroidLanguagePack_mod_section_difficulty_increase",
+            Increase,
             DroidAssets.ModPerfect,
             IsRanked: true,
-            IncompatibleAcronyms: ["NF", "SD", "AT"]
+            IncompatibleAcronyms: ["SD", "NF", "AT", "AP", "RX"]
         ),
         new(
             "PR",
             "Precise",
             "Ultimate rhythm gamer timing.",
-            "OsuDroidLanguagePack_mod_section_difficulty_increase",
+            Increase,
             DroidAssets.ModPrecise,
             1.06f,
             IsRanked: true
         ),
         new(
-            "SC",
-            "Small Circle",
-            "Who put ants in my beatmaps?",
-            "OsuDroidLanguagePack_mod_section_difficulty_increase",
-            DroidAssets.ModSmallCircle,
-            HasCustomization: true
-        ),
-        new(
             "SD",
             "Sudden Death",
             "Miss and fail.",
-            "OsuDroidLanguagePack_mod_section_difficulty_increase",
+            Increase,
             DroidAssets.ModSuddenDeath,
             IsRanked: true,
-            IncompatibleAcronyms: ["NF", "PF", "AT"]
+            IncompatibleAcronyms: ["PF", "NF", "AT", "AP", "RX"]
         ),
         new(
             "TC",
             "Traceable",
             "Put your faith in the approach circles...",
-            "OsuDroidLanguagePack_mod_section_difficulty_increase",
+            Increase,
             DroidAssets.ModTraceable,
             1.06f,
-            IncompatibleAcronyms: ["HD"]
+            IsRanked: true
         ),
         new(
             "AT",
             "Autoplay",
             "Watch a perfect automated play through the song.",
-            "OsuDroidLanguagePack_mod_section_difficulty_automation",
+            Automation,
             DroidAssets.ModAutoplay,
             IncompatibleAcronyms: ["RX", "AP", "PF", "SD"]
         ),
@@ -161,90 +147,91 @@ public static class ModCatalog
             "AP",
             "Autopilot",
             "Automatic cursor movement - just follow the rhythm.",
-            "OsuDroidLanguagePack_mod_section_difficulty_automation",
+            Automation,
             DroidAssets.ModAutopilot,
             0.001f,
-            IncompatibleAcronyms: ["RX", "AT", "NF"]
+            IncompatibleAcronyms: ["AT", "RX", "PF", "SD", "NF"]
         ),
         new(
             "RX",
             "Relax",
             "You don't need to tap. Give your tapping fingers a break from the heat of things.",
-            "OsuDroidLanguagePack_mod_section_difficulty_automation",
+            Automation,
             DroidAssets.ModRelax,
             0.001f,
-            IncompatibleAcronyms: ["AT", "NF", "AP"]
+            IncompatibleAcronyms: ["AT", "AP", "PF", "SD", "NF"]
         ),
         new(
             "CS",
             "Custom Speed",
             "Play at any speed you want - slow or fast.",
-            "OsuDroidLanguagePack_mod_section_difficulty_conversion",
+            Conversion,
             DroidAssets.ModCustomSpeed,
-            HasCustomization: true,
-            IsRanked: true
+            IsRanked: true,
+            Settings: RateSettings(1f)
         ),
         new(
             "DA",
             "Difficulty Adjust",
             "Override a beatmap's difficulty settings.",
-            "OsuDroidLanguagePack_mod_section_difficulty_conversion",
+            Conversion,
             DroidAssets.ModDifficultyAdjust,
-            HasCustomization: true
+            Settings: DifficultyAdjustSettings()
         ),
         new(
             "MR",
             "Mirror",
             "Flip objects on the chosen axes.",
-            "OsuDroidLanguagePack_mod_section_difficulty_conversion",
+            Conversion,
             DroidAssets.ModMirror,
-            HasCustomization: true,
+            Settings: MirrorSettings(),
             IncompatibleAcronyms: ["HR"]
         ),
         new(
             "RD",
             "Random",
             "It never gets boring!",
-            "OsuDroidLanguagePack_mod_section_difficulty_conversion",
-            DroidAssets.ModRandom
+            Conversion,
+            DroidAssets.ModRandom,
+            Settings: RandomSettings()
         ),
         new(
             "V2",
             "Score V2",
             "A different scoring mode from what you have known.",
-            "OsuDroidLanguagePack_mod_section_difficulty_conversion",
+            Conversion,
             DroidAssets.ModScoreV2
         ),
         new(
             "AD",
             "Approach Different",
             "Never trust the approach circles...",
-            "OsuDroidLanguagePack_mod_section_fun",
+            Fun,
             DroidAssets.ModApproachDifferent,
-            HasCustomization: true,
+            Settings: ApproachDifferentSettings(),
             IncompatibleAcronyms: ["HD", "FR"]
         ),
         new(
             "FR",
             "Freeze Frame",
             "Burn the notes into your memory.",
-            "OsuDroidLanguagePack_mod_section_fun",
+            Fun,
             DroidAssets.ModFreezeFrame,
-            HasCustomization: true,
             IncompatibleAcronyms: ["AD", "HD"]
         ),
         new(
             "MU",
             "Muted",
             "Can you still feel the rhythm without music?",
-            "OsuDroidLanguagePack_mod_section_fun",
-            DroidAssets.ModMuted
+            Fun,
+            DroidAssets.ModMuted,
+            Settings: MutedSettings()
         ),
         new(
             "SY",
             "Synesthesia",
             "Colors hit objects based on the rhythm.",
-            "OsuDroidLanguagePack_mod_section_fun",
+            Fun,
             DroidAssets.ModSynesthesia,
             0.8f
         ),
@@ -252,15 +239,17 @@ public static class ModCatalog
             "WD",
             "Wind Down",
             "Sloooow doooown...",
-            "OsuDroidLanguagePack_mod_section_fun",
-            DroidAssets.ModWindDown
+            Fun,
+            DroidAssets.ModWindDown,
+            Settings: WindDownSettings()
         ),
         new(
             "WU",
             "Wind Up",
             "Can you keep up?",
-            "OsuDroidLanguagePack_mod_section_fun",
-            DroidAssets.ModWindUp
+            Fun,
+            DroidAssets.ModWindUp,
+            Settings: WindUpSettings()
         ),
     ];
 }

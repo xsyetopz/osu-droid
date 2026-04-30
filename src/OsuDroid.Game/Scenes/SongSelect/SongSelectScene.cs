@@ -2,6 +2,7 @@ using OsuDroid.Game.Beatmaps;
 using OsuDroid.Game.Beatmaps.Difficulty;
 using OsuDroid.Game.Localization;
 using OsuDroid.Game.Runtime.Audio;
+using OsuDroid.Game.Scenes.ModSelect;
 using OsuDroid.Game.UI.Elements;
 using OsuDroid.Game.UI.Geometry;
 using OsuDroid.Game.UI.Input;
@@ -98,6 +99,7 @@ public sealed partial class SongSelectScene(
     private readonly Queue<BeatmapInfo> _completedDifficultyUpdates = new();
     private readonly object _libraryRefreshGate = new();
     private ITextInputService _textInputService = textInputService ?? new NoOpTextInputService();
+    private ModSelectionState _selectedModState = ModSelectionState.Empty;
 
     private BeatmapLibrarySnapshot _snapshot = BeatmapLibrarySnapshot.Empty;
     private BeatmapLibrarySnapshot _visibleSnapshot = BeatmapLibrarySnapshot.Empty;
@@ -145,6 +147,8 @@ public sealed partial class SongSelectScene(
         get => _selectionState.SetExpansion;
         set => _selectionState.SetExpansion = value;
     }
+
+    public void SetSelectedModState(ModSelectionState state) => _selectedModState = state;
 
     private string searchQuery
     {

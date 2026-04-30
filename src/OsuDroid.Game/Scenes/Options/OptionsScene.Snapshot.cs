@@ -7,6 +7,7 @@ public sealed partial class OptionsScene
 {
     public GameFrameSnapshot CreateSnapshot(VirtualViewport viewport)
     {
+        RememberViewport(viewport);
         ClampScroll(viewport);
         return CreateSnapshot(
             viewport,
@@ -21,6 +22,7 @@ public sealed partial class OptionsScene
         VirtualViewport viewport
     )
     {
+        RememberViewport(viewport);
         SettingsSection sectionData = s_sections.Single(settingsSection =>
             settingsSection.Section == section
         );

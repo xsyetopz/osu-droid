@@ -25,6 +25,7 @@ public sealed partial class ModSelectScene
         AddTopBar(elements, viewport);
         AddSections(elements, viewport);
         AddBottomBar(elements, viewport);
+        AddCustomizeDialog(elements, viewport);
         AddPresetDialog(elements, viewport);
         return new UiFrameSnapshot(viewport, elements, DroidAssets.MainMenuManifest);
     }
@@ -46,6 +47,7 @@ public sealed partial class ModSelectScene
         AddTopBar(elements, viewport);
         AddSections(elements, viewport);
         AddBottomBar(elements, viewport);
+        AddCustomizeDialog(elements, viewport);
         AddPresetDialog(elements, viewport);
         return new UiFrameSnapshot(viewport, elements, DroidAssets.MainMenuManifest);
     }
@@ -101,7 +103,7 @@ public sealed partial class ModSelectScene
             UiElementFactory.Sprite(
                 "modselect-search-icon",
                 DroidAssets.CommonSearchSmall,
-                new UiRect(search.Right - 64f, search.Y + 15f, 52f, 28f),
+                new UiRect(search.Right - 52f, search.Y + 13f, 32f, 32f),
                 s_accent,
                 1f,
                 UiAction.ModSelectSearchBox,
@@ -240,7 +242,7 @@ public sealed partial class ModSelectScene
         {
             if (IntersectsVertically(y, ToggleHeight, clip))
             {
-                UiAction action = UiActionGroups.TryGetModSelectPresetAction(
+                UiAction action = UiActionGroups.TryGetModSelectPresetSlotAction(
                     presetIndex,
                     out UiAction presetAction
                 )
@@ -332,7 +334,7 @@ public sealed partial class ModSelectScene
         {
             int index = IndexOfEntry(entry);
             if (
-                UiActionGroups.TryGetModSelectToggleAction(index, out UiAction action)
+                UiActionGroups.TryGetModSelectCatalogModToggleAction(index, out UiAction action)
                 && IntersectsVertically(y, ToggleHeight, clip)
             )
             {
@@ -710,59 +712,64 @@ public sealed partial class ModSelectScene
     {
         float y = viewport.VirtualHeight - 56f;
         float leftX = SidePadding;
+        ModStatSnapshot stats = CurrentStats();
         leftX = AddLabeledBadge(
             elements,
             "ar",
             "AR",
-            FormatStat(_selectedBeatmap?.ApproachRate),
+            FormatStat(stats.ApproachRate),
             leftX,
-            y
+            y,
+            stats.ApproachRateDirection
         );
         leftX = AddLabeledBadge(
             elements,
             "od",
             "OD",
-            FormatStat(_selectedBeatmap?.OverallDifficulty),
+            FormatStat(stats.OverallDifficulty),
             leftX + 10f,
-            y
+            y,
+            stats.OverallDifficultyDirection
         );
         leftX = AddLabeledBadge(
             elements,
             "cs",
             "CS",
-            FormatStat(_selectedBeatmap?.CircleSize),
+            FormatStat(stats.CircleSize),
             leftX + 10f,
-            y
+            y,
+            stats.CircleSizeDirection
         );
         leftX = AddLabeledBadge(
             elements,
             "hp",
             "HP",
-            FormatStat(_selectedBeatmap?.HpDrainRate),
+            FormatStat(stats.HpDrainRate),
             leftX + 10f,
-            y
+            y,
+            stats.HpDrainRateDirection
         );
         AddLabeledBadge(
             elements,
             "bpm",
             "BPM",
-            _selectedBeatmap?.MostCommonBpm.ToString(
-                "0",
-                System.Globalization.CultureInfo.InvariantCulture
-            ) ?? "0",
+            stats.MostCommonBpm.ToString("0", System.Globalization.CultureInfo.InvariantCulture),
             leftX + 10f,
-            y
+            y,
+            stats.BpmDirection
         );
 
         string scoreValue =
-            ScoreMultiplier.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)
-            + "x";
+            stats.ScoreMultiplier.ToString(
+                "0.00",
+                System.Globalization.CultureInfo.InvariantCulture
+            ) + "x";
         float scoreWidth = LabeledBadgeWidth("Score", scoreValue);
         float scoreX = viewport.VirtualWidth - SidePadding - scoreWidth;
         AddLabeledBadge(elements, "score", "Score", scoreValue, scoreX, y);
-        UiColor rankedFill = IsRanked ? s_ranked : s_button;
-        UiColor rankedText = IsRanked ? s_rankedText : s_accent;
-        string rankedTextValue = IsRanked ? "Ranked" : "Unranked";
+        UiColor rankedFill = stats.IsRanked ? s_ranked : s_button;
+        UiColor rankedText = stats.IsRanked ? s_rankedText : s_accent;
+        string rankedTextValue = stats.IsRanked ? "Ranked" : "Unranked";
         float rankedWidth = BadgeWidth(rankedTextValue);
         float rankedX = scoreX - 10f - rankedWidth;
         elements.Add(
@@ -786,13 +793,12 @@ public sealed partial class ModSelectScene
             )
         );
 
-        float starValue =
-            _selectedBeatmap?.DroidStarRating ?? _selectedBeatmap?.StandardStarRating ?? 0f;
+        float starValue = stats.DroidStarRating ?? stats.StandardStarRating ?? 0f;
         UiColor starFill = StarRatingColor(starValue);
         UiColor starText = starValue >= 6.5f ? StarRatingTextColor(starValue) : s_black;
         float starAlpha = starValue >= 6.5f ? 1f : 0.75f;
         string starValueText = FormatStat(starValue);
-        float starWidth = 12f + 20f + 8f + TextWidth(starValueText, 18f) + 12f;
+        float starWidth = 88f;
         float starX = rankedX - 10f - starWidth;
         elements.Add(
             Fill(
@@ -817,7 +823,7 @@ public sealed partial class ModSelectScene
             Text(
                 "modselect-star-value",
                 starValueText,
-                new UiRect(starX + 40f, y + 9f, starWidth - 52f, 24f),
+                new UiRect(starX + 36f, y + 9f, starWidth - 44f, 24f),
                 18f,
                 starText,
                 alignment: UiTextAlignment.Center
