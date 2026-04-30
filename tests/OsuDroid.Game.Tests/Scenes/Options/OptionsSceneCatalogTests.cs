@@ -78,6 +78,9 @@ public sealed partial class OptionsSceneTests
         Assert.That(scene.ActiveRows, Does.Contain("Cursor Size"));
         Assert.That(scene.GetIntValue("cursorSize"), Is.EqualTo(50));
 
+        scene.HandleAction(UiAction.OptionsSectionLibrary, viewport);
+        Assert.That(scene.GetBoolValue("deleteUnsupportedVideos"), Is.True);
+
         scene.HandleAction(UiAction.OptionsSectionInput, viewport);
         Assert.That(scene.ActiveRows, Does.Contain("Back button press time"));
         Assert.That(scene.ActiveRows, Does.Contain("Set Intensity"));

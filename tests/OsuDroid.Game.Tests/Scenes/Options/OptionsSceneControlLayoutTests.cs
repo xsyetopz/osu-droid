@@ -11,18 +11,22 @@ namespace OsuDroid.Game.Tests;
 public sealed partial class OptionsSceneTests
 {
     [Test]
-    public void OptionsSceneImplementedSelectRowsCycleStoredValue()
+    public void OptionsSceneImplementedSelectRowsPersistDialogChoice()
     {
         var scene = new OptionsScene(new GameLocalizer());
         var viewport = VirtualViewport.FromSurface(1280, 720);
 
         scene.HandleAction(UiAction.OptionsActiveRow2, viewport);
-        UiFrameSnapshot frame = scene.CreateSnapshot(viewport).UiFrame;
+        UiFrameSnapshot dialogFrame = scene.CreateSnapshot(viewport).UiFrame;
 
-        UiElementSnapshot value = frame.Elements.Single(element =>
-            element.Id == "options-row-2-value"
+        Assert.That(
+            dialogFrame
+                .Elements.Single(element => element.Id == "options-select-dialog-option-0-text")
+                .Text,
+            Is.EqualTo("osu!droid")
         );
-        Assert.That(value.Text, Is.EqualTo("osu!standard"));
+        scene.HandleAction(UiAction.OptionsSelectDialogOption1, viewport);
+        Assert.That(scene.GetIntValue("difficultyAlgorithm"), Is.EqualTo(1));
     }
 
     [Test]

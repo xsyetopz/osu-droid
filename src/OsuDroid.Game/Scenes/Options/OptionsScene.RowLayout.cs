@@ -37,7 +37,7 @@ public sealed partial class OptionsScene
         string summaryText = GetSummaryText(row);
         float reservedControlWidth =
             row.Kind == SettingsRowKind.Slider ? 0f
-            : row.Kind == SettingsRowKind.Select ? 150f * DpScale
+            : row.Kind == SettingsRowKind.Select ? 0f
             : 96f * DpScale;
         float textWidth =
             row.Kind == SettingsRowKind.Input
@@ -107,10 +107,6 @@ public sealed partial class OptionsScene
         if (row.Kind == SettingsRowKind.Checkbox)
         {
             AddCheckbox(elements, row, index, bounds);
-        }
-        else if (row.Kind == SettingsRowKind.Select)
-        {
-            AddSelectControl(elements, row, index, bounds);
         }
         else if (row.Kind == SettingsRowKind.Input)
         {

@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Runtime.Paths;
+using OsuDroid.Game.Runtime.Settings;
 
 namespace OsuDroid.Game.Beatmaps;
 
@@ -38,8 +39,11 @@ public interface IBeatmapLibrary
     void ClearProperties();
 }
 
-public sealed class BeatmapLibrary(DroidGamePathLayout paths, IBeatmapLibraryRepository repository)
-    : IBeatmapLibrary
+public sealed partial class BeatmapLibrary(
+    DroidGamePathLayout paths,
+    IBeatmapLibraryRepository repository,
+    IGameSettingsStore? settingsStore = null
+) : IBeatmapLibrary
 {
     private const string StandardRulesetFilterMetadataKey = "library.standardRulesetFilterVersion";
     private const long StandardRulesetFilterVersion = 2;
@@ -100,8 +104,16 @@ public sealed class BeatmapLibrary(DroidGamePathLayout paths, IBeatmapLibraryRep
             }
 
             reindexedDirectories.Add(directoryName);
-            indexedStamps[directoryName] = indexStamp;
-            beatmaps.AddRange(ParseBeatmapSet(directory));
+            BeatmapInfo[] parsedBeatmaps = ParseBeatmapSet(directory).ToArray();
+            if (DeleteUnimportedBeatmaps() && parsedBeatmaps.Length == 0)
+            {
+                TryDeleteDirectory(directory);
+            }
+            else
+            {
+                indexedStamps[directoryName] = indexStamp;
+                beatmaps.AddRange(parsedBeatmaps);
+            }
         }
 
         if (reindexedDirectories.Count > 0)
@@ -231,8 +243,15 @@ public sealed class BeatmapLibrary(DroidGamePathLayout paths, IBeatmapLibraryRep
             try
             {
                 beatmap = BeatmapFileParser.Parse(osuFile, paths.Songs);
+                DeleteUnsupportedVideoIfNeeded(osuFile);
             }
-            catch (Exception) { }
+            catch (Exception)
+            {
+                if (DeleteUnimportedBeatmaps())
+                {
+                    TryDeleteFile(osuFile);
+                }
+            }
 
             if (beatmap is not null)
             {

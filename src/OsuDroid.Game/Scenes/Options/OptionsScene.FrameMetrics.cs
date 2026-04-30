@@ -57,7 +57,7 @@ public sealed partial class OptionsScene
         float listWidth = ActiveListWidth(_lastViewport);
         float reservedControlWidth =
             row.Kind is SettingsRowKind.Input or SettingsRowKind.Slider ? 0f
-            : row.Kind == SettingsRowKind.Select ? 150f * DpScale
+            : row.Kind == SettingsRowKind.Select ? 0f
             : 96f * DpScale;
         return Math.Max(80f * DpScale, listWidth - RowPadding * 3f - reservedControlWidth);
     }

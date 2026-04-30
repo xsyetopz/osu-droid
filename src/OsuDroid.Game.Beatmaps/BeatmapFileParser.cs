@@ -84,6 +84,15 @@ public sealed class BeatmapFileParser
         );
     }
 
+    public static string? ParseVideoFilename(string osuFilePath)
+    {
+        Dictionary<string, Dictionary<string, string>> sections = ReadSections(osuFilePath);
+        Dictionary<string, string> events =
+            sections.GetValueOrDefault("Events")
+            ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        return ParseVideoFilename(events.Values);
+    }
+
     public static bool IsStandardRulesetFile(string osuFilePath)
     {
         try
@@ -205,6 +214,30 @@ public sealed class BeatmapFileParser
             if (
                 !line.StartsWith("0,", StringComparison.Ordinal)
                 && !line.StartsWith("Background,", StringComparison.OrdinalIgnoreCase)
+            )
+            {
+                continue;
+            }
+
+            string[] fields = line.Split(',');
+            if (fields.Length < 3)
+            {
+                continue;
+            }
+
+            return fields[2].Trim().Trim('"');
+        }
+
+        return null;
+    }
+
+    private static string? ParseVideoFilename(IEnumerable<string> eventLines)
+    {
+        foreach (string line in eventLines)
+        {
+            if (
+                !line.StartsWith("1,", StringComparison.Ordinal)
+                && !line.StartsWith("Video,", StringComparison.OrdinalIgnoreCase)
             )
             {
                 continue;

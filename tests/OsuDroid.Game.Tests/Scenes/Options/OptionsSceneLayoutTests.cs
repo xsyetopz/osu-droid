@@ -123,9 +123,6 @@ public sealed partial class OptionsSceneTests
         UiElementSnapshot secondCheckbox = frame.Elements.Single(element =>
             element.Id == "options-row-1-checkbox"
         );
-        UiElementSnapshot selectDropdown = frame.Elements.Single(element =>
-            element.Id == "options-row-2-dropdown"
-        );
 
         Assert.That(row.IsEnabled, Is.True);
         Assert.That(row.Action, Is.EqualTo(UiAction.OptionsToggleServerConnection));
@@ -144,8 +141,6 @@ public sealed partial class OptionsSceneTests
         Assert.That(firstCheckbox.MaterialIcon, Is.EqualTo(UiMaterialIcon.CheckboxBlankOutline));
         Assert.That(firstCheckbox.Color, Is.EqualTo(UiColor.Opaque(178, 178, 204)));
         Assert.That(secondCheckbox.MaterialIcon, Is.EqualTo(UiMaterialIcon.CheckboxBlankOutline));
-        Assert.That(selectDropdown.Kind, Is.EqualTo(UiElementKind.MaterialIcon));
-        Assert.That(selectDropdown.MaterialIcon, Is.EqualTo(UiMaterialIcon.ArrowDropDown));
     }
 
     [Test]
@@ -214,6 +209,8 @@ public sealed partial class OptionsSceneTests
         frame = scene.CreateSnapshot(viewport).UiFrame;
         Assert.That(frame.Elements.Any(element => element.Id == "options-row-0-lock"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "options-row-1-lock"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-2-lock"), Is.False);
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-3-lock"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "options-row-4-lock"), Is.False);
         Assert.That(frame.Elements.Any(element => element.Id == "options-row-6-lock"), Is.False);
 
@@ -305,39 +302,92 @@ public sealed partial class OptionsSceneTests
     }
 
     [Test]
-    public void OptionsSceneSelectRowsKeepValueAndDropdownOnRight()
+    public void OptionsSceneSelectRowsUseAndroidDialogInsteadOfInlineValue()
     {
         var scene = new OptionsScene(new GameLocalizer());
         UiFrameSnapshot frame = scene
             .CreateSnapshot(VirtualViewport.FromSurface(1280, 720))
             .UiFrame;
 
-        UiElementSnapshot row = frame.Elements.Single(element => element.Id == "options-row-2");
+        UiElementSnapshot categoryTitle = frame.Elements.Single(element =>
+            element.Id == "options-category-0-title"
+        );
+        UiElementSnapshot categoryHeader = frame.Elements.Single(element =>
+            element.Id == "options-category-0-header"
+        );
         UiElementSnapshot summary = frame.Elements.Single(element =>
             element.Id == "options-row-2-summary"
         );
-        UiElementSnapshot value = frame.Elements.Single(element =>
-            element.Id == "options-row-2-value"
-        );
-        UiElementSnapshot dropdown = frame.Elements.Single(element =>
-            element.Id == "options-row-2-dropdown"
+        UiElementSnapshot accountTitle = frame.Elements.Single(element =>
+            element.Id == "options-category-3-title"
         );
 
-        Assert.That(summary.Bounds.Right, Is.LessThan(value.Bounds.X));
-        Assert.That(value.Bounds.Right, Is.LessThanOrEqualTo(dropdown.Bounds.X));
-        Assert.That(value.TextStyle!.Alignment, Is.EqualTo(UiTextAlignment.Right));
+        Assert.That(frame.Elements.Any(element => element.Id == "options-row-2-value"), Is.False);
         Assert.That(
-            dropdown.Bounds.X,
-            Is.GreaterThan(
-                row.Bounds.Right
-                    - DroidUiMetrics.RowPadding
-                    - DroidUiMetrics.SectionIconSize
-                    - 0.01f
-            )
+            frame.Elements.Any(element => element.Id == "options-row-2-dropdown"),
+            Is.False
         );
         Assert.That(
-            dropdown.Bounds.Y + dropdown.Bounds.Height / 2f,
-            Is.EqualTo(row.Bounds.Y + row.Bounds.Height / 2f).Within(0.001f)
+            frame.Elements.Any(element => element.Id == "options-row-2-summary-1"),
+            Is.False
+        );
+        Assert.That(
+            summary.Text,
+            Is.EqualTo("Choose the algorithm used to calculate difficulty and performance points")
+        );
+        Assert.That(categoryTitle.Text, Is.EqualTo("Online"));
+        Assert.That(categoryTitle.TextStyle!.Alignment, Is.EqualTo(UiTextAlignment.Center));
+        Assert.That(
+            categoryTitle.Bounds.X + categoryTitle.Bounds.Width / 2f,
+            Is.EqualTo(categoryHeader.Bounds.X + categoryHeader.Bounds.Width / 2f).Within(0.001f)
+        );
+        Assert.That(accountTitle.Text, Is.EqualTo("Account"));
+        Assert.That(accountTitle.Bounds.Y, Is.LessThan(720f));
+    }
+
+    [Test]
+    public void OptionsSceneSelectDialogMatchesAndroidChoiceBehavior()
+    {
+        var settings = new MemorySettingsStore();
+        var scene = new OptionsScene(new GameLocalizer(), settings);
+        var viewport = VirtualViewport.FromSurface(1280, 720);
+
+        scene.HandleAction(UiAction.OptionsActiveRow2, viewport);
+        UiFrameSnapshot dialogFrame = scene.CreateSnapshot(viewport).UiFrame;
+
+        UiElementSnapshot title = dialogFrame.Elements.Single(element =>
+            element.Id == "options-select-dialog-title"
+        );
+        UiElementSnapshot selectedOption = dialogFrame.Elements.Single(element =>
+            element.Id == "options-select-dialog-option-0"
+        );
+        UiElementSnapshot selectedCheck = dialogFrame.Elements.Single(element =>
+            element.Id == "options-select-dialog-option-0-check"
+        );
+
+        Assert.That(title.Text, Is.EqualTo("Difficulty algorithm"));
+        Assert.That(title.TextStyle!.Alignment, Is.EqualTo(UiTextAlignment.Center));
+        Assert.That(selectedOption.Action, Is.EqualTo(UiAction.OptionsSelectDialogOption0));
+        Assert.That(selectedCheck.MaterialIcon, Is.EqualTo(UiMaterialIcon.Check));
+
+        scene.HandleAction(UiAction.OptionsSelectDialogOption1, viewport);
+        Assert.That(scene.GetIntValue("difficultyAlgorithm"), Is.EqualTo(1));
+        Assert.That(settings.GetInt("difficultyAlgorithm", 0), Is.EqualTo(1));
+        Assert.That(
+            scene
+                .CreateSnapshot(viewport)
+                .UiFrame.Elements.Any(element => element.Id == "options-select-dialog"),
+            Is.False
+        );
+
+        scene.HandleAction(UiAction.OptionsActiveRow2, viewport);
+        scene.HandleAction(UiAction.OptionsSelectDialogBackdrop, viewport);
+        Assert.That(scene.GetIntValue("difficultyAlgorithm"), Is.EqualTo(1));
+        Assert.That(
+            scene
+                .CreateSnapshot(viewport)
+                .UiFrame.Elements.Any(element => element.Id == "options-select-dialog"),
+            Is.False
         );
     }
 }

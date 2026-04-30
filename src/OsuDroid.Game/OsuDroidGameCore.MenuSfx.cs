@@ -113,5 +113,6 @@ public sealed partial class OsuDroidGameCore
     private static bool IsOptionsAction(UiAction action) =>
         UiActionGroups.IsOptionsSection(action)
         || UiActionGroups.IsOptionsToggle(action)
-        || UiActionGroups.IsOptionsActiveRow(action);
+        || UiActionGroups.IsOptionsActiveRow(action)
+        || UiActionGroups.IsOptionsSelectDialogAction(action);
 }

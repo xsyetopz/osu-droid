@@ -65,11 +65,11 @@ public sealed partial class OsuDroidGameCore
         pathLayout.EnsureDirectories();
         var database = new DroidDatabase(pathLayout.GetDatabasePath(buildType));
         database.EnsureCreated();
-        BeatmapLibrary library = CreateBeatmapLibrary(database, pathLayout);
-        var mirrorClient = new OsuDirectMirrorClient(new HttpClient());
         var _settingsStore = new JsonGameSettingsStore(
             Path.Combine(pathLayout.CoreRoot, "config", "settings.json")
         );
+        BeatmapLibrary library = CreateBeatmapLibrary(database, pathLayout, _settingsStore);
+        var mirrorClient = new OsuDirectMirrorClient(new HttpClient());
         var importService = new BeatmapImportService(pathLayout, library);
         var processingService = new BeatmapProcessingService(
             pathLayout,
@@ -101,11 +101,12 @@ public sealed partial class OsuDroidGameCore
 
     private static BeatmapLibrary CreateBeatmapLibrary(
         DroidDatabase database,
-        DroidGamePathLayout pathLayout
+        DroidGamePathLayout pathLayout,
+        IGameSettingsStore? settingsStore = null
     )
     {
         var repository = new BeatmapLibraryRepository(database);
-        return new BeatmapLibrary(pathLayout, repository);
+        return new BeatmapLibrary(pathLayout, repository, settingsStore);
     }
 
     private BootstrapLoadingProgress CreateBeatmapProcessingProgress()

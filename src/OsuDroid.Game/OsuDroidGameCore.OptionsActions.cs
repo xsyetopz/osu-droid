@@ -16,6 +16,11 @@ public sealed partial class OsuDroidGameCore
     {
         if (action == UiAction.OptionsBack)
         {
+            if (_activeScene == ActiveScene.Options && _options.CloseSelectDialog())
+            {
+                return true;
+            }
+
             BackToMainMenu();
             return true;
         }

@@ -36,6 +36,7 @@ public sealed partial class OptionsScene
     private string? _statusMessageKey;
     private TimeSpan _statusMessageRemaining;
     private int? _activeSliderRowIndex;
+    private int? _activeSelectRowIndex;
     private double _elapsedSeconds;
     private OptionsScrollTarget? _activeScrollTarget;
     private readonly KineticScrollState _contentScroll = new(KineticScrollAxis.Vertical);

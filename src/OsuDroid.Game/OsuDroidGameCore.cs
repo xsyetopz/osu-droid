@@ -100,7 +100,8 @@ public sealed partial class OsuDroidGameCore
             );
         difficultyService.EnsureCalculatorVersions();
         _beatmapLibrary =
-            services.BeatmapLibrary ?? CreateBeatmapLibrary(services.Database, services.Paths);
+            services.BeatmapLibrary
+            ?? CreateBeatmapLibrary(services.Database, services.Paths, _settingsStore);
         BeatmapLibrarySnapshot initialLibrary = _beatmapLibrary.Load();
         if (initialLibrary.Sets.Count == 0 || _beatmapLibrary.NeedsScanRefresh())
         {

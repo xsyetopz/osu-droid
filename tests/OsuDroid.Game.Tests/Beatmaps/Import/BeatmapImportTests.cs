@@ -4,6 +4,7 @@ using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Beatmaps.Online;
 using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Runtime.Paths;
+using OsuDroid.Game.Runtime.Settings;
 
 namespace OsuDroid.Game.Tests;
 
@@ -220,6 +221,113 @@ public sealed partial class BeatmapImportTests
             snapshot.Sets[0].Beatmaps.Select(beatmap => beatmap.Version),
             Is.EqualTo(new[] { "Standard" })
         );
+    }
+
+    [Test]
+    public void ScanKeepsUnimportedBeatmapsByDefault()
+    {
+        DroidGamePathLayout roots = CreatePathLayout();
+        var database = new DroidDatabase(roots.GetDatabasePath("debug"));
+        database.EnsureCreated();
+        var repository = new BeatmapLibraryRepository(database);
+        var library = new BeatmapLibrary(roots, repository);
+        string set = Path.Combine(roots.Songs, "123 Artist - Title");
+        Directory.CreateDirectory(set);
+        string taikoFile = Path.Combine(set, "taiko.osu");
+        File.WriteAllText(taikoFile, SampleOsu(mode: 1, version: "Taiko"));
+
+        BeatmapLibrarySnapshot snapshot = library.Scan();
+
+        Assert.That(snapshot.Sets, Is.Empty);
+        Assert.That(File.Exists(taikoFile), Is.True);
+        Assert.That(Directory.Exists(set), Is.True);
+    }
+
+    [Test]
+    public void ScanDeletesUnimportedBeatmapsWhenOptionIsEnabled()
+    {
+        DroidGamePathLayout roots = CreatePathLayout();
+        var database = new DroidDatabase(roots.GetDatabasePath("debug"));
+        database.EnsureCreated();
+        var settings = CreateSettings(roots);
+        settings.SetBool("deleteUnimportedBeatmaps", true);
+        var repository = new BeatmapLibraryRepository(database);
+        var library = new BeatmapLibrary(roots, repository, settings);
+        string invalidSet = Path.Combine(roots.Songs, "123 Artist - Title");
+        Directory.CreateDirectory(invalidSet);
+        string taikoFile = Path.Combine(invalidSet, "taiko.osu");
+        File.WriteAllText(taikoFile, SampleOsu(mode: 1, version: "Taiko"));
+        string mixedSet = Path.Combine(roots.Songs, "124 Artist - Mixed");
+        Directory.CreateDirectory(mixedSet);
+        string standardFile = Path.Combine(mixedSet, "standard.osu");
+        string catchFile = Path.Combine(mixedSet, "catch.osu");
+        File.WriteAllText(standardFile, SampleOsu(mode: 0, version: "Standard"));
+        File.WriteAllText(catchFile, SampleOsu(mode: 2, version: "Catch"));
+
+        BeatmapLibrarySnapshot snapshot = library.Scan();
+
+        Assert.That(snapshot.Sets, Has.Count.EqualTo(1));
+        Assert.That(Directory.Exists(invalidSet), Is.False);
+        Assert.That(File.Exists(catchFile), Is.False);
+        Assert.That(File.Exists(standardFile), Is.True);
+    }
+
+    [Test]
+    public void ScanDeletesOnlyUnsupportedVideoFilesWhenOptionIsEnabled()
+    {
+        DroidGamePathLayout roots = CreatePathLayout();
+        var database = new DroidDatabase(roots.GetDatabasePath("debug"));
+        database.EnsureCreated();
+        var settings = CreateSettings(roots);
+        settings.SetBool("deleteUnsupportedVideos", true);
+        var repository = new BeatmapLibraryRepository(database);
+        var library = new BeatmapLibrary(roots, repository, settings);
+        string unsupportedSet = Path.Combine(roots.Songs, "123 Artist - Unsupported");
+        Directory.CreateDirectory(unsupportedSet);
+        string unsupportedVideo = Path.Combine(unsupportedSet, "video.avi");
+        File.WriteAllText(
+            Path.Combine(unsupportedSet, "map.osu"),
+            SampleOsu(videoFilename: "video.avi")
+        );
+        File.WriteAllText(unsupportedVideo, "video");
+        string supportedSet = Path.Combine(roots.Songs, "124 Artist - Supported");
+        Directory.CreateDirectory(supportedSet);
+        string supportedVideo = Path.Combine(supportedSet, "video.mp4");
+        File.WriteAllText(
+            Path.Combine(supportedSet, "map.osu"),
+            SampleOsu(videoFilename: "video.mp4")
+        );
+        File.WriteAllText(supportedVideo, "video");
+
+        BeatmapLibrarySnapshot snapshot = library.Scan();
+
+        Assert.That(snapshot.Sets, Has.Count.EqualTo(2));
+        Assert.That(File.Exists(unsupportedVideo), Is.False);
+        Assert.That(File.Exists(supportedVideo), Is.True);
+    }
+
+    [Test]
+    public void ProcessingImportsDownloadsAndKeepsArchiveWhenOptionsRequestIt()
+    {
+        DroidGamePathLayout roots = CreatePathLayout();
+        var database = new DroidDatabase(roots.GetDatabasePath("debug"));
+        database.EnsureCreated();
+        var settings = CreateSettings(roots);
+        settings.SetBool("scandownload", true);
+        settings.SetBool("deleteosz", false);
+        var repository = new BeatmapLibraryRepository(database);
+        var library = new BeatmapLibrary(roots, repository, settings);
+        var importer = new BeatmapImportService(roots, library);
+        var processing = new BeatmapProcessingService(roots, importer, library, settings);
+        string archive = Path.Combine(roots.Downloads, "123 Artist - Title.osz");
+        Directory.CreateDirectory(roots.Downloads);
+        CreateOsz(archive, "map.osu", SampleOsu());
+
+        processing.Start();
+        BeatmapLibrarySnapshot snapshot = WaitForProcessing(processing);
+
+        Assert.That(snapshot.Sets, Has.Count.EqualTo(1));
+        Assert.That(File.Exists(archive), Is.True);
     }
 
     [Test]

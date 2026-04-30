@@ -29,6 +29,7 @@ public sealed partial class OptionsScene
         AddSections(elements, viewport, sectionData.Section, activeSectionScrollOffset);
         AddAppBar(elements, viewport);
         AddStatusMessage(elements, viewport);
+        AddSelectDialog(elements, viewport);
 
         return new UiFrameSnapshot(viewport, elements, DroidAssets.MainMenuManifest);
     }
@@ -168,14 +169,17 @@ public sealed partial class OptionsScene
                     Text(
                         $"options-category-{rowIndex}-title",
                         _localizer[category.TitleKey],
-                        listX + RowPadding,
+                        listX,
                         categoryTop + (CategoryHeaderHeight - RowSummarySize) / 2f,
-                        listWidth - RowPadding * 2f,
+                        listWidth,
                         RowSummarySize + 4f,
                         RowSummarySize,
                         s_secondaryText,
                         0.95f,
-                        true
+                        true,
+                        UiAction.None,
+                        true,
+                        UiTextAlignment.Center
                     )
                 );
             }

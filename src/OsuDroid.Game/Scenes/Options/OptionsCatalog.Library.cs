@@ -34,16 +34,14 @@ internal static partial class OptionsCatalog
                             "Options_DeleteUnimportedTitle",
                             "Options_DeleteUnimportedSummary",
                             SettingsRowKind.Checkbox,
-                            false,
-                            Availability: SettingsRowAvailability.Locked
+                            false
                         ),
                         new(
                             "deleteUnsupportedVideos",
                             "Options_DeleteUnsupportedVideosTitle",
                             "Options_DeleteUnsupportedVideosSummary",
                             SettingsRowKind.Checkbox,
-                            false,
-                            Availability: SettingsRowAvailability.Locked
+                            true
                         ),
                         new(
                             "preferNoVideoDownloads",

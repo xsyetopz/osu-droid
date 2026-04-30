@@ -4,6 +4,7 @@ using OsuDroid.Game.Beatmaps;
 using OsuDroid.Game.Beatmaps.Import;
 using OsuDroid.Game.Compatibility.Database;
 using OsuDroid.Game.Runtime.Paths;
+using OsuDroid.Game.Runtime.Settings;
 
 namespace OsuDroid.Game.Tests;
 
@@ -84,6 +85,26 @@ public sealed partial class BeatmapImportTests
         }
     }
 
+    private static BeatmapLibrarySnapshot WaitForProcessing(BeatmapProcessingService processing)
+    {
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+        while (DateTime.UtcNow < deadline)
+        {
+            if (processing.TryConsumeCompletedSnapshot(out BeatmapLibrarySnapshot snapshot))
+            {
+                return snapshot;
+            }
+
+            Thread.Sleep(20);
+        }
+
+        Assert.Fail("Beatmap processing did not complete.");
+        return BeatmapLibrarySnapshot.Empty;
+    }
+
+    private static JsonGameSettingsStore CreateSettings(DroidGamePathLayout roots) =>
+        new(Path.Combine(roots.CoreRoot, "config", "settings.json"));
+
     private static string CreateTempDirectory()
     {
         string path = Path.Combine(
@@ -94,9 +115,15 @@ public sealed partial class BeatmapImportTests
         return path;
     }
 
-    private static string SampleOsu(int mode = 0, string version = "Hard", bool includeMode = true)
+    private static string SampleOsu(
+        int mode = 0,
+        string version = "Hard",
+        bool includeMode = true,
+        string? videoFilename = null
+    )
     {
         string modeLine = includeMode ? $"Mode:{mode}" : string.Empty;
+        string videoLine = videoFilename is null ? string.Empty : $"1,0,\"{videoFilename}\",0,0";
         return $$"""
 osu file format v14
 
@@ -125,6 +152,7 @@ ApproachRate:9
 
 [Events]
 0,0,"bg.jpg",0,0
+{{videoLine}}
 
 [TimingPoints]
 0,500,4,2,1,60,1,0

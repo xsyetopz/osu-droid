@@ -34,6 +34,7 @@ public sealed partial class OptionsScene
             return;
         }
 
+        CloseSelectDialog();
         _activeSection = section;
         _contentScrollOffset = 0f;
         if (viewport is { } actualViewport)
@@ -46,6 +47,12 @@ public sealed partial class OptionsScene
     public void HandleAction(UiAction action, VirtualViewport viewport)
     {
         RememberViewport(viewport);
+
+        if (TryHandleSelectDialogAction(action))
+        {
+            return;
+        }
+
         OptionsSection? selectedSection = SectionForAction(action);
 
         if (selectedSection is { } section)
@@ -183,7 +190,7 @@ public sealed partial class OptionsScene
                 break;
 
             case SettingsRowKind.Select:
-                CycleSelect(row);
+                OpenSelectDialog(rowIndex);
                 _pendingSfxKey = "click-short";
                 break;
 
@@ -212,27 +219,25 @@ public sealed partial class OptionsScene
         _changedSettingKey = row.Key;
     }
 
-    private void CycleSelect(SettingsRow row)
+    private void SelectOption(SettingsRow row, int optionIndex)
     {
         int valueCount = row.ValueKeys?.Count ?? (row.ValueKey is null ? 0 : 1);
-        if (valueCount <= 1)
+        if ((uint)optionIndex >= (uint)valueCount)
         {
             return;
         }
 
-        int current = ClampSelectValue(row, GetIntValue(row.Key));
-        int next = (current + 1) % valueCount;
-        _intValues[row.Key] = next;
-        _settingsStore?.SetInt(row.Key, next);
+        _intValues[row.Key] = optionIndex;
+        _settingsStore?.SetInt(row.Key, optionIndex);
         _changedSettingKey = row.Key;
     }
 
-    private string GetSelectValue(SettingsRow row)
+    private SettingsRow? ActiveRowAt(int rowIndex)
     {
-        return row.ValueKeys is { Count: > 0 } valueKeys
-                ? _localizer[valueKeys[ClampSelectValue(row, GetIntValue(row.Key))]]
-            : row.ValueKey is null ? string.Empty
-            : _localizer[row.ValueKey];
+        SettingsRow[] rows = ActiveSectionData
+            .Categories.SelectMany(category => category.Rows)
+            .ToArray();
+        return (uint)rowIndex < (uint)rows.Length ? rows[rowIndex] : null;
     }
 
     private void FocusInput(SettingsRow row, int rowIndex, VirtualViewport viewport)
